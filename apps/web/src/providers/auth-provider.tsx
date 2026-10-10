@@ -3,6 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { signOut as apiSignOut, toAuthError, type AuthError, type Session, type User } from "@guf/api";
+import { clearActiveWorkoutCache } from "@/components/workout/workout-provider";
+import { clearOfflineData } from "@/lib/offline/db";
+import { flushOutbox, startOutboxSync } from "@/lib/offline/outbox";
 import { getSupabaseClient } from "@/lib/supabase";
 
 interface AuthState {
@@ -32,7 +35,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       setIsLoading(false);
       // Privacidade: não deixar dados de um usuário no cache para o próximo.
-      if (event === "SIGNED_OUT") queryClient.clear();
+      if (event === "SIGNED_OUT") {
+        queryClient.clear();
+        clearActiveWorkoutCache();
+        void clearOfflineData();
+      }
+      // Fila offline: envia o que ficou pendente assim que houver sessão.
+      if (nextSession) startOutboxSync();
     });
     // initialize() devolve o erro da leitura da URL de retorno (PKCE), se houver.
     void client.auth.initialize().then(({ error }) => {
@@ -42,6 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [queryClient]);
 
   const signOut = useCallback(async () => {
+    // Antes de sair, tenta enviar o que estiver na fila offline (sair apaga os dados do aparelho).
+    await flushOutbox();
     const { error } = await apiSignOut(getSupabaseClient());
     return error;
   }, []);

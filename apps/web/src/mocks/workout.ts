@@ -1,20 +1,12 @@
 /**
  * MOCK do treino em andamento e da biblioteca de exercícios — mesmo contrato de @guf/api
- * (WorkoutApi): mesmos nomes, parâmetros e retorno (incluindo erros).
- *
- * Guarda tudo em memória (como um "banco" local): as escritas alteram os dados e o
- * resumo de finishWorkout sai deles, como fará o finish_workout real.
- * Para integrar o Supabase: implementar as funções em packages/api/src/workout.ts e
- * trocar `from "@/mocks/workout"` por `from "@guf/api"`.
+ * (WorkoutApi). A tela usa os DADOS REAIS; este mock existe só para o modo de demonstração
+ * em DESENVOLVIMENTO (/treino?id=demo&estado=demo), com o treino do design e sem gravar nada.
  */
-import {
-  markLoadRecords,
-  sessionTotals,
-  workoutElapsedSeconds,
-  type SetType,
-} from "@guf/core";
+import { markLoadRecords, sessionTotals, workoutElapsedSeconds, type SetType } from "@guf/core";
 import {
   apiError,
+  DEFAULT_REST_SECONDS,
   type ActiveWorkout,
   type GufClient,
   type LibraryExercise,
@@ -161,9 +153,9 @@ function seedWorkout(sessionId: string): ActiveWorkout {
     projectName: "Hipertrofia 2026 – ABC",
     performedOn: new Date().toISOString().slice(0, 10),
     startedAt: new Date(Date.now() - 1934 * 1000).toISOString(),
-    pausedAt: null,
-    pausedSeconds: 0,
+    activePeriods: [{ startedAt: new Date(Date.now() - 1934 * 1000).toISOString(), endedAt: null }],
     note: null,
+    weightUnit: "kg",
     exercises: [
       seedExercise("Puxada frontal", 90, "Pegada aberta, puxar até o queixo", [
         ["warmup", [30, 12], 30, 12, true],
@@ -222,29 +214,9 @@ function findExercise(sessionExerciseId: string): { workout: ActiveWorkout; exer
 
 const clone = <T>(value: T): T => structuredClone(value);
 
-function newWorkoutExercise(ex: LibraryExercise, setCount = 3): WorkoutExercise {
-  return {
-    id: nextId("se"),
-    exerciseId: ex.id,
-    name: ex.name,
-    muscleGroup: ex.muscleGroup,
-    equipment: ex.equipment,
-    restSeconds: 60,
-    note: null,
-    bestKg: BEST_KG[ex.name] ?? null,
-    sets: Array.from({ length: setCount }, (_, i) => ({
-      id: nextId("set"),
-      setNumber: i + 1,
-      setType: "normal" as const,
-      weightKg: null,
-      reps: 10,
-      isCompleted: false,
-      previous: null,
-    })),
-  };
-}
-
 /* ---------------- Contrato ---------------- */
+
+const ok = { data: null, error: null } as const;
 
 export const getWorkout: WorkoutApi["getWorkout"] = async (client, { sessionId }) => {
   ignoreClient(client);
@@ -262,41 +234,35 @@ export const getExerciseLibrary: WorkoutApi["getExerciseLibrary"] = async (clien
   return { data: clone(library), error: null };
 };
 
-export const createExercise: WorkoutApi["createExercise"] = async (client, { name, muscleGroup, equipment }) => {
+export const getExerciseContext: WorkoutApi["getExerciseContext"] = async (client, { exerciseIds }) => {
   ignoreClient(client);
   await wait();
-  const ex: LibraryExercise = { id: nextId("ex-custom"), name: name.trim(), muscleGroup, equipment, isCustom: true };
+  const context: Awaited<ReturnType<WorkoutApi["getExerciseContext"]>>["data"] = {};
+  for (const id of exerciseIds) {
+    const ex = library.find((e) => e.id === id);
+    context[id] = { previous: [], bestKg: ex ? (BEST_KG[ex.name] ?? null) : null, restSeconds: DEFAULT_REST_SECONDS, routineNote: null };
+  }
+  return { data: context, error: null };
+};
+
+export const createExercise: WorkoutApi["createExercise"] = async (client, { id, name, muscleGroup, equipment }) => {
+  ignoreClient(client);
+  await wait();
+  const ex: LibraryExercise = { id, name: name.trim(), muscleGroup, equipment, isCustom: true };
   library.push(ex);
   return { data: clone(ex), error: null };
 };
 
-export const addWorkoutExercises: WorkoutApi["addWorkoutExercises"] = async (client, { sessionId, exerciseIds }) => {
+export const addWorkoutExercises: WorkoutApi["addWorkoutExercises"] = async (client) => {
   ignoreClient(client);
   await wait();
-  const workout = session(sessionId);
-  const added = exerciseIds
-    .map((id) => library.find((e) => e.id === id))
-    .filter((e): e is LibraryExercise => Boolean(e))
-    .map((e) => newWorkoutExercise(e));
-  workout.exercises.push(...added);
-  return { data: clone(added), error: null };
+  return ok;
 };
 
-export const replaceWorkoutExercise: WorkoutApi["replaceWorkoutExercise"] = async (
-  client,
-  { sessionId, sessionExerciseId, exerciseId },
-) => {
+export const replaceWorkoutExercise: WorkoutApi["replaceWorkoutExercise"] = async (client) => {
   ignoreClient(client);
   await wait();
-  const workout = session(sessionId);
-  const index = workout.exercises.findIndex((e) => e.id === sessionExerciseId);
-  const ex = library.find((e) => e.id === exerciseId);
-  const old = workout.exercises[index];
-  if (index === -1 || !ex || !old) return { data: null, error: apiError("unknown") };
-  const replacement = newWorkoutExercise(ex, old.sets.length);
-  replacement.sets = replacement.sets.map((s, i) => ({ ...s, setType: old.sets[i]?.setType ?? "normal", reps: old.sets[i]?.reps ?? 10 }));
-  workout.exercises[index] = replacement;
-  return { data: clone(replacement), error: null };
+  return ok;
 };
 
 export const removeWorkoutExercise: WorkoutApi["removeWorkoutExercise"] = async (client, { sessionExerciseId }) => {
@@ -304,84 +270,80 @@ export const removeWorkoutExercise: WorkoutApi["removeWorkoutExercise"] = async 
   await wait();
   const found = findExercise(sessionExerciseId);
   if (found) found.workout.exercises = found.workout.exercises.filter((e) => e.id !== sessionExerciseId);
-  return { data: null, error: null };
+  return ok;
 };
 
-export const saveSet: WorkoutApi["saveSet"] = async (client, { sessionExerciseId, setId, set }) => {
+export const saveSet: WorkoutApi["saveSet"] = async (client) => {
   ignoreClient(client);
   await wait();
-  const found = findExercise(sessionExerciseId);
-  if (!found) return { data: null, error: apiError("unknown") };
-  const existing = setId ? found.exercise.sets.find((s) => s.id === setId) : undefined;
-  if (existing) {
-    Object.assign(existing, set);
-    return { data: clone(existing), error: null };
-  }
-  const created: WorkoutSet = { id: setId ?? nextId("set"), previous: null, ...set };
-  found.exercise.sets.push(created);
-  return { data: clone(created), error: null };
+  return ok;
 };
 
-export const deleteSet: WorkoutApi["deleteSet"] = async (client, { setId }) => {
+export const deleteSet: WorkoutApi["deleteSet"] = async (client) => {
   ignoreClient(client);
   await wait();
-  for (const workout of sessions.values()) {
-    for (const exercise of workout.exercises) exercise.sets = exercise.sets.filter((s) => s.id !== setId);
-  }
-  return { data: null, error: null };
+  return ok;
 };
 
-export const saveExerciseNote: WorkoutApi["saveExerciseNote"] = async (client, { sessionExerciseId, note }) => {
+export const saveExerciseNote: WorkoutApi["saveExerciseNote"] = async (client) => {
   ignoreClient(client);
   await wait();
-  const found = findExercise(sessionExerciseId);
-  if (found) found.exercise.note = note || null;
-  return { data: null, error: null };
+  return ok;
 };
 
-export const saveWorkoutNote: WorkoutApi["saveWorkoutNote"] = async (client, { sessionId, note }) => {
+export const saveWorkoutNote: WorkoutApi["saveWorkoutNote"] = async (client) => {
   ignoreClient(client);
   await wait();
-  session(sessionId).note = note || null;
-  return { data: null, error: null };
+  return ok;
 };
 
-export const setWorkoutPaused: WorkoutApi["setWorkoutPaused"] = async (client, { sessionId, pausedAt, pausedSeconds }) => {
+export const pauseWorkout: WorkoutApi["pauseWorkout"] = async (client) => {
   ignoreClient(client);
-  const workout = session(sessionId);
-  workout.pausedAt = pausedAt;
-  workout.pausedSeconds = pausedSeconds;
-  return { data: null, error: null };
+  return ok;
+};
+
+export const resumeWorkout: WorkoutApi["resumeWorkout"] = async (client) => {
+  ignoreClient(client);
+  return ok;
 };
 
 export const finishWorkout: WorkoutApi["finishWorkout"] = async (client, { sessionId }) => {
   ignoreClient(client);
   await wait();
   const workout = session(sessionId);
-  const sets = workout.exercises.flatMap((e) => e.sets);
-  const totals = sessionTotals(sets);
+  const totals = sessionTotals(workout.exercises.flatMap((e) => e.sets));
   const personalRecords = workout.exercises.flatMap((e) => {
     const flags = markLoadRecords(e.sets, e.bestKg);
-    return e.sets
-      .filter((_, i) => flags[i])
-      .map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));
+    return e.sets.filter((_, i) => flags[i]).map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));
   });
-  const durationSeconds = workoutElapsedSeconds(workout);
+  const clock = { startedAt: workout.startedAt, periods: workout.activePeriods };
+  const durationSeconds = workoutElapsedSeconds(clock);
   sessions.delete(sessionId);
-  return { data: { durationSeconds, volumeKg: totals.volumeKg, setCount: totals.setCount, personalRecords }, error: null };
+  return {
+    data: {
+      durationSeconds,
+      elapsedSeconds: durationSeconds,
+      pauseCount: Math.max(0, workout.activePeriods.length - 1),
+      volumeKg: totals.volumeKg,
+      setCount: totals.setCount,
+      personalRecords,
+    },
+    error: null,
+  };
 };
 
 export const discardWorkout: WorkoutApi["discardWorkout"] = async (client, { sessionId }) => {
   ignoreClient(client);
   await wait();
   sessions.delete(sessionId);
-  return { data: null, error: null };
+  return ok;
 };
 
 /** Garante em tempo de compilação que o mock segue o contrato completo. */
 export const mockWorkoutApi = {
   getWorkout,
   getExerciseLibrary,
+  getExerciseContext,
   createExercise,
   addWorkoutExercises,
   replaceWorkoutExercise,
@@ -390,7 +352,9 @@ export const mockWorkoutApi = {
   deleteSet,
   saveExerciseNote,
   saveWorkoutNote,
-  setWorkoutPaused,
+  pauseWorkout,
+  resumeWorkout,
   finishWorkout,
   discardWorkout,
 } satisfies WorkoutApi;
+

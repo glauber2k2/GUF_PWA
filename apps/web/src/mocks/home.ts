@@ -144,7 +144,7 @@ export const getHomeSummary: HomeApi["getHomeSummary"] = async (client, { today,
     weekSessions,
     inProgress:
       todayScenario === "andamento"
-        ? { id: "session-open", routineId: "routine-b", name: ROUTINES[1]!.name, performedOn: today, startedAt }
+        ? { id: "session-open", routineId: "routine-b", name: ROUTINES[1]!.name, performedOn: today, startedAt, activePeriods: [{ startedAt, endedAt: null }] }
         : null,
     streak: {
       currentStreak,

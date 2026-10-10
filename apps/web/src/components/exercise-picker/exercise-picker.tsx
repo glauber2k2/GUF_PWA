@@ -28,10 +28,11 @@ import {
   TextField,
   Toast,
 } from "@/components/ds";
+import { enqueue } from "@/lib/offline/outbox";
+import { addToLibraryCache, loadExerciseLibrary } from "@/lib/offline/workout-repo";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import { createExercise, getExerciseLibrary } from "@/mocks/workout";
+import { mockWorkoutApi } from "@/mocks/workout";
 
 export type ExercisePickerMode = "rotina" | "treino" | "troca";
 
@@ -45,6 +46,8 @@ export interface ExercisePickerProps {
   /** Exercícios que já estão na rotina/treino (aparecem como "Já adicionado"). */
   addedExerciseIds: readonly string[];
   offline?: boolean;
+  /** false = modo de demonstração (mock, sem gravar). */
+  persist?: boolean;
   onClose: () => void;
   /** Exercícios escolhidos, na ordem em que foram marcados. */
   onConfirm: (exercises: LibraryExercise[]) => void;
@@ -55,13 +58,23 @@ export interface ExercisePickerProps {
  * do corpo. Tocar marca 1 (ou vários) e o botão adiciona todos de uma vez. Em "troca",
  * a escolha é única.
  */
-export function ExercisePicker({ mode, addedExerciseIds, offline = false, onClose, onConfirm }: ExercisePickerProps) {
+export function ExercisePicker({
+  mode,
+  addedExerciseIds,
+  offline = false,
+  persist = true,
+  onClose,
+  onConfirm,
+}: ExercisePickerProps) {
   const queryClient = useQueryClient();
   const library = useQuery({
-    queryKey: [EXERCISE_LIBRARY_KEY],
+    queryKey: [EXERCISE_LIBRARY_KEY, persist],
     staleTime: 10 * 60_000,
     queryFn: async () => {
-      const { data, error } = await getExerciseLibrary(getSupabaseClient());
+      // Banco (com cópia no aparelho para usar sem internet) ou, na demonstração, o mock.
+      const { data, error } = persist
+        ? await loadExerciseLibrary()
+        : await mockWorkoutApi.getExerciseLibrary(getSupabaseClient());
       if (error) throw error;
       return data;
     },
@@ -113,17 +126,26 @@ export function ExercisePicker({ mode, addedExerciseIds, offline = false, onClos
   }, [exercises, filter, query]);
 
   const create = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await createExercise(getSupabaseClient(), {
+    mutationFn: async (): Promise<LibraryExercise> => {
+      // Criado no aparelho (id local) e enviado pela fila: funciona sem internet.
+      const exercise: LibraryExercise = {
+        id: crypto.randomUUID(),
         name: newName.trim(),
         muscleGroup: newGroup,
         equipment: newEquipment,
-      });
-      if (error) throw error;
-      return data;
+        isCustom: true,
+      };
+      if (!persist) {
+        const { data, error } = await mockWorkoutApi.createExercise(getSupabaseClient(), exercise);
+        if (error) throw error;
+        return data;
+      }
+      await addToLibraryCache(exercise);
+      await enqueue({ kind: "createExercise", ...exercise });
+      return exercise;
     },
     onSuccess: (exercise) => {
-      queryClient.setQueryData<LibraryExercise[]>([EXERCISE_LIBRARY_KEY], (prev) => [...(prev ?? []), exercise]);
+      queryClient.setQueryData<LibraryExercise[]>([EXERCISE_LIBRARY_KEY, persist], (prev) => [...(prev ?? []), exercise]);
       setSelected((prev) => (single ? [exercise.id] : [...prev, exercise.id]));
       setLastPicked(exercise.id);
       setCreateOpen(false);

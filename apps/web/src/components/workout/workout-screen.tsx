@@ -18,14 +18,25 @@ import {
   Trophy,
   type LucideIcon,
 } from "lucide-react";
-import type { ActiveWorkout, FinishedWorkoutSummary, LibraryExercise, WorkoutSet } from "@guf/api";
+import {
+  finishWorkout,
+  getExerciseContext,
+  isNetworkError,
+  type ActiveWorkout,
+  type ExerciseContext,
+  type FinishedWorkoutSummary,
+  type LibraryExercise,
+  type WorkoutSet,
+} from "@guf/api";
 import {
   finishWorkoutMessage,
   formatElapsed,
   formatNumber,
+  fromDisplayWeight,
   markLoadRecords,
   nextSetLabel,
   setsProgressLabel,
+  toDisplayWeight,
   toLocalISODate,
 } from "@guf/core";
 import { useAppShell } from "@/components/app-shell/app-shell";
@@ -46,23 +57,14 @@ import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/hooks/use-dev-workout-state";
 import { HOME_SUMMARY_KEY } from "@/hooks/use-home-summary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import type { OutboxOp } from "@/lib/offline/db";
+import { dismissOutboxFailure, enqueue, flushOutbox, hasPendingFor, useOutboxStatus } from "@/lib/offline/outbox";
+import { loadWorkout, removeWorkoutSnapshot, saveWorkoutSnapshot, type DataSource } from "@/lib/offline/workout-repo";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import {
-  addWorkoutExercises,
-  deleteSet,
-  discardWorkout,
-  finishWorkout,
-  getWorkout,
-  removeWorkoutExercise,
-  replaceWorkoutExercise,
-  saveExerciseNote,
-  saveSet,
-  saveWorkoutNote,
-  setWorkoutMockFailure,
-} from "@/mocks/workout";
+import { mockWorkoutApi } from "@/mocks/workout";
 import { SetEditSheet } from "./set-edit-sheet";
+import { buildWorkoutExercise, localSummary, toNewWorkoutExercise, workoutSnapshot } from "./workout-builders";
 import { useActiveWorkout, useWorkoutClock, type ActiveWorkoutState } from "./workout-provider";
 import { WorkoutExerciseCard } from "./workout-exercise-card";
 import { WorkoutHeader } from "./workout-header";
@@ -73,6 +75,7 @@ const TOAST_MS = 1800;
 const UNDO_MS = 4000;
 const FLASH_MS = 1300;
 const SET_LETTER: Record<string, string> = { warmup: "A", dropset: "D", failure: "F" };
+const WORKOUT_KEY = "workout";
 
 function vibrate(pattern: number | number[]) {
   try {
@@ -108,25 +111,35 @@ export function WorkoutScreen() {
 function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet<DevWorkoutFlag> }) {
   const router = useRouter();
   const online = useOnlineStatus();
+  const { active, clear } = useActiveWorkout();
   const [freeWorkout, setFreeWorkout] = useState<ActiveWorkout | null>(null);
+  // Demonstração (só em desenvolvimento): treino do design via mock, sem gravar nada.
+  const demo = process.env.NODE_ENV === "development" && dev.has("demo");
   const workout = useQuery({
-    queryKey: ["workout", sessionId],
+    queryKey: [WORKOUT_KEY, sessionId, demo],
     staleTime: Infinity,
     gcTime: 0,
     retry: false,
-    queryFn: async () => {
-      if (process.env.NODE_ENV === "development" && dev.has("erro")) setWorkoutMockFailure(true);
-      const { data, error } = await getWorkout(getSupabaseClient(), { sessionId });
+    queryFn: async (): Promise<{ workout: ActiveWorkout; source: DataSource }> => {
+      if (process.env.NODE_ENV === "development" && dev.has("erro")) throw new Error("Simulação de erro (?estado=erro).");
+      if (demo) {
+        const { data, error } = await mockWorkoutApi.getWorkout(getSupabaseClient(), { sessionId });
+        if (error) throw error;
+        return { workout: data, source: "network" };
+      }
+      const { data, error } = await loadWorkout(sessionId);
       if (error) throw error;
       return data;
     },
   });
   const offline = dev.has("offline") || !online;
 
-  const data = freeWorkout ?? workout.data;
+  const data = freeWorkout ? { workout: freeWorkout, source: "device" as const } : workout.data;
   if (data && !dev.has("carregando")) {
-    return <WorkoutView workout={data} offline={offline} dev={dev} />;
+    return <WorkoutView workout={data.workout} source={data.source} persist={!demo} offline={offline} dev={dev} />;
   }
+
+  const notFound = (workout.error as { code?: string } | null)?.code === "workout_not_found";
 
   return (
     <main className="flex min-h-dvh flex-col gap-3 px-4 pb-[calc(124px+env(safe-area-inset-bottom))]">
@@ -136,14 +149,25 @@ function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet
           seu treino está salvo no aparelho
         </Banner>
       )}
-      {workout.isError && !dev.has("carregando") ? (
+      {notFound ? (
+        <EmptyState
+          icon={Dumbbell}
+          title="Treino encerrado"
+          message="Este treino já foi finalizado ou não está mais disponível."
+          actionLabel="Voltar ao início"
+          onAction={() => {
+            if (active?.sessionId === sessionId) clear();
+            router.replace("/");
+          }}
+        />
+      ) : workout.isError && !dev.has("carregando") ? (
         <>
           <Banner tone="danger" actionLabel="Tentar" onAction={() => void workout.refetch()}>
-            Não foi possível carregar a rotina. Verifique a internet e tente de novo.
+            Não foi possível carregar o treino. Verifique a internet e tente de novo.
           </Banner>
           <EmptyState
             icon={CloudOff}
-            title="Rotina indisponível"
+            title="Treino indisponível"
             message="Enquanto isso, dá para registrar como treino livre e adicionar os exercícios na hora."
             actionLabel="Começar treino livre"
             onAction={() =>
@@ -154,9 +178,9 @@ function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet
                 projectName: null,
                 performedOn: toLocalISODate(new Date()),
                 startedAt: new Date().toISOString(),
-                pausedAt: null,
-                pausedSeconds: 0,
+                activePeriods: [{ startedAt: new Date().toISOString(), endedAt: null }],
                 note: null,
+                weightUnit: "kg",
                 exercises: [],
               })
             }
@@ -186,50 +210,60 @@ interface ToastState {
   undo?: () => void;
 }
 
-function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offline: boolean; dev: ReadonlySet<DevWorkoutFlag> }) {
+interface WorkoutViewProps {
+  workout: ActiveWorkout;
+  source: DataSource;
+  /** false = demonstração (não grava). */
+  persist: boolean;
+  offline: boolean;
+  dev: ReadonlySet<DevWorkoutFlag>;
+}
+
+function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const shell = useAppShell();
+  const outbox = useOutboxStatus();
   const { active, track, clear, togglePause, startRest, adjustRest, toggleRestPause, skipRest, onRestEnd } = useActiveWorkout();
   const [state, dispatch] = useReducer(workoutReducer, workout, initWorkoutView);
+  const unit = workout.weightUnit;
 
   const [sheet, setSheet] = useState<Sheet>(() => (dev.has("timer") ? { kind: "timer" } : null));
   const [dialog, setDialog] = useState<"finish" | "discard" | null>(() => (dev.has("confirmar") ? "finish" : null));
   const [edit, setEdit] = useState<{ exerciseId: string; setIndex: number; field: EditableField } | null>(() =>
-    dev.has("editando") && workout.exercises[0] ? { exerciseId: workout.exercises[0].id, setIndex: 2, field: "weightKg" } : null,
+    dev.has("editando") && workout.exercises[0] ? { exerciseId: workout.exercises[0].id, setIndex: 0, field: "weightKg" } : null,
   );
   const [picker, setPicker] = useState<{ mode: "treino" | "troca"; exerciseId?: string } | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [popped, setPopped] = useState<string | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
-  const [summary, setSummary] = useState<FinishedWorkoutSummary | null>(null);
+  const [summary, setSummary] = useState<{ data: FinishedWorkoutSummary; pending: boolean } | null>(null);
   const [finishing, setFinishing] = useState(false);
   const pendingExerciseRemoval = useRef<{ id: string; timer: ReturnType<typeof setTimeout> } | null>(null);
 
   // Relógio: o do provider (compartilhado com o mini card) ou, até registrar, o do próprio treino.
-  const fallback: ActiveWorkoutState = {
-    sessionId: workout.id,
-    name: workout.name,
-    clock: { startedAt: workout.startedAt, pausedAt: workout.pausedAt, pausedSeconds: workout.pausedSeconds },
-    rest: null,
-  };
+  const baseClock = { startedAt: workout.startedAt, periods: workout.activePeriods };
+  const fallback: ActiveWorkoutState = { sessionId: workout.id, name: workout.name, clock: baseClock, rest: null, persist };
   const current = active?.sessionId === workout.id ? active : fallback;
   const { elapsed, paused, restLeft } = useWorkoutClock(summary ? null : current);
 
   // Registra o treino aberto (mini card nas outras telas) e aplica os estados de desenvolvimento.
   useEffect(() => {
-    track({
-      sessionId: workout.id,
-      name: workout.name,
-      clock: { startedAt: workout.startedAt, pausedAt: workout.pausedAt, pausedSeconds: workout.pausedSeconds },
-    });
+    track({ sessionId: workout.id, name: workout.name, clock: baseClock, persist });
     if (process.env.NODE_ENV === "development") {
       if (dev.has("pausado")) togglePause();
-      if (dev.has("descansando") || dev.has("timer")) startRest(54, "Próx.: Puxada frontal 65 × 8");
+      if (dev.has("descansando") || dev.has("timer")) startRest(54, "Próx.: série seguinte");
     }
     // Só ao abrir o treino.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workout.id]);
+
+  // Retrato do treino no aparelho a cada alteração (abre sem internet com tudo o que foi feito).
+  const clock = current.clock;
+  useEffect(() => {
+    if (!persist || summary) return;
+    void saveWorkoutSnapshot(workoutSnapshot(workout, state, clock));
+  }, [persist, summary, workout, state, clock]);
 
   const showToast = useCallback((message: string, icon: LucideIcon = CircleCheck, undo?: () => void) => {
     setToast({ message, icon, undo });
@@ -240,6 +274,16 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     const timer = setTimeout(() => setToast(null), toast.undo ? UNDO_MS : TOAST_MS);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  // Fila: avisa quando uma alteração foi descartada por erro.
+  useEffect(() => {
+    if (!outbox.lastFailure) return;
+    const timer = setTimeout(() => {
+      showToast(`Uma alteração não foi salva: ${outbox.lastFailure}`, Info);
+      dismissOutboxFailure();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [outbox.lastFailure, showToast]);
 
   // "Descanso concluído" quando o descanso termina sozinho.
   useEffect(
@@ -259,35 +303,38 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     return () => clearTimeout(timer);
   }, [hasFlash]);
 
+  /** Grava pela fila offline (na demonstração, não grava nada). */
+  const queue = useCallback(
+    (op: OutboxOp) => {
+      if (persist) void enqueue(op);
+    },
+    [persist],
+  );
+
   // Confirma a remoção pendente de exercício ao sair da tela.
   useEffect(
     () => () => {
       const pending = pendingExerciseRemoval.current;
       if (pending) {
         clearTimeout(pending.timer);
-        void removeWorkoutExercise(getSupabaseClient(), { sessionExerciseId: pending.id });
+        queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: pending.id });
       }
     },
-    [],
+    [queue, workout.id],
   );
 
-  const client = getSupabaseClient;
-  const persist = async (action: Promise<{ error: { message: string } | null }>) => {
-    const { error } = await action;
-    if (error) showToast(error.message, Info);
-  };
-  const persistSet = (exerciseId: string, set: WorkoutSet) =>
-    persist(
-      saveSet(client(), {
-        sessionExerciseId: exerciseId,
-        setId: set.id,
-        set: { setNumber: set.setNumber, setType: set.setType, weightKg: set.weightKg, reps: set.reps, isCompleted: set.isCompleted },
-      }),
-    );
+  const saveSetOp = (exerciseId: string, set: WorkoutSet) =>
+    queue({
+      kind: "saveSet",
+      sessionId: workout.id,
+      sessionExerciseId: exerciseId,
+      set: { id: set.id, setNumber: set.setNumber, setType: set.setType, weightKg: set.weightKg, reps: set.reps, isCompleted: set.isCompleted },
+    });
 
   const allSets = state.exercises.flatMap((e) => e.sets);
   const doneCount = allSets.filter((s) => s.isCompleted).length;
   const progressPct = allSets.length ? (doneCount / allSets.length) * 100 : 0;
+  const displayLoad = (kg: number | null) => toDisplayWeight(kg, unit);
 
   /* ---------- Séries ---------- */
 
@@ -297,7 +344,7 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     if (!ex || !set) return;
     const completed = !set.isCompleted;
     dispatch({ type: "toggleSet", exerciseId: ex.id, setIndex });
-    void persistSet(ex.id, { ...set, isCompleted: completed });
+    saveSetOp(ex.id, { ...set, isCompleted: completed });
     if (!completed) {
       setPopped(null);
       return;
@@ -310,12 +357,12 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     startRest(
       ex.restSeconds,
       nextSetLabel(
-        after.map((e) => ({ exerciseName: e.name, sets: e.sets })),
+        after.map((e) => ({ exerciseName: e.name, sets: e.sets.map((s) => ({ ...s, weightKg: displayLoad(s.weightKg) })) })),
         exerciseIndex,
         setIndex,
       ),
     );
-    if (isRecord) showToast(`Recorde pessoal · ${ex.name} ${formatNumber(set.weightKg ?? 0)} kg`, Trophy);
+    if (isRecord) showToast(`Recorde pessoal · ${ex.name} ${formatNumber(displayLoad(set.weightKg) ?? 0)} ${unit}`, Trophy);
   };
 
   const cycleType = (ex: ExerciseView, setIndex: number) => {
@@ -323,14 +370,13 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     if (!set) return;
     dispatch({ type: "cycleSetType", exerciseId: ex.id, setIndex });
     const order = ["normal", "warmup", "dropset", "failure"] as const;
-    const nextType = order[(order.indexOf(set.setType) + 1) % order.length] ?? "normal";
-    void persistSet(ex.id, { ...set, setType: nextType });
+    saveSetOp(ex.id, { ...set, setType: order[(order.indexOf(set.setType) + 1) % order.length] ?? "normal" });
   };
 
   const addSet = (ex: ExerciseView) => {
     const set = newSetFrom(ex);
     dispatch({ type: "addSet", exerciseId: ex.id, set });
-    void persistSet(ex.id, set);
+    saveSetOp(ex.id, set);
   };
 
   const removeSet = (ex: ExerciseView, setIndex: number) => {
@@ -340,15 +386,15 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     setEdit(null);
     setPopped(null);
     vibrate(15);
-    void persist(deleteSet(client(), { setId: set.id }));
+    queue({ kind: "deleteSet", sessionId: workout.id, setId: set.id });
     showToast(`Série removida · ${ex.name}`, Trash2, () => {
       dispatch({ type: "restoreSet", exerciseId: ex.id, setIndex, set });
-      void persistSet(ex.id, set);
+      saveSetOp(ex.id, set);
       setToast(null);
     });
   };
 
-  /* ---------- Edição de carga/reps ---------- */
+  /* ---------- Edição de carga/reps (na unidade do usuário; estado em kg) ---------- */
 
   const editExercise = edit ? state.exercises.find((e) => e.id === edit.exerciseId) : undefined;
   const editSet = edit && editExercise ? (editExercise.sets[edit.setIndex] ?? null) : null;
@@ -360,11 +406,19 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     return `Série ${label} · ${editExercise.name}`;
   })();
   const finishEdit = () => {
-    if (editExercise && editSet) void persistSet(editExercise.id, editSet);
+    if (editExercise && editSet) saveSetOp(editExercise.id, editSet);
     setEdit(null);
   };
 
   /* ---------- Exercícios ---------- */
+
+  /** Contexto para montar exercícios novos (anterior, recorde, descanso); sem internet, vazio. */
+  const contextFor = async (ids: string[]): Promise<Record<string, ExerciseContext>> => {
+    if (offline) return {};
+    const api = persist ? getExerciseContext : mockWorkoutApi.getExerciseContext;
+    const { data } = await api(getSupabaseClient(), { exerciseIds: ids, routineId: workout.routineId });
+    return data ?? {};
+  };
 
   const removeExercise = (exerciseId: string) => {
     const index = state.exercises.findIndex((e) => e.id === exerciseId);
@@ -372,17 +426,17 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     if (!exercise) return;
     setSheet(null);
     dispatch({ type: "removeExercise", exerciseId });
-    // A remoção só vai para o banco depois do prazo do "Desfazer".
+    // A remoção só entra na fila depois do prazo do "Desfazer".
     const pending = pendingExerciseRemoval.current;
     if (pending) {
       clearTimeout(pending.timer);
-      void removeWorkoutExercise(client(), { sessionExerciseId: pending.id });
+      queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: pending.id });
     }
     pendingExerciseRemoval.current = {
       id: exerciseId,
       timer: setTimeout(() => {
         pendingExerciseRemoval.current = null;
-        void persist(removeWorkoutExercise(client(), { sessionExerciseId: exerciseId }));
+        queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: exerciseId });
       }, UNDO_MS),
     };
     showToast(`${exercise.name} removido`, Trash2, () => {
@@ -398,24 +452,33 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
   const onPicked = async (chosen: LibraryExercise[]) => {
     const target = picker;
     setPicker(null);
-    if (!target) return;
+    if (!target || chosen.length === 0) return;
+    const context = await contextFor(chosen.map((e) => e.id));
+
     if (target.mode === "troca" && target.exerciseId && chosen[0]) {
-      const { data, error } = await replaceWorkoutExercise(client(), {
+      const index = state.exercises.findIndex((e) => e.id === target.exerciseId);
+      const old = state.exercises[index];
+      if (!old) return;
+      // Mantém o número e o tipo das séries.
+      const replacement = buildWorkoutExercise(chosen[0], context[chosen[0].id], old.sets);
+      dispatch({ type: "replaceExercise", exerciseId: old.id, exercise: replacement });
+      queue({
+        kind: "replaceExercise",
         sessionId: workout.id,
-        sessionExerciseId: target.exerciseId,
-        exerciseId: chosen[0].id,
+        sessionExerciseId: old.id,
+        exercise: toNewWorkoutExercise(replacement, index),
       });
-      if (error) return showToast(error.message, Info);
-      dispatch({ type: "replaceExercise", exerciseId: target.exerciseId, exercise: data });
       return showToast("Exercício trocado", ArrowLeftRight);
     }
-    const { data, error } = await addWorkoutExercises(client(), {
+
+    const created = chosen.map((e) => buildWorkoutExercise(e, context[e.id]));
+    dispatch({ type: "addExercises", exercises: created });
+    queue({
+      kind: "addExercises",
       sessionId: workout.id,
-      exerciseIds: chosen.map((e) => e.id),
+      exercises: created.map((e, i) => toNewWorkoutExercise(e, state.exercises.length + i)),
     });
-    if (error) return showToast(error.message, Info);
-    dispatch({ type: "addExercises", exercises: data });
-    showToast(data.length === 1 ? `${data[0]?.name} adicionado` : `${data.length} exercícios adicionados`, Plus);
+    showToast(created.length === 1 ? `${created[0]?.name} adicionado` : `${created.length} exercícios adicionados`, Plus);
   };
 
   /* ---------- Observações ---------- */
@@ -430,10 +493,10 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
     const note = noteDraft.trim();
     if (sheet.target === "workout") {
       dispatch({ type: "setWorkoutNote", note });
-      void persist(saveWorkoutNote(client(), { sessionId: workout.id, note }));
+      queue({ kind: "workoutNote", sessionId: workout.id, note });
     } else {
       dispatch({ type: "setExerciseNote", exerciseId: sheet.target, note });
-      void persist(saveExerciseNote(client(), { sessionExerciseId: sheet.target, note }));
+      queue({ kind: "exerciseNote", sessionId: workout.id, sessionExerciseId: sheet.target, note });
     }
     setSheet(null);
     showToast("Observação salva", StickyNote);
@@ -441,24 +504,52 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
 
   /* ---------- Finalizar / descartar ---------- */
 
-  const finish = async () => {
-    setFinishing(true);
-    const { data, error } = await finishWorkout(client(), { sessionId: workout.id });
-    setFinishing(false);
-    if (error) return showToast(error.message, Info);
+  const closeOut = () => {
     setDialog(null);
     setSheet(null);
     skipRest();
     clear();
     void queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] });
-    setSummary(data);
+  };
+
+  const finish = async () => {
+    setFinishing(true);
+    const local = localSummary(state, clock);
+    try {
+      if (!persist) {
+        const { data, error } = await mockWorkoutApi.finishWorkout(getSupabaseClient(), { sessionId: workout.id });
+        if (error) return showToast(error.message, Info);
+        closeOut();
+        return setSummary({ data, pending: false });
+      }
+      // Online: envia o que estiver pendente e finaliza no servidor (resumo e recordes oficiais).
+      await flushOutbox();
+      if (!offline && !(await hasPendingFor(workout.id))) {
+        const { data, error } = await finishWorkout(getSupabaseClient(), { sessionId: workout.id });
+        if (data) {
+          await removeWorkoutSnapshot(workout.id);
+          closeOut();
+          return setSummary({ data, pending: false });
+        }
+        if (!isNetworkError(error)) return showToast(error.message, Info);
+      }
+      // Sem conexão: finaliza no aparelho e envia quando a internet voltar.
+      await enqueue({ kind: "finish", sessionId: workout.id });
+      closeOut();
+      setSummary({ data: local, pending: true });
+    } finally {
+      setFinishing(false);
+    }
   };
 
   const discard = async () => {
-    const { error } = await discardWorkout(client(), { sessionId: workout.id });
-    if (error) return showToast(error.message, Info);
-    clear();
-    void queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] });
+    if (persist) {
+      await enqueue({ kind: "discard", sessionId: workout.id });
+      await removeWorkoutSnapshot(workout.id);
+    } else {
+      await mockWorkoutApi.discardWorkout(getSupabaseClient(), { sessionId: workout.id });
+    }
+    closeOut();
     shell.showToast("Treino descartado");
     router.replace("/");
   };
@@ -469,9 +560,11 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
         name={workout.name}
         projectName={workout.projectName}
         performedOn={workout.performedOn}
-        summary={summary}
+        summary={summary.data}
+        unit={unit}
+        pending={summary.pending}
         onDone={() => {
-          shell.showToast("Treino salvo no histórico");
+          shell.showToast(summary.pending ? "Treino salvo no aparelho" : "Treino salvo no histórico");
           router.replace("/");
         }}
         onOpenHistory={() => shell.showToast("O Histórico chega em breve")}
@@ -502,16 +595,25 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
           onTogglePause={togglePause}
           onOpenMenu={() => setSheet({ kind: "workout-menu" })}
         />
-        {offline && (
+        {offline ? (
           <Banner tone="warning" title="Sem conexão">
             seu treino está salvo no aparelho
           </Banner>
+        ) : (
+          persist &&
+          source === "device" &&
+          outbox.pending > 0 && (
+            <Banner tone="info" title="Sincronizando">
+              enviando as alterações feitas sem internet.
+            </Banner>
+          )
         )}
 
         {state.exercises.map((ex, i) => (
           <WorkoutExerciseCard
             key={ex.id}
             exercise={ex}
+            unit={unit}
             enterDelayMs={i * 40}
             poppedKey={popped}
             editing={edit?.exerciseId === ex.id ? { setIndex: edit.setIndex, field: edit.field } : null}
@@ -588,9 +690,18 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
         title={editTitle}
         set={editSet}
         field={edit?.field ?? "weightKg"}
+        unit={unit}
         onFieldChange={(field) => setEdit((e) => (e ? { ...e, field } : e))}
         onValueChange={(field, value) =>
-          edit && dispatch({ type: "setField", exerciseId: edit.exerciseId, setIndex: edit.setIndex, field, value })
+          edit &&
+          dispatch({
+            type: "setField",
+            exerciseId: edit.exerciseId,
+            setIndex: edit.setIndex,
+            field,
+            // Carga digitada na unidade do usuário; o estado (e o banco) guardam kg.
+            value: field === "weightKg" ? (fromDisplayWeight(value, unit) ?? 0) : value,
+          })
         }
         onDone={finishEdit}
       />
@@ -695,6 +806,7 @@ function WorkoutView({ workout, offline, dev }: { workout: ActiveWorkout; offlin
           mode={picker.mode}
           addedExerciseIds={state.exercises.map((e) => e.exerciseId)}
           offline={offline}
+          persist={persist}
           onClose={() => setPicker(null)}
           onConfirm={(list) => void onPicked(list)}
         />

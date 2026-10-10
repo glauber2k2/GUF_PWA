@@ -2,8 +2,16 @@
 
 import { CalendarDays, Check } from "lucide-react";
 import type { FinishedWorkoutSummary } from "@guf/api";
-import { formatElapsed, formatNumber, formatShortDate, fromLocalISODate, TIMES_SIGN } from "@guf/core";
-import { Button, Icon, PRHighlight, WorkoutSummaryCard } from "@/components/ds";
+import {
+  formatElapsed,
+  formatNumber,
+  formatShortDate,
+  fromLocalISODate,
+  TIMES_SIGN,
+  toDisplayWeight,
+  type WeightUnit,
+} from "@guf/core";
+import { Banner, Button, Icon, PRHighlight, WorkoutSummaryCard } from "@/components/ds";
 import { useCountUp } from "@/hooks/use-count-up";
 
 export interface WorkoutSummaryProps {
@@ -11,13 +19,25 @@ export interface WorkoutSummaryProps {
   projectName: string | null;
   performedOn: string;
   summary: FinishedWorkoutSummary;
+  unit: WeightUnit;
+  /** Finalizado sem internet: será enviado quando a conexão voltar. */
+  pending?: boolean;
   onDone: () => void;
   onOpenHistory: () => void;
 }
 
 /** Resumo do treino concluído: números contando e recordes do dia em dourado. */
-export function WorkoutSummary({ name, projectName, performedOn, summary, onDone, onOpenHistory }: WorkoutSummaryProps) {
-  const volume = useCountUp(Math.round(summary.volumeKg), { delayMs: 250 });
+export function WorkoutSummary({
+  name,
+  projectName,
+  performedOn,
+  summary,
+  unit,
+  pending = false,
+  onDone,
+  onOpenHistory,
+}: WorkoutSummaryProps) {
+  const volume = useCountUp(Math.round(toDisplayWeight(summary.volumeKg, unit) ?? 0), { delayMs: 250 });
   const sets = useCountUp(summary.setCount, { delayMs: 250 });
   const prs = summary.personalRecords;
 
@@ -39,12 +59,25 @@ export function WorkoutSummary({ name, projectName, performedOn, summary, onDone
           date={formatShortDate(fromLocalISODate(performedOn))}
           stats={[
             { value: formatElapsed(summary.durationSeconds), label: "Duração" },
-            { value: formatNumber(volume, 0), label: "Volume kg" },
+            { value: formatNumber(volume, 0), label: `Volume ${unit}` },
             { value: String(sets), label: "Séries" },
           ]}
           prs={prs.length}
         />
       </div>
+
+      {summary.pauseCount > 0 && (
+        <span className="text-[13px] text-fg-muted">
+          Tempo efetivo, sem as pausas · {summary.pauseCount === 1 ? "1 pausa" : `${summary.pauseCount} pausas`} ·{" "}
+          {formatElapsed(Math.max(0, summary.elapsedSeconds - summary.durationSeconds))} parado
+        </span>
+      )}
+
+      {pending && (
+        <Banner tone="warning" title="Sem conexão">
+          o treino está salvo no aparelho e vai para o histórico quando a internet voltar.
+        </Banner>
+      )}
 
       {prs.length > 0 && (
         <>
@@ -53,7 +86,7 @@ export function WorkoutSummary({ name, projectName, performedOn, summary, onDone
           </span>
           {prs.map((pr, i) => (
             <div key={`${pr.exerciseName}-${i}`} className="animate-guf-rise" style={{ animationDelay: `${300 + i * 120}ms` }}>
-              <PRHighlight label={`Maior carga · ${pr.exerciseName}`} value={`${formatNumber(pr.weightKg)} kg ${TIMES_SIGN} ${pr.reps}`} />
+              <PRHighlight label={`Maior carga · ${pr.exerciseName}`} value={`${formatNumber(toDisplayWeight(pr.weightKg, unit) ?? 0)} ${unit} ${TIMES_SIGN} ${pr.reps}`} />
             </div>
           ))}
         </>

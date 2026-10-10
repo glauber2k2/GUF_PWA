@@ -1,13 +1,24 @@
 "use client";
 
 import { ChevronDown, ChevronUp, Dumbbell, Ellipsis, Plus, StickyNote, Timer } from "lucide-react";
-import { equipmentLabel, formatClock, markLoadRecords, muscleGroupLabel, previousLabel, setsProgressLabel } from "@guf/core";
+import {
+  equipmentLabel,
+  formatClock,
+  markLoadRecords,
+  muscleGroupLabel,
+  previousLabel,
+  setsProgressLabel,
+  toDisplayWeight,
+  type WeightUnit,
+} from "@guf/core";
 import { Button, Icon, IconButton, SetRow, SetRowHeader, SwipeToDelete, Tag } from "@/components/ds";
 import { cn } from "@/lib/utils";
 import type { EditableField, ExerciseView } from "./workout-state";
 
 export interface WorkoutExerciseCardProps {
   exercise: ExerciseView;
+  /** Unidade de exibição (o estado guarda kg). */
+  unit: WeightUnit;
   /** Atraso da animação de entrada (ms), escalonado pela posição. */
   enterDelayMs: number;
   /** "exercício:série" que acabou de ser concluída (anima o check). */
@@ -27,6 +38,7 @@ export interface WorkoutExerciseCardProps {
 /** Card do exercício no treino: cabeçalho, observação e séries (arrastar para remover). */
 export function WorkoutExerciseCard({
   exercise: e,
+  unit,
   enterDelayMs,
   poppedKey,
   editing,
@@ -94,7 +106,7 @@ export function WorkoutExerciseCard({
 
       {e.open && (
         <>
-          <SetRowHeader />
+          <SetRowHeader unit={unit} />
           {e.sets.map((s, i) => {
             if (s.setType === "normal") normalCount++;
             return (
@@ -102,8 +114,10 @@ export function WorkoutExerciseCard({
                 <SetRow
                   type={s.setType}
                   number={normalCount}
-                  previous={previousLabel(s.previous)}
-                  weightKg={s.weightKg}
+                  previous={previousLabel(
+                    s.previous && { weightKg: toDisplayWeight(s.previous.weightKg, unit), reps: s.previous.reps },
+                  )}
+                  weightKg={toDisplayWeight(s.weightKg, unit)}
                   reps={s.reps}
                   done={s.isCompleted}
                   pr={records[i]}

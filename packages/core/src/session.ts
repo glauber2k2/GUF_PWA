@@ -59,33 +59,66 @@ export function formatElapsed(totalSeconds: number): string {
   return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-/** Estado do relógio do treino (início + pausas). */
+/** Trecho em que o treino estava RODANDO (workout_active_periods). endedAt nulo = em andamento. */
+export interface ActivePeriod {
+  startedAt: string;
+  endedAt: string | null;
+}
+
+/** Relógio do treino: início real + períodos ativos (pausar fecha um, retomar abre outro). */
 export interface WorkoutClock {
   /** ISO do início do treino. */
   startedAt: string;
-  /** Total de segundos já pausados (pausas encerradas). */
-  pausedSeconds: number;
-  /** ISO de quando a pausa atual começou; null se estiver rodando. */
-  pausedAt: string | null;
+  periods: ActivePeriod[];
 }
+
+const ms = (iso: string) => new Date(iso).getTime();
 
 /**
- * Segundos de treino: agora − início − pausas. Calculado a partir dos horários
- * (não de um contador), então continua certo com a aba em segundo plano ou após recarregar.
+ * Tempo EFETIVO de treino em segundos: soma dos períodos ativos (o aberto conta até agora).
+ * Calculado a partir dos horários (não de um contador), então continua certo com a aba em
+ * segundo plano, após recarregar ou depois de várias pausas. Mesma regra do finish_workout.
  */
 export function workoutElapsedSeconds(clock: WorkoutClock, now: Date = new Date()): number {
-  const start = new Date(clock.startedAt).getTime();
-  const end = clock.pausedAt ? new Date(clock.pausedAt).getTime() : now.getTime();
-  return Math.max(0, Math.floor((end - start) / 1000) - clock.pausedSeconds);
+  if (clock.periods.length === 0) return Math.max(0, Math.floor((now.getTime() - ms(clock.startedAt)) / 1000));
+  const total = clock.periods.reduce(
+    (sum, p) => sum + Math.max(0, (p.endedAt ? ms(p.endedAt) : now.getTime()) - ms(p.startedAt)),
+    0,
+  );
+  return Math.floor(total / 1000);
 }
 
-/** Pausa ou retoma o relógio, acumulando o tempo pausado. */
-export function toggleWorkoutPause(clock: WorkoutClock, now: Date = new Date()): WorkoutClock {
-  if (clock.pausedAt) {
-    const pausedFor = Math.max(0, Math.floor((now.getTime() - new Date(clock.pausedAt).getTime()) / 1000));
-    return { ...clock, pausedSeconds: clock.pausedSeconds + pausedFor, pausedAt: null };
-  }
-  return { ...clock, pausedAt: now.toISOString() };
+/** Pausado = há períodos e nenhum está em andamento. */
+export function isWorkoutPaused(clock: WorkoutClock): boolean {
+  return clock.periods.length > 0 && clock.periods.every((p) => p.endedAt !== null);
+}
+
+/** Fecha o período aberto em `at` (já pausado → sem mudança). */
+export function pauseClock(clock: WorkoutClock, at: Date = new Date()): WorkoutClock {
+  if (isWorkoutPaused(clock)) return clock;
+  return {
+    ...clock,
+    periods: clock.periods.map((p) =>
+      p.endedAt === null ? { ...p, endedAt: new Date(Math.max(at.getTime(), ms(p.startedAt))).toISOString() } : p,
+    ),
+  };
+}
+
+/** Abre um período novo em `at`, nunca antes do fim do anterior (já rodando → sem mudança). */
+export function resumeClock(clock: WorkoutClock, at: Date = new Date()): WorkoutClock {
+  if (!isWorkoutPaused(clock) && clock.periods.length > 0) return clock;
+  const lastEnd = clock.periods.reduce((max, p) => Math.max(max, p.endedAt ? ms(p.endedAt) : 0), ms(clock.startedAt));
+  return { ...clock, periods: [...clock.periods, { startedAt: new Date(Math.max(at.getTime(), lastEnd)).toISOString(), endedAt: null }] };
+}
+
+/** Pausa ou retoma. */
+export function toggleWorkoutPause(clock: WorkoutClock, at: Date = new Date()): WorkoutClock {
+  return isWorkoutPaused(clock) ? resumeClock(clock, at) : pauseClock(clock, at);
+}
+
+/** Quantas pausas houve (períodos − 1). */
+export function pauseCount(clock: WorkoutClock): number {
+  return Math.max(0, clock.periods.length - 1);
 }
 
 export interface RecordCandidate {

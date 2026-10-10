@@ -10,19 +10,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { toggleWorkoutPause, workoutElapsedSeconds, type WorkoutClock } from "@guf/core";
-import { getSupabaseClient } from "@/lib/supabase";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import { setWorkoutPaused } from "@/mocks/workout";
+import { isWorkoutPaused, toggleWorkoutPause, workoutElapsedSeconds, type WorkoutClock } from "@guf/core";
+import { enqueue } from "@/lib/offline/outbox";
 
 /*
  * Estado do treino em andamento compartilhado pela tela de treino e pelo mini card:
- * relógio (início + pausas) e descanso. Guardado no aparelho (localStorage) para
- * sobreviver a recarregar a página — conveniência local até a migration de pausa
- * (workout_sessions.paused_at / paused_seconds) e o offline com Dexie.
+ * relógio (períodos ativos, como workout_active_periods) e descanso.
+ * Pausar/retomar muda o relógio na hora e entra na fila offline com o horário real.
+ * O localStorage é só cache para abrir rápido; a fonte é o banco (sincronizado pelo AppShell).
  */
 
-const STORAGE_KEY = "guf.active-workout";
+export const ACTIVE_WORKOUT_STORAGE_KEY = "guf.active-workout";
 const REST_END_VIBRATION_MS = 200;
 
 export interface RestState {
@@ -40,12 +38,24 @@ export interface ActiveWorkoutState {
   name: string;
   clock: WorkoutClock;
   rest: RestState | null;
+  /** false = modo de demonstração (não grava no banco). */
+  persist: boolean;
+}
+
+interface TrackInput {
+  sessionId: string;
+  name: string;
+  clock: WorkoutClock;
+  persist?: boolean;
 }
 
 interface WorkoutContextValue {
   active: ActiveWorkoutState | null;
-  /** Começa (ou atualiza) o acompanhamento de um treino aberto. */
-  track: (workout: { sessionId: string; name: string; clock: WorkoutClock }) => void;
+  /**
+   * Acompanha um treino aberto. Mesmo treino já acompanhado: mantém o relógio local
+   * (ele tem as pausas mais recentes, inclusive as ainda na fila offline).
+   */
+  track: (workout: TrackInput) => void;
   clear: () => void;
   togglePause: () => void;
   startRest: (seconds: number, next: string) => void;
@@ -61,8 +71,10 @@ const WorkoutContext = createContext<WorkoutContextValue | null>(null);
 function readStored(): ActiveWorkoutState | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as ActiveWorkoutState) : null;
+    const raw = window.localStorage.getItem(ACTIVE_WORKOUT_STORAGE_KEY);
+    const parsed = raw ? (JSON.parse(raw) as ActiveWorkoutState) : null;
+    // Formato antigo (antes dos períodos ativos) é descartado.
+    return parsed && Array.isArray(parsed.clock?.periods) ? parsed : null;
   } catch {
     return null;
   }
@@ -70,11 +82,16 @@ function readStored(): ActiveWorkoutState | null {
 
 function writeStored(state: ActiveWorkoutState | null) {
   try {
-    if (state) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    else window.localStorage.removeItem(STORAGE_KEY);
+    if (state) window.localStorage.setItem(ACTIVE_WORKOUT_STORAGE_KEY, JSON.stringify(state));
+    else window.localStorage.removeItem(ACTIVE_WORKOUT_STORAGE_KEY);
   } catch {
     // Armazenamento bloqueado (aba anônima etc.): segue só em memória.
   }
+}
+
+/** Apaga o cache do treino ativo (ao sair da conta). */
+export function clearActiveWorkoutCache() {
+  writeStored(null);
 }
 
 /** Segundos restantes de descanso agora. */
@@ -120,25 +137,22 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
   }, [restEndsAt, update]);
 
   // Ações estáveis (não mudam entre renderizações): seguras como dependência de efeitos.
-  const actions = useMemo<Omit<WorkoutContextValue, "active">>(() => {
-    const persistPause = (state: ActiveWorkoutState) => {
-      void setWorkoutPaused(getSupabaseClient(), {
-        sessionId: state.sessionId,
-        pausedAt: state.clock.pausedAt,
-        pausedSeconds: state.clock.pausedSeconds,
-      });
-    };
-    return {
-      track: ({ sessionId, name, clock }) =>
+  const actions = useMemo<Omit<WorkoutContextValue, "active">>(
+    () => ({
+      track: ({ sessionId, name, clock, persist = true }) =>
         update((prev) =>
-          prev?.sessionId === sessionId ? { ...prev, name } : { sessionId, name, clock, rest: null },
+          prev?.sessionId === sessionId ? { ...prev, name, persist } : { sessionId, name, clock, rest: null, persist },
         ),
       clear: () => update(() => null),
-      togglePause: () =>
+      togglePause: () => {
+        const at = new Date();
         update((prev) => {
           if (!prev) return prev;
-          const clock = toggleWorkoutPause(prev.clock);
-          const pausing = clock.pausedAt !== null;
+          const pausing = !isWorkoutPaused(prev.clock);
+          const clock = toggleWorkoutPause(prev.clock, at);
+          if (prev.persist) {
+            void enqueue({ kind: pausing ? "pause" : "resume", sessionId: prev.sessionId, at: at.toISOString() });
+          }
           // Pausar o treino pausa o descanso junto; retomar retoma.
           const rest = prev.rest
             ? pausing
@@ -147,10 +161,9 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
                 ? { ...prev.rest, endsAt: Date.now() + prev.rest.remainingWhenPaused * 1000 }
                 : prev.rest
             : null;
-          const next = { ...prev, clock, rest };
-          persistPause(next);
-          return next;
-        }),
+          return { ...prev, clock, rest };
+        });
+      },
       startRest: (seconds, next) =>
         update((prev) =>
           prev && seconds > 0
@@ -178,8 +191,9 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
         listeners.current.add(listener);
         return () => listeners.current.delete(listener);
       },
-    };
-  }, [update]);
+    }),
+    [update],
+  );
 
   const value = useMemo<WorkoutContextValue>(() => ({ active, ...actions }), [active, actions]);
 
@@ -203,13 +217,14 @@ export function useNow(active = true, intervalMs = 1000): number {
   return now;
 }
 
-/** Tempo decorrido e descanso restante, atualizados a cada segundo. */
+/** Tempo efetivo, pausa e descanso restante, atualizados a cada segundo. */
 export function useWorkoutClock(active: ActiveWorkoutState | null) {
-  const running = Boolean(active && (!active.clock.pausedAt || active.rest?.endsAt));
+  const paused = active ? isWorkoutPaused(active.clock) : false;
+  const running = Boolean(active && (!paused || active.rest?.endsAt));
   const now = useNow(running);
   return {
     elapsed: active ? workoutElapsedSeconds(active.clock, new Date(now)) : 0,
-    paused: Boolean(active?.clock.pausedAt),
+    paused,
     restLeft: restRemaining(active?.rest ?? null, now),
   };
 }

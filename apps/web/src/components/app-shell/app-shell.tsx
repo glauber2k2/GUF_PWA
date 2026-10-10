@@ -6,7 +6,9 @@ import { Info, Play, Plus } from "lucide-react";
 import { estimateRoutineMinutes, plural, startedAgoLabel, suggestNextRoutine, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
 import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
+import { useDevHomeState } from "@/hooks/use-dev-home-state";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
+import { hasPendingFor, isClosedLocally } from "@/lib/offline/outbox";
 import { cn } from "@/lib/utils";
 import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
 import { useActiveWorkout } from "@/components/workout/workout-provider";
@@ -65,7 +67,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   // trailingSlash: true → normalizar "/treino/" para "/treino".
   const pathname = usePathname().replace(/(.)\/$/, "$1");
-  const { active } = useActiveWorkout();
+  const { active, track, clear } = useActiveWorkout();
+  const devHome = useDevHomeState();
   // Tela de treino é imersiva: sem menu inferior e sem mini card (ela tem o próprio rodapé).
   const immersive = pathname === "/treino";
   const summary = useHomeSummary();
@@ -110,6 +113,36 @@ export function AppShell({ children }: { children: ReactNode }) {
     () => ({ showToast, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor, openWorkout }),
     [showToast, startWorkoutFor, openWorkout],
   );
+
+  // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
+  // Sem treino no banco e nada pendente no aparelho → o mini card some.
+  const serverInProgress = summary.data?.inProgress;
+  const summaryLoaded = summary.isSuccess;
+  const activeId = active?.sessionId ?? null;
+  const activePersist = active?.persist ?? false;
+  useEffect(() => {
+    if (!summaryLoaded) return;
+    let cancelled = false;
+    void (async () => {
+      if (serverInProgress) {
+        if (await isClosedLocally(serverInProgress.id)) return;
+        if (cancelled) return;
+        track({
+          sessionId: serverInProgress.id,
+          name: serverInProgress.name,
+          clock: { startedAt: serverInProgress.startedAt, periods: serverInProgress.activePeriods },
+          // Cenários de demonstração (?estado=) não gravam nada.
+          persist: !devHome.scenario,
+        });
+      } else if (activeId && activePersist && !devHome.scenario) {
+        if (await hasPendingFor(activeId)) return;
+        if (!cancelled) clear();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [summaryLoaded, serverInProgress, activeId, activePersist, devHome.scenario, track, clear]);
 
   const tabIndex = Math.max(0, TAB_ROUTES.findIndex((t) => t.path === pathname));
   // Treino aberto: o acompanhado no aparelho ou o que o banco informa.
