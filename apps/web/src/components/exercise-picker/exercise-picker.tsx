@@ -22,6 +22,7 @@ import {
   EmptyState,
   Icon,
   IconButton,
+  ScreenPortal,
   SearchField,
   SheetOption,
   Skeleton,
@@ -183,228 +184,231 @@ export function ExercisePicker({
     : "Toque para marcar. Marque vários para adicionar de uma vez.";
   const ctaLabel = single ? "Trocar exercício" : count > 1 ? `Adicionar ${count} exercícios` : "Adicionar exercício";
 
+  // Portal: tela cheia fixa, fora de ancestrais animados (ver ScreenPortal).
   return (
-    <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 animate-guf-in-right bg-background">
-      <div className="mx-auto flex h-dvh w-full max-w-[430px] flex-col pt-[env(safe-area-inset-top)]">
-        <header className="flex h-[52px] flex-none items-center gap-1 px-2">
-          <IconButton icon={X} label="Fechar" variant="ghost" onClick={onClose} />
-          <h1 className="m-0 flex-1 text-center text-[17px] leading-[22px] font-semibold">{title}</h1>
-          <span className="w-11 flex-none" />
-        </header>
+    <ScreenPortal>
+      <div role="dialog" aria-modal="true" aria-label={title} className="fixed inset-0 z-50 animate-guf-in-right bg-background">
+        <div className="mx-auto flex h-dvh w-full max-w-[430px] flex-col pt-[env(safe-area-inset-top)]">
+          <header className="flex h-[52px] flex-none items-center gap-1 px-2">
+            <IconButton icon={X} label="Fechar" variant="ghost" onClick={onClose} />
+            <h1 className="m-0 flex-1 text-center text-[17px] leading-[22px] font-semibold">{title}</h1>
+            <span className="w-11 flex-none" />
+          </header>
 
-        <div className="flex flex-none flex-col gap-3 px-4 pt-1">
-          <SearchField placeholder="Buscar exercício" value={query} onChange={(e) => setQuery(e.target.value)} />
-          {offline && (
-            <Banner tone="warning" title="Sem conexão">
-              mostrando os exercícios salvos no aparelho
-            </Banner>
-          )}
-        </div>
-
-        <div
-          role="group"
-          aria-label="Filtrar por grupo muscular"
-          className="flex flex-none gap-2 overflow-x-auto px-4 pt-3 pb-1 [scrollbar-width:none]"
-        >
-          <Chip label="Todos" selected={filter === "todos"} onChange={() => setFilter("todos")} />
-          {MUSCLE_GROUP_ORDER.map((g) => (
-            <Chip key={g} label={muscleGroupLabel(g)} selected={filter === g} onChange={() => setFilter(g)} />
-          ))}
-        </div>
-        <span className="flex-none px-4 pt-1.5 pb-1 text-[13px] leading-[18px] text-pretty text-fg-muted">{helper}</span>
-
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-[168px] [scrollbar-width:none]">
-          {library.isPending && (
-            <div aria-busy="true" aria-label="Carregando exercícios" className="flex flex-col gap-3.5 pt-4">
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-16 w-11 rounded-md" />
-                <Skeleton className="h-5 w-[120px]" />
-              </div>
-              {SKELETON_WIDTHS.map((w) => (
-                <div key={w} className="flex h-[46px] items-center justify-between">
-                  <div className="flex flex-col gap-2">
-                    <Skeleton className={w} />
-                    <Skeleton className="h-3 w-[70px]" />
-                  </div>
-                  <Skeleton className="size-7 rounded-pill" />
-                </div>
-              ))}
-            </div>
-          )}
-
-          {library.isError && (
-            <div className="pt-4">
-              <Banner tone="danger" actionLabel="Tentar" onAction={() => void library.refetch()}>
-                Não foi possível carregar os exercícios. Verifique a internet e tente de novo.
+          <div className="flex flex-none flex-col gap-3 px-4 pt-1">
+            <SearchField placeholder="Buscar exercício" value={query} onChange={(e) => setQuery(e.target.value)} />
+            {offline && (
+              <Banner tone="warning" title="Sem conexão">
+                mostrando os exercícios salvos no aparelho
               </Banner>
-            </div>
-          )}
-
-          {ready && sections.length > 0 && (
-            <>
-              {sections.map((s, si) => (
-                <section
-                  key={s.group}
-                  aria-label={muscleGroupLabel(s.group)}
-                  className="flex animate-guf-rise flex-col pt-4"
-                  style={{ animationDelay: `${Math.min(si, 6) * 40}ms` }}
-                >
-                  <div className="flex items-center gap-3 border-b border-border pb-2">
-                    <span className="grid h-16 w-11 flex-none place-items-center rounded-md border border-border bg-surface text-fg-muted">
-                      <BodyMap muscleGroup={s.group} />
-                    </span>
-                    <div className="flex min-w-0 flex-col gap-0.5">
-                      <h2 className="m-0 text-lg leading-6 font-semibold">{muscleGroupLabel(s.group)}</h2>
-                      <span className="text-[13px] leading-[18px] text-fg-muted">
-                        {plural(s.items.length, "exercício", "exercícios")} ·{" "}
-                        {muscleGroupView(s.group) === "back" ? "vista de costas" : "vista de frente"}
-                      </span>
-                    </div>
-                  </div>
-                  {s.items.map((e) => {
-                    const isAdded = added.has(e.id);
-                    const isOn = selected.includes(e.id) && !isAdded;
-                    const sub = `${equipmentLabel(e.equipment)}${e.isCustom ? " · Personalizado" : ""}`;
-                    return (
-                      <button
-                        key={e.id}
-                        type="button"
-                        disabled={isAdded}
-                        aria-pressed={isOn}
-                        aria-label={`${e.name}, ${sub}${isAdded ? ", já adicionado" : isOn ? ", selecionado" : ""}`}
-                        onClick={() => toggle(e.id)}
-                        className={cn(
-                          "-mx-1.5 flex min-h-[60px] items-center gap-3 rounded-[10px] border-b border-border px-1.5 py-2 text-left",
-                          "transition-colors duration-150 ease-standard",
-                          isAdded ? "cursor-default" : "cursor-pointer",
-                          isOn ? "bg-accent/10" : "bg-transparent",
-                        )}
-                      >
-                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                          <span className={cn("truncate text-[15px] leading-5 font-medium", isAdded ? "text-fg-muted" : "text-fg")}>
-                            {e.name}
-                          </span>
-                          <span className="text-[13px] leading-[18px] text-fg-muted">{sub}</span>
-                        </span>
-                        {isAdded ? (
-                          <span className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-fg-muted">
-                            <Icon icon={Check} size={14} />
-                            Já adicionado
-                          </span>
-                        ) : isOn ? (
-                          <span
-                            aria-hidden="true"
-                            className={cn(
-                              "grid size-7 flex-none place-items-center rounded-pill bg-accent text-accent-foreground",
-                              lastPicked === e.id && "animate-guf-pop",
-                            )}
-                          >
-                            <Icon icon={Check} size={16} />
-                          </span>
-                        ) : (
-                          <span aria-hidden="true" className="size-7 flex-none rounded-pill border-[1.5px] border-border-strong" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </section>
-              ))}
-              <div className="pt-5">
-                <SheetOption icon={Plus} title="Criar exercício" dashed onClick={openCreate} />
-              </div>
-            </>
-          )}
-
-          {ready && sections.length === 0 && (
-            <div className="animate-guf-rise pt-6">
-              <EmptyState
-                icon={SearchX}
-                title="Nenhum exercício encontrado"
-                message={`Nada encontrado para “${query.trim()}”. Confira a grafia ou crie o exercício.`}
-                actionLabel="Criar exercício"
-                onAction={openCreate}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
-        <div className="mx-auto flex max-w-[430px] flex-col gap-1 px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">
-          {count > 0 && !single && (
-            <div className="flex h-11 items-center justify-between">
-              <span aria-live="polite" className="flex items-center gap-2 text-sm font-semibold">
-                <b className="grid h-6 min-w-6 place-items-center rounded-pill bg-accent px-[7px] font-display text-[15px] font-bold text-accent-foreground tabular-nums">
-                  {count}
-                </b>
-                {count === 1 ? "selecionado" : "selecionados"}
-              </span>
-              <Button variant="ghost" onClick={() => setSelected([])}>
-                Limpar
-              </Button>
-            </div>
-          )}
-          <Button size="lg" fullWidth icon={single ? ArrowLeftRight : Plus} disabled={count === 0} onClick={confirm}>
-            {ctaLabel}
-          </Button>
-        </div>
-      </div>
-
-      {toast && (
-        <div
-          className={cn(
-            "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
-            count > 0 && !single
-              ? "bottom-[calc(162px+env(safe-area-inset-bottom))]"
-              : "bottom-[calc(114px+env(safe-area-inset-bottom))]",
-          )}
-        >
-          <Toast message={toast} icon={CircleCheck} />
-        </div>
-      )}
-
-      <BottomSheet placement="screen" open={createOpen} onClose={() => setCreateOpen(false)} title="Criar exercício" subtitle="Personalizado">
-        <TextField
-          label="Nome do exercício"
-          value={newName}
-          placeholder="Ex.: Supino articulado"
-          error={nameError ?? undefined}
-          onChange={(e) => {
-            setNewName(e.target.value);
-            setNameError(null);
-          }}
-        />
-        <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-medium text-fg-secondary">Grupo muscular</span>
-          <div className="flex flex-wrap gap-1.5">
-            {MUSCLE_GROUP_ORDER.map((g) => (
-              <Chip key={g} label={muscleGroupLabel(g)} selected={newGroup === g} onChange={() => setNewGroup(g)} />
-            ))}
+            )}
           </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <span className="text-[13px] font-medium text-fg-secondary">Equipamento</span>
-          <div className="flex flex-wrap gap-1.5">
-            {Object.keys(EQUIPMENT_LABELS).map((code) => (
-              <Chip key={code} label={equipmentLabel(code)} selected={newEquipment === code} onChange={() => setNewEquipment(code)} />
-            ))}
-          </div>
-        </div>
-        <div className="pt-1.5">
-          <Button
-            size="lg"
-            icon={Plus}
-            fullWidth
-            loading={create.isPending}
-            onClick={() => {
-              if (!newName.trim()) return setNameError("Informe o nome do exercício.");
-              create.mutate();
-            }}
+
+          <div
+            role="group"
+            aria-label="Filtrar por grupo muscular"
+            className="flex flex-none gap-2 overflow-x-auto px-4 pt-3 pb-1 [scrollbar-width:none]"
           >
-            Criar exercício
-          </Button>
+            <Chip label="Todos" selected={filter === "todos"} onChange={() => setFilter("todos")} />
+            {MUSCLE_GROUP_ORDER.map((g) => (
+              <Chip key={g} label={muscleGroupLabel(g)} selected={filter === g} onChange={() => setFilter(g)} />
+            ))}
+          </div>
+          <span className="flex-none px-4 pt-1.5 pb-1 text-[13px] leading-[18px] text-pretty text-fg-muted">{helper}</span>
+
+          <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-[168px] [scrollbar-width:none]">
+            {library.isPending && (
+              <div aria-busy="true" aria-label="Carregando exercícios" className="flex flex-col gap-3.5 pt-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-16 w-11 rounded-md" />
+                  <Skeleton className="h-5 w-[120px]" />
+                </div>
+                {SKELETON_WIDTHS.map((w) => (
+                  <div key={w} className="flex h-[46px] items-center justify-between">
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className={w} />
+                      <Skeleton className="h-3 w-[70px]" />
+                    </div>
+                    <Skeleton className="size-7 rounded-pill" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {library.isError && (
+              <div className="pt-4">
+                <Banner tone="danger" actionLabel="Tentar" onAction={() => void library.refetch()}>
+                  Não foi possível carregar os exercícios. Verifique a internet e tente de novo.
+                </Banner>
+              </div>
+            )}
+
+            {ready && sections.length > 0 && (
+              <>
+                {sections.map((s, si) => (
+                  <section
+                    key={s.group}
+                    aria-label={muscleGroupLabel(s.group)}
+                    className="flex animate-guf-rise flex-col pt-4"
+                    style={{ animationDelay: `${Math.min(si, 6) * 40}ms` }}
+                  >
+                    <div className="flex items-center gap-3 border-b border-border pb-2">
+                      <span className="grid h-16 w-11 flex-none place-items-center rounded-md border border-border bg-surface text-fg-muted">
+                        <BodyMap muscleGroup={s.group} />
+                      </span>
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <h2 className="m-0 text-lg leading-6 font-semibold">{muscleGroupLabel(s.group)}</h2>
+                        <span className="text-[13px] leading-[18px] text-fg-muted">
+                          {plural(s.items.length, "exercício", "exercícios")} ·{" "}
+                          {muscleGroupView(s.group) === "back" ? "vista de costas" : "vista de frente"}
+                        </span>
+                      </div>
+                    </div>
+                    {s.items.map((e) => {
+                      const isAdded = added.has(e.id);
+                      const isOn = selected.includes(e.id) && !isAdded;
+                      const sub = `${equipmentLabel(e.equipment)}${e.isCustom ? " · Personalizado" : ""}`;
+                      return (
+                        <button
+                          key={e.id}
+                          type="button"
+                          disabled={isAdded}
+                          aria-pressed={isOn}
+                          aria-label={`${e.name}, ${sub}${isAdded ? ", já adicionado" : isOn ? ", selecionado" : ""}`}
+                          onClick={() => toggle(e.id)}
+                          className={cn(
+                            "-mx-1.5 flex min-h-[60px] items-center gap-3 rounded-[10px] border-b border-border px-1.5 py-2 text-left",
+                            "transition-colors duration-150 ease-standard",
+                            isAdded ? "cursor-default" : "cursor-pointer",
+                            isOn ? "bg-accent/10" : "bg-transparent",
+                          )}
+                        >
+                          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span className={cn("truncate text-[15px] leading-5 font-medium", isAdded ? "text-fg-muted" : "text-fg")}>
+                              {e.name}
+                            </span>
+                            <span className="text-[13px] leading-[18px] text-fg-muted">{sub}</span>
+                          </span>
+                          {isAdded ? (
+                            <span className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-fg-muted">
+                              <Icon icon={Check} size={14} />
+                              Já adicionado
+                            </span>
+                          ) : isOn ? (
+                            <span
+                              aria-hidden="true"
+                              className={cn(
+                                "grid size-7 flex-none place-items-center rounded-pill bg-accent text-accent-foreground",
+                                lastPicked === e.id && "animate-guf-pop",
+                              )}
+                            >
+                              <Icon icon={Check} size={16} />
+                            </span>
+                          ) : (
+                            <span aria-hidden="true" className="size-7 flex-none rounded-pill border-[1.5px] border-border-strong" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </section>
+                ))}
+                <div className="pt-5">
+                  <SheetOption icon={Plus} title="Criar exercício" dashed onClick={openCreate} />
+                </div>
+              </>
+            )}
+
+            {ready && sections.length === 0 && (
+              <div className="animate-guf-rise pt-6">
+                <EmptyState
+                  icon={SearchX}
+                  title="Nenhum exercício encontrado"
+                  message={`Nada encontrado para “${query.trim()}”. Confira a grafia ou crie o exercício.`}
+                  actionLabel="Criar exercício"
+                  onAction={openCreate}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </BottomSheet>
-    </div>
+
+        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
+          <div className="mx-auto flex max-w-[430px] flex-col gap-1 px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">
+            {count > 0 && !single && (
+              <div className="flex h-11 items-center justify-between">
+                <span aria-live="polite" className="flex items-center gap-2 text-sm font-semibold">
+                  <b className="grid h-6 min-w-6 place-items-center rounded-pill bg-accent px-[7px] font-display text-[15px] font-bold text-accent-foreground tabular-nums">
+                    {count}
+                  </b>
+                  {count === 1 ? "selecionado" : "selecionados"}
+                </span>
+                <Button variant="ghost" onClick={() => setSelected([])}>
+                  Limpar
+                </Button>
+              </div>
+            )}
+            <Button size="lg" fullWidth icon={single ? ArrowLeftRight : Plus} disabled={count === 0} onClick={confirm}>
+              {ctaLabel}
+            </Button>
+          </div>
+        </div>
+
+        {toast && (
+          <div
+            className={cn(
+              "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
+              count > 0 && !single
+                ? "bottom-[calc(162px+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(114px+env(safe-area-inset-bottom))]",
+            )}
+          >
+            <Toast message={toast} icon={CircleCheck} />
+          </div>
+        )}
+
+        <BottomSheet placement="screen" open={createOpen} onClose={() => setCreateOpen(false)} title="Criar exercício" subtitle="Personalizado">
+          <TextField
+            label="Nome do exercício"
+            value={newName}
+            placeholder="Ex.: Supino articulado"
+            error={nameError ?? undefined}
+            onChange={(e) => {
+              setNewName(e.target.value);
+              setNameError(null);
+            }}
+          />
+          <div className="flex flex-col gap-2">
+            <span className="text-[13px] font-medium text-fg-secondary">Grupo muscular</span>
+            <div className="flex flex-wrap gap-1.5">
+              {MUSCLE_GROUP_ORDER.map((g) => (
+                <Chip key={g} label={muscleGroupLabel(g)} selected={newGroup === g} onChange={() => setNewGroup(g)} />
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-[13px] font-medium text-fg-secondary">Equipamento</span>
+            <div className="flex flex-wrap gap-1.5">
+              {Object.keys(EQUIPMENT_LABELS).map((code) => (
+                <Chip key={code} label={equipmentLabel(code)} selected={newEquipment === code} onChange={() => setNewEquipment(code)} />
+              ))}
+            </div>
+          </div>
+          <div className="pt-1.5">
+            <Button
+              size="lg"
+              icon={Plus}
+              fullWidth
+              loading={create.isPending}
+              onClick={() => {
+                if (!newName.trim()) return setNameError("Informe o nome do exercício.");
+                create.mutate();
+              }}
+            >
+              Criar exercício
+            </Button>
+          </div>
+        </BottomSheet>
+      </div>
+    </ScreenPortal>
   );
 }

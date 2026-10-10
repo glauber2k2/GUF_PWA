@@ -51,6 +51,7 @@ guf-app/
 - **Cores de texto:** `text-fg`, `text-fg-secondary`, `text-fg-muted`. Atenção: `text-primary` é o volt (alias do shadcn), não a cor do texto. Misturas de cor (`color-mix`) viram tokens nomeados no `@theme`, nunca classes arbitrárias com `var()`.
 - **Componentes:** reutilizar os de `apps/web/src/components/ds/` antes de criar novos; componente novo só se não existir. Componentes de uma tela ficam em `src/components/<tela>/`.
 - **Reordenar listas:** usar o hook `usePointerReorder` (`apps/web/src/hooks/`; toque, mouse e setas do teclado) + positions sequenciais (`changedPositions` em packages/core). O `ReorderList` do design system usa o arrastar nativo do HTML5, que não funciona no toque do celular — não usar em telas do app.
+- **Camadas fixas na tela** (folhas `BottomSheet`/`ConfirmDialog` com `placement="screen"`, seletor de exercícios e qualquer tela cheia nova): renderizar por portal no `<body>` (`ScreenPortal` do design system). Um ancestral com `transform` (ex.: a animação de entrada `animate-guf-rise`) vira a referência do `position: fixed` e a camada "escondida" aparece no meio da página. Camadas: folhas `z-[60]`, diálogos `z-[70]` (acima de telas cheias `z-50`).
 - **Toast:** `useAppShell().showToast(mensagem, { icon, actionLabel, onAction })`; com ação (ex.: "Desfazer") fica 4 s. Tela com barra de ação fixa acima do menu chama `setToastRaised(true)`.
 - **Fontes:** Inter (interface) e Barlow Condensed (números, sempre `tabular-nums`), locais via `next/font/local` em `src/app/fonts/`.
 - **Dados fictícios:** sempre em `apps/web/src/mocks/`, com a **mesma assinatura** das funções reais de `packages/api` (mesmos nomes, parâmetros e retorno, inclusive erros), validada com `satisfies <Contrato>Api`. Integrar = trocar a importação.
@@ -85,6 +86,7 @@ guf-app/
 - **Validação** (`routineDraftSchema` em packages/schemas): nome obrigatório e pelo menos 1 exercício com repetições. Exercício novo: 3 × 10, descanso 90 s.
 - Exercícios criados no seletor entram pela fila offline: `flushOutbox()` antes de salvar a rotina.
 - Só online (mesma regra de Projetos). Estados de desenvolvimento: os mesmos `?estado=` de Projetos (mock compartilha a memória).
+- **Atalhos:** "Criar minha primeira rotina" (Início) e "Montar uma rotina" (folha Iniciar treino) abrem `/rotina?projeto=<projeto ativo>` (`newRoutinePathFor`); sem projeto ativo, a lista de Projetos.
 
 ## Histórico (/historico)
 - **Dados:** `packages/api/src/history.ts` — `getHistoryOverview` (dias treinados das últimas 104 semanas + `get_streak()` + meta + unidade + data do 1º treino), `getTrainingDays` (mês do calendário) e `getDaySessions` (treinos do dia, com recordes). Mapeadores comuns com a Início em `packages/api/src/shared.ts`.
