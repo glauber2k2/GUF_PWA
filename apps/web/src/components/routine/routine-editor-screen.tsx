@@ -330,7 +330,6 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
               letter={routineLetter(p.name)}
               title={p.name}
               subtitle={current ? `Selecionado · ${meta}` : meta}
-              highlighted={current}
               onClick={() => {
                 dispatch({ type: "setProject", projectId: p.id });
                 setSheet(null);
