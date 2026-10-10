@@ -11,3 +11,6 @@ export * from "./feedback";
 export * from "./body-map";
 export * from "./swipe-to-delete";
 export * from "./portal";
+export * from "./loader";
+export * from "./loading";
+export * from "./muscle-icon";

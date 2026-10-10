@@ -5,8 +5,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { Info, ListPlus, Play, Plus, type LucideIcon } from "lucide-react";
 import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
+import { BottomNav, BottomSheet, LoadingScreen, SheetOption, Toast } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
+import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
 import { hasPendingFor, isClosedLocally } from "@/lib/offline/outbox";
 import { cn } from "@/lib/utils";
@@ -70,6 +71,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Treino e edição de rotina são imersivos: sem menu inferior e sem mini card (têm o próprio rodapé).
   const immersive = pathname === "/treino" || pathname === "/rotina";
   const summary = useHomeSummary();
+  const online = useOnlineStatus();
+  // Abertura: depois do login, a tela de carregamento fica até os dados do usuário chegarem
+  // (uma vez por sessão). Sem internet não bloqueia: o treino offline precisa abrir.
+  const [booted, setBooted] = useState(false);
+  if (!booted && (summary.data || summary.isError || !online)) setBooted(true);
   const start = useStartWorkout();
   const [toast, setToast] = useState<ToastState | null>(null);
   const [toastRaised, setToastRaised] = useState(false);
@@ -172,6 +178,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Destaque = treino de hoje (pelos dias da semana ou, sem dias marcados, pela ordem); dia de descanso: nenhum.
   const plan = todayPlan(routines, data?.lastFinishedRoutineId ?? null, fromLocalISODate(today));
   const suggested = trainedToday || (plan.kind !== "scheduled" && plan.kind !== "sequence") ? null : plan.routine;
+
+  if (!booted) return <LoadingScreen />;
 
   return (
     <AppShellContext.Provider value={api}>

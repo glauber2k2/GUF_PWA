@@ -1,7 +1,8 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { LoaderCircle, Plus, type LucideIcon } from "lucide-react";
+import { Plus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
+import { GufLoader } from "./loader";
 
 const PRESS = "active:scale-[.97] motion-reduce:active:scale-100";
 
@@ -72,7 +73,8 @@ export function Button({
       {...rest}
     >
       {loading ? (
-        <Icon icon={LoaderCircle} size={s.icon} spin />
+        // Loading 02 (Desenho): sobre volt usa a cor do texto do volt; nas demais, a cor do botão.
+        <GufLoader variant={2} size={s.icon} tone={variant === "primary" && !disabled ? "onAccent" : "mono"} />
       ) : icon ? (
         <Icon icon={icon} size={s.icon} />
       ) : null}
