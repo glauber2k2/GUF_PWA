@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight, Trophy, type LucideIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Check, Trophy, type LucideIcon } from "lucide-react";
 import { formatNumber, formatSigned, type SetType } from "@guf/core";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
@@ -343,5 +343,107 @@ export function TextDivider({ label = "ou", className }: { label?: string; class
       <span aria-hidden="true">{label}</span>
       <span aria-hidden="true" className="h-px flex-1 bg-border" />
     </div>
+  );
+}
+
+export type WeekDayState = "done" | "today" | "past" | "future";
+
+export interface WeekStripDay {
+  /** Chave estável (data "yyyy-MM-dd"). */
+  key: string;
+  /** Inicial do dia ("S", "T"…). */
+  initial: string;
+  dayOfMonth: number;
+  state: WeekDayState;
+  /** Rótulo acessível: "Sexta, 9 out · treinou". */
+  label: string;
+  /** Atraso da animação de "pop" dos dias treinados (ms, escalonado). */
+  popDelayMs?: number;
+}
+
+const WEEK_CIRCLE: Record<WeekDayState, string> = {
+  done: "grid place-items-center bg-accent text-accent-foreground animate-guf-pop-in",
+  today: "border-2 border-accent-text bg-accent/12",
+  past: "bg-surface-3",
+  future: "border border-dashed border-border-strong opacity-70",
+};
+
+/** Semana de segunda a domingo: treinou (volt), hoje (contorno), passado e futuro. */
+export function WeekStrip({
+  days,
+  onSelectDay,
+  className,
+}: {
+  days: WeekStripDay[];
+  /** Toque em um dia treinado (abre o resumo do dia). */
+  onSelectDay?: (key: string) => void;
+  className?: string;
+}) {
+  return (
+    <div className={cn("grid grid-cols-7", className)}>
+      {days.map((d) => {
+        const interactive = d.state === "done" && Boolean(onSelectDay);
+        return (
+          <button
+            key={d.key}
+            type="button"
+            aria-label={d.label}
+            aria-current={d.state === "today" ? "date" : undefined}
+            disabled={!interactive}
+            onClick={interactive ? () => onSelectDay?.(d.key) : undefined}
+            className={cn(
+              "flex min-w-0 flex-col items-center gap-1.5 bg-transparent py-1 text-fg-muted",
+              interactive
+                ? "cursor-pointer transition-transform duration-100 ease-standard active:scale-[.94] motion-reduce:active:scale-100"
+                : "cursor-default",
+            )}
+          >
+            <span className="text-[11px] leading-4 font-semibold" aria-hidden="true">
+              {d.initial}
+            </span>
+            <span
+              aria-hidden="true"
+              className={cn("size-[38px] rounded-pill", WEEK_CIRCLE[d.state])}
+              style={d.state === "done" && d.popDelayMs ? { animationDelay: `${d.popDelayMs}ms` } : undefined}
+            >
+              {d.state === "done" && <Icon icon={Check} size={20} />}
+            </span>
+            <span
+              aria-hidden="true"
+              className={cn(
+                "text-[13px] leading-4 tabular-nums",
+                d.state === "today" ? "font-bold text-fg" : "font-medium",
+                d.state === "future" ? "text-fg-muted" : d.state !== "today" && "text-fg-secondary",
+              )}
+            >
+              {d.dayOfMonth}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+export interface StatItem {
+  label: string;
+  value: string;
+  unit?: string;
+}
+
+/** Números de um treino (Duração · Volume · Séries) em Barlow. */
+export function StatGrid({ stats, className }: { stats: StatItem[]; className?: string }) {
+  return (
+    <dl className={cn("m-0 grid auto-cols-fr grid-flow-col gap-2", className)}>
+      {stats.map((s) => (
+        <div key={s.label} className="flex min-w-0 flex-col gap-1">
+          <dt className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">{s.label}</dt>
+          <dd className="m-0 font-display text-[28px] leading-7 font-semibold tabular-nums">
+            {s.value}
+            {s.unit && <span className="text-base text-fg-secondary">{s.unit}</span>}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 }

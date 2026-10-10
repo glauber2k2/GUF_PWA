@@ -56,6 +56,9 @@
   --color-banner-danger: color-mix(in oklab, var(--danger) 12%, var(--surface));
   --color-banner-success: color-mix(in oklab, var(--success) 12%, var(--surface));
   --color-banner-info: color-mix(in oklab, var(--info) 12%, var(--surface));
+  --color-done-surface: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  --color-risk-surface: color-mix(in oklab, var(--warning) 8%, var(--surface));
+  --color-sheen: var(--sheen);
 
   --color-google-surface: var(--google-surface);
   --color-google-surface-hover: var(--google-surface-hover);
@@ -138,6 +141,10 @@
   --animate-guf-pop-badge: guf-pop 0.3s var(--ease-overshoot);
   --animate-guf-spin: guf-spin 0.8s linear infinite;
   --animate-guf-shimmer: guf-shimmer 1.4s linear infinite;
+  --animate-guf-rise: guf-rise 0.35s var(--ease-enter) both;
+  --animate-guf-rise-fast: guf-rise 0.25s var(--ease-enter) both;
+  --animate-guf-pop-in: guf-pop 0.35s var(--ease-overshoot) both;
+  --animate-guf-sheen: guf-sheen 3.6s var(--ease-standard) 1.2s infinite;
 }
 
 @layer base {

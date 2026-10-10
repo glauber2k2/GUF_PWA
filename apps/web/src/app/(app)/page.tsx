@@ -1,6 +1,5 @@
-import { HomePlaceholder } from "@/components/auth/home-placeholder";
+import { HomeScreen } from "@/components/home/home-screen";
 
-/** MARCADOR: a tela Início real entra com o design dela. */
 export default function Home() {
-  return <HomePlaceholder />;
+  return <HomeScreen />;
 }

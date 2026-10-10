@@ -11,7 +11,9 @@
     "build": "tsc --noEmit",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "date-fns": "^4.4.0"
+  },
   "devDependencies": {
     "typescript": "^5"
   }
