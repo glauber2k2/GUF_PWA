@@ -1,0 +1,13 @@
+/* Tipografia. Inter = interface. Barlow Condensed = números e títulos de destaque, sempre tabular-nums.
+   As famílias vêm do next/font (variáveis --font-inter e --font-barlow, definidas no layout). */
+:root {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow), var(--font-inter), sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --tracking-display: -0.01em;
+  --tracking-h1: -0.02em;
+  --tracking-h2: -0.015em;
+  --tracking-wordmark: -0.02em;
+  --tracking-overline: 0.08em;
+}
