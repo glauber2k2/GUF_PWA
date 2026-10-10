@@ -7,6 +7,9 @@ import { estimateRoutineMinutes, plural, startedAgoLabel, suggestNextRoutine, to
 import type { RoutineSummary } from "@guf/api";
 import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
+import { cn } from "@/lib/utils";
+import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
+import { useActiveWorkout } from "@/components/workout/workout-provider";
 
 const TOAST_MS = 1800;
 
@@ -60,7 +63,11 @@ export function routineMeta(routine: RoutineSummary): string {
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
+  // trailingSlash: true → normalizar "/treino/" para "/treino".
+  const pathname = usePathname().replace(/(.)\/$/, "$1");
+  const { active } = useActiveWorkout();
+  // Tela de treino é imersiva: sem menu inferior e sem mini card (ela tem o próprio rodapé).
+  const immersive = pathname === "/treino";
   const summary = useHomeSummary();
   const start = useStartWorkout();
   const [toast, setToast] = useState<string | null>(null);
@@ -81,22 +88,22 @@ export function AppShell({ children }: { children: ReactNode }) {
     (routine: Pick<RoutineSummary, "id" | "name"> | null) => {
       setStartOpen(false);
       start.mutate(routine?.id ?? null, {
-        // A tela de treino entra numa próxima etapa; por enquanto, só o aviso.
-        onSuccess: () => showToast(routine ? `${routineShortName(routine.name)} iniciado` : "Treino vazio iniciado"),
+        onSuccess: ({ sessionId }) => {
+          showToast(routine ? `${routineShortName(routine.name)} iniciado` : "Treino vazio iniciado");
+          router.push(`/treino?id=${encodeURIComponent(sessionId)}`);
+        },
         onError: (error) => showToast(error.message),
       });
     },
-    [start, showToast],
+    [start, showToast, router],
   );
 
-  // A tela de treino (/treino?id=…) entra numa próxima etapa; até lá, só o aviso.
   const openWorkout = useCallback(
     (sessionId: string) => {
-      void sessionId;
       setStartOpen(false);
-      showToast("A tela de treino chega em breve");
+      router.push(`/treino?id=${encodeURIComponent(sessionId)}`);
     },
-    [showToast],
+    [router],
   );
 
   const api = useMemo<AppShellApi>(
@@ -105,7 +112,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const tabIndex = Math.max(0, TAB_ROUTES.findIndex((t) => t.path === pathname));
-  const inProgress = summary.data?.inProgress ?? null;
+  // Treino aberto: o acompanhado no aparelho ou o que o banco informa.
+  const inProgress = active
+    ? { id: active.sessionId, name: active.name, startedAt: active.clock.startedAt }
+    : (summary.data?.inProgress ?? null);
+  const showMiniCard = Boolean(active) && !immersive;
 
   const onNav = (index: number) => {
     // "Treinar": com treino aberto, retoma (um treino em andamento por vez); senão, escolhe o que iniciar.
@@ -125,17 +136,47 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <AppShellContext.Provider value={api}>
-      <div className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col pb-[calc(92px+env(safe-area-inset-bottom))]">
+      <div
+        className={cn(
+          "mx-auto flex min-h-dvh w-full max-w-[430px] flex-col",
+          immersive
+            ? ""
+            : showMiniCard
+              ? "pb-[calc(168px+env(safe-area-inset-bottom))]"
+              : "pb-[calc(92px+env(safe-area-inset-bottom))]",
+        )}
+      >
         {children}
       </div>
 
       {toast && (
-        <div className="fixed inset-x-4 bottom-[calc(92px+env(safe-area-inset-bottom))] z-20 mx-auto max-w-[398px] animate-guf-rise-fast">
+        <div
+          className={cn(
+            "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
+            immersive
+              ? "bottom-[calc(114px+env(safe-area-inset-bottom))]"
+              : showMiniCard
+                ? "bottom-[calc(168px+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(92px+env(safe-area-inset-bottom))]",
+          )}
+        >
           <Toast message={toast} icon={Info} />
         </div>
       )}
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px]">
+      {showMiniCard && (
+        <MiniWorkoutCard
+          onOpen={openWorkout}
+          className="fixed inset-x-3 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[15] mx-auto max-w-[406px]"
+        />
+      )}
+
+      <div
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px]",
+          immersive && "hidden",
+        )}
+      >
         <BottomNav
           value={tabIndex}
           onChange={onNav}

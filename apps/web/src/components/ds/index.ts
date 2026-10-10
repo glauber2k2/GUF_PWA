@@ -8,3 +8,5 @@ export * from "./workout";
 export * from "./navigation";
 export * from "./overlays";
 export * from "./feedback";
+export * from "./body-map";
+export * from "./swipe-to-delete";
