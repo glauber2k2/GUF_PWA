@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const prefersReducedMotion = () =>
-  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+import { prefersReducedMotion } from "@/lib/motion";
 
 /**
  * Conta de 0 até `target` (ease-out cúbico). Com movimento reduzido, mostra o valor final direto.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import {
   currentWeek,
@@ -128,6 +129,7 @@ function HomeContent({
   onSoon: (what: string) => void;
 }) {
   const shell = useAppShell();
+  const router = useRouter();
   const name = firstName(data.profile.name);
   const initial = (name ?? userEmail ?? "?").charAt(0).toUpperCase();
   // Calendário pela RPC get_training_days (dias com treino concluído).
@@ -174,7 +176,7 @@ function HomeContent({
           trainedDays={trainedDays}
           count={data.streak.currentWeekCount}
           goal={data.profile.weeklyGoal}
-          onOpenHistory={() => onSoon("O Histórico")}
+          onOpenHistory={() => router.push("/historico")}
           onSelectDay={(iso) => onOpenSheet({ kind: "day", iso })}
         />
       </div>

@@ -1,0 +1,67 @@
+import { durationSeconds, type LoggedSet, type SetType } from "@guf/core";
+import type { Database } from "@guf/types";
+import type { GufClient } from "./client";
+
+/* Tipos e conversões usados por mais de uma tela (Início e Histórico). */
+
+/** Dia treinado (get_training_days). */
+export interface TrainingDay {
+  performedOn: string;
+  sessions: number;
+  volumeKg: number;
+}
+
+export interface StreakSummary {
+  currentStreak: number;
+  bestStreak: number;
+  currentWeekCount: number;
+  weekSecured: boolean;
+  streakAtRisk: boolean;
+}
+
+export const FREE_WORKOUT_NAME = "Treino livre";
+
+type Functions = Database["public"]["Functions"];
+
+export async function currentUserId(client: GufClient): Promise<string | null> {
+  const { data } = await client.auth.getSession();
+  return data.session?.user.id ?? null;
+}
+
+export function toTrainingDay(row: Functions["get_training_days"]["Returns"][number]): TrainingDay {
+  return { performedOn: row.performed_on, sessions: row.sessions, volumeKg: Number(row.total_volume_kg) };
+}
+
+/** Linha do get_streak() (sem linha = usuário sem treinos). */
+export function toStreakSummary(row: Functions["get_streak"]["Returns"][number] | undefined): StreakSummary {
+  return {
+    currentStreak: row?.current_streak ?? 0,
+    bestStreak: row?.best_streak ?? 0,
+    currentWeekCount: row?.current_week_count ?? 0,
+    weekSecured: row?.week_secured ?? false,
+    streakAtRisk: row?.streak_at_risk ?? false,
+  };
+}
+
+interface SetLogRow {
+  set_type: string;
+  weight_kg: number | null;
+  reps: number | null;
+  is_completed: boolean;
+}
+
+export function toLoggedSets(rows: readonly SetLogRow[]): LoggedSet[] {
+  return rows.map((l) => ({ setType: l.set_type as SetType, weightKg: l.weight_kg, reps: l.reps, isCompleted: l.is_completed }));
+}
+
+interface FinishedSessionRow {
+  started_at: string;
+  finished_at: string | null;
+  active_seconds: number | null;
+}
+
+/** Duração exibida: tempo efetivo (sem pausas); treinos antigos sem o campo usam início → fim. */
+export function sessionDurationSeconds(row: FinishedSessionRow): number {
+  return row.active_seconds ?? durationSeconds(row.started_at, row.finished_at);
+}
+

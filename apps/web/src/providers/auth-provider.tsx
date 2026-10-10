@@ -5,7 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { signOut as apiSignOut, toAuthError, type AuthError, type Session, type User } from "@guf/api";
 import { clearActiveWorkoutCache } from "@/components/workout/workout-provider";
 import { clearOfflineData } from "@/lib/offline/db";
-import { flushOutbox, startOutboxSync } from "@/lib/offline/outbox";
+import { flushOutbox, onWorkoutClosedSynced, startOutboxSync } from "@/lib/offline/outbox";
+import { invalidateTrainingData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 
 interface AuthState {
@@ -47,7 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void client.auth.initialize().then(({ error }) => {
       if (error) setInitError(toAuthError(error));
     });
-    return () => subscription.unsubscribe();
+    // Treino finalizado sem internet chegou ao servidor: Início e Histórico recarregam.
+    const stopClosedSync = onWorkoutClosedSynced(() => invalidateTrainingData(queryClient));
+    return () => {
+      subscription.unsubscribe();
+      stopClosedSync();
+    };
   }, [queryClient]);
 
   const signOut = useCallback(async () => {

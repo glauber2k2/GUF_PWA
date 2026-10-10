@@ -18,7 +18,7 @@ const TOAST_MS = 1800;
 /** Rotas de cada aba (índice do BottomNav). null = tela ainda não construída. */
 const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/", name: "Início" },
-  { path: null, name: "Histórico" },
+  { path: "/historico", name: "Histórico" },
   { path: null, name: "Treinar" },
   { path: null, name: "Projetos" },
   { path: null, name: "Perfil" },
