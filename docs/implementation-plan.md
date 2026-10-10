@@ -65,9 +65,8 @@ e do `CLAUDE.md` → commit/push e PR.
 
 **Telas/rotas (query string, site estático):** `/projetos`, `/projetos/detalhe?id=…`, `/rotina?id=…`.
 
-**Dados:** tabelas `projects`, `routines`, `routine_exercises` (já existem, com RLS). Nenhuma migration prevista.
-Avaliar se trocar o projeto ativo precisa ser atômico (duas gravações seguidas podem violar o índice único
-`projects_one_active_per_user`); se sim, criar uma RPC `activate_project` em migration nova.
+**Dados:** tabelas `projects`, `routines`, `routine_exercises` (já existem, com RLS).
+Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_activate_project.sql`, **já aplicada** no Supabase): atômica, erro próprio `GP001`.
 
 **Reaproveitar:** `ExercisePicker`, `ReorderList`, `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
 
@@ -76,7 +75,9 @@ Avaliar se trocar o projeto ativo precisa ser atômico (duas gravações seguida
 - Ativar outro projeto nunca deixa dois ativos nem nenhum ativo por erro.
 - Arquivar rotina não apaga o histórico de treinos feitos com ela.
 
-**Decisões pendentes (pedir antes de implementar):** design da aba no Claude Design; se edição de rotina funciona offline (hoje a fila offline só cobre o treino em andamento).
+**Decisões tomadas:** edição de projetos e rotinas **só com internet** — sem conexão, bloquear as ações de edição com o aviso "Sem conexão – para criar ou editar rotinas, conecte-se à internet." (o conteúdo carregado continua visível); troca de projeto ativo pela RPC atômica.
+
+**Decisões pendentes:** design da aba no Claude Design.
 
 ---
 
@@ -173,5 +174,5 @@ Avaliar se trocar o projeto ativo precisa ser atômico (duas gravações seguida
 | Documentos legais provisórios | Jurídico | Revisão por advogado antes do lançamento; nova versão no banco força novo aceite (`/aceite`) |
 | Dados de saúde (medidas) | Jurídico/LGPD | Consentimento específico, revogação que apaga os dados, nada em logs/analytics |
 | Sem testes automatizados | Técnico | Etapa 6; até lá, testar regras do core a cada etapa |
-| Trocar projeto ativo em duas gravações | Técnico | Avaliar RPC atômica na Etapa 1 |
+| Trocar projeto ativo em duas gravações | Técnico | Resolvido: RPC `activate_project` (atômica) |
 | Limites do plano gratuito (Supabase/Vercel) | Financeiro | Revisar uso antes de abrir para usuários; produção em Cloudflare Pages ou Vercel pago |

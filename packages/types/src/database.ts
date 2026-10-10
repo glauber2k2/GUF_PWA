@@ -606,6 +606,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      activate_project: { Args: { p_project_id: string }; Returns: undefined }
       current_legal_document: {
         Args: { p_doc_type: string }
         Returns: {

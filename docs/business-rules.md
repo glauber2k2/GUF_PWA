@@ -40,11 +40,13 @@
 | Regra | Onde |
 |---|---|
 | Projeto = grupo de rotinas; rotina = lista ordenada de exercícios planejados (séries, repetições alvo em texto livre como "10", "8-12" ou "falha", e descanso). | Banco |
-| **No máximo um projeto ativo por usuário** (índice único). Para ativar outro, desativar o atual antes. | Banco |
+| **No máximo um projeto ativo por usuário** (índice único). A troca é feita pela função `activate_project`, que desativa o atual e ativa o novo na mesma transação (nunca fica com dois ou nenhum por erro). Projeto arquivado ou de outro usuário não pode ser ativado (erro `GP001`). | Banco (`activate_project`) |
 | **Rotina sugerida para hoje:** a próxima do projeto ativo depois da última concluída, seguindo a ordem (`position`) e voltando para a primeira depois da última. Sem histórico, a primeira. | Core (`home.ts`) |
 | Duração estimada da rotina = Σ séries × (40 s de execução + descanso), arredondada para múltiplos de 5 min; sem meta, 3 séries e 90 s. | Core (`workout.ts`) |
 | Observação de exercício feita no treino é salva também na rotina e aparece nos próximos treinos dela. | API (`workout.ts`) |
-| *A criação e edição de projetos e rotinas pelo app ainda não existe (Etapa 1 do plano).* | — |
+| Ficar sem projeto ativo é permitido (desativar o atual); arquivar o projeto ativo também o desativa. | Regra de projeto (Etapa 1) |
+| **Montar e editar projetos e rotinas exige internet** (não há fila offline para essas telas). Sem conexão, as ações de edição ficam bloqueadas com o aviso "Sem conexão – para criar ou editar rotinas, conecte-se à internet."; o que já foi carregado continua visível. | Regra de projeto (Etapa 1) |
+| *A criação e edição de projetos e rotinas pelo app está na Etapa 1 do plano (em andamento).* | — |
 
 ## 4. Treino
 
@@ -153,7 +155,6 @@
 
 ## 10. Pontos em aberto (decisões de produto)
 
-- Criação e edição de projetos/rotinas funcionará offline? (hoje a fila cobre só o treino em andamento)
 - Quais medidas corporais entram no módulo de medidas.
 - Uso do esforço percebido (RPE): a coluna existe no banco, sem uso no app.
 - Exibir também o recorde de 1RM estimado no resumo do treino (o banco já calcula).
