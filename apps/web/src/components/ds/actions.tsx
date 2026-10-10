@@ -29,6 +29,8 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
   iconRight?: LucideIcon;
   loading?: boolean;
   fullWidth?: boolean;
+  /** Brilho que atravessa o botão (ação principal da tela). Some com movimento reduzido. */
+  sheen?: boolean;
   children?: ReactNode;
 }
 
@@ -40,6 +42,7 @@ export function Button({
   loading = false,
   disabled = false,
   fullWidth = false,
+  sheen = false,
   type = "button",
   onClick,
   className,
@@ -48,6 +51,7 @@ export function Button({
 }: ButtonProps) {
   const s = BUTTON_SIZES[size];
   const bold = variant === "primary" || size === "lg";
+  const showSheen = sheen && !disabled && !loading;
   return (
     <button
       type={type}
@@ -56,6 +60,7 @@ export function Button({
       onClick={disabled || loading ? undefined : onClick}
       className={cn(
         "inline-flex cursor-pointer items-center justify-center gap-2 rounded-md whitespace-nowrap",
+        showSheen && "relative overflow-hidden",
         "transition-[transform,background-color] duration-150 ease-standard active:duration-100",
         s.box,
         variant === "ghost" && s.ghostPx,
@@ -73,6 +78,16 @@ export function Button({
       ) : null}
       {children}
       {iconRight && !loading ? <Icon icon={iconRight} size={s.icon} /> : null}
+      {showSheen && (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-0 animate-guf-sheen bg-[length:250%_100%] bg-[position:160%_0]",
+            "bg-linear-[105deg] from-transparent from-38% via-sheen via-50% to-transparent to-62%",
+            "motion-reduce:hidden",
+          )}
+        />
+      )}
     </button>
   );
 }
