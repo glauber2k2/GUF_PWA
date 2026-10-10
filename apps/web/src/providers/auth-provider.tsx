@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { signOut as apiSignOut, type AuthError, type Session, type User } from "@guf/api";
+import { signOut as apiSignOut, toAuthError, type AuthError, type Session, type User } from "@guf/api";
 import { getSupabaseClient } from "@/lib/supabase";
 
 interface AuthState {
@@ -10,6 +10,8 @@ interface AuthState {
   session: Session | null;
   /** true até o Supabase informar a sessão inicial (inclui a troca do ?code= do PKCE). */
   isLoading: boolean;
+  /** Erro ao iniciar a sessão (ex.: troca do ?code= do Google falhou). */
+  initError: AuthError | null;
   signOut: () => Promise<AuthError | null>;
 }
 
@@ -19,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [initError, setInitError] = useState<AuthError | null>(null);
 
   useEffect(() => {
     const client = getSupabaseClient();
@@ -31,6 +34,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Privacidade: não deixar dados de um usuário no cache para o próximo.
       if (event === "SIGNED_OUT") queryClient.clear();
     });
+    // initialize() devolve o erro da leitura da URL de retorno (PKCE), se houver.
+    void client.auth.initialize().then(({ error }) => {
+      if (error) setInitError(toAuthError(error));
+    });
     return () => subscription.unsubscribe();
   }, [queryClient]);
 
@@ -40,8 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ user: session?.user ?? null, session, isLoading, signOut }),
-    [session, isLoading, signOut],
+    () => ({ user: session?.user ?? null, session, isLoading, initError, signOut }),
+    [session, isLoading, initError, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

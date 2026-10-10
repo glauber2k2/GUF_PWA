@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { ConsentPlaceholder } from "@/components/auth/consent-placeholder";
+import { ConsentForm } from "@/components/auth/consent-form";
 
 export const metadata: Metadata = {
   title: "Aceite dos termos · Guf",
 };
 
-/** MARCADOR: a tela de aceite real entra quando o design estiver pronto. */
+/** Portão LGPD: aceite dos documentos obrigatórios pendentes. */
 export default function ConsentPage() {
-  return <ConsentPlaceholder />;
+  return <ConsentForm />;
 }
