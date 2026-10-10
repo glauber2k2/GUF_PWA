@@ -1,10 +1,10 @@
 "use client";
 
 import { Check, Clock, Trophy, Zap } from "lucide-react";
-import { isStreakRecord, streakStatus } from "@guf/core";
+import { isStreakRecord, STREAK_MESSAGES, streakStatus, weeklyGoalLabel } from "@guf/core";
 import type { StreakSummary } from "@guf/api";
 import { Icon } from "@/components/ds";
-import { useCountUp } from "@/hooks/use-count-up";
+import { StreakCount } from "@/components/streak/streak-count";
 import { cn } from "@/lib/utils";
 
 /** Barras da meta semanal (só exibição): preenchidas até a contagem da semana. */
@@ -29,7 +29,6 @@ function GoalSegments({ goal, count }: { goal: number; count: number }) {
 export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: number | null }) {
   const status = streakStatus(streak);
   const record = isStreakRecord(streak);
-  const animated = useCountUp(streak.currentStreak);
   const count = streak.currentWeekCount;
 
   if (status === "zero") {
@@ -41,9 +40,7 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
           </span>
           <div className="flex flex-col gap-0.5">
             <h3 className="m-0 text-lg leading-6 font-semibold text-pretty">Comece sua sequência esta semana</h3>
-            <span className="text-sm leading-5 text-pretty text-fg-secondary">
-              Treine 1 vez até domingo e comece sua sequência.
-            </span>
+            <span className="text-sm leading-5 text-pretty text-fg-secondary">{STREAK_MESSAGES.zero}</span>
           </div>
         </div>
         {goal ? <GoalSegments goal={goal} count={count} /> : null}
@@ -52,7 +49,6 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
   }
 
   const risk = status === "risk";
-  const weeks = streak.currentStreak === 1 ? "semana" : "semanas";
 
   return (
     <section
@@ -71,19 +67,7 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
         >
           <Icon icon={Zap} size={28} />
         </span>
-        <div className="flex min-w-0 flex-1 flex-col">
-          <p className="m-0 flex items-baseline gap-1.5" aria-label={`${streak.currentStreak} ${weeks} seguidas treinando`}>
-            <span aria-hidden="true" className="font-display text-[56px] leading-[52px] font-bold tracking-[-0.01em] tabular-nums">
-              {animated}
-            </span>
-            <span aria-hidden="true" className="font-display text-[26px] leading-7 font-semibold">
-              {weeks}
-            </span>
-          </p>
-          <span className="text-[13px] leading-[18px] text-fg-secondary" aria-hidden="true">
-            {streak.currentStreak === 1 ? "seguida treinando" : "seguidas treinando"}
-          </span>
-        </div>
+        <StreakCount weeks={streak.currentStreak} />
         {risk && (
           <span className="flex h-6 items-center gap-1 self-start rounded-pill bg-warning/16 px-2 text-xs font-semibold whitespace-nowrap text-warning">
             <Icon icon={Clock} size={12} />
@@ -98,13 +82,13 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
           {status === "secured" ? (
             <>
               <span className="inline-flex items-center gap-1 font-semibold">
-                Semana garantida
+                {STREAK_MESSAGES.secured}
                 <Icon icon={Check} size={16} className="text-accent-text" label="concluída" />
               </span>
-              {goal ? <span className="text-fg-secondary"> · {Math.min(count, goal)} de {goal} treinos da sua meta</span> : null}
+              {goal ? <span className="text-fg-secondary"> · {weeklyGoalLabel(count, goal)}</span> : null}
             </>
           ) : (
-            "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."
+            STREAK_MESSAGES.risk
           )}
         </p>
       </div>

@@ -58,6 +58,7 @@
   --color-banner-info: color-mix(in oklab, var(--info) 12%, var(--surface));
   --color-done-surface: color-mix(in oklab, var(--accent) 10%, var(--surface));
   --color-risk-surface: color-mix(in oklab, var(--warning) 8%, var(--surface));
+  --color-record-surface: color-mix(in oklab, var(--pr) 8%, var(--surface));
   --color-sheen: var(--sheen);
 
   --color-google-surface: var(--google-surface);
@@ -149,6 +150,9 @@
   --animate-guf-in-right: guf-in-right 0.3s var(--ease-enter) both;
   --animate-guf-flash: guf-rise 0.25s var(--ease-enter) both, guf-flash 0.9s var(--ease-standard) 150ms both;
   --animate-guf-live: guf-live 1.6s var(--ease-standard) infinite;
+  --animate-guf-from-left: guf-from-left 0.25s var(--ease-enter) both;
+  --animate-guf-from-right: guf-from-right 0.25s var(--ease-enter) both;
+  --animate-guf-fade: guf-fade 0.15s var(--ease-standard) both;
 }
 
 @layer base {
