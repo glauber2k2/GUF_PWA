@@ -16,7 +16,7 @@ Usuário registra treinos NA ACADEMIA, com uma mão, entre séries: registrar um
 - Monorepo: Turborepo + pnpm
 - Web: Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui
 - Dados: @supabase/supabase-js + TanStack Query
-- Formulários: React Hook Form + Zod
+- Formulários: React Hook Form + Zod (integração via @hookform/resolvers)
 - Gráficos: Recharts · Datas: date-fns · Ícones: lucide-react
 - Animações: Anime.js (v4), React Bits, Motion — sempre respeitando prefers-reduced-motion
 - PWA: Serwist · Offline do treino em andamento: Dexie (IndexedDB)
@@ -38,7 +38,7 @@ guf-app/
 ## Regras de arquitetura (OBRIGATÓRIAS)
 1. **Site estático:** `output: "export"` no Next.js. NÃO usar Server Actions, Route Handlers, middleware de servidor ou SSR com dados. Tudo roda no cliente.
 2. **Rotas dinâmicas:** evitar `/treino/[id]`. Usar rotas fixas com query string (`/treino?id=...`) lidas com `useSearchParams` (envolver em `<Suspense>`).
-3. **Segurança no banco:** o RLS do Supabase protege os dados. No front, usar APENAS a chave `anon` (`NEXT_PUBLIC_SUPABASE_ANON_KEY`). NUNCA usar `service_role` no front.
+3. **Segurança no banco:** o RLS do Supabase protege os dados. No front, usar APENAS a chave pública `publishable` (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). NUNCA usar `service_role`/`secret` no front. Cliente: `createGufClient` (packages/api, PKCE + sessão persistente) via `getSupabaseClient()` em apps/web/src/lib/supabase.ts.
 4. **Lógica reutilizável fora do app web:** cálculos em `packages/core`, validações em `packages/schemas`, consultas em `packages/api`. Componentes React ficam em `apps/web`.
 5. **Não alterar o banco pelo front nem pelo painel.** Mudanças de schema só via nova migration em `supabase/migrations/` (`npx supabase migration new nome`). Não editar migrations já existentes.
 6. **Tipos do banco:** importar de `packages/types/src/database.ts`. Regenerar com `npx supabase gen types typescript --linked > packages/types/src/database.ts` após qualquer migration.
@@ -46,7 +46,7 @@ guf-app/
 ## Backend (Supabase) — já implementado
 Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.
 
-Preenchidos por gatilho (NÃO enviar): `user_id` em routine_exercises, session_exercises e measurement_values; `user_id`, `session_id`, `exercise_id` e `completed_at` em set_logs. Perfil e plano são criados automaticamente no cadastro.
+Preenchidos por gatilho (NÃO enviar): `user_id` em routine_exercises, session_exercises e measurement_values; `user_id`, `session_id`, `exercise_id` e `completed_at` em set_logs. Perfil e plano são criados automaticamente no cadastro. No cadastro por e-mail, o aceite LGPD vai em `options.data.accepted_document_ids` (ids vigentes de terms, privacy e age_declaration exibidos na tela) e o gatilho `handle_new_user` grava em consent_records — NÃO chamar `accept_documents` no signUp (sem sessão quando a confirmação de e-mail está ligada).
 
 Funções RPC:
 | Função | Uso |

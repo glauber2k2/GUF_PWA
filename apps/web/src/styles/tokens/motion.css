@@ -1,0 +1,15 @@
+/* Movimento: rápido e funcional; celebração só em conquistas (PR, resumo) */
+:root {
+  --duration-instant: 100ms; /* press, toggles */
+  --duration-fast: 150ms; /* hover, fades curtos */
+  --duration-base: 200ms; /* check da série, chips */
+  --duration-moderate: 250ms; /* cards, banners */
+  --duration-screen: 300ms; /* transição de tela, sheet */
+  --duration-slow: 350ms; /* modais grandes */
+  --duration-celebrate: 800ms; /* PR, resumo */
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
