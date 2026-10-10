@@ -57,7 +57,7 @@
 | Nova rotina entra no fim da lista; reordenar grava posições sequenciais (1, 2, 3…), só das que mudaram. | Core (`nextPosition`, `changedPositions`) + API |
 | Nome de projeto e de rotina: 1 a 100 caracteres; descrição do projeto: até 500 (opcional). | Schemas (`projects.ts`) |
 | No projeto ativo, a rotina sugerida aparece como "Hoje" (ou "Próximo", se já treinou hoje). | Core (`suggestedRoutine`) |
-| Nova rotina e edição dos exercícios na tela de Rotina (`/rotina`); a folha de Projetos só renomeia. | Web |
+| Nova rotina e edição dos exercícios na tela de Rotina (`/rotina`); a folha de Projetos só renomeia. "Criar minha primeira rotina" (Início) e "Montar uma rotina" (Iniciar treino) criam a rotina direto no projeto ativo (para usuário novo, o Favoritos); sem projeto ativo, levam à lista de Projetos. | Web |
 
 ## 4. Treino
 

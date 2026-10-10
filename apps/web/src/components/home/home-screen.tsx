@@ -18,6 +18,7 @@ import {
 import type { HomeSummary } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { newRoutinePathFor } from "@/components/projects/paths";
 import { Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
 import { useHomeSummary } from "@/hooks/use-home-summary";
@@ -171,7 +172,8 @@ function HomeContent({
             onSwapRoutine: () => onOpenSheet({ kind: "swap" }),
             onStartEmpty: () => shell.startWorkout(null),
             onChooseRoutine: shell.openStartSheet,
-            onCreateRoutine: () => router.push("/projetos"),
+            // Todo usuário tem projeto (Favoritos): cria a rotina direto no projeto ativo.
+            onCreateRoutine: () => router.push(newRoutinePathFor(data.activeProject?.id)),
             onOpenSummary: () => onSoon("O resumo do treino"),
           }}
         />

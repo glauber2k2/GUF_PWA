@@ -4,10 +4,12 @@ import { useEffect, type ReactNode } from "react";
 import { Play, Plus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
+import { ScreenPortal } from "./portal";
 
 /*
  * Overlays: por padrão usam position:absolute (dentro de um container com position:relative,
- * como na vitrine). Nas telas do app, use placement="screen" (fixo na viewport).
+ * como na vitrine). Nas telas do app, use placement="screen" (fixo na viewport, renderizado no <body>
+ * por portal — nunca dentro de um ancestral com transform/animação).
  */
 
 export interface BottomSheetProps {
@@ -42,13 +44,14 @@ export function BottomSheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  return (
+  const sheet = (
     <div
       aria-hidden={!open}
       inert={!open}
       className={cn(
         "inset-0",
-        screen ? "fixed z-40" : "absolute z-30",
+        // Acima de telas cheias (seletor de exercícios, z-50): as folhas também podem abrir sobre elas.
+        screen ? "fixed z-[60]" : "absolute z-30",
         open ? "pointer-events-auto" : "pointer-events-none",
       )}
     >
@@ -83,6 +86,7 @@ export function BottomSheet({
       </div>
     </div>
   );
+  return screen ? <ScreenPortal>{sheet}</ScreenPortal> : sheet;
 }
 
 export interface SheetOptionProps {
@@ -171,8 +175,8 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   if (!open) return null;
   const screen = placement === "screen";
-  return (
-    <div className={cn("inset-0", screen ? "fixed z-50" : "absolute z-40")}>
+  const dialog = (
+    <div className={cn("inset-0", screen ? "fixed z-[70]" : "absolute z-40")}>
       <div onClick={onCancel} className="absolute inset-0 bg-scrim" />
       <div
         role="alertdialog"
@@ -208,6 +212,7 @@ export function ConfirmDialog({
       </div>
     </div>
   );
+  return screen ? <ScreenPortal>{dialog}</ScreenPortal> : dialog;
 }
 
 export interface ToastProps {

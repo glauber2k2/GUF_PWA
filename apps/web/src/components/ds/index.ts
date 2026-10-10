@@ -10,3 +10,4 @@ export * from "./overlays";
 export * from "./feedback";
 export * from "./body-map";
 export * from "./swipe-to-delete";
+export * from "./portal";
