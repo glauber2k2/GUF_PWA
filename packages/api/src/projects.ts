@@ -61,6 +61,8 @@ export interface ProjectsApi {
   /** Arquiva (e desativa, se era o ativo). Treinos feitos continuam no histórico. */
   archiveProject: (client: GufClient, input: { projectId: string }) => Result;
   restoreProject: (client: GufClient, input: { projectId: string }) => Result;
+  /** Exclui o projeto e as rotinas dele (o histórico de treinos fica). Favoritos é recusado (project_locked). */
+  deleteProject: (client: GufClient, input: { projectId: string }) => Result;
   renameRoutine: (client: GufClient, input: { routineId: string; name: string }) => Result;
   archiveRoutine: (client: GufClient, input: { routineId: string }) => Result;
   restoreRoutine: (client: GufClient, input: { routineId: string }) => Result;
@@ -173,6 +175,9 @@ export const archiveProject: ProjectsApi["archiveProject"] = (client, { projectI
 export const restoreProject: ProjectsApi["restoreProject"] = (client, { projectId }) =>
   write(() => client.from("projects").update({ archived_at: null }).eq("id", projectId));
 
+export const deleteProject: ProjectsApi["deleteProject"] = (client, { projectId }) =>
+  write(() => client.from("projects").delete().eq("id", projectId));
+
 export const renameRoutine: ProjectsApi["renameRoutine"] = (client, { routineId, name }) =>
   write(() => client.from("routines").update({ name: name.trim() }).eq("id", routineId));
 
@@ -200,6 +205,7 @@ export const projectsApi = {
   deactivateProject,
   archiveProject,
   restoreProject,
+  deleteProject,
   renameRoutine,
   archiveRoutine,
   restoreRoutine,

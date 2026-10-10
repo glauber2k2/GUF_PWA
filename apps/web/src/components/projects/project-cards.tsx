@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArchiveRestore, CalendarCheck, Check, ChevronDown, ChevronRight, CircleDashed, Ellipsis, Star } from "lucide-react";
+import { ArchiveRestore, CalendarCheck, Check, ChevronDown, ChevronRight, CircleDashed, Ellipsis, Star, Trash2 } from "lucide-react";
 import { archivedLabel, projectMeta, routineLetter } from "@guf/core";
 import type { Project, ProjectRoutine } from "@guf/api";
 import { Button, Icon, IconButton } from "@/components/ds";
@@ -155,17 +155,19 @@ export function ProjectListItem({
   );
 }
 
-/** Seção recolhível "Arquivados (N)" com "Restaurar". */
+/** Seção recolhível "Arquivados (N)" com "Restaurar" e "Excluir". */
 export function ArchivedProjects({
   projects,
   disabled,
   defaultOpen = false,
   onRestore,
+  onDelete,
 }: {
   projects: Project[];
   disabled: boolean;
   defaultOpen?: boolean;
   onRestore: (project: Project) => void;
+  onDelete: (project: Project) => void;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
@@ -196,6 +198,7 @@ export function ArchivedProjects({
               <Button variant="ghost" icon={ArchiveRestore} disabled={disabled} onClick={() => onRestore(p)}>
                 Restaurar
               </Button>
+              <IconButton icon={Trash2} variant="ghost" label={`Excluir ${p.name}`} disabled={disabled} onClick={() => onDelete(p)} />
             </article>
           ))}
           <span className="px-1 text-xs leading-4 text-pretty text-fg-muted">Treinos feitos com projetos arquivados continuam no histórico.</span>

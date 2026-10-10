@@ -179,6 +179,14 @@ export const mockProjectsApi = {
       ? Promise.resolve({ data: null, error: apiError("project_locked") })
       : mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, isActive: false, archivedAt: new Date().toISOString() }))),
   restoreProject: (client, { projectId }) => mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, archivedAt: null }))),
+  deleteProject: (client, { projectId }) =>
+    store.find((p) => p.id === projectId)?.isFavorites
+      ? Promise.resolve({ data: null, error: apiError("project_locked") })
+      : mutateVoid(client, () => {
+          if (!store.some((p) => p.id === projectId)) return false;
+          store = store.filter((p) => p.id !== projectId);
+          return true;
+        }),
   renameRoutine: (client, { routineId, name }) =>
     mutateVoid(client, () => {
       const project = findRoutineProject(routineId);
