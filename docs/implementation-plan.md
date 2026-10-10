@@ -15,12 +15,12 @@
 | Tela Início com dados reais (treino de hoje, semana, sequência) | `feat/inicio`, `feat/inicio-dados` | Na `main` |
 | Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
 | Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
+| Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | **Aguardando PR/merge** |
 
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
 |---|---|---|
-| Não há como criar projetos, rotinas e exercícios planejados pelo app | Aba "Projetos" e botão "Criar rotina" da Início mostram "chega em breve" | **Alto:** um usuário novo só consegue fazer treino livre |
 | Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
@@ -55,6 +55,8 @@ e do `CLAUDE.md` → commit/push e PR.
 ### Etapa 1 — Projetos e rotinas (aba "Projetos")
 
 **Branch:** `feat/projetos` · **Prioridade:** alta (sem ela o usuário não planeja treinos)
+
+**Andamento:** [x] migration `activate_project` · [x] lista e detalhe de projetos · [x] migration `routine_schedule_and_favorites` (dias da semana, Favoritos, `save_routine`) · [x] tela de Rotina · [x] treino de hoje por dia e dia de descanso na Início · [ ] PR
 
 **Escopo**
 - Lista de projetos (ativo em destaque, arquivados separados) e criação/edição/arquivamento.

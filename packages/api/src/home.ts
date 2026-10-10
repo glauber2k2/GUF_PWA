@@ -34,6 +34,8 @@ export interface RoutineSummary {
   id: string;
   name: string;
   position: number;
+  /** Dias da semana (ISO: 1 = segunda … 7 = domingo); define o treino de hoje. */
+  weekdays: number[];
   /** Exercícios na ordem planejada. */
   exercises: PlannedExercise[];
 }
@@ -159,7 +161,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       const routinesRes = await client
         .from("routines")
         .select(
-          "id, name, position, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group))",
+          "id, name, position, weekdays, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group))",
         )
         .eq("project_id", projectRes.data.id)
         .is("archived_at", null)
@@ -174,6 +176,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
           id: r.id,
           name: r.name,
           position: r.position,
+          weekdays: r.weekdays,
           exercises: r.routine_exercises.map((re) => ({
             name: re.exercises?.name ?? "Exercício",
             muscleGroup: re.exercises?.muscle_group ?? "",

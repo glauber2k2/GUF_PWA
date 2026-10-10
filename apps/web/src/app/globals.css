@@ -57,6 +57,7 @@
   --color-banner-success: color-mix(in oklab, var(--success) 12%, var(--surface));
   --color-banner-info: color-mix(in oklab, var(--info) 12%, var(--surface));
   --color-done-surface: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  --color-active-surface: color-mix(in oklab, var(--accent) 6%, var(--surface-elevated));
   --color-risk-surface: color-mix(in oklab, var(--warning) 8%, var(--surface));
   --color-record-surface: color-mix(in oklab, var(--pr) 8%, var(--surface));
   --color-sheen: var(--sheen);
