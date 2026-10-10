@@ -48,6 +48,7 @@ import {
   EmptyState,
   RestTimer,
   RestTimerBar,
+  SavingOverlay,
   SheetOption,
   SkeletonCard,
   TextField,
@@ -783,13 +784,15 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         </Button>
       </BottomSheet>
 
+      {/* Finalizando: cartão "Salvando treino" (loading 07) até o resumo aparecer. */}
+      <SavingOverlay open={finishing} title="Salvando treino" message="Leva só um instante." variant={7} />
       <ConfirmDialog
         placement="screen"
-        open={dialog === "finish"}
+        open={dialog === "finish" && !finishing}
         title="Finalizar treino?"
         message={finishWorkoutMessage(allSets.length - doneCount)}
         cancelLabel="Continuar"
-        confirmLabel={finishing ? "Finalizando…" : "Finalizar"}
+        confirmLabel="Finalizar"
         onCancel={() => setDialog(null)}
         onConfirm={() => void finish()}
       />

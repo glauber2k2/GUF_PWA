@@ -1,61 +1,79 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DOT, LOGO_VIEWBOX, MARK_VIEWBOX, RING, WORDMARK_PATHS, WORDMARK_TRANSFORM } from "./brand-geometry";
 
-/** Símbolo "Anel": anel de progresso aberto + ponto (a próxima série). Grade 48. */
-function RingMark({ className }: { className?: string }) {
+/** Cores da marca: "brand" = símbolo volt (accent-text) e wordmark na cor do texto; "mono" = herda a cor (currentColor). */
+const MARK_TONES = {
+  brand: { ring: "stroke-accent-text", dot: "fill-accent-text", word: "stroke-fg" },
+  mono: { ring: "stroke-current", dot: "fill-current", word: "stroke-current" },
+} as const;
+
+export type BrandTone = keyof typeof MARK_TONES;
+
+/** Anel + ponto (grade 48), para usar dentro de um <svg>. */
+export function MarkShapes({ tone = "brand" }: { tone?: BrandTone }) {
+  const t = MARK_TONES[tone];
   return (
-    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className={className}>
+    <>
       <circle
-        cx="24"
-        cy="24"
-        r="16"
-        stroke="currentColor"
-        strokeWidth="7"
+        cx={RING.cx}
+        cy={RING.cy}
+        r={RING.r}
+        strokeWidth={RING.strokeWidth}
         strokeLinecap="round"
-        strokeDasharray="78.2 200"
-        transform="rotate(-20 24 24)"
+        strokeDasharray={RING.dasharray}
+        transform={RING.transform}
+        className={cn("fill-none", t.ring)}
       />
-      <circle cx="32" cy="10.14" r="4.5" fill="currentColor" />
-    </svg>
+      <circle cx={DOT.cx} cy={DOT.cy} r={DOT.r} className={t.dot} />
+    </>
   );
 }
 
-/** Tamanhos do logo (símbolo · espaço · wordmark). A partir de 40px o wordmark cresce 1,286×. */
+/** Wordmark "guf" em traços (mesma grade do anel), para usar dentro do <svg> da logo. */
+export function WordmarkShapes({ tone = "brand" }: { tone?: BrandTone }) {
+  return (
+    <g strokeWidth={7} strokeLinejoin="round" transform={WORDMARK_TRANSFORM} className={cn("fill-none", MARK_TONES[tone].word)}>
+      {WORDMARK_PATHS.map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </g>
+  );
+}
+
+/**
+ * Tamanhos da logo (altura do SVG). Com wordmark, a logo completa (assets/guf-logo-*.svg);
+ * sem, só o símbolo.
+ */
 const LOGO_SIZES = {
-  sm: { mark: "size-[26px]", gap: "gap-1.5", text: "text-[26px]" },
-  md: { mark: "size-8", gap: "gap-[7px]", text: "text-[32px]" },
-  lg: { mark: "size-10", gap: "gap-[9px]", text: "text-[51px]" },
-  xl: { mark: "size-14", gap: "gap-3", text: "text-[72px]" },
-  "2xl": { mark: "size-20", gap: "gap-[18px]", text: "text-[103px]" },
+  sm: { full: "h-8", mark: "size-[26px]" },
+  md: { full: "h-10", mark: "size-8" },
+  lg: { full: "h-14", mark: "size-10" },
+  xl: { full: "h-[76px]", mark: "size-14" },
+  "2xl": { full: "h-[104px]", mark: "size-20" },
 } as const;
 
 export interface LogoProps {
   size?: keyof typeof LOGO_SIZES;
-  /** "brand": símbolo em volt (accent-text); "mono": herda a cor do texto. */
-  tone?: "brand" | "mono";
+  /** "brand": símbolo volt + wordmark na cor do texto (claro/escuro pelo tema); "mono": herda a cor. */
+  tone?: BrandTone;
   wordmark?: boolean;
   className?: string;
 }
 
+/** Logo guf em SVG (sem texto de fonte): segue o tema pelos tokens (volt + texto; no claro, verde escuro AA). */
 export function Logo({ size = "sm", tone = "brand", wordmark = true, className }: LogoProps) {
   const s = LOGO_SIZES[size];
   return (
-    <span role="img" aria-label="Guf" className={cn("inline-flex items-center", s.gap, className)}>
-      <span className={cn("flex", tone === "brand" ? "text-accent-text" : "text-current")}>
-        <RingMark className={s.mark} />
-      </span>
-      {wordmark && (
-        <span
-          className={cn(
-            "font-display leading-none font-bold tracking-[-0.02em]",
-            s.text,
-            tone === "brand" ? "text-fg" : "text-current",
-          )}
-        >
-          guf
-        </span>
-      )}
-    </span>
+    <svg
+      role="img"
+      aria-label="guf"
+      viewBox={wordmark ? LOGO_VIEWBOX : MARK_VIEWBOX}
+      className={cn("block flex-none overflow-visible", wordmark ? cn(s.full, "aspect-[141.5/76.65] w-auto") : s.mark, className)}
+    >
+      <MarkShapes tone={tone} />
+      {wordmark && <WordmarkShapes tone={tone} />}
+    </svg>
   );
 }
 
@@ -70,7 +88,9 @@ export function AppIcon({ size = "md", className }: { size?: keyof typeof APP_IC
   const s = APP_ICON_SIZES[size];
   return (
     <div className={cn("grid flex-none place-items-center bg-brand-ink text-brand-volt", s.box, className)}>
-      <RingMark className={s.mark} />
+      <svg viewBox={MARK_VIEWBOX} aria-hidden="true" className={s.mark}>
+        <MarkShapes tone="mono" />
+      </svg>
     </div>
   );
 }

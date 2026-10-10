@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { ArrowUpRight, CircleCheck, Dumbbell, Ellipsis, Play, Plus, StickyNote, Timer, Trash2 } from "lucide-react";
 import {
   AppHeader,
@@ -49,6 +49,8 @@ import {
   WorkoutSummaryCard,
 } from "@/components/ds";
 import { cn } from "@/lib/utils";
+import { BrandLoadingSection, MuscleSection } from "./brand-sections";
+import { Group, OVERLINE, PANEL, Section, SectionHeader } from "./layout";
 import {
   CALENDAR,
   CHART_PERIOD_OPTIONS,
@@ -84,10 +86,10 @@ const SECTIONS = [
   { id: "elevacao", label: "Elevação" },
   { id: "movimento", label: "Movimento" },
   { id: "componentes", label: "Componentes" },
+  { id: "marca", label: "Marca e loading" },
+  { id: "musculos", label: "Músculos" },
 ];
 
-const PANEL = "rounded-lg border border-border bg-surface";
-const OVERLINE = "text-[11px] font-semibold tracking-[0.08em] uppercase";
 
 export function DesignSystemShowcase() {
   return (
@@ -99,7 +101,7 @@ export function DesignSystemShowcase() {
             <span className={cn(OVERLINE, "text-fg-muted")}>Design system · v1.0</span>
             <h1 className="m-0 text-[40px] leading-[44px] font-bold tracking-[-0.02em]">Guf — Evolução Fitness</h1>
             <p className="m-0 max-w-[560px] text-base leading-6 text-pretty text-fg-secondary">
-              Cores, tipografia, espaçamento, elevação, movimento e componentes, lado a lado nos temas escuro e claro.
+              Cores, tipografia, espaçamento, elevação, movimento, componentes, marca, carregamento e músculos, lado a lado nos temas escuro e claro.
             </p>
           </div>
         </div>
@@ -140,28 +142,9 @@ function ThemeColumn({ theme, anchors = false }: { theme: ThemeKey; anchors?: bo
       <ElevationSection id={id("elevacao")} note={t.elevNote} />
       <MotionSection id={id("movimento")} />
       <ComponentsSection id={id("componentes")} theme={theme} />
+      <BrandLoadingSection id={id("marca")} />
+      <MuscleSection id={id("musculos")} />
     </div>
-  );
-}
-
-function SectionHeader({ index, title, children, action }: { index: string; title: string; children?: ReactNode; action?: ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-end justify-between gap-3">
-      <div className="grid gap-1">
-        <span className={cn(OVERLINE, "text-accent-text")}>{index}</span>
-        <h2 className="m-0 text-[22px] leading-7 font-semibold tracking-[-0.015em]">{title}</h2>
-        {children && <p className="m-0 text-sm leading-5 text-pretty text-fg-secondary">{children}</p>}
-      </div>
-      {action}
-    </div>
-  );
-}
-
-function Section({ id, children, gap = "gap-6" }: { id?: string; children: ReactNode; gap?: string }) {
-  return (
-    <section id={id} className={cn("grid scroll-mt-16", gap)}>
-      {children}
-    </section>
   );
 }
 
@@ -344,15 +327,6 @@ function MotionSection({ id }: { id?: string }) {
         ))}
       </div>
     </Section>
-  );
-}
-
-function Group({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="grid gap-3.5">
-      <h3 className="m-0 text-lg leading-6 font-semibold">{title}</h3>
-      {children}
-    </div>
   );
 }
 
