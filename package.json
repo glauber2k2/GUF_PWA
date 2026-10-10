@@ -1,0 +1,20 @@
+{
+  "name": "guf-app",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev --filter=@guf/web",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:types": "supabase gen types typescript --linked > packages/types/src/database.ts"
+  },
+  "devDependencies": {
+    "supabase": "^2.120.0",
+    "turbo": "^2",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=20"
+  }
+}

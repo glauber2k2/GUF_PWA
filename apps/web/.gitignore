@@ -1,0 +1,6 @@
+# Regras gerais ficam no .gitignore da raiz.
+/.next/
+/out/
+.env
+.env*.local
+!.env.example
