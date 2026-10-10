@@ -6,9 +6,10 @@ import { ExternalLink, FileText } from "lucide-react";
 import { acceptDocuments, hasPriorConsent, type AuthError } from "@guf/api";
 import { consentRequirements, consentSourceFor, legalDocumentLabel } from "@guf/core";
 import { Banner, Button, Checkbox, Icon, Logo } from "@/components/ds";
-import { usePendingDocuments } from "@/hooks/use-pending-documents";
+import { usePendingDocuments, useSignupDocuments } from "@/hooks/use-pending-documents";
 import { getSupabaseClient } from "@/lib/supabase";
 import { useAuth } from "@/providers/auth-provider";
+import { LegalLink } from "./auth-screen";
 
 /**
  * Portão /aceite (LGPD): documentos obrigatórios pendentes (pending_documents()).
@@ -35,6 +36,10 @@ export function ConsentForm() {
 
   const docs = pending.data ?? [];
   const { needsAge, needsTerms } = consentRequirements(docs.map((d) => d.doc_type));
+  // Links da confirmação: o documento pendente; se não estiver pendente, a versão vigente.
+  const current = useSignupDocuments();
+  const docUrl = (type: "terms" | "privacy") =>
+    docs.find((d) => d.doc_type === type)?.url ?? current.data?.[type].url;
   const allChecked = (!needsAge || ageChecked) && (!needsTerms || termsChecked);
 
   const accept = useMutation({
@@ -129,7 +134,8 @@ export function ConsentForm() {
             )}
             {needsTerms && (
               <Checkbox checked={termsChecked} onChange={(e) => setTermsChecked(e.target.checked)}>
-                Li e aceito os Termos de Uso e a Política de Privacidade
+                Li e aceito os <LegalLink href={docUrl("terms")}>Termos de Uso</LegalLink> e a{" "}
+                <LegalLink href={docUrl("privacy")}>Política de Privacidade</LegalLink>
               </Checkbox>
             )}
           </div>

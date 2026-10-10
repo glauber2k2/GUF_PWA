@@ -59,3 +59,17 @@ export function AuthFooter({ question, children, className }: { question: string
     </p>
   );
 }
+
+/**
+ * Link para um documento legal (URL publicada em legal_documents), em nova aba.
+ * Dentro de um Checkbox, abre o documento sem marcar a caixa (input nativo + label).
+ */
+export function LegalLink({ href, children }: { href: string | undefined; children: ReactNode }) {
+  if (!href) return <span className="font-medium">{children}</span>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-accent-text underline">
+      {children}
+      <span className="sr-only"> (abre em nova aba)</span>
+    </a>
+  );
+}
