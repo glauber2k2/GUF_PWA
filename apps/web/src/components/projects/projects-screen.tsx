@@ -120,7 +120,9 @@ function ProjectsContent({ overview, actions }: { overview: ProjectsOverview; ac
             </>
           )}
 
-          {archived.length > 0 && <ArchivedProjects projects={archived} disabled={disabled} onRestore={(p) => void actions.restore(p)} />}
+          {archived.length > 0 && (
+            <ArchivedProjects projects={archived} disabled={disabled} onRestore={(p) => void actions.restore(p)} onDelete={flows.requestDelete} />
+          )}
         </>
       )}
       {flows.element}
