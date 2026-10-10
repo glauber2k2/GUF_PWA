@@ -1,0 +1,178 @@
+# Plano de implementação — Guf App
+
+> Atualizado em 10/10/2026 · Branch de referência: `feat/historico`
+> Regras de negócio: [`business-rules.md`](./business-rules.md) · Instruções técnicas: [`CLAUDE.md`](../CLAUDE.md)
+
+## 1. Situação atual
+
+### Entregue
+
+| Etapa | Branch | Situação |
+|---|---|---|
+| Design system do Guf (tokens, componentes, vitrine `/design-system` só em dev) | `feat/design-system` | Na `main` |
+| Login e cadastro por e-mail com aceite LGPD | — | Na `main` |
+| Login com Google (PKCE) e portão `/aceite` | `feat/login-google` | Na `main` |
+| Tela Início com dados reais (treino de hoje, semana, sequência) | `feat/inicio`, `feat/inicio-dados` | Na `main` |
+| Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
+| Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
+
+### Lacunas conhecidas no que já existe
+
+| Lacuna | Onde | Impacto |
+|---|---|---|
+| Não há como criar projetos, rotinas e exercícios planejados pelo app | Aba "Projetos" e botão "Criar rotina" da Início mostram "chega em breve" | **Alto:** um usuário novo só consegue fazer treino livre |
+| "Ver no histórico" no resumo do treino ainda mostra "O Histórico chega em breve" | `apps/web/src/components/workout/workout-screen.tsx` | Baixo: a tela já existe; basta navegar para `/historico` |
+| Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
+| Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
+| Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
+| Aba "Perfil" sem tela (só "Sair" numa folha da Início) | AppShell / Início | Médio; obrigatório para os direitos LGPD |
+| PWA (Serwist) não configurado: o app não é instalável e não abre sem internet | `apps/web` | Médio |
+| Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
+| Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
+
+## 2. Próximas etapas (ordem recomendada)
+
+A ordem prioriza o que impede o uso real do app (criar rotinas), depois o que completa o ciclo de evolução
+(resumo e histórico por exercício), depois os direitos do usuário (Perfil/LGPD) e, por fim, instalação e lançamento.
+
+Cada etapa segue o mesmo fluxo: branch própria a partir da anterior → plano curto → implementação (core → api → web)
+→ `pnpm lint`, `pnpm typecheck`, `pnpm build` → testes das regras → atualização deste plano, de `business-rules.md`
+e do `CLAUDE.md` → commit/push e PR.
+
+---
+
+### Etapa 0 — Ajustes rápidos (antes da próxima funcionalidade)
+
+**Branch:** `fix/ajustes-historico`
+
+- "Ver no histórico" do resumo do treino → navegar para `/historico`.
+- Abrir o PR da `feat/historico` e fazer o merge.
+- Confirmar no painel do Supabase as Redirect URLs com curinga (`http://localhost:3000/**` e o domínio de testes).
+
+**Critério de aceite:** nenhum "chega em breve" para telas que já existem.
+
+---
+
+### Etapa 1 — Projetos e rotinas (aba "Projetos")
+
+**Branch:** `feat/projetos` · **Prioridade:** alta (sem ela o usuário não planeja treinos)
+
+**Escopo**
+- Lista de projetos (ativo em destaque, arquivados separados) e criação/edição/arquivamento.
+- Ativar projeto: um ativo por usuário (desativar o atual antes de ativar outro).
+- Rotinas do projeto: criar, renomear, reordenar (`position`), arquivar.
+- Exercícios planejados da rotina: adicionar pelo seletor de exercícios já existente (com criação de exercício próprio), reordenar, definir séries, repetições alvo (texto livre: "10", "8-12", "falha") e descanso.
+- Atalhos: "Criar rotina" da Início e folha "Iniciar treino" levam para cá quando não há rotinas.
+
+**Telas/rotas (query string, site estático):** `/projetos`, `/projetos/detalhe?id=…`, `/rotina?id=…`.
+
+**Dados:** tabelas `projects`, `routines`, `routine_exercises` (já existem, com RLS). Nenhuma migration prevista.
+Avaliar se trocar o projeto ativo precisa ser atômico (duas gravações seguidas podem violar o índice único
+`projects_one_active_per_user`); se sim, criar uma RPC `activate_project` em migration nova.
+
+**Reaproveitar:** `ExercisePicker`, `ReorderList`, `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
+
+**Critérios de aceite**
+- Usuário novo cria projeto → rotina → exercícios e inicia o treino planejado pela Início.
+- Ativar outro projeto nunca deixa dois ativos nem nenhum ativo por erro.
+- Arquivar rotina não apaga o histórico de treinos feitos com ela.
+
+**Decisões pendentes (pedir antes de implementar):** design da aba no Claude Design; se edição de rotina funciona offline (hoje a fila offline só cobre o treino em andamento).
+
+---
+
+### Etapa 2 — Resumo do treino e histórico por exercício
+
+**Branch:** `feat/evolucao` · **Prioridade:** alta (é a promessa central do app: ver a evolução)
+
+**Escopo**
+- **Resumo de um treino concluído** (`/treino/resumo?id=…`): duração efetiva, volume, séries, exercícios com as séries feitas e recordes daquele treino. Aberto pela folha do dia do Histórico e pelo card "Concluído" da Início.
+- **Evolução por exercício** (`/exercicio?id=…`): carga máxima, 1RM estimado, volume por treino (gráfico Recharts), recordes pessoais (carga, 1RM, volume) e lista dos últimos treinos.
+- Acesso pelo resumo do treino, pelo cartão do exercício no treino e por uma busca de exercícios no Histórico.
+
+**Dados:** `get_exercise_history(p_exercise_id, p_from)` e `get_exercise_records(p_exercise_id)` já existem. Recordes de um treino passado: mesma regra já usada na folha do dia (`sessionLoadRecord`).
+
+**Critérios de aceite:** valores do app iguais aos do banco (mesmas regras de volume, 1RM e recorde); primeira vez do exercício não gera recorde; peso em kg ou lb conforme o perfil.
+
+**Decisões pendentes:** design das duas telas; se o histórico por exercício deve ter cópia offline.
+
+---
+
+### Etapa 3 — Perfil, preferências e privacidade (LGPD)
+
+**Branch:** `feat/perfil` · **Prioridade:** alta para o lançamento (direitos do titular)
+
+**Escopo**
+- Dados: nome, e-mail (só leitura), foto (opcional, avaliar armazenamento).
+- Preferências: unidade de peso (kg/lb), meta semanal (1 a 7, só exibição), tema claro/escuro.
+- Privacidade: **exportar meus dados** (`export_my_data()` → arquivo JSON), ver documentos aceitos, **revogar consentimento de saúde**, **excluir conta** (Edge Function `delete-account` + `signOut()`), sair da conta.
+- Páginas públicas dos documentos: `/termos`, `/privacidade`, `/termo-de-saude` (conteúdo vindo dos textos definitivos).
+
+**Critérios de aceite**
+- Excluir conta pede confirmação explícita, apaga os dados no servidor e limpa o aparelho (cache, treino ativo, IndexedDB).
+- Exportação contém só os dados do usuário logado.
+- Trocar kg/lb muda só a exibição (banco continua em kg).
+
+**Riscos:** textos legais precisam de **validação jurídica** antes da produção.
+
+---
+
+### Etapa 4 — Medidas corporais (módulo opcional)
+
+**Branch:** `feat/medidas` · **Prioridade:** média
+
+**Escopo**
+- Portão de consentimento de saúde em camadas: resumo sempre visível (5 itens) + "Ler termo completo" + checkbox desmarcada + "Agora não" e "Autorizar e continuar" com o mesmo peso visual (`has_health_consent`, `grant_health_consent`).
+- Registro de medidas (`body_measurements` + `measurement_values`) e evolução em gráfico.
+- Revogar consentimento apaga as medidas (`revoke_health_consent`) — com aviso claro antes.
+
+**Regras não negociáveis:** nunca enviar dados de medidas para logs, Sentry ou analytics.
+
+**Decisões pendentes:** quais medidas entram (peso, % de gordura, circunferências); design no Claude Design.
+
+---
+
+### Etapa 5 — PWA instalável e offline do app
+
+**Branch:** `feat/pwa` · **Prioridade:** média (uso na academia com sinal ruim)
+
+**Escopo**
+- Serwist: manifest, ícones, tela de instalação, cache do app (páginas estáticas e assets) para abrir sem internet.
+- Integração com o offline existente (Dexie): treino em andamento e cópia do Histórico já funcionam sem rede.
+- Aviso de nova versão disponível.
+
+**Critério de aceite:** app instalado abre sem internet, retoma o treino em andamento e sincroniza a fila quando a conexão volta.
+
+---
+
+### Etapa 6 — Qualidade e lançamento
+
+**Branch:** `chore/lancamento` (pode ser dividida)
+
+- **Testes automatizados:** test runner para `packages/core` e `packages/api` (ex.: Vitest — **biblioteca nova, pedir aprovação**), convertendo os testes avulsos já feitos (relógio, unidades, 1RM, Histórico).
+- **Monitoramento de erros** (ex.: Sentry — pedir aprovação), com filtro que impede dados de medidas e dados pessoais.
+- **Hospedagem de produção:** Cloudflare Pages ou plano pago da Vercel; domínio próprio; Redirect URLs do Supabase para o domínio.
+- **E-mail transacional próprio** (SMTP) para confirmação de cadastro e recuperação de senha.
+- **Documentos legais definitivos** no banco (versões, URLs e hash reais) — substituir os provisórios do `seed.sql`. **Validação jurídica obrigatória.**
+- **Revisão de acessibilidade** (WCAG AA) e de desempenho em celulares de entrada.
+
+---
+
+### Futuro (fora do MVP)
+
+- App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.
+- Login com Apple (junto com o app iOS).
+- Planos pagos (`entitlements`, `is_premium()` já existem no banco).
+- Esforço percebido (RPE): a coluna `set_logs.rpe` já existe, mas não é usada pelo app.
+- Animações com Anime.js, Motion e React Bits (previstas na stack, ainda não instaladas).
+- Iniciar treino sem internet (exigiria criar a sessão no aparelho e sincronizar depois).
+
+## 3. Riscos e dependências
+
+| Item | Tipo | Mitigação |
+|---|---|---|
+| Documentos legais provisórios | Jurídico | Revisão por advogado antes do lançamento; nova versão no banco força novo aceite (`/aceite`) |
+| Dados de saúde (medidas) | Jurídico/LGPD | Consentimento específico, revogação que apaga os dados, nada em logs/analytics |
+| Sem testes automatizados | Técnico | Etapa 6; até lá, testar regras do core a cada etapa |
+| Trocar projeto ativo em duas gravações | Técnico | Avaliar RPC atômica na Etapa 1 |
+| Limites do plano gratuito (Supabase/Vercel) | Financeiro | Revisar uso antes de abrir para usuários; produção em Cloudflare Pages ou Vercel pago |

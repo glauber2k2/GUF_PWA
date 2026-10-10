@@ -34,7 +34,8 @@ guf-app/
 ├── packages/api/        # cliente Supabase + funções de consulta (usadas por web e mobile)
 ├── packages/types/      # tipos gerados do banco (src/database.ts)
 ├── supabase/            # migrations, seed e Edge Functions (backend JÁ PRONTO)
-└── design/              # referências exportadas do Claude Design
+├── design/              # referências exportadas do Claude Design
+└── docs/                # plano de implementação e regras de negócio (manter atualizados a cada etapa)
 ```
 
 ## Regras de arquitetura (OBRIGATÓRIAS)
