@@ -53,6 +53,7 @@
 | Lista de projetos: o ativo em destaque; os demais em uso (mais recentes primeiro); arquivados numa seção recolhível (arquivados mais recentemente primeiro). | Core (`groupProjects`) |
 | Ativar outro projeto quando já existe um ativo pede confirmação ("O projeto 'X' deixa de ser o ativo…"). Criar projeto pode já ativá-lo (padrão: ativar quando não há projeto ativo). | Web (`project-flows.tsx`, `project-form-sheet.tsx`) |
 | Arquivar projeto ou rotina nunca apaga treinos feitos (o treino guarda o nome da rotina). Projeto arquivado pode ser restaurado (volta inativo). | Banco + API |
+| **Excluir projeto:** permitido para qualquer projeto, exceto o Favoritos (pelo menu do projeto ou na lista de arquivados). Exclui junto as rotinas e os exercícios planejados; os treinos já feitos continuam no histórico. Pede confirmação ("As N rotinas deste projeto também serão excluídas… Não dá para desfazer.") e não tem "Desfazer". Excluir o projeto ativo deixa o usuário sem projeto ativo. | Banco (`on delete cascade`, `protect_favorites_project`) + Web |
 | Ativar, desativar, arquivar, restaurar e arquivar rotina oferecem "Desfazer" por 4 s (desfazer a ativação volta para o ativo anterior, ou para nenhum). | Web (`use-project-actions.ts`) |
 | Nova rotina entra no fim da lista; reordenar grava posições sequenciais (1, 2, 3…), só das que mudaram. | Core (`nextPosition`, `changedPositions`) + API |
 | Nome de projeto e de rotina: 1 a 100 caracteres; descrição do projeto: até 500 (opcional). | Schemas (`projects.ts`) |

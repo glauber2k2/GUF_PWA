@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Archive, ArrowDown, ArrowUp, CircleCheck, CircleOff, Pencil } from "lucide-react";
-import { activateProjectMessage, archiveProjectMessage, moveItem } from "@guf/core";
+import { Archive, ArrowDown, ArrowUp, CircleCheck, CircleOff, Pencil, Trash2 } from "lucide-react";
+import { activateProjectMessage, archiveProjectMessage, deleteProjectMessage, moveItem } from "@guf/core";
 import type { Project, ProjectRoutine } from "@guf/api";
 import { BottomSheet, ConfirmDialog, SheetOption } from "@/components/ds";
 import { ProjectFormSheet } from "./project-form-sheet";
@@ -14,6 +14,7 @@ type OverlayKind =
   | "project-form"
   | "confirm-activate"
   | "confirm-archive"
+  | "confirm-delete"
   | "routine-menu"
   | "routine-form"
   | "confirm-archive-routine";
@@ -34,11 +35,13 @@ export function useProjectFlows({
   actions,
   onProjectCreated,
   onProjectArchived,
+  onProjectDeleted,
 }: {
   activeProject: Project | null;
   actions: ProjectActions;
   onProjectCreated?: (projectId: string) => void;
   onProjectArchived?: (projectId: string) => void;
+  onProjectDeleted?: (projectId: string) => void;
 }) {
   const [state, setState] = useState<FlowState>({ overlay: null, project: null, routine: null });
   const { overlay, project, routine } = state;
@@ -86,12 +89,20 @@ export function useProjectFlows({
               />
             )}
             {!project.isFavorites && (
-              <SheetOption
-                icon={Archive}
-                title="Arquivar projeto"
-                subtitle="Treinos feitos continuam no histórico"
-                onClick={() => open("confirm-archive", { project })}
-              />
+              <>
+                <SheetOption
+                  icon={Archive}
+                  title="Arquivar projeto"
+                  subtitle="Treinos feitos continuam no histórico"
+                  onClick={() => open("confirm-archive", { project })}
+                />
+                <SheetOption
+                  icon={Trash2}
+                  title="Excluir projeto"
+                  subtitle="Apaga o projeto e as rotinas dele"
+                  onClick={() => open("confirm-delete", { project })}
+                />
+              </>
             )}
           </>
         )}
@@ -157,6 +168,20 @@ export function useProjectFlows({
       />
       <ConfirmDialog
         placement="screen"
+        open={overlay === "confirm-delete"}
+        title={project ? `Excluir '${project.name}'?` : "Excluir projeto?"}
+        message={deleteProjectMessage(project?.routines.length ?? 0)}
+        cancelLabel="Cancelar"
+        confirmLabel="Excluir"
+        destructive
+        onCancel={close}
+        onConfirm={async () => {
+          close();
+          if (project && (await actions.remove(project))) onProjectDeleted?.(project.id);
+        }}
+      />
+      <ConfirmDialog
+        placement="screen"
         open={overlay === "confirm-archive-routine"}
         title="Arquivar rotina?"
         message="Seus treinos já feitos com esta rotina continuam no histórico. Você pode restaurar depois."
@@ -178,6 +203,7 @@ export function useProjectFlows({
     /** Novo projeto: `project` vazio indica criação. */
     openNewProject: () => open("project-form"),
     openProjectMenu: (target: Project) => open("project-menu", { project: target }),
+    requestDelete: (target: Project) => open("confirm-delete", { project: target }),
     openRoutineMenu: (target: Project, targetRoutine: ProjectRoutine) => open("routine-menu", { project: target, routine: targetRoutine }),
   };
 }

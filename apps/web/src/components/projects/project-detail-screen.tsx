@@ -85,7 +85,7 @@ function DetailContent({
   const newRoutine = () => router.push(newRoutinePath(project.id));
   const { active } = groupProjects(overview.projects);
   const disabled = !actions.canEdit || actions.busy;
-  const flows = useProjectFlows({ activeProject: active, actions, onProjectArchived: onBack });
+  const flows = useProjectFlows({ activeProject: active, actions, onProjectArchived: onBack, onProjectDeleted: onBack });
   const now = new Date();
   const next = project.isActive ? highlightedRoutine(project.routines, overview.lastFinished, now, toLocalISODate(now)) : null;
   const showActivateBar = !project.isActive;
