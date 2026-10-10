@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Banner, Logo } from "@/components/ds";
+import { Banner, LoadingScreen } from "@/components/ds";
 import { usePendingDocuments } from "@/hooks/use-pending-documents";
 import { loginPathFor, safeNextPath } from "@/lib/redirect";
 import { useAuth } from "@/providers/auth-provider";
@@ -13,14 +13,9 @@ import { useAuth } from "@/providers/auth-provider";
  * Usam useSearchParams → os layouts envolvem os guardas em <Suspense>.
  */
 
-/** Tela de espera enquanto a sessão e os aceites são verificados. */
+/** Tela de abertura (logo animada) enquanto a sessão e os aceites são verificados. */
 export function AuthSplash() {
-  return (
-    <div aria-busy="true" className="grid min-h-dvh w-full place-items-center bg-background">
-      <Logo size="md" wordmark={false} className="animate-pulse motion-reduce:animate-none" />
-      <span className="sr-only">Carregando</span>
-    </div>
-  );
+  return <LoadingScreen />;
 }
 
 function GuardError({ onRetry }: { onRetry: () => void }) {

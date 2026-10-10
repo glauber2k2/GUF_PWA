@@ -154,6 +154,29 @@
   --animate-guf-from-left: guf-from-left 0.25s var(--ease-enter) both;
   --animate-guf-from-right: guf-from-right 0.25s var(--ease-enter) both;
   --animate-guf-fade: guf-fade 0.15s var(--ease-standard) both;
+  /* GufLoader (ver base.css) */
+  --animate-gl-spin-1000: gl-spin 1000ms linear infinite;
+  --animate-gl-spin-1100: gl-spin 1100ms linear infinite;
+  --animate-gl-spin-1400: gl-spin 1400ms linear infinite;
+  --animate-gl-draw: gl-draw 1800ms var(--ease-standard) infinite;
+  --animate-gl-dotpop: gl-dotpop 1800ms var(--ease-standard) infinite;
+  --animate-gl-beat: gl-beat 1200ms var(--ease-standard) infinite;
+  --animate-gl-ripple: gl-ripple 1200ms cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-gl-close: gl-close 1600ms var(--ease-standard) infinite;
+  --animate-gl-absorb: gl-absorb 1600ms var(--ease-standard) infinite;
+  --animate-gl-breathe: gl-breathe 900ms cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  --animate-gl-elastic: gl-elastic 1400ms cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  --animate-gl-hop: gl-hop 380ms cubic-bezier(0.33, 0, 0.67, 1) infinite alternate;
+  --animate-gl-sonar: gl-sonar 1800ms cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-gl-swing: gl-swing 700ms cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+  /* MuscleIcon (atrasos por elemento via animation-delay) */
+  --animate-guf-mg-fade: guf-mg-fade 400ms var(--ease-standard) both;
+  --animate-guf-mg-target: guf-mg-in 460ms var(--ease-overshoot) both, guf-mg-pump 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms infinite;
+  --animate-guf-mg-target-once: guf-mg-in 460ms var(--ease-overshoot) both, guf-mg-pump 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms 1;
+  --animate-guf-mg-glow: guf-mg-glow 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms infinite;
+  --animate-guf-mg-glow-once: guf-mg-glow 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms 1;
+  --animate-guf-mg-pump: guf-mg-pump 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms infinite;
+  --animate-guf-mg-pump-once: guf-mg-pump 2400ms cubic-bezier(0.45, 0, 0.55, 1) 700ms 1;
 }
 
 @layer base {

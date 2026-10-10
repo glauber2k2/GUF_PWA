@@ -169,6 +169,10 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - Bottom navigation: Início, Histórico, Treinar (central), Projetos, Perfil.
 - Acessibilidade WCAG AA, foco visível, labels acima dos campos.
 - Sem emoji nem caractere unicode como ícone: usar ícones do lucide-react.
+- **Logo:** sempre o componente `Logo` (SVG em traços, sem texto de fonte; geometria em `components/ds/brand-geometry.ts`, igual a `assets/guf-logo-*.svg` do Claude Design). Cores pelos tokens: volt + texto no escuro, verde escuro AA + texto escuro no claro; `tone="mono"` herda a cor. Favicon: `src/app/icon.svg`.
+- **Carregamento:** `GufLoader` (10 animações do símbolo "Anel"). Padrão do app: **02 (Desenho)** em spinners — botões com `loading` e abertura do app; **07 (Ponto saltitante)** no `SavingOverlay` ao salvar o treino. Telas que carregam conteúdo continuam com **skeleton** na silhueta da tela (como nos protótipos). Movimento reduzido: pulso de opacidade (classes `guf-motion-pulse`/`guf-motion-hide` em base.css).
+- **Abertura do app:** `LoadingScreen` (logo animada + "Preparando seu treino") enquanto a sessão/aceites são verificados (`AuthSplash`) e, depois do login, até os dados da Início chegarem (uma vez por sessão, no `AppShell`). Sem internet não bloqueia (treino offline).
+- **Músculos:** `MuscleIcon` (12 grupos, estático/animado/zoom) e `MuscleFilterTile` para filtros; código do banco → ícone com `muscleIconKey` (corpo inteiro e cardio sem ícone).
 - Ao implementar um design: a moldura de celular, a barra de status e o indicador de home do Claude Design são só apresentação e não entram no app.
 
 ## Convenções
