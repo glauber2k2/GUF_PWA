@@ -11,6 +11,7 @@ import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
 import { hasPendingFor, isClosedLocally } from "@/lib/offline/outbox";
 import { cn } from "@/lib/utils";
 import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
+import { newRoutinePathFor } from "@/components/projects/paths";
 import { useActiveWorkout } from "@/components/workout/workout-provider";
 
 const TOAST_MS = 1800;
@@ -270,7 +271,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 subtitle="Crie um projeto com Treino A, B, C…"
                 onClick={() => {
                   setStartOpen(false);
-                  router.push("/projetos");
+                  router.push(newRoutinePathFor(data?.activeProject?.id));
                 }}
               />
             )}
