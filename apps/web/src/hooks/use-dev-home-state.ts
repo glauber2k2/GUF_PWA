@@ -17,7 +17,7 @@ export interface DevHomeState {
 
 const NONE: DevHomeState = { scenario: null, forceLoading: false, forceOffline: false };
 
-const TODAY_VALUES: TodayScenario[] = ["planejado", "vazio", "novo", "concluido"];
+const TODAY_VALUES: TodayScenario[] = ["planejado", "vazio", "novo", "concluido", "andamento"];
 const STREAK_VALUES: StreakScenario[] = ["ativa", "recorde", "risco", "zerada"];
 
 /**

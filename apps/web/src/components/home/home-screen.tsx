@@ -27,8 +27,12 @@ import { WeekCard } from "./week-card";
 
 type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | { kind: "account" } | null;
 
-/** Estado do card "Treino de hoje" (concluído hoje > rotina sugerida > sem plano > novo). */
+/**
+ * Estado do card "Treino de hoje":
+ * em andamento > concluído hoje > rotina sugerida do projeto ativo > sem plano > usuário novo.
+ */
 function todayState(data: HomeSummary, today: string): TodayCardState {
+  if (data.inProgress) return { kind: "in_progress", session: data.inProgress };
   const todaySessions = data.weekSessions.filter((s) => s.performedOn === today);
   if (todaySessions.length > 0) return { kind: "done", sessions: todaySessions };
   const project = data.activeProject;
@@ -126,7 +130,8 @@ function HomeContent({
   const shell = useAppShell();
   const name = firstName(data.profile.name);
   const initial = (name ?? userEmail ?? "?").charAt(0).toUpperCase();
-  const trainedDays = new Set(data.weekSessions.map((s) => s.performedOn));
+  // Calendário pela RPC get_training_days (dias com treino concluído).
+  const trainedDays = new Set(data.trainingDays.map((d) => d.performedOn));
 
   return (
     <>
@@ -152,6 +157,7 @@ function HomeContent({
         <TodayCard
           state={todayState(data, today)}
           actions={{
+            onResume: (sessionId) => shell.openWorkout(sessionId),
             onStartPlanned: (routine) => shell.startWorkout(routine),
             onSwapRoutine: () => onOpenSheet({ kind: "swap" }),
             onStartEmpty: () => shell.startWorkout(null),
