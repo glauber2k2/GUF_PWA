@@ -3,6 +3,7 @@
 export type ApiErrorCode =
   | "workout_in_progress"
   | "workout_not_found"
+  | "project_not_found"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -19,6 +20,7 @@ export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiEr
 export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   workout_in_progress: "Você já tem um treino em andamento. Retome ou finalize esse treino antes de começar outro.",
   workout_not_found: "Este treino já foi finalizado ou não está mais disponível. Volte para a Início.",
+  project_not_found: "Este projeto não existe mais ou está arquivado. Atualize a lista e tente de novo.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -39,6 +41,7 @@ export function toApiError(error: unknown): ApiError {
     const { code, message } = error as { code?: string; message?: string };
     if (code === "23505") return apiError("workout_in_progress"); // índice único: 1 treino em andamento
     if (code === "P0002") return apiError("workout_not_found"); // "Treino em andamento não encontrado"
+    if (code === "GP001") return apiError("project_not_found"); // activate_project
     if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");
     if (typeof message === "string" && /fetch|network|load failed/i.test(message)) return apiError("network_error");
   }

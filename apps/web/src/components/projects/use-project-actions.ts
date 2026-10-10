@@ -1,0 +1,109 @@
+"use client";
+
+import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Info, WifiOff, type LucideIcon } from "lucide-react";
+import { changedPositions, OFFLINE_EDIT_MESSAGE } from "@guf/core";
+import type { ApiResult, GufClient, Project, ProjectRoutine } from "@guf/api";
+import { useAppShell } from "@/components/app-shell/app-shell";
+import { useCanEditPlanning, useProjectsSource } from "@/hooks/use-projects";
+import { invalidatePlanningData } from "@/lib/query-keys";
+import { getSupabaseClient } from "@/lib/supabase";
+
+/** Aviso de quem tenta editar sem internet (edição de projetos/rotinas é só online). */
+export const OFFLINE_TOAST = `Sem conexão – ${OFFLINE_EDIT_MESSAGE}`;
+
+type Operation = (client: GufClient) => Promise<ApiResult<unknown>>;
+
+interface Feedback {
+  message: string;
+  icon: LucideIcon;
+  /** Operação que desfaz a ação (botão "Desfazer" no toast). */
+  undo?: Operation;
+}
+
+/**
+ * Ações de projetos e rotinas que não usam formulário (ativar, arquivar, reordenar…):
+ * só com internet; sucesso recarrega Projetos e Início e mostra o toast (com "Desfazer" quando houver);
+ * erro vira toast com a mensagem pronta (sem conexão → aviso de edição só online).
+ */
+export function useProjectActions() {
+  const { api } = useProjectsSource();
+  const queryClient = useQueryClient();
+  const shell = useAppShell();
+  const canEdit = useCanEditPlanning();
+  const [busy, setBusy] = useState(false);
+
+  const run = async (operation: Operation, feedback?: Feedback): Promise<boolean> => {
+    if (!canEdit) {
+      shell.showToast(OFFLINE_TOAST, { icon: WifiOff });
+      return false;
+    }
+    setBusy(true);
+    const { error } = await operation(getSupabaseClient());
+    setBusy(false);
+    if (error) {
+      shell.showToast(error.code === "network_error" ? OFFLINE_TOAST : error.message, { icon: error.code === "network_error" ? WifiOff : Info });
+      await invalidatePlanningData(queryClient);
+      return false;
+    }
+    await invalidatePlanningData(queryClient);
+    if (feedback) {
+      const undo = feedback.undo;
+      shell.showToast(feedback.message, {
+        icon: feedback.icon,
+        actionLabel: undo ? "Desfazer" : undefined,
+        onAction: undo ? () => void run(undo) : undefined,
+      });
+    }
+    return true;
+  };
+
+  return {
+    busy,
+    canEdit,
+    /** Ativa `project`; desfazer volta para o ativo anterior (ou para nenhum). */
+    activate: (project: Project, previous: Project | null) =>
+      run((c) => api.activateProject(c, { projectId: project.id }), {
+        message: "Projeto ativado",
+        icon: CircleCheck,
+        undo: (c) => (previous ? api.activateProject(c, { projectId: previous.id }) : api.deactivateProject(c, { projectId: project.id })),
+      }),
+    deactivate: (project: Project) =>
+      run((c) => api.deactivateProject(c, { projectId: project.id }), {
+        message: "Projeto desativado",
+        icon: CircleOff,
+        undo: (c) => api.activateProject(c, { projectId: project.id }),
+      }),
+    /** Arquiva; desfazer restaura e, se era o ativo, ativa de novo. */
+    archive: (project: Project) =>
+      run((c) => api.archiveProject(c, { projectId: project.id }), {
+        message: "Projeto arquivado",
+        icon: Archive,
+        undo: async (c) => {
+          const restored = await api.restoreProject(c, { projectId: project.id });
+          return restored.error || !project.isActive ? restored : api.activateProject(c, { projectId: project.id });
+        },
+      }),
+    restore: (project: Project) =>
+      run((c) => api.restoreProject(c, { projectId: project.id }), {
+        message: "Projeto restaurado",
+        icon: ArchiveRestore,
+        undo: (c) => api.archiveProject(c, { projectId: project.id }),
+      }),
+    archiveRoutine: (routine: ProjectRoutine) =>
+      run((c) => api.archiveRoutine(c, { routineId: routine.id }), {
+        message: "Rotina arquivada",
+        icon: Archive,
+        undo: (c) => api.restoreRoutine(c, { routineId: routine.id }),
+      }),
+    /** Grava a nova ordem (só as positions que mudaram). */
+    reorder: (ordered: ProjectRoutine[]) => {
+      const positions = changedPositions(ordered);
+      if (positions.length === 0) return Promise.resolve(true);
+      return run((c) => api.reorderRoutines(c, { positions }), { message: "Ordem salva", icon: Check });
+    },
+  };
+}
+
+export type ProjectActions = ReturnType<typeof useProjectActions>;

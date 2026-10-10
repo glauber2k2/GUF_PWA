@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Info, Play, Plus } from "lucide-react";
-import { estimateRoutineMinutes, plural, startedAgoLabel, suggestNextRoutine, toLocalISODate } from "@guf/core";
+import { Info, ListPlus, Play, Plus, type LucideIcon } from "lucide-react";
+import { routineLetter, routineMeta, routineShortName, startedAgoLabel, suggestNextRoutine, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
 import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
@@ -14,18 +14,33 @@ import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
 import { useActiveWorkout } from "@/components/workout/workout-provider";
 
 const TOAST_MS = 1800;
+/** Toast com ação ("Desfazer") fica mais tempo na tela. */
+const TOAST_ACTION_MS = 4000;
 
 /** Rotas de cada aba (índice do BottomNav). null = tela ainda não construída. */
 const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/", name: "Início" },
   { path: "/historico", name: "Histórico" },
   { path: null, name: "Treinar" },
-  { path: null, name: "Projetos" },
+  { path: "/projetos", name: "Projetos" },
   { path: null, name: "Perfil" },
 ];
 
+export interface ToastOptions {
+  icon?: LucideIcon;
+  /** Ação do toast (ex.: "Desfazer"); com ação, o toast fica 4 s. */
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+interface ToastState extends ToastOptions {
+  message: string;
+}
+
 interface AppShellApi {
-  showToast: (message: string) => void;
+  showToast: (message: string, options?: ToastOptions) => void;
+  /** Tela com barra de ação fixa acima do menu: o toast sobe para não cobri-la. */
+  setToastRaised: (raised: boolean) => void;
   openStartSheet: () => void;
   /** Inicia um treino (rotina ou vazio) e avisa o resultado. */
   startWorkout: (routine: Pick<RoutineSummary, "id" | "name"> | null) => void;
@@ -39,24 +54,6 @@ export function useAppShell(): AppShellApi {
   const ctx = useContext(AppShellContext);
   if (!ctx) throw new Error("useAppShell precisa estar dentro de <AppShell>.");
   return ctx;
-}
-
-/** "Treino B – Costas e Bíceps" → "Treino B" */
-export function routineShortName(name: string): string {
-  return name.split(" – ")[0] ?? name;
-}
-
-/** Letra da rotina: "Treino B – …" → "B"; outros nomes → inicial. */
-export function routineLetter(name: string): string {
-  const match = /^Treino\s+(\S)/i.exec(name);
-  return (match?.[1] ?? name.trim().charAt(0)).toUpperCase();
-}
-
-export function routineMeta(routine: RoutineSummary): string {
-  const parts = [plural(routine.exercises.length, "exercício", "exercícios")];
-  const minutes = estimateRoutineMinutes(routine.exercises);
-  if (minutes) parts.push(`~${minutes} min`);
-  return parts.join(" · ");
 }
 
 /**
@@ -73,15 +70,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const immersive = pathname === "/treino";
   const summary = useHomeSummary();
   const start = useStartWorkout();
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState | null>(null);
+  const [toastRaised, setToastRaised] = useState(false);
   const [startOpen, setStartOpen] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = useCallback((message: string) => {
+  const showToast = useCallback((message: string, options?: ToastOptions) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast(message);
-    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
-  }, []);
+    setToast({ message, ...options });
+    toastTimer.current = setTimeout(() => setToast(null), options?.actionLabel ? TOAST_ACTION_MS : TOAST_MS);
+  }, [setToast]);
 
   useEffect(() => () => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -98,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         onError: (error) => showToast(error.message),
       });
     },
-    [start, showToast, router],
+    [start, showToast, router, setStartOpen],
   );
 
   const openWorkout = useCallback(
@@ -106,12 +104,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       setStartOpen(false);
       router.push(`/treino?id=${encodeURIComponent(sessionId)}`);
     },
-    [router],
+    [router, setStartOpen],
   );
 
   const api = useMemo<AppShellApi>(
-    () => ({ showToast, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor, openWorkout }),
-    [showToast, startWorkoutFor, openWorkout],
+    () => ({ showToast, setToastRaised, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor, openWorkout }),
+    [showToast, startWorkoutFor, openWorkout, setToastRaised, setStartOpen],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
@@ -144,7 +142,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, [summaryLoaded, serverInProgress, activeId, activePersist, devHome.scenario, track, clear]);
 
-  const tabIndex = Math.max(0, TAB_ROUTES.findIndex((t) => t.path === pathname));
+  // Aba ativa também nas telas internas dela (ex.: /projetos/detalhe → Projetos).
+  const tabIndex = Math.max(
+    0,
+    TAB_ROUTES.findIndex((t) => t.path === pathname || (t.path && t.path !== "/" && pathname.startsWith(`${t.path}/`))),
+  );
   // Treino aberto: o acompanhado no aparelho ou o que o banco informa.
   const inProgress = active
     ? { id: active.sessionId, name: active.name, startedAt: active.clock.startedAt }
@@ -156,6 +158,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (index === 2) return inProgress ? openWorkout(inProgress.id) : setStartOpen(true);
     const tab = TAB_ROUTES[index];
     if (!tab || tab.path === pathname) return;
+    // Na tela interna de uma aba, tocar na aba volta para a lista dela.
     if (tab.path) return router.push(tab.path);
     showToast(`${tab.name} chega em breve`);
   };
@@ -188,12 +191,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
             immersive
               ? "bottom-[calc(114px+env(safe-area-inset-bottom))]"
-              : showMiniCard
+              : showMiniCard || toastRaised
                 ? "bottom-[calc(168px+env(safe-area-inset-bottom))]"
                 : "bottom-[calc(92px+env(safe-area-inset-bottom))]",
           )}
         >
-          <Toast message={toast} icon={Info} />
+          <Toast
+            message={toast.message}
+            icon={toast.icon ?? Info}
+            actionLabel={toast.actionLabel}
+            onAction={() => {
+              toast.onAction?.();
+              setToast(null);
+            }}
+          />
         </div>
       )}
 
@@ -245,11 +256,22 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={r.id}
                 letter={routineLetter(r.name)}
                 title={r.name}
-                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r)}` : routineMeta(r)}
+                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r.exercises)}` : routineMeta(r.exercises)}
                 highlighted={r.id === suggested?.id}
                 onClick={() => startWorkoutFor(r)}
               />
             ))}
+            {routines.length === 0 && (
+              <SheetOption
+                icon={ListPlus}
+                title="Montar uma rotina"
+                subtitle="Crie um projeto com Treino A, B, C…"
+                onClick={() => {
+                  setStartOpen(false);
+                  router.push("/projetos");
+                }}
+              />
+            )}
             <SheetOption icon={Plus} title="Treino vazio" dashed onClick={() => startWorkoutFor(null)} />
           </>
         )}
