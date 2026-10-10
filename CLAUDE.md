@@ -18,7 +18,7 @@ Nome da marca: **guf** (Guf App) — nunca "guff" (o design system do Claude Des
 - Web: Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui
 - Dados: @supabase/supabase-js + TanStack Query
 - Formulários: React Hook Form + Zod (integração via @hookform/resolvers)
-- Gráficos: Recharts · Datas: date-fns · Ícones: lucide-react
+- Gráficos: Recharts (instalado no apps/web; cores via `var(--color-…)` dos tokens) · Datas: date-fns (só em packages/core; o app usa as funções de `dates.ts`) · Ícones: lucide-react
 - Animações: Anime.js (v4), React Bits, Motion — sempre respeitando prefers-reduced-motion. Ainda não instaladas: por enquanto as animações são keyframes CSS do design system.
 - PWA: Serwist · Offline do treino em andamento: Dexie (IndexedDB)
 - Hospedagem: testes na **Vercel** (atual). Produção: **Cloudflare Pages** ou plano pago da Vercel, antes de monetizar. Em todos os casos, site estático.
@@ -68,6 +68,18 @@ guf-app/
 - **Mini card / aba Treinar:** o `AppShell` acompanha `inProgress` do banco (sem redirecionar; a Início mostra o card em destaque) e some o mini card quando o banco não tem treino aberto e não há nada pendente no aparelho.
 - **Demonstração (só dev):** `/treino?id=demo&estado=demo` usa o mock e não grava nada.
 
+## Histórico (/historico)
+- **Dados:** `packages/api/src/history.ts` — `getHistoryOverview` (dias treinados das últimas 104 semanas + `get_streak()` + meta + unidade + data do 1º treino), `getTrainingDays` (mês do calendário) e `getDaySessions` (treinos do dia, com recordes). Mapeadores comuns com a Início em `packages/api/src/shared.ts`.
+- **Regras puras:** `packages/core/src/history.ts` (grade do mês, tercis de volume, médias semanais, comparação de períodos, faixa de semanas, recorde de treino passado).
+- **Sequência:** números SEMPRE do `get_streak()` (nunca recalcular no app). Faixa das últimas 12 semanas: preenchida se a semana teve ≥ 1 treino concluído; a semana atual sem treino fica "em risco" até domingo.
+- **Calendário:** semana seg–dom, do mês do 1º treino até o mês atual; 3 níveis de realce pelos tercis de volume das últimas 12 semanas (tokens `volume-1`, `volume-2`, `accent`); só dias treinados são tocáveis (abrem a folha do dia).
+- **Gráfico:** "Volume médio por dia treinado" por semana (4 sem · 3 meses · 6 meses · 1 ano); média = dias treinados com volume > 0 (dia só de cardio conta como treino, não entra na média); semana sem treino é lacuna, nunca zero; média do período = média das semanas com treino; variação % vs. período anterior (alta em volt, queda em cor neutra). Menos de 2 semanas com volume → aviso "poucos dados".
+- **Recordes do dia:** mesma regra do `finish_workout` — carga máxima do treino maior que a de todos os treinos concluídos ANTES dele (dias anteriores e, no mesmo dia, os que terminaram antes); primeira vez não gera recorde. Calculado com `get_exercise_history` dos exercícios do dia, só ao abrir a folha.
+- **URL:** `?mes=2026-10&periodo=3m` (mês futuro ou inválido → mês atual).
+- **Offline:** `withDeviceCache` (`apps/web/src/lib/offline/device-cache.ts`, tabela `history` do Dexie) guarda a última resposta e mostra o banner "Sem conexão – mostrando o último histórico salvo".
+- **Atualização:** finalizar/descartar treino chama `invalidateTrainingData` (`apps/web/src/lib/query-keys.ts`) → Início e Histórico recarregam; o mesmo acontece quando a fila offline envia um treino finalizado sem internet.
+- **Estados de desenvolvimento:** `/historico?estado=` padrao · risco · recorde · novo · poucos · erro · carregando · offline · dia (combináveis).
+
 ## Backend (Supabase) — já implementado
 Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, workout_active_periods, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.
 
@@ -107,7 +119,8 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - **Rotina sugerida para hoje:** a próxima do projeto ativo depois da última concluída, seguindo `position`, voltando para a primeira depois da última. Sem histórico → a primeira.
 - **Card "Treino de hoje" (prioridade):** em andamento > concluído hoje > rotina sugerida > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina).
 - **Streak:** semana (seg–dom) conta com ≥ 1 treino concluído; semana inteira sem treino zera. `weekly_goal` é só para exibição.
-- **Textos do card de sequência:** número + "semanas" com "seguidas treinando" abaixo (lê-se "semanas seguidas treinando"); `week_secured` → "Semana garantida ✓" (o ✓ é o ícone Check do lucide) + "X de Y treinos da sua meta" quando houver meta; `streak_at_risk` → "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até domingo e comece sua sequência."; destaque dourado de recorde quando `current_streak` = `best_streak` e > 0.
+- **Textos do card de sequência** (constantes `STREAK_MESSAGES`, `streakWords` e `weeklyGoalLabel` em packages/core/src/home.ts, usadas na Início e no Histórico): número + "semanas" com "seguidas treinando" abaixo (lê-se "semanas seguidas treinando"); `week_secured` → "Semana garantida ✓" (o ✓ é o ícone Check do lucide) + "X de Y treinos da sua meta" quando houver meta; `streak_at_risk` → "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até domingo e comece sua sequência."; destaque dourado de recorde quando `current_streak` = `best_streak` e > 0.
+- **Série concluída:** só conta o que foi marcado como concluído. Ao finalizar, `finish_workout` APAGA as séries não concluídas (e exercícios que ficaram sem séries) antes de calcular resumo e recordes; histórico, calendário, "anterior" e recordes leem só séries concluídas. O recorde só aparece ao concluir a série (`markLoadRecords` ignora não concluídas e aquecimento).
 - **Resumo de um treino:** volume = Σ carga × reps das séries concluídas sem aquecimento (mesma regra de `get_training_days`); "Séries" = séries concluídas sem aquecimento. Duração estimada da rotina = Σ séries × (40s + descanso), com padrão de 3 séries e 90s.
 - **1RM estimado:** Epley — carga × (1 + reps / 30). Aquecimentos não contam.
 - **Primeira vez de um exercício não gera PR.**

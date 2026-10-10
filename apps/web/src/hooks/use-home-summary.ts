@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getHomeSummary, startWorkout, type HomeApi } from "@guf/api";
 import { currentWeek, toLocalISODate } from "@guf/core";
+import { HOME_SUMMARY_KEY, invalidateTrainingData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 import { mockHomeApi, setHomeMockScenario } from "@/mocks/home";
 import { useAuth } from "@/providers/auth-provider";
@@ -23,7 +24,7 @@ function homeApiFor(dev: DevHomeState): HomeApi {
   return realHomeApi;
 }
 
-export const HOME_SUMMARY_KEY = "home-summary";
+export { HOME_SUMMARY_KEY };
 
 /** Dados da tela Início (datas sempre no fuso local do aparelho). */
 export function useHomeSummary() {
@@ -60,6 +61,6 @@ export function useStartWorkout() {
       return data;
     },
     // Atualiza a Início: o treino recém-criado aparece como "em andamento".
-    onSettled: () => queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] }),
+    onSettled: () => invalidateTrainingData(queryClient),
   });
 }
