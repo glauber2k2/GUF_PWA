@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signUpWithEmail, type AuthError } from "@guf/api";
 import { signUpSchema } from "@guf/schemas";
 import {
   Banner,
@@ -15,19 +15,26 @@ import {
   TextDivider,
   TextField,
 } from "@/components/ds";
+import { useSignupDocuments } from "@/hooks/use-pending-documents";
 import { getSupabaseClient } from "@/lib/supabase";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import { signUpWithEmail } from "@/mocks/auth";
 import { AuthFooter, AuthLink, AuthScreen } from "./auth-screen";
 import { useGoogleSignIn } from "./use-google-sign-in";
 
-const LEGAL_LINK = "font-medium underline hover:underline";
+/** Link para o documento legal (URL publicada em legal_documents), em nova aba. */
+function LegalLink({ href, children }: { href: string | undefined; children: ReactNode }) {
+  if (!href) return <span className="font-medium">{children}</span>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-accent-text underline">
+      {children}
+    </a>
+  );
+}
 
 export function SignUpForm() {
-  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const google = useGoogleSignIn(setFormError);
+  const documents = useSignupDocuments();
   const {
     register,
     handleSubmit,
@@ -41,28 +48,36 @@ export function SignUpForm() {
     mode: "onTouched",
   });
 
-  // LGPD: "Criar conta" só habilita com as duas confirmações marcadas.
+  // LGPD: "Criar conta" só habilita com as duas confirmações marcadas e os documentos carregados.
   const [isAdult, acceptsTerms] = useWatch({ control, name: ["isAdult", "acceptsTerms"] });
-  const consentsGiven = isAdult && acceptsTerms;
+  const docs = documents.data;
+  const canSubmit = isAdult && acceptsTerms && Boolean(docs);
 
   const onSubmit = handleSubmit(async (values) => {
+    if (!docs) return;
     setFormError(null);
     setNotice(null);
-    const { data, error } = await signUpWithEmail(getSupabaseClient(), values);
+    const { data, error } = await signUpWithEmail(getSupabaseClient(), {
+      ...values,
+      // Ids das versões exibidas nesta tela quando o usuário marcou as confirmações.
+      acceptedDocumentIds: [docs.terms.id, docs.privacy.id, docs.age_declaration.id],
+      emailRedirectTo: `${window.location.origin}/`,
+      platform: "web",
+    });
     if (error) {
       if (error.code === "email_already_registered") setError("email", { message: error.message });
       else if (error.code === "weak_password") setError("password", { message: error.message });
       else setFormError(error.message);
       return;
     }
+    // Com sessão, o guarda leva para o app; sem sessão, falta confirmar o e-mail.
     if (data.needsEmailConfirmation) {
-      setNotice("confirme seu e-mail pelo link enviado e depois entre.");
-      return;
+      setNotice("confirme seu e-mail pelo link enviado para a sua caixa de entrada.");
     }
-    router.replace("/");
   });
 
   const busy = isSubmitting || google.pending;
+  const documentsError = documents.error as AuthError | null;
 
   return (
     <AuthScreen
@@ -109,29 +124,22 @@ export function SignUpForm() {
             Tenho 18 anos ou mais
           </Checkbox>
           <Checkbox error={errors.acceptsTerms?.message} {...register("acceptsTerms")}>
-            Li e aceito os{" "}
-            <AuthLink href="/legal?doc=termos" prefetch={false} target="_blank" rel="noopener" className={LEGAL_LINK}>
-              Termos de Uso
-            </AuthLink>{" "}
-            e a{" "}
-            <AuthLink
-              href="/legal?doc=privacidade"
-              prefetch={false}
-              target="_blank"
-              rel="noopener"
-              className={LEGAL_LINK}
-            >
-              Política de Privacidade
-            </AuthLink>
+            Li e aceito os <LegalLink href={docs?.terms.url}>Termos de Uso</LegalLink> e a{" "}
+            <LegalLink href={docs?.privacy.url}>Política de Privacidade</LegalLink>
           </Checkbox>
         </div>
+        {documentsError && (
+          <Banner tone="danger" actionLabel="Tentar" onAction={() => void documents.refetch()}>
+            {documentsError.message}
+          </Banner>
+        )}
         {formError && <Banner tone="danger">{formError}</Banner>}
         {notice && (
           <Banner tone="success" title="Conta criada">
             {notice}
           </Banner>
         )}
-        <Button type="submit" size="lg" fullWidth loading={isSubmitting} disabled={!consentsGiven || google.pending}>
+        <Button type="submit" size="lg" fullWidth loading={isSubmitting} disabled={!canSubmit || google.pending}>
           {isSubmitting ? "Criando conta" : "Criar conta"}
         </Button>
         <AuthFooter question="Já tem conta?" className="min-h-9">

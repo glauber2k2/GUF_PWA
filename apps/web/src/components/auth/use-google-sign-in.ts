@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { signInWithGoogle } from "@guf/api";
 import { getSupabaseClient } from "@/lib/supabase";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import { signInWithGoogle } from "@/mocks/auth";
 
 /**
- * Inicia o "Continuar com Google". Após o primeiro acesso, o app checa
- * pending_documents() e manda para /aceite (próxima etapa).
+ * Inicia o "Continuar com Google" (PKCE). Na volta, o cliente troca o ?code= pela sessão
+ * ao carregar a página; o guarda checa pending_documents() e manda para /aceite se preciso.
  */
 export function useGoogleSignIn(onError: (message: string) => void) {
   const [pending, setPending] = useState(false);

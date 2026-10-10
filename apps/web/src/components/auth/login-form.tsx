@@ -1,19 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@guf/schemas";
 import { Banner, Button, GoogleButton, Logo, PasswordField, TextDivider, TextField } from "@/components/ds";
+import { signInWithEmail } from "@guf/api";
 import { getSupabaseClient } from "@/lib/supabase";
-// Trocar por "@guf/api" na integração com o Supabase (mesma assinatura).
-import { signInWithEmail } from "@/mocks/auth";
 import { AuthFooter, AuthLink, AuthScreen } from "./auth-screen";
 import { useGoogleSignIn } from "./use-google-sign-in";
 
 export function LoginForm() {
-  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const google = useGoogleSignIn(setFormError);
   const {
@@ -29,11 +26,8 @@ export function LoginForm() {
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     const { error } = await signInWithEmail(getSupabaseClient(), values);
-    if (error) {
-      setFormError(error.message);
-      return;
-    }
-    router.replace("/");
+    // Sucesso: o AuthProvider recebe SIGNED_IN e o guarda leva para o app (ou para ?next=).
+    if (error) setFormError(error.message);
   });
 
   const busy = isSubmitting || google.pending;
