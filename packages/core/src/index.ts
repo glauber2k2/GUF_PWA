@@ -5,3 +5,4 @@ export * from "./password";
 export * from "./dates";
 export * from "./home";
 export * from "./workout";
+export * from "./legal";

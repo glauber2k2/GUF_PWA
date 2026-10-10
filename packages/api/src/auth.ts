@@ -1,4 +1,10 @@
-import { isAuthError, isAuthRetryableFetchError, isAuthWeakPasswordError } from "@supabase/supabase-js";
+import {
+  isAuthError,
+  isAuthImplicitGrantRedirectError,
+  isAuthPKCECodeVerifierMissingError,
+  isAuthRetryableFetchError,
+  isAuthWeakPasswordError,
+} from "@supabase/supabase-js";
 import type { GufClient } from "./client";
 
 /* =====================================================================
@@ -13,6 +19,11 @@ export type AuthErrorCode =
   | "weak_password"
   | "rate_limited"
   | "documents_unavailable"
+  | "documents_outdated"
+  | "oauth_cancelled"
+  | "oauth_expired"
+  | "oauth_unavailable"
+  | "oauth_failed"
   | "network_error"
   | "unknown";
 
@@ -32,6 +43,11 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   weak_password: "Senha fraca. Use 8 ou mais caracteres, com número e símbolo.",
   rate_limited: "Muitas tentativas seguidas. Aguarde um minuto e tente de novo.",
   documents_unavailable: "Não foi possível carregar os Termos de Uso e a Política de Privacidade. Tente de novo em instantes.",
+  documents_outdated: "Os termos foram atualizados. Confira a nova versão e aceite de novo.",
+  oauth_cancelled: "Login com Google cancelado. Tente de novo ou entre com e-mail e senha.",
+  oauth_expired: "O login com Google expirou ou foi aberto em outro navegador. Tente de novo neste aparelho.",
+  oauth_unavailable: "O login com Google não está disponível no momento. Entre com e-mail e senha.",
+  oauth_failed: "Não foi possível entrar com o Google. Tente de novo em instantes.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível concluir agora. Tente de novo em instantes.",
 };
@@ -100,10 +116,54 @@ export interface AuthApi {
  * Implementação (Supabase)
  * ===================================================================== */
 
+/** Códigos de erro do Supabase Auth ligados ao fluxo OAuth/PKCE. */
+const OAUTH_CODE_MAP: Record<string, AuthErrorCode> = {
+  provider_disabled: "oauth_unavailable",
+  oauth_provider_not_supported: "oauth_unavailable",
+  bad_oauth_state: "oauth_expired",
+  bad_oauth_callback: "oauth_expired",
+  flow_state_not_found: "oauth_expired",
+  flow_state_expired: "oauth_expired",
+  bad_code_verifier: "oauth_expired",
+};
+
+export interface OAuthReturnParams {
+  /** ?error= (padrão OAuth: access_denied, server_error…) */
+  error?: string | null;
+  /** ?error_code= (código do Supabase Auth) */
+  errorCode?: string | null;
+  /** ?error_description= */
+  errorDescription?: string | null;
+}
+
+/**
+ * Erro devolvido na URL de retorno do Google (?error=…&error_code=…&error_description=…).
+ * Retorna null quando a URL não indica erro.
+ */
+export function oauthReturnError({ error, errorCode, errorDescription }: OAuthReturnParams): AuthError | null {
+  if (!error && !errorCode) return null;
+  if (errorCode && OAUTH_CODE_MAP[errorCode]) return authError(OAUTH_CODE_MAP[errorCode]!);
+  if (error === "access_denied") return authError("oauth_cancelled");
+  if (errorDescription && /provider is not enabled|unsupported provider/i.test(errorDescription)) {
+    return authError("oauth_unavailable");
+  }
+  return authError("oauth_failed");
+}
+
 /** Converte qualquer erro do Supabase/rede no AuthError do app. */
 export function toAuthError(error: unknown): AuthError {
   if (isAuthRetryableFetchError(error)) return authError("network_error");
   if (isAuthWeakPasswordError(error)) return authError("weak_password");
+  // Retorno do OAuth (PKCE): verificador ausente = aberto em outro navegador/aba ou expirado.
+  if (isAuthPKCECodeVerifierMissingError(error)) return authError("oauth_expired");
+  if (isAuthImplicitGrantRedirectError(error)) {
+    const details = error.details;
+    return (
+      oauthReturnError({ error: details?.error, errorCode: details?.code, errorDescription: error.message }) ??
+      authError("oauth_failed")
+    );
+  }
+  if (isAuthError(error) && error.code && OAUTH_CODE_MAP[error.code]) return authError(OAUTH_CODE_MAP[error.code]!);
   if (isAuthError(error)) {
     switch (error.code) {
       case "invalid_credentials":
