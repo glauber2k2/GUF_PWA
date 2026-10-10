@@ -55,11 +55,23 @@ guf-app/
 - **Só em desenvolvimento:** páginas com extensão `.dev.tsx` (ex.: `/design-system`, reconhecidas só no `next dev` via `pageExtensions`) e parâmetros de teste como `?estado=` (protegidos por `process.env.NODE_ENV === "development"`, eliminados do build de produção).
 - **Rotas e proteção (no cliente; quem protege os dados é o RLS):** grupo `(app)` exige sessão e aceite (`RequireAuth` + `AppShell` com menu inferior); `(auth)` = /login e /cadastro (logado segue para o app); `(consent)` = /aceite. `?next=` só aceita caminhos internos (`safeNextPath`).
 - **Datas:** sempre no fuso local do aparelho (`packages/core/src/dates.ts`); semana de segunda a domingo.
+- **Erros da API:** códigos e mensagens em `packages/api/src/result.ts` (`toApiError`): `workout_in_progress` (23505), `workout_not_found` (P0002), `not_authenticated`, `network_error`, `unknown`.
+
+## Treino em andamento (offline-first)
+- **Escrita sempre pela fila** (`apps/web/src/lib/offline/`, Dexie): a tela altera o estado local na hora e enfileira a operação com `enqueue(op)`; `flushOutbox()` envia em ordem quando há internet (eventos online/visibilidade + intervalo de 20s). Nunca chamar as funções de escrita da API direto da tela, exceto `finishWorkout` online.
+- **Idempotência:** ids de exercícios do treino, séries e exercícios criados são gerados no aparelho (`crypto.randomUUID()`) e gravados com upsert; reenviar a mesma operação não duplica.
+- **Fila:** para em `network_error`/`not_authenticated` e tenta de novo depois; outros erros tentam até 5 vezes e a operação é descartada com aviso. Descartar o treino remove as operações pendentes dele.
+- **Leitura:** `loadWorkout` usa a cópia do aparelho enquanto houver operações pendentes daquele treino; senão, a rede (atualizando a cópia); sem internet, a cópia. A tela salva um retrato do treino a cada alteração.
+- **Finalizar:** online e sem pendências → `finish_workout` (resumo e recordes oficiais); sem internet → enfileira `finish` e mostra o resumo calculado no aparelho (mesmas regras) com aviso de envio pendente.
+- **Sair da conta:** tenta enviar a fila antes; depois limpa cache do TanStack Query, treino ativo (localStorage) e dados offline (IndexedDB).
+- **Não funciona offline:** iniciar treino (a sessão é criada no servidor).
+- **Mini card / aba Treinar:** o `AppShell` acompanha `inProgress` do banco (sem redirecionar; a Início mostra o card em destaque) e some o mini card quando o banco não tem treino aberto e não há nada pendente no aparelho.
+- **Demonstração (só dev):** `/treino?id=demo&estado=demo` usa o mock e não grava nada.
 
 ## Backend (Supabase) — já implementado
-Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.
+Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, workout_active_periods, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.
 
-Preenchidos por gatilho (NÃO enviar): `user_id` em routine_exercises, session_exercises e measurement_values; `user_id`, `session_id`, `exercise_id` e `completed_at` em set_logs. (Os tipos gerados marcam esses `user_id` como obrigatórios por serem NOT NULL; omitir e fazer conversão de tipo explícita com comentário.) `workout_sessions.user_id` NÃO tem gatilho: enviar o id do usuário logado. Perfil e plano são criados automaticamente no cadastro.
+Preenchidos por gatilho (NÃO enviar): `user_id` em routine_exercises, session_exercises e measurement_values; `user_id`, `session_id`, `exercise_id` e `completed_at` em set_logs. (Os tipos gerados marcam esses `user_id` como obrigatórios por serem NOT NULL; omitir e fazer conversão de tipo explícita com comentário.) `workout_sessions.user_id` NÃO tem gatilho: enviar o id do usuário logado. `exercises.user_id` (exercício próprio) também é enviado. Em `workout_active_periods` o `user_id` vem por gatilho e o primeiro período é aberto automaticamente ao criar a sessão (não inserir pelo front). Perfil e plano são criados automaticamente no cadastro.
 
 **Cadastro por e-mail:** os ids das versões vigentes de terms, privacy e age_declaration exibidas na tela vão em `options.data.accepted_document_ids` no `signUp` (com `emailRedirectTo` = origem atual do app e `signup_platform`), e o gatilho `handle_new_user` registra os aceites (`source 'signup_email'`, só versões vigentes; ids inválidos são ignorados e o portão /aceite cobre o que faltar). NÃO chamar `accept_documents` no signUp (sem sessão quando a confirmação de e-mail está ligada).
 
@@ -70,7 +82,8 @@ Funções RPC:
 | `accept_documents(p_document_ids, p_source, p_platform)` | Registrar aceite (só versões vigentes; versão desatualizada → erro 22023) |
 | `has_health_consent()` / `grant_health_consent(p_platform)` / `revoke_health_consent(p_platform)` | Módulo de medidas (revogar apaga as medidas) |
 | `get_last_performance(p_exercise_ids)` | Coluna "anterior" no treino |
-| `finish_workout(p_session_id)` | Finaliza treino; retorna resumo + `personal_records` |
+| `pause_workout(p_session_id, p_at)` / `resume_workout(p_session_id, p_at)` | Pausar/retomar (idempotentes; `p_at` = hora real da ação, para envio offline; o servidor limita a horários válidos) |
+| `finish_workout(p_session_id)` | Finaliza treino: fecha o período aberto, grava `active_seconds`; retorna resumo (`duration_seconds` = tempo efetivo, `elapsed_seconds`, `pauses`) + `personal_records` |
 | `get_exercise_history(p_exercise_id, p_from)` / `get_exercise_records(p_exercise_id)` | Evolução e recordes |
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |
@@ -85,7 +98,12 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - **Um treino em andamento por vez** (o banco recusa outro): ao abrir o app, retomar o treino aberto. Com treino aberto, a aba "Treinar" e a folha "Iniciar treino" oferecem só retomar.
 - **Iniciar treino:** cria a sessão (nome da rotina como snapshot ou "Treino livre") e copia os exercícios planejados para session_exercises; se a cópia falhar, apaga a sessão recém-criada.
 - **Um projeto ativo por usuário:** desativar o atual antes de ativar outro.
-- **Trocar exercício de um treino:** apagar o session_exercise e criar outro.
+- **Trocar exercício de um treino:** apagar o session_exercise e criar outro (mantém número e tipo das séries).
+- **Tempo de treino:** `started_at`/`finished_at` = início e fim; tempo efetivo = soma dos períodos de `workout_active_periods` (várias pausas; no máximo um período aberto por treino) e fica em `workout_sessions.active_seconds` ao finalizar. A duração exibida é sempre a efetiva (`active_seconds` ?? fim − início para treinos antigos). Relógio no front: `WorkoutClock` em `packages/core/src/session.ts`.
+- **Séries planejadas ao iniciar:** `target_sets` da rotina (sem meta: nº de séries do último desempenho, mínimo 3), carga/reps do último desempenho ou, sem histórico, o mínimo de `target_reps`.
+- **Exercício adicionado no treino:** séries do último desempenho (`get_last_performance`), recorde de `get_exercise_records` e descanso de `routine_exercises.rest_seconds` (padrão 90s); sem internet, 3 séries vazias.
+- **Observação de exercício:** salva no session_exercise e na `routine_exercises.notes` (vale para os próximos treinos da rotina).
+- **Unidade de peso:** `toDisplayWeight`/`fromDisplayWeight` em `packages/core/src/units.ts`; edição em lb com passo 5, em kg com passo 2,5.
 - **Rotina sugerida para hoje:** a próxima do projeto ativo depois da última concluída, seguindo `position`, voltando para a primeira depois da última. Sem histórico → a primeira.
 - **Card "Treino de hoje" (prioridade):** em andamento > concluído hoje > rotina sugerida > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina).
 - **Streak:** semana (seg–dom) conta com ≥ 1 treino concluído; semana inteira sem treino zera. `weekly_goal` é só para exibição.
