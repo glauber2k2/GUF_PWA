@@ -44,7 +44,7 @@ guf-app/
 3. **Segurança no banco:** o RLS do Supabase protege os dados. No front, usar APENAS a chave pública `publishable` (`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`). NUNCA usar `service_role`/`secret` no front. Cliente: `createGufClient` (packages/api, PKCE + sessão persistente) via `getSupabaseClient()` em apps/web/src/lib/supabase.ts. `NEXT_PUBLIC_SUPABASE_URL` é só a URL base do projeto (`https://<ref>.supabase.co`, sem `/rest/v1`).
 4. **Lógica reutilizável fora do app web:** cálculos em `packages/core`, validações em `packages/schemas`, consultas em `packages/api`. Componentes React ficam em `apps/web`.
 5. **Não alterar o banco pelo front nem pelo painel.** Mudanças de schema só via nova migration em `supabase/migrations/` (`npx supabase migration new nome`). Não editar migrations já existentes.
-6. **Tipos do banco:** importar de `packages/types/src/database.ts`. Regenerar com `npx supabase gen types typescript --linked > packages/types/src/database.ts` após qualquer migration (gerar antes num arquivo temporário para não truncar o atual se o comando falhar).
+6. **Tipos do banco:** importar de `packages/types/src/database.ts`. Regenerar com `npx supabase gen types typescript --linked > packages/types/src/database.ts` após qualquer migration (gerar antes num arquivo temporário para não truncar o atual se o comando falhar). No Windows PowerShell 5.1, o `>` grava em UTF-16: converter para UTF-8 antes de substituir o `database.ts` (ou gerar pelo Git Bash). Nesta versão da CLI o `gen types` pode não achar o login que os outros comandos acham; nesse caso, rodar no terminal do usuário.
 
 ## Padrões do front (apps/web)
 - **Estilo:** classes utilitárias do Tailwind usando os tokens do `@theme` (ex.: `bg-surface`, `text-fg`, `rounded-lg`). Sem estilos inline (`style={{…}}`), exceto valores realmente dinâmicos (ex.: % de uma barra de progresso, atraso escalonado de animação). Sem CSS por componente. O CSS global fica só para tokens, reset, fontes e keyframes (`src/styles/tokens/` + `src/app/globals.css`).
@@ -97,6 +97,7 @@ Funções RPC:
 | `get_last_performance(p_exercise_ids)` | Coluna "anterior" no treino |
 | `pause_workout(p_session_id, p_at)` / `resume_workout(p_session_id, p_at)` | Pausar/retomar (idempotentes; `p_at` = hora real da ação, para envio offline; o servidor limita a horários válidos) |
 | `finish_workout(p_session_id)` | Finaliza treino: fecha o período aberto, grava `active_seconds`; retorna resumo (`duration_seconds` = tempo efetivo, `elapsed_seconds`, `pauses`) + `personal_records` |
+| `activate_project(p_project_id)` | Ativa o projeto e desativa o anterior na mesma transação (um ativo por usuário). Erro próprio `GP001` = projeto não encontrado ou arquivado (não usar os códigos de treino) |
 | `get_exercise_history(p_exercise_id, p_from)` / `get_exercise_records(p_exercise_id)` | Evolução e recordes |
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |
@@ -110,7 +111,8 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - **performed_on** = data LOCAL do usuário (`format(new Date(), 'yyyy-MM-dd')`), nunca deixar o padrão do banco (UTC).
 - **Um treino em andamento por vez** (o banco recusa outro): ao abrir o app, retomar o treino aberto. Com treino aberto, a aba "Treinar" e a folha "Iniciar treino" oferecem só retomar.
 - **Iniciar treino:** cria a sessão (nome da rotina como snapshot ou "Treino livre") e copia os exercícios planejados para session_exercises; se a cópia falhar, apaga a sessão recém-criada.
-- **Um projeto ativo por usuário:** desativar o atual antes de ativar outro.
+- **Um projeto ativo por usuário:** trocar o ativo SEMPRE pela RPC `activate_project` (atômica); nunca em duas gravações pelo app. Desativar (ficar sem projeto ativo) ou arquivar o ativo é uma gravação simples (`is_active = false`; ao arquivar, também desativar).
+- **Projetos e rotinas só com internet:** criar, editar, reordenar e arquivar projetos, rotinas e exercícios planejados exige conexão (sem fila offline). Sem internet, as ações de edição ficam bloqueadas com o aviso "Sem conexão – para criar ou editar rotinas, conecte-se à internet." e o conteúdo já carregado continua visível.
 - **Trocar exercício de um treino:** apagar o session_exercise e criar outro (mantém número e tipo das séries).
 - **Tempo de treino:** `started_at`/`finished_at` = início e fim; tempo efetivo = soma dos períodos de `workout_active_periods` (várias pausas; no máximo um período aberto por treino) e fica em `workout_sessions.active_seconds` ao finalizar. A duração exibida é sempre a efetiva (`active_seconds` ?? fim − início para treinos antigos). Relógio no front: `WorkoutClock` em `packages/core/src/session.ts`.
 - **Séries planejadas ao iniciar:** `target_sets` da rotina (sem meta: nº de séries do último desempenho, mínimo 3), carga/reps do último desempenho ou, sem histórico, o mínimo de `target_reps`.
