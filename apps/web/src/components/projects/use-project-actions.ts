@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Info, WifiOff, type LucideIcon } from "lucide-react";
+import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Info, Trash2, WifiOff, type LucideIcon } from "lucide-react";
 import { changedPositions, OFFLINE_EDIT_MESSAGE } from "@guf/core";
 import type { ApiResult, GufClient, Project, ProjectRoutine } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
@@ -91,6 +91,8 @@ export function useProjectActions() {
         icon: ArchiveRestore,
         undo: (c) => api.archiveProject(c, { projectId: project.id }),
       }),
+    /** Exclui o projeto e as rotinas dele (sem "Desfazer": a confirmação avisa antes). */
+    remove: (project: Project) => run((c) => api.deleteProject(c, { projectId: project.id }), { message: "Projeto excluído", icon: Trash2 }),
     archiveRoutine: (routine: ProjectRoutine) =>
       run((c) => api.archiveRoutine(c, { routineId: routine.id }), {
         message: "Rotina arquivada",

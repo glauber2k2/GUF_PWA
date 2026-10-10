@@ -77,6 +77,12 @@ export function archiveProjectMessage(isActive: boolean): string {
   return isActive ? `${base} Você ficará sem projeto ativo até ativar outro.` : base;
 }
 
+/** Texto da confirmação de excluir projeto (as rotinas vão junto; o histórico fica). */
+export function deleteProjectMessage(routineCount: number): string {
+  const routines = routineCount === 0 ? "" : routineCount === 1 ? "A rotina deste projeto também será excluída. " : `As ${routineCount} rotinas deste projeto também serão excluídas. `;
+  return `${routines}Os treinos já feitos continuam no histórico. Não dá para desfazer.`;
+}
+
 /** Aviso das telas de Projetos/Rotinas sem internet (edição só com conexão). */
 export const OFFLINE_EDIT_MESSAGE = "para criar ou editar rotinas, conecte-se à internet.";
 
