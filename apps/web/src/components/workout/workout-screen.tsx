@@ -567,7 +567,11 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           shell.showToast(summary.pending ? "Treino salvo no aparelho" : "Treino salvo no histórico");
           router.replace("/");
         }}
-        onOpenHistory={() => shell.showToast("O Histórico chega em breve")}
+        onOpenHistory={() => {
+          // Finalizado sem internet: o treino entra no histórico quando a fila sincronizar.
+          if (summary.pending) shell.showToast("O treino aparece no histórico quando a internet voltar");
+          router.replace("/historico");
+        }}
       />
     );
   }
