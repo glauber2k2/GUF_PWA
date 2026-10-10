@@ -1,8 +1,29 @@
 "use client";
 
-import { ArrowLeftRight, Calendar, Check, ChevronRight, Dumbbell, List, Play, Plus, RotateCcw, type LucideIcon } from "lucide-react";
-import { formatClock, formatNumber, formatSetsReps, plural } from "@guf/core";
-import type { FinishedSession, RoutineSummary } from "@guf/api";
+import {
+  ArrowLeftRight,
+  Calendar,
+  Check,
+  ChevronRight,
+  Dumbbell,
+  List,
+  Play,
+  Plus,
+  RotateCcw,
+  Timer,
+  type LucideIcon,
+} from "lucide-react";
+import {
+  estimateRoutineMinutes,
+  formatClock,
+  formatNumber,
+  formatPlannedSets,
+  plannedSetCount,
+  plural,
+  routineMuscleGroups,
+  startedAgoLabel,
+} from "@guf/core";
+import type { FinishedSession, InProgressSession, RoutineSummary } from "@guf/api";
 import { Button, Icon, StatGrid, Tag } from "@/components/ds";
 import { cn } from "@/lib/utils";
 
@@ -11,12 +32,14 @@ const OVERLINE = "text-[11px] leading-4 font-semibold tracking-[0.08em] uppercas
 const PREVIEW_COUNT = 3;
 
 export type TodayCardState =
+  | { kind: "in_progress"; session: InProgressSession }
   | { kind: "planned"; projectName: string; routine: RoutineSummary }
   | { kind: "empty" }
   | { kind: "new" }
   | { kind: "done"; sessions: FinishedSession[] };
 
 export interface TodayCardActions {
+  onResume: (sessionId: string) => void;
   onStartPlanned: (routine: RoutineSummary) => void;
   onSwapRoutine: () => void;
   onStartEmpty: () => void;
@@ -83,6 +106,27 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
     return <NoPlanCard icon={Dumbbell} message="Comece agora e monte os exercícios conforme treina." actions={actions} isNew />;
   }
 
+  if (state.kind === "in_progress") {
+    const { session } = state;
+    return (
+      <section aria-label="Treino em andamento" className={cn(CARD, "border-[1.5px] border-accent-text")}>
+        <span className={cn(OVERLINE, "text-accent-text")}>Treino em andamento</span>
+        <div className="mt-3 flex items-center gap-3.5">
+          <span className="grid size-12 flex-none place-items-center rounded-md bg-accent/16 text-accent-text">
+            <Icon icon={Timer} size={24} />
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <h2 className="m-0 truncate text-lg leading-6 font-semibold">{session.name}</h2>
+            <span className="text-sm leading-5 text-fg-secondary">{startedAgoLabel(session.startedAt)}</span>
+          </div>
+        </div>
+        <Button size="lg" icon={Play} fullWidth sheen className="mt-5" onClick={() => actions.onResume(session.id)}>
+          Retomar treino
+        </Button>
+      </section>
+    );
+  }
+
   if (state.kind === "done") {
     const last = state.sessions[state.sessions.length - 1];
     const subtitle = state.sessions.length > 1 ? `${last?.name} e mais ${state.sessions.length - 1}` : last?.name;
@@ -109,14 +153,15 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
   }
 
   const { routine, projectName } = state;
-  const totalSets = routine.exercises.reduce((t, e) => t + e.sets, 0);
+  const minutes = estimateRoutineMinutes(routine.exercises);
   const meta = [
     plural(routine.exercises.length, "exercício", "exercícios"),
-    plural(totalSets, "série", "séries"),
-    routine.estimatedMinutes ? `~${routine.estimatedMinutes} min` : null,
+    routine.exercises.length > 0 ? plural(plannedSetCount(routine.exercises), "série", "séries") : null,
+    minutes ? `~${minutes} min` : null,
   ]
     .filter(Boolean)
     .join(" · ");
+  const muscleGroups = routineMuscleGroups(routine.exercises.map((e) => e.muscleGroup).filter(Boolean));
   const preview = routine.exercises.slice(0, PREVIEW_COUNT);
   const remaining = routine.exercises.length - preview.length;
 
@@ -128,9 +173,9 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
       </div>
       <h2 className="mt-2 mb-0 text-[22px] leading-7 font-semibold tracking-[-0.015em] text-pretty">{routine.name}</h2>
       <span className="mt-1 text-sm leading-5 text-fg-secondary">{meta}</span>
-      {routine.muscleGroups.length > 0 && (
+      {muscleGroups.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {routine.muscleGroups.map((g) => (
+          {muscleGroups.map((g) => (
             <Tag key={g} size="sm">
               {g}
             </Tag>
@@ -145,7 +190,7 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
             </span>
             <span className="min-w-0 flex-1 truncate text-[15px] leading-5 font-medium">{ex.name}</span>
             <span className="font-display text-[17px] font-semibold text-fg-secondary tabular-nums">
-              {formatSetsReps(ex.sets, ex.repsMin, ex.repsMax)}
+              {formatPlannedSets(ex.targetSets, ex.targetReps)}
             </span>
           </li>
         ))}

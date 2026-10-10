@@ -96,6 +96,9 @@ importers:
 
   packages/api:
     dependencies:
+      '@guf/core':
+        specifier: workspace:*
+        version: link:../core
       '@guf/types':
         specifier: workspace:*
         version: link:../types

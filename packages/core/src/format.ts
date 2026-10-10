@@ -33,11 +33,23 @@ export function formatClock(totalSeconds: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-/** Séries × repetições planejadas: "3 × 8–12", "3 × 10" ou "3 séries" (sem reps). */
-export function formatSetsReps(sets: number, repsMin: number | null, repsMax: number | null): string {
-  if (repsMin === null && repsMax === null) return `${sets} ${sets === 1 ? "série" : "séries"}`;
-  const reps = repsMin !== null && repsMax !== null && repsMin !== repsMax ? `${repsMin}–${repsMax}` : `${repsMin ?? repsMax}`;
-  return `${sets} ${TIMES_SIGN} ${reps}`;
+/**
+ * Repetições alvo da rotina (routine_exercises.target_reps é texto livre: "10", "8-12", "falha").
+ * Intervalos usam travessão: "8–12".
+ */
+export function formatTargetReps(targetReps: string | null | undefined): string | null {
+  const reps = targetReps?.trim();
+  if (!reps) return null;
+  return reps.replace(/\s*-\s*/g, "–");
+}
+
+/** Séries × repetições planejadas: "3 × 8–12", "3 × falha", "3 séries", "8–12 reps" ou null. */
+export function formatPlannedSets(targetSets: number | null | undefined, targetReps: string | null | undefined): string | null {
+  const reps = formatTargetReps(targetReps);
+  if (targetSets && reps) return `${targetSets} ${TIMES_SIGN} ${reps}`;
+  if (targetSets) return `${targetSets} ${targetSets === 1 ? "série" : "séries"}`;
+  if (reps) return /^\d/.test(reps) ? `${reps} reps` : reps;
+  return null;
 }
 
 /** Plural simples em pt-BR: plural(6, "exercício", "exercícios") → "6 exercícios". */
