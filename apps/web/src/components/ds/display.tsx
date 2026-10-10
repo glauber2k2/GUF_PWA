@@ -334,3 +334,14 @@ export function MonthCalendar({
     </div>
   );
 }
+
+/** Divisor com texto central ("ou") entre métodos de acesso. */
+export function TextDivider({ label = "ou", className }: { label?: string; className?: string }) {
+  return (
+    <div role="separator" aria-label={label} className={cn("flex items-center gap-3 text-[13px] text-fg-muted", className)}>
+      <span aria-hidden="true" className="h-px flex-1 bg-border" />
+      <span aria-hidden="true">{label}</span>
+      <span aria-hidden="true" className="h-px flex-1 bg-border" />
+    </div>
+  );
+}

@@ -4,7 +4,7 @@ export type PasswordStrength = 0 | 1 | 2 | 3 | 4;
 export const PASSWORD_STRENGTH_LABELS: Record<PasswordStrength, string> = {
   0: "Muito fraca",
   1: "Fraca",
-  2: "Razoável",
+  2: "Média",
   3: "Boa",
   4: "Forte",
 };

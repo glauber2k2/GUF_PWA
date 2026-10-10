@@ -26,6 +26,7 @@ const LOGO_SIZES = {
   md: { mark: "size-8", gap: "gap-[7px]", text: "text-[32px]" },
   lg: { mark: "size-10", gap: "gap-[9px]", text: "text-[51px]" },
   xl: { mark: "size-14", gap: "gap-3", text: "text-[72px]" },
+  "2xl": { mark: "size-20", gap: "gap-[18px]", text: "text-[103px]" },
 } as const;
 
 export interface LogoProps {

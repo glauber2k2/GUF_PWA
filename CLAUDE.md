@@ -16,7 +16,7 @@ Usuário registra treinos NA ACADEMIA, com uma mão, entre séries: registrar um
 - Monorepo: Turborepo + pnpm
 - Web: Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui
 - Dados: @supabase/supabase-js + TanStack Query
-- Formulários: React Hook Form + Zod
+- Formulários: React Hook Form + Zod (integração via @hookform/resolvers)
 - Gráficos: Recharts · Datas: date-fns · Ícones: lucide-react
 - Animações: Anime.js (v4), React Bits, Motion — sempre respeitando prefers-reduced-motion
 - PWA: Serwist · Offline do treino em andamento: Dexie (IndexedDB)
