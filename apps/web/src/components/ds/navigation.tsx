@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { CalendarDays, Dumbbell, GripVertical, House, Layers, User, type LucideIcon } from "lucide-react";
+import { CalendarDays, ClipboardList, Dumbbell, GripVertical, House, User, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
 
@@ -57,7 +57,7 @@ export const BOTTOM_NAV_ITEMS: NavItem[] = [
   { label: "Início", icon: House },
   { label: "Histórico", icon: CalendarDays },
   { label: "Treinar", icon: Dumbbell },
-  { label: "Projetos", icon: Layers },
+  { label: "Projetos", icon: ClipboardList },
   { label: "Perfil", icon: User },
 ];
 

@@ -2,3 +2,5 @@ export * from "./training";
 export * from "./format";
 export * from "./records";
 export * from "./password";
+export * from "./dates";
+export * from "./home";

@@ -1,22 +1,57 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, type ReactNode } from "react";
 import { Play, Plus, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
 
-/* Overlays usam position:absolute — coloque dentro de um container de tela com position:relative. */
+/*
+ * Overlays: por padrão usam position:absolute (dentro de um container com position:relative,
+ * como na vitrine). Nas telas do app, use placement="screen" (fixo na viewport).
+ */
 
 export interface BottomSheetProps {
   open?: boolean;
   title?: string;
   subtitle?: string;
   onClose?: () => void;
+  /** "container": dentro do pai (vitrine) · "screen": sobre a tela inteira (app). */
+  placement?: "container" | "screen";
   children?: ReactNode;
   className?: string;
 }
 
-export function BottomSheet({ open = true, title, subtitle, onClose, children, className }: BottomSheetProps) {
+export function BottomSheet({
+  open = true,
+  title,
+  subtitle,
+  onClose,
+  placement = "container",
+  children,
+  className,
+}: BottomSheetProps) {
+  const screen = placement === "screen";
+
+  // Esc fecha a folha aberta.
+  useEffect(() => {
+    if (!open || !onClose) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   return (
-    <div aria-hidden={!open} className={cn("absolute inset-0 z-30", open ? "pointer-events-auto" : "pointer-events-none")}>
+    <div
+      aria-hidden={!open}
+      inert={!open}
+      className={cn(
+        "inset-0",
+        screen ? "fixed z-40" : "absolute z-30",
+        open ? "pointer-events-auto" : "pointer-events-none",
+      )}
+    >
       <div
         onClick={onClose}
         className={cn(
@@ -26,9 +61,11 @@ export function BottomSheet({ open = true, title, subtitle, onClose, children, c
       />
       <div
         role="dialog"
+        aria-modal={open || undefined}
         aria-label={title}
         className={cn(
           "absolute inset-x-0 bottom-0 grid gap-2.5 rounded-t-xl bg-surface-elevated px-4 pt-2 pb-5 shadow-e3",
+          screen && "mx-auto max-w-[430px] pb-[calc(20px+env(safe-area-inset-bottom))]",
           open
             ? "translate-y-0 transition-transform duration-300 ease-enter"
             : "translate-y-full transition-transform duration-200 ease-exit",

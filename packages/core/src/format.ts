@@ -32,3 +32,15 @@ export function formatClock(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
+
+/** Séries × repetições planejadas: "3 × 8–12", "3 × 10" ou "3 séries" (sem reps). */
+export function formatSetsReps(sets: number, repsMin: number | null, repsMax: number | null): string {
+  if (repsMin === null && repsMax === null) return `${sets} ${sets === 1 ? "série" : "séries"}`;
+  const reps = repsMin !== null && repsMax !== null && repsMin !== repsMax ? `${repsMin}–${repsMax}` : `${repsMin ?? repsMax}`;
+  return `${sets} ${TIMES_SIGN} ${reps}`;
+}
+
+/** Plural simples em pt-BR: plural(6, "exercício", "exercícios") → "6 exercícios". */
+export function plural(count: number, one: string, many: string): string {
+  return `${formatNumber(count, 0)} ${count === 1 ? one : many}`;
+}
