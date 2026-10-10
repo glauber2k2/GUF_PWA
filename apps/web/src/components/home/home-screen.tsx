@@ -12,7 +12,7 @@ import {
   greeting,
   routineLetter,
   routineMeta,
-  suggestNextRoutine,
+  todayPlan,
   toLocalISODate,
 } from "@guf/core";
 import type { HomeSummary } from "@guf/api";
@@ -32,15 +32,20 @@ type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | { kind: "account"
 
 /**
  * Estado do card "Treino de hoje":
- * em andamento > concluído hoje > rotina sugerida do projeto ativo > sem plano > usuário novo.
+ * em andamento > concluído hoje > treino de hoje do projeto ativo (pelos dias da semana; sem dias
+ * marcados, a próxima pela ordem) ou dia de descanso > sem plano > usuário novo.
  */
 function todayState(data: HomeSummary, today: string): TodayCardState {
   if (data.inProgress) return { kind: "in_progress", session: data.inProgress };
   const todaySessions = data.weekSessions.filter((s) => s.performedOn === today);
   if (todaySessions.length > 0) return { kind: "done", sessions: todaySessions };
   const project = data.activeProject;
-  const suggested = project ? suggestNextRoutine(project.routines, data.lastFinishedRoutineId) : null;
-  if (project && suggested) return { kind: "planned", projectName: project.name, routine: suggested };
+  if (project) {
+    const date = fromLocalISODate(today);
+    const plan = todayPlan(project.routines, data.lastFinishedRoutineId, date);
+    if (plan.kind === "scheduled" || plan.kind === "sequence") return { kind: "planned", projectName: project.name, routine: plan.routine };
+    if (plan.kind === "rest") return { kind: "rest", projectName: project.name, next: plan.next, today: date };
+  }
   return data.hasAnyRoutine ? { kind: "empty" } : { kind: "new" };
 }
 

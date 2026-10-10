@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Ellipsis, GripVertical } from "lucide-react";
-import { routineLetter, routineMeta } from "@guf/core";
+import { routineLetter, routineMeta, weekdaysLabel } from "@guf/core";
 import type { ProjectRoutine } from "@guf/api";
 import { Icon, IconButton } from "@/components/ds";
 import { usePointerReorder } from "@/hooks/use-pointer-reorder";
@@ -88,7 +88,10 @@ export function RoutineList({ routines, nextRoutineId, nextLabel, disabled, onOp
                     </span>
                   )}
                 </span>
-                <span className="text-[13px] leading-[18px] text-fg-muted tabular-nums">{routineMeta(r.exercises)}</span>
+                <span className="text-[13px] leading-[18px] text-fg-muted tabular-nums">
+                  {r.weekdays.length > 0 ? `${weekdaysLabel(r.weekdays)} · ` : ""}
+                  {routineMeta(r.exercises)}
+                </span>
               </span>
             </button>
             <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${r.name}`} disabled={disabled} onClick={() => onMenu(r)} />

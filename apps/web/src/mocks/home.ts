@@ -3,12 +3,13 @@
  *
  * A tela usa os DADOS REAIS (packages/api). Este mock existe só para visualizar os
  * estados do design em DESENVOLVIMENTO, via ?estado= (ver useDevHomeState):
- * - Treino de hoje: planejado (padrão) · vazio · novo · concluido · andamento
+ * - Treino de hoje: planejado (padrão) · descanso · vazio · novo · concluido · andamento
  * - Sequência: ativa (padrão) · recorde · risco · zerada
  */
 import type { FinishedSession, GufClient, HomeApi, HomeSummary, PlannedExercise, RoutineSummary } from "@guf/api";
+import { fromLocalISODate, isoWeekday, WEEKDAYS } from "@guf/core";
 
-export type TodayScenario = "planejado" | "vazio" | "novo" | "concluido" | "andamento";
+export type TodayScenario = "planejado" | "descanso" | "vazio" | "novo" | "concluido" | "andamento";
 export type StreakScenario = "ativa" | "recorde" | "risco" | "zerada";
 
 export interface HomeMockScenario {
@@ -47,6 +48,7 @@ const ROUTINES: RoutineSummary[] = [
     id: "routine-a",
     name: "Treino A – Peito e Tríceps",
     position: 1,
+    weekdays: [],
     exercises: [
       ex("Supino reto", "peito", 4, "8-12", 120),
       ex("Supino inclinado com halteres", "peito", 3, "10"),
@@ -60,6 +62,7 @@ const ROUTINES: RoutineSummary[] = [
     id: "routine-b",
     name: "Treino B – Costas e Bíceps",
     position: 2,
+    weekdays: [],
     exercises: [
       ex("Puxada frontal", "costas", 3, "8-12"),
       ex("Remada curvada com barra", "costas", 3, "8-10", 120),
@@ -73,6 +76,7 @@ const ROUTINES: RoutineSummary[] = [
     id: "routine-c",
     name: "Treino C – Pernas e Ombros",
     position: 3,
+    weekdays: [],
     exercises: [
       ex("Agachamento livre", "quadriceps", 4, "6-10", 150),
       ex("Leg press", "quadriceps", 3, "10-12", 120),
@@ -132,12 +136,15 @@ export const getHomeSummary: HomeApi["getHomeSummary"] = async (client, { today,
   const weekSecured = weekSessions.length > 0;
   if (weekSecured && currentStreak === 0) currentStreak = 1; // a semana atual já conta
 
-  const hasProject = todayScenario === "planejado" || todayScenario === "concluido" || todayScenario === "andamento";
+  const hasProject = todayScenario !== "vazio" && todayScenario !== "novo";
+  // "descanso": rotinas com dias marcados, nenhum hoje (a Início mostra o próximo treino da semana).
+  const restDays = WEEKDAYS.map((d) => d.iso).filter((d) => d !== isoWeekday(fromLocalISODate(today)));
+  const routines = todayScenario === "descanso" ? ROUTINES.map((r, i) => ({ ...r, weekdays: restDays.filter((_, j) => j % 3 === i) })) : ROUTINES;
   const startedAt = new Date(Date.now() - 25 * 60_000).toISOString();
 
   const summary: HomeSummary = {
     profile: { name: "Lucas Almeida", weeklyGoal: streakScenario === "zerada" ? 3 : 4 },
-    activeProject: hasProject ? { ...PROJECT, routines: ROUTINES } : null,
+    activeProject: hasProject ? { ...PROJECT, routines } : null,
     hasAnyRoutine: !isNew,
     lastFinishedRoutineId: isNew ? null : "routine-a",
     trainingDays,

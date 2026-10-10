@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ClipboardList, Plus } from "lucide-react";
-import { groupProjects, suggestedRoutine, toLocalISODate } from "@guf/core";
+import { groupProjects, highlightedRoutine, toLocalISODate } from "@guf/core";
 import type { ProjectsOverview } from "@guf/api";
 import { AppHeader, Banner, Button, EmptyState, LargeTitle } from "@/components/ds";
 import { useProjectsOverview, useProjectsSource } from "@/hooks/use-projects";
@@ -66,7 +66,8 @@ function ListLayout({ canEdit, onNew, children }: { canEdit: boolean; onNew: (()
 function ProjectsContent({ overview, actions }: { overview: ProjectsOverview; actions: ReturnType<typeof useProjectActions> }) {
   const router = useRouter();
   const { active, others, archived } = groupProjects(overview.projects);
-  const next = active ? suggestedRoutine(active.routines, overview.lastFinished, toLocalISODate(new Date())) : null;
+  const now = new Date();
+  const next = active ? highlightedRoutine(active.routines, overview.lastFinished, now, toLocalISODate(now)) : null;
   const disabled = !actions.canEdit || actions.busy;
   const flows = useProjectFlows({
     activeProject: active,

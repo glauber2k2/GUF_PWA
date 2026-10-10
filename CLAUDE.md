@@ -58,7 +58,7 @@ guf-app/
 - **Só em desenvolvimento:** páginas com extensão `.dev.tsx` (ex.: `/design-system`, reconhecidas só no `next dev` via `pageExtensions`) e parâmetros de teste como `?estado=` (protegidos por `process.env.NODE_ENV === "development"`, eliminados do build de produção).
 - **Rotas e proteção (no cliente; quem protege os dados é o RLS):** grupo `(app)` exige sessão e aceite (`RequireAuth` + `AppShell` com menu inferior); `(auth)` = /login e /cadastro (logado segue para o app); `(consent)` = /aceite. `?next=` só aceita caminhos internos (`safeNextPath`).
 - **Datas:** sempre no fuso local do aparelho (`packages/core/src/dates.ts`); semana de segunda a domingo.
-- **Erros da API:** códigos e mensagens em `packages/api/src/result.ts` (`toApiError`): `workout_in_progress` (23505), `workout_not_found` (P0002), `not_authenticated`, `network_error`, `unknown`.
+- **Erros da API:** códigos e mensagens em `packages/api/src/result.ts` (`toApiError`): `workout_in_progress` (23505), `workout_not_found` (P0002), `project_not_found` (GP001), `project_locked` (GP002, Favoritos), `routine_empty` (GP003), `routine_not_found` (GP004), `not_authenticated`, `network_error`, `unknown`.
 
 ## Treino em andamento (offline-first)
 - **Escrita sempre pela fila** (`apps/web/src/lib/offline/`, Dexie): a tela altera o estado local na hora e enfileira a operação com `enqueue(op)`; `flushOutbox()` envia em ordem quando há internet (eventos online/visibilidade + intervalo de 20s). Nunca chamar as funções de escrita da API direto da tela, exceto `finishWorkout` online.
@@ -77,6 +77,14 @@ guf-app/
 - **Ações** (`use-project-actions.ts`): ativar (RPC `activate_project`), desativar, arquivar (também desativa), restaurar, arquivar rotina e reordenar — cada uma com toast e "Desfazer". Após gravar: `invalidatePlanningData` (Projetos + Início).
 - **Menus, folhas e confirmações** ficam em `project-flows.tsx` (usado pela lista e pelo detalhe).
 - **Estados de desenvolvimento:** `?estado=` padrao · nenhum-ativo · novo · sem-rotinas · erro · carregando · offline · queda (gravações falham como queda de conexão).
+- **Favoritos:** projeto padrão de todo usuário (`projects.is_favorites`), criado no cadastro (`handle_new_user`; ativo para usuário novo). Não existe rotina avulsa: rotinas sem outro projeto ficam nele. O banco recusa renomear, arquivar, excluir ou criar outro pelo app (gatilho `protect_favorites_project`, erro GP002); o app esconde essas opções. A exclusão da conta apaga tudo normalmente.
+
+## Rotina (/rotina?id=… para editar · /rotina?projeto=… para nova)
+- **Tela imersiva** (sem menu inferior): nome, projeto, dias da semana, exercícios planejados (séries 1–20, repetições alvo em texto livre até 20 caracteres, descanso 45 s/1:00/1:30/2:00/3:00, observação), trocar (mantém séries, repetições, descanso e observação), remover (com "Desfazer") e reordenar (`usePointerReorder`).
+- **Rascunho + "Salvar":** as mudanças ficam na tela (`routine-draft.ts`) e são gravadas de uma vez pela RPC `save_routine` (transação: nome, projeto, dias e exercícios; ids dos exercícios gerados no app; os que saíram da lista são apagados). Sair com mudanças pede confirmação.
+- **Validação** (`routineDraftSchema` em packages/schemas): nome obrigatório e pelo menos 1 exercício com repetições. Exercício novo: 3 × 10, descanso 90 s.
+- Exercícios criados no seletor entram pela fila offline: `flushOutbox()` antes de salvar a rotina.
+- Só online (mesma regra de Projetos). Estados de desenvolvimento: os mesmos `?estado=` de Projetos (mock compartilha a memória).
 
 ## Histórico (/historico)
 - **Dados:** `packages/api/src/history.ts` — `getHistoryOverview` (dias treinados das últimas 104 semanas + `get_streak()` + meta + unidade + data do 1º treino), `getTrainingDays` (mês do calendário) e `getDaySessions` (treinos do dia, com recordes). Mapeadores comuns com a Início em `packages/api/src/shared.ts`.
@@ -107,6 +115,7 @@ Funções RPC:
 | `pause_workout(p_session_id, p_at)` / `resume_workout(p_session_id, p_at)` | Pausar/retomar (idempotentes; `p_at` = hora real da ação, para envio offline; o servidor limita a horários válidos) |
 | `finish_workout(p_session_id)` | Finaliza treino: fecha o período aberto, grava `active_seconds`; retorna resumo (`duration_seconds` = tempo efetivo, `elapsed_seconds`, `pauses`) + `personal_records` |
 | `activate_project(p_project_id)` | Ativa o projeto e desativa o anterior na mesma transação (um ativo por usuário). Erro próprio `GP001` = projeto não encontrado ou arquivado (não usar os códigos de treino) |
+| `save_routine(p_routine_id, p_project_id, p_name, p_weekdays, p_exercises)` | Cria (`p_routine_id` nulo) ou atualiza a rotina e seus exercícios planejados numa transação; mudar de projeto põe a rotina no fim da lista. Erros GP001, GP003, GP004 |
 | `get_exercise_history(p_exercise_id, p_from)` / `get_exercise_records(p_exercise_id)` | Evolução e recordes |
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |
@@ -128,8 +137,8 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - **Exercício adicionado no treino:** séries do último desempenho (`get_last_performance`), recorde de `get_exercise_records` e descanso de `routine_exercises.rest_seconds` (padrão 90s); sem internet, 3 séries vazias.
 - **Observação de exercício:** salva no session_exercise e na `routine_exercises.notes` (vale para os próximos treinos da rotina).
 - **Unidade de peso:** `toDisplayWeight`/`fromDisplayWeight` em `packages/core/src/units.ts`; edição em lb com passo 5, em kg com passo 2,5.
-- **Rotina sugerida para hoje:** a próxima do projeto ativo depois da última concluída, seguindo `position`, voltando para a primeira depois da última. Sem histórico → a primeira.
-- **Card "Treino de hoje" (prioridade):** em andamento > concluído hoje > rotina sugerida > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina).
+- **Treino de hoje (projeto ativo):** pelos dias da semana das rotinas (`routines.weekdays`, ISO 1 = segunda … 7 = domingo). Rotina marcada para hoje → é o treino de hoje (várias no mesmo dia: a primeira pela ordem; as demais em "Trocar rotina"). O projeto usa dias e nenhuma rotina é de hoje → **dia de descanso** + o próximo treino da semana ("Amanhã" ou "Qua, 14 out"). Nenhuma rotina com dia marcado → a próxima pela ordem (`position`) depois da última concluída, voltando para a primeira; sem histórico, a primeira. Regra em `todayPlan` (`packages/core/src/schedule.ts`).
+- **Card "Treino de hoje" (prioridade):** em andamento > concluído hoje > treino de hoje do projeto ativo **ou** dia de descanso > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina).
 - **Streak:** semana (seg–dom) conta com ≥ 1 treino concluído; semana inteira sem treino zera. `weekly_goal` é só para exibição.
 - **Textos do card de sequência** (constantes `STREAK_MESSAGES`, `streakWords` e `weeklyGoalLabel` em packages/core/src/home.ts, usadas na Início e no Histórico): número + "semanas" com "seguidas treinando" abaixo (lê-se "semanas seguidas treinando"); `week_secured` → "Semana garantida ✓" (o ✓ é o ícone Check do lucide) + "X de Y treinos da sua meta" quando houver meta; `streak_at_risk` → "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até domingo e comece sua sequência."; destaque dourado de recorde quando `current_streak` = `best_streak` e > 0.
 - **Série concluída:** só conta o que foi marcado como concluído. Ao finalizar, `finish_workout` APAGA as séries não concluídas (e exercícios que ficaram sem séries) antes de calcular resumo e recordes; histórico, calendário, "anterior" e recordes leem só séries concluídas. O recorde só aparece ao concluir a série (`markLoadRecords` ignora não concluídas e aquecimento).

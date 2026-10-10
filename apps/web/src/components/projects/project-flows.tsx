@@ -63,7 +63,10 @@ export function useProjectFlows({
       <BottomSheet placement="screen" open={overlay === "project-menu"} onClose={close} title={project?.name}>
         {project && (
           <>
-            <SheetOption icon={Pencil} title="Editar nome e descrição" onClick={() => open("project-form", { project })} />
+            {/* Favoritos é fixo: sem renomear nem arquivar. */}
+            {!project.isFavorites && (
+              <SheetOption icon={Pencil} title="Editar nome e descrição" onClick={() => open("project-form", { project })} />
+            )}
             {project.isActive ? (
               <SheetOption
                 icon={CircleOff}
@@ -82,12 +85,14 @@ export function useProjectFlows({
                 onClick={() => requestActivate(project)}
               />
             )}
-            <SheetOption
-              icon={Archive}
-              title="Arquivar projeto"
-              subtitle="Treinos feitos continuam no histórico"
-              onClick={() => open("confirm-archive", { project })}
-            />
+            {!project.isFavorites && (
+              <SheetOption
+                icon={Archive}
+                title="Arquivar projeto"
+                subtitle="Treinos feitos continuam no histórico"
+                onClick={() => open("confirm-archive", { project })}
+              />
+            )}
           </>
         )}
       </BottomSheet>
@@ -121,7 +126,7 @@ export function useProjectFlows({
         }}
       />
 
-      <RoutineNameSheet open={overlay === "routine-form"} project={project} routine={routine ?? undefined} onClose={close} />
+      <RoutineNameSheet open={overlay === "routine-form"} project={project} routine={routine} onClose={close} />
 
       <ConfirmDialog
         placement="screen"
@@ -173,7 +178,6 @@ export function useProjectFlows({
     /** Novo projeto: `project` vazio indica criação. */
     openNewProject: () => open("project-form"),
     openProjectMenu: (target: Project) => open("project-menu", { project: target }),
-    openNewRoutine: (target: Project) => open("routine-form", { project: target }),
     openRoutineMenu: (target: Project, targetRoutine: ProjectRoutine) => open("routine-menu", { project: target, routine: targetRoutine }),
   };
 }

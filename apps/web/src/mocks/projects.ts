@@ -19,27 +19,43 @@ function ignoreClient(client: GufClient) {
 }
 
 const planned = (count: number) => Array.from({ length: count }, () => ({ targetSets: 3, restSeconds: 90 }));
-const routine = (id: string, name: string, position: number, exercises: number): ProjectRoutine => ({
+const routine = (id: string, name: string, position: number, exercises: number, weekdays: number[] = []): ProjectRoutine => ({
   id,
   name,
   position,
+  weekdays,
   exercises: planned(exercises),
 });
 
+/** Projeto padrão de todo usuário (fixo; criado no cadastro). */
+const favorites = (isActive: boolean, routines: ProjectRoutine[] = []): Project => ({
+  id: "p-favoritos",
+  name: "Favoritos",
+  description: null,
+  isActive,
+  isFavorites: true,
+  archivedAt: null,
+  createdAt: "2026-01-01T12:00:00Z",
+  routines,
+});
+
 function seed(scenario: ProjectsMockScenario): Project[] {
-  if (scenario === "novo") return [];
+  // Usuário novo: só o Favoritos (ativo, sem rotinas).
+  if (scenario === "novo") return [favorites(true)];
   const projects: Project[] = [
+    favorites(false, [routine("r-fav", "Peito em casa", 1, 4)]),
     {
       id: "p-abc",
       name: "Hipertrofia 2026 – ABC",
       description: "Foco em volume, 3 vezes por semana.",
       isActive: scenario !== "nenhum-ativo",
+      isFavorites: false,
       archivedAt: null,
       createdAt: "2026-09-02T12:00:00Z",
       routines: [
-        routine("r-a", "Treino A – Peito e Tríceps", 1, 6),
-        routine("r-b", "Treino B – Costas e Bíceps", 2, 6),
-        routine("r-c", "Treino C – Pernas e Ombros", 3, 7),
+        routine("r-a", "Treino A – Peito e Tríceps", 1, 6, [1, 4]),
+        routine("r-b", "Treino B – Costas e Bíceps", 2, 6, [2, 5]),
+        routine("r-c", "Treino C – Pernas e Ombros", 3, 7, [3, 6]),
       ],
     },
     {
@@ -47,6 +63,7 @@ function seed(scenario: ProjectsMockScenario): Project[] {
       name: "Força 5x5",
       description: "Básicos pesados com progressão linear.",
       isActive: false,
+      isFavorites: false,
       archivedAt: null,
       createdAt: "2026-08-01T12:00:00Z",
       routines:
@@ -59,6 +76,7 @@ function seed(scenario: ProjectsMockScenario): Project[] {
       name: "Mobilidade e core",
       description: null,
       isActive: false,
+      isFavorites: false,
       archivedAt: null,
       createdAt: "2026-07-01T12:00:00Z",
       routines: [routine("r-core", "Core e alongamento", 1, 5)],
@@ -68,6 +86,7 @@ function seed(scenario: ProjectsMockScenario): Project[] {
       name: "Adaptação 2025",
       description: null,
       isActive: false,
+      isFavorites: false,
       archivedAt: "2026-03-10T12:00:00Z",
       createdAt: "2025-01-10T12:00:00Z",
       routines: [routine("r-fa", "Full body A", 1, 6), routine("r-fb", "Full body B", 2, 6)],
@@ -138,6 +157,7 @@ export const mockProjectsApi = {
         name: name.trim(),
         description: description.trim() || null,
         isActive: activate,
+        isFavorites: false,
         archivedAt: null,
         createdAt: new Date().toISOString(),
         routines: [],
@@ -155,17 +175,10 @@ export const mockProjectsApi = {
     }),
   deactivateProject: (client, { projectId }) => mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, isActive: false }))),
   archiveProject: (client, { projectId }) =>
-    mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, isActive: false, archivedAt: new Date().toISOString() }))),
+    store.find((p) => p.id === projectId)?.isFavorites
+      ? Promise.resolve({ data: null, error: apiError("project_locked") })
+      : mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, isActive: false, archivedAt: new Date().toISOString() }))),
   restoreProject: (client, { projectId }) => mutateVoid(client, () => updateProject(projectId, (p) => ({ ...p, archivedAt: null }))),
-  createRoutine: (client, { projectId, name }) =>
-    mutate(client, () => {
-      const id = `r-${++uid}`;
-      const found = updateProject(projectId, (p) => ({
-        ...p,
-        routines: [...p.routines, routine(id, name.trim(), nextPosition(p.routines.map((r) => r.position)), 0)],
-      }));
-      return found ? { id } : null;
-    }),
   renameRoutine: (client, { routineId, name }) =>
     mutateVoid(client, () => {
       const project = findRoutineProject(routineId);
@@ -198,3 +211,34 @@ export const mockProjectsApi = {
       return true;
     }),
 } satisfies ProjectsApi;
+
+/* ---------------------------------------------------------------------
+ * Apoio ao mock da tela de Rotina (mocks/routines.ts): mesma memória dos projetos.
+ * --------------------------------------------------------------------- */
+
+/** As gravações devem simular queda de conexão? */
+export function mockDropsOnSave(): boolean {
+  return dropOnSave;
+}
+
+/** Projeto e rotina (em uso) pelo id da rotina. */
+export function findMockRoutine(routineId: string): { project: Project; routine: ProjectRoutine } | null {
+  const project = findRoutineProject(routineId);
+  const target = project?.routines.find((r) => r.id === routineId);
+  return project && target ? { project, routine: target } : null;
+}
+
+/** Grava o resumo da rotina na memória (nome, dias, projeto e exercícios planejados). */
+export function saveMockRoutine(input: { id: string; projectId: string; name: string; weekdays: number[]; exercises: ProjectRoutine["exercises"] }): boolean {
+  const target = store.find((p) => p.id === input.projectId && !p.archivedAt);
+  if (!target) return false;
+  const current = findMockRoutine(input.id);
+  const position = current && current.project.id === input.projectId ? current.routine.position : nextPosition(target.routines.map((r) => r.position));
+  const saved: ProjectRoutine = { id: input.id, name: input.name.trim(), position, weekdays: input.weekdays, exercises: input.exercises };
+  store = store.map((p) => {
+    const others = p.routines.filter((r) => r.id !== input.id);
+    if (p.id !== input.projectId) return { ...p, routines: others };
+    return { ...p, routines: [...others, saved].sort((a, b) => a.position - b.position) };
+  });
+  return true;
+}

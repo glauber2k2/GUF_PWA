@@ -17,12 +17,11 @@ import { SaveErrorBanner, useSaveState } from "./save-state";
 export interface RoutineNameSheetProps {
   open: boolean;
   project: Project | null;
-  /** Rotina a renomear; ausente = nova rotina (no fim da lista). */
-  routine?: ProjectRoutine;
+  routine: ProjectRoutine | null;
   onClose: () => void;
 }
 
-/** Nova rotina / renomear rotina (só o nome; os exercícios são montados na tela da rotina). */
+/** Renomear rotina (nome, dias e exercícios completos ficam na tela da rotina). */
 export function RoutineNameSheet({ open, project, routine, onClose }: RoutineNameSheetProps) {
   const { api } = useProjectsSource();
   const queryClient = useQueryClient();
@@ -47,16 +46,13 @@ export function RoutineNameSheet({ open, project, routine, onClose }: RoutineNam
   const nameLength = useWatch({ control, name: "name" }).trim().length;
 
   const onSubmit = handleSubmit(async ({ name }) => {
-    if (!project || !save.ensureOnline()) return;
+    if (!routine || !save.ensureOnline()) return;
     setSubmitting(true);
-    const client = getSupabaseClient();
-    const result = routine
-      ? await api.renameRoutine(client, { routineId: routine.id, name })
-      : await api.createRoutine(client, { projectId: project.id, name });
+    const result = await api.renameRoutine(getSupabaseClient(), { routineId: routine.id, name });
     setSubmitting(false);
     if (result.error) return save.fail(result.error);
     await invalidatePlanningData(queryClient);
-    shell.showToast(routine ? "Rotina renomeada" : "Rotina criada", { icon: CircleCheck });
+    shell.showToast("Rotina renomeada", { icon: CircleCheck });
     onClose();
   });
 
@@ -65,7 +61,7 @@ export function RoutineNameSheet({ open, project, routine, onClose }: RoutineNam
       placement="screen"
       open={open}
       onClose={onClose}
-      title={routine ? "Renomear rotina" : "Nova rotina"}
+      title="Renomear rotina"
       subtitle={project?.name}
     >
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3">

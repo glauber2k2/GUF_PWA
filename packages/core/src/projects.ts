@@ -1,7 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { plural } from "./format";
-import { suggestNextRoutine, type RoutineOrder } from "./home";
 import { estimateRoutineMinutes } from "./workout";
 
 /** Regras da aba Projetos (puras, sem React). */
@@ -35,12 +34,14 @@ export function routineMeta(exercises: ReadonlyArray<{ targetSets: number | null
 export interface ProjectLike {
   id: string;
   isActive: boolean;
+  /** Projeto padrão "Favoritos" (fixo; aparece primeiro entre os demais). */
+  isFavorites?: boolean;
   archivedAt: string | null;
   createdAt: string;
 }
 
 /**
- * Lista de projetos da tela: o ativo (no máximo um), os demais em uso (mais recentes primeiro)
+ * Lista de projetos da tela: o ativo (no máximo um), os demais em uso (Favoritos primeiro, depois os mais recentes)
  * e os arquivados (arquivados mais recentemente primeiro).
  */
 export function groupProjects<T extends ProjectLike>(projects: readonly T[]): { active: T | null; others: T[]; archived: T[] } {
@@ -48,7 +49,9 @@ export function groupProjects<T extends ProjectLike>(projects: readonly T[]): { 
   const byNewest = (a: string, b: string) => b.localeCompare(a);
   return {
     active: live.find((p) => p.isActive) ?? null,
-    others: live.filter((p) => !p.isActive).sort((a, b) => byNewest(a.createdAt, b.createdAt)),
+    others: live
+      .filter((p) => !p.isActive)
+      .sort((a, b) => Number(Boolean(b.isFavorites)) - Number(Boolean(a.isFavorites)) || byNewest(a.createdAt, b.createdAt)),
     archived: projects.filter((p) => p.archivedAt).sort((a, b) => byNewest(a.archivedAt ?? "", b.archivedAt ?? "")),
   };
 }
@@ -104,20 +107,21 @@ export function nextPosition(positions: readonly number[]): number {
 }
 
 /* ---------------------------------------------------------------------
- * Rotina sugerida do projeto ativo
+ * Edição de rotina (exercícios planejados)
  * --------------------------------------------------------------------- */
 
-/**
- * Rotina que a Início sugere (próxima depois da última concluída, pela ordem) e o rótulo:
- * "Hoje" ou, se já treinou hoje, "Próximo".
- */
-export function suggestedRoutine<T extends RoutineOrder>(
-  routines: readonly T[],
-  lastFinished: { routineId: string; performedOn: string } | null,
-  todayIso: string,
-): { routine: T | null; label: "Hoje" | "Próximo" } {
-  return {
-    routine: suggestNextRoutine(routines, lastFinished?.routineId ?? null),
-    label: lastFinished?.performedOn === todayIso ? "Próximo" : "Hoje",
-  };
+/** Opções de descanso entre séries (segundos). */
+export const ROUTINE_REST_OPTIONS = [45, 60, 90, 120, 180] as const;
+
+/** Exercício recém-adicionado à rotina: 3 séries de 10, descanso padrão de 90 s. */
+export const NEW_PLANNED_EXERCISE = { targetSets: 3, targetReps: "10", restSeconds: 90, notes: "" } as const;
+
+/** "6 exercícios · 19 séries · ~55 min"; vazia → "Nenhum exercício". */
+export function routineDraftSummary(exercises: ReadonlyArray<{ targetSets: number; restSeconds: number }>): string {
+  if (exercises.length === 0) return "Nenhum exercício";
+  const sets = exercises.reduce((total, e) => total + e.targetSets, 0);
+  const minutes = estimateRoutineMinutes(exercises);
+  return [plural(exercises.length, "exercício", "exercícios"), plural(sets, "série", "séries"), minutes ? `~${minutes} min` : null]
+    .filter(Boolean)
+    .join(" · ");
 }

@@ -3,13 +3,13 @@
 import { useEffect, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Archive, ChevronLeft, CircleCheck, Ellipsis, ListPlus, Plus, SearchX } from "lucide-react";
-import { groupProjects, projectMeta, suggestedRoutine, toLocalISODate } from "@guf/core";
+import { groupProjects, highlightedRoutine, projectMeta, toLocalISODate } from "@guf/core";
 import type { Project, ProjectsOverview } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
 import { Banner, Button, EmptyState, IconButton, SheetOption, Skeleton } from "@/components/ds";
 import { useProjectsOverview, useProjectsSource } from "@/hooks/use-projects";
 import { OfflineEditBanner } from "./offline-edit-banner";
-import { PROJECTS_PATH } from "./paths";
+import { newRoutinePath, PROJECTS_PATH, routinePath } from "./paths";
 import { ActiveBadge, SectionLabel } from "./project-cards";
 import { useProjectFlows } from "./project-flows";
 import { RoutineList } from "./routine-list";
@@ -81,10 +81,13 @@ function DetailContent({
   onBack: () => void;
 }) {
   const shell = useAppShell();
+  const router = useRouter();
+  const newRoutine = () => router.push(newRoutinePath(project.id));
   const { active } = groupProjects(overview.projects);
   const disabled = !actions.canEdit || actions.busy;
   const flows = useProjectFlows({ activeProject: active, actions, onProjectArchived: onBack });
-  const next = project.isActive ? suggestedRoutine(project.routines, overview.lastFinished, toLocalISODate(new Date())) : null;
+  const now = new Date();
+  const next = project.isActive ? highlightedRoutine(project.routines, overview.lastFinished, now, toLocalISODate(now)) : null;
   const showActivateBar = !project.isActive;
 
   // Barra "Ativar este projeto" fixa acima do menu: o toast sobe para não cobri-la.
@@ -129,11 +132,11 @@ function DetailContent({
             nextRoutineId={next?.routine?.id ?? null}
             nextLabel={next?.label ?? "Hoje"}
             disabled={disabled}
-            onOpen={() => shell.showToast("A edição da rotina chega em breve")}
+            onOpen={(r) => router.push(routinePath(r.id))}
             onMenu={(r) => flows.openRoutineMenu(project, r)}
             onReorder={actions.reorder}
           />
-          {actions.canEdit && <SheetOption icon={Plus} title="Nova rotina" dashed onClick={() => flows.openNewRoutine(project)} />}
+          {actions.canEdit && <SheetOption icon={Plus} title="Nova rotina" dashed onClick={newRoutine} />}
         </>
       ) : (
         <div className="mt-3 animate-guf-rise-fast">
@@ -142,7 +145,7 @@ function DetailContent({
             title="Nenhuma rotina ainda"
             message="Crie as rotinas deste projeto, como Treino A, B e C."
             actionLabel={actions.canEdit ? "Nova rotina" : undefined}
-            onAction={() => flows.openNewRoutine(project)}
+            onAction={newRoutine}
           />
         </div>
       )}
