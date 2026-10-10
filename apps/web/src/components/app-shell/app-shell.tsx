@@ -2,8 +2,8 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Info, Plus } from "lucide-react";
-import { plural, suggestNextRoutine, toLocalISODate } from "@guf/core";
+import { Info, Play, Plus } from "lucide-react";
+import { estimateRoutineMinutes, plural, startedAgoLabel, suggestNextRoutine, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
 import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
@@ -24,6 +24,8 @@ interface AppShellApi {
   openStartSheet: () => void;
   /** Inicia um treino (rotina ou vazio) e avisa o resultado. */
   startWorkout: (routine: Pick<RoutineSummary, "id" | "name"> | null) => void;
+  /** Abre o treino em andamento (tela de treino: /treino?id=…). */
+  openWorkout: (sessionId: string) => void;
 }
 
 const AppShellContext = createContext<AppShellApi | null>(null);
@@ -47,7 +49,8 @@ export function routineLetter(name: string): string {
 
 export function routineMeta(routine: RoutineSummary): string {
   const parts = [plural(routine.exercises.length, "exercício", "exercícios")];
-  if (routine.estimatedMinutes) parts.push(`~${routine.estimatedMinutes} min`);
+  const minutes = estimateRoutineMinutes(routine.exercises);
+  if (minutes) parts.push(`~${minutes} min`);
   return parts.join(" · ");
 }
 
@@ -86,15 +89,27 @@ export function AppShell({ children }: { children: ReactNode }) {
     [start, showToast],
   );
 
+  // A tela de treino (/treino?id=…) entra numa próxima etapa; até lá, só o aviso.
+  const openWorkout = useCallback(
+    (sessionId: string) => {
+      void sessionId;
+      setStartOpen(false);
+      showToast("A tela de treino chega em breve");
+    },
+    [showToast],
+  );
+
   const api = useMemo<AppShellApi>(
-    () => ({ showToast, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor }),
-    [showToast, startWorkoutFor],
+    () => ({ showToast, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor, openWorkout }),
+    [showToast, startWorkoutFor, openWorkout],
   );
 
   const tabIndex = Math.max(0, TAB_ROUTES.findIndex((t) => t.path === pathname));
+  const inProgress = summary.data?.inProgress ?? null;
 
   const onNav = (index: number) => {
-    if (index === 2) return setStartOpen(true);
+    // "Treinar": com treino aberto, retoma (um treino em andamento por vez); senão, escolhe o que iniciar.
+    if (index === 2) return inProgress ? openWorkout(inProgress.id) : setStartOpen(true);
     const tab = TAB_ROUTES[index];
     if (!tab || tab.path === pathname) return;
     if (tab.path) return router.push(tab.path);
@@ -132,20 +147,38 @@ export function AppShell({ children }: { children: ReactNode }) {
         placement="screen"
         open={startOpen}
         onClose={() => setStartOpen(false)}
-        title="Iniciar treino"
-        subtitle={data?.activeProject?.name}
+        title={inProgress ? "Treino em andamento" : "Iniciar treino"}
+        subtitle={inProgress ? undefined : data?.activeProject?.name}
       >
-        {routines.map((r) => (
-          <SheetOption
-            key={r.id}
-            letter={routineLetter(r.name)}
-            title={r.name}
-            subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r)}` : routineMeta(r)}
-            highlighted={r.id === suggested?.id}
-            onClick={() => startWorkoutFor(r)}
-          />
-        ))}
-        <SheetOption icon={Plus} title="Treino vazio" dashed onClick={() => startWorkoutFor(null)} />
+        {inProgress ? (
+          // O banco aceita só 1 treino em andamento: oferecer retomar em vez de iniciar outro.
+          <>
+            <p className="m-0 text-sm leading-5 text-fg-secondary">
+              Finalize o treino aberto antes de começar outro.
+            </p>
+            <SheetOption
+              icon={Play}
+              title={inProgress.name}
+              subtitle={`Retomar · ${startedAgoLabel(inProgress.startedAt)}`}
+              highlighted
+              onClick={() => openWorkout(inProgress.id)}
+            />
+          </>
+        ) : (
+          <>
+            {routines.map((r) => (
+              <SheetOption
+                key={r.id}
+                letter={routineLetter(r.name)}
+                title={r.name}
+                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r)}` : routineMeta(r)}
+                highlighted={r.id === suggested?.id}
+                onClick={() => startWorkoutFor(r)}
+              />
+            ))}
+            <SheetOption icon={Plus} title="Treino vazio" dashed onClick={() => startWorkoutFor(null)} />
+          </>
+        )}
       </BottomSheet>
     </AppShellContext.Provider>
   );
