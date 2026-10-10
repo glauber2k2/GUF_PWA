@@ -10,11 +10,13 @@ import {
   formatShortDate,
   fromLocalISODate,
   greeting,
-  suggestNextRoutine,
+  routineLetter,
+  routineMeta,
+  todayPlan,
   toLocalISODate,
 } from "@guf/core";
 import type { HomeSummary } from "@guf/api";
-import { routineLetter, routineMeta, useAppShell } from "@/components/app-shell/app-shell";
+import { useAppShell } from "@/components/app-shell/app-shell";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
@@ -30,15 +32,20 @@ type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | { kind: "account"
 
 /**
  * Estado do card "Treino de hoje":
- * em andamento > concluído hoje > rotina sugerida do projeto ativo > sem plano > usuário novo.
+ * em andamento > concluído hoje > treino de hoje do projeto ativo (pelos dias da semana; sem dias
+ * marcados, a próxima pela ordem) ou dia de descanso > sem plano > usuário novo.
  */
 function todayState(data: HomeSummary, today: string): TodayCardState {
   if (data.inProgress) return { kind: "in_progress", session: data.inProgress };
   const todaySessions = data.weekSessions.filter((s) => s.performedOn === today);
   if (todaySessions.length > 0) return { kind: "done", sessions: todaySessions };
   const project = data.activeProject;
-  const suggested = project ? suggestNextRoutine(project.routines, data.lastFinishedRoutineId) : null;
-  if (project && suggested) return { kind: "planned", projectName: project.name, routine: suggested };
+  if (project) {
+    const date = fromLocalISODate(today);
+    const plan = todayPlan(project.routines, data.lastFinishedRoutineId, date);
+    if (plan.kind === "scheduled" || plan.kind === "sequence") return { kind: "planned", projectName: project.name, routine: plan.routine };
+    if (plan.kind === "rest") return { kind: "rest", projectName: project.name, next: plan.next, today: date };
+  }
   return data.hasAnyRoutine ? { kind: "empty" } : { kind: "new" };
 }
 
@@ -164,7 +171,7 @@ function HomeContent({
             onSwapRoutine: () => onOpenSheet({ kind: "swap" }),
             onStartEmpty: () => shell.startWorkout(null),
             onChooseRoutine: shell.openStartSheet,
-            onCreateRoutine: () => onSoon("A criação de rotinas"),
+            onCreateRoutine: () => router.push("/projetos"),
             onOpenSummary: () => onSoon("O resumo do treino"),
           }}
         />
@@ -212,7 +219,7 @@ function SwapSheet({
           key={r.id}
           letter={routineLetter(r.name)}
           title={r.name}
-          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r)}` : routineMeta(r)}
+          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r.exercises)}` : routineMeta(r.exercises)}
           highlighted={r.id === currentId}
           onClick={() => {
             onClose();

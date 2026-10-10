@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Dumbbell,
   List,
+  Moon,
   Play,
   Plus,
   RotateCcw,
@@ -19,7 +20,10 @@ import {
   formatNumber,
   formatPlannedSets,
   plannedSetCount,
+  nextTrainingDayLabel,
   plural,
+  routineLetter,
+  routineMeta,
   routineMuscleGroups,
   startedAgoLabel,
 } from "@guf/core";
@@ -34,6 +38,8 @@ const PREVIEW_COUNT = 3;
 export type TodayCardState =
   | { kind: "in_progress"; session: InProgressSession }
   | { kind: "planned"; projectName: string; routine: RoutineSummary }
+  /** O projeto usa dias da semana e nenhuma rotina é de hoje: descanso + próximo treino da semana. */
+  | { kind: "rest"; projectName: string; next: { routine: RoutineSummary; date: Date } | null; today: Date }
   | { kind: "empty" }
   | { kind: "new" }
   | { kind: "done"; sessions: FinishedSession[] };
@@ -97,8 +103,43 @@ function NoPlanCard({ icon, message, actions, isNew }: { icon: LucideIcon; messa
   );
 }
 
-/** Card "Treino de hoje": planejado · sem plano · usuário novo · concluído. */
+/** Dia de descanso no plano: mensagem tranquila e, menor, o próximo treino da semana. */
+function RestCard({ state, actions }: { state: Extract<TodayCardState, { kind: "rest" }>; actions: TodayCardActions }) {
+  const { next } = state;
+  return (
+    <section aria-label="Treino de hoje" className={CARD}>
+      <span className={cn(OVERLINE, "text-fg-muted")}>{state.projectName}</span>
+      <div className="mt-3 flex items-center gap-3.5">
+        <span className="grid size-12 flex-none place-items-center rounded-md bg-surface-3 text-fg-secondary">
+          <Icon icon={Moon} size={24} />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <h2 className="m-0 text-lg leading-6 font-semibold text-pretty">Hoje é dia de descanso</h2>
+          <span className="text-sm leading-5 text-pretty text-fg-secondary">Recuperar também faz parte da evolução.</span>
+        </div>
+      </div>
+      {next && (
+        <div className="mt-4 flex items-center gap-3 rounded-md bg-surface-3 px-3 py-2.5">
+          <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-surface font-display text-lg font-bold">
+            {routineLetter(next.routine.name)}
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className={cn(OVERLINE, "text-accent-text")}>Próximo treino · {nextTrainingDayLabel(next.date, state.today)}</span>
+            <span className="truncate text-sm leading-5 font-medium">{next.routine.name}</span>
+            <span className="text-xs leading-4 text-fg-muted tabular-nums">{routineMeta(next.routine.exercises)}</span>
+          </span>
+        </div>
+      )}
+      <Button variant="ghost" icon={Dumbbell} fullWidth className="mt-3" onClick={actions.onChooseRoutine}>
+        Treinar mesmo assim
+      </Button>
+    </section>
+  );
+}
+
+/** Card "Treino de hoje": planejado · descanso · sem plano · usuário novo · concluído. */
 export function TodayCard({ state, actions }: { state: TodayCardState; actions: TodayCardActions }) {
+  if (state.kind === "rest") return <RestCard state={state} actions={actions} />;
   if (state.kind === "empty") {
     return <NoPlanCard icon={Calendar} message="Monte um treino na hora ou escolha uma das suas rotinas." actions={actions} isNew={false} />;
   }

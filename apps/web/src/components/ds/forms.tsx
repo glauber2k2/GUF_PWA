@@ -62,6 +62,43 @@ export function TextField({ label, error, hint, size = "md", id, className, ...r
   );
 }
 
+export interface TextAreaFieldProps extends ComponentPropsWithRef<"textarea"> {
+  label?: string;
+  error?: string;
+  hint?: string;
+}
+
+/** Texto de várias linhas (descrições), com o mesmo visual do TextField. Aceita `ref` (React Hook Form). */
+export function TextAreaField({ label, error, hint, id, rows = 3, className, ...rest }: TextAreaFieldProps) {
+  const autoId = useId();
+  const inputId = id ?? autoId;
+  const messageId = `${inputId}-msg`;
+  return (
+    <div className={cn("grid gap-1.5", className)}>
+      {label && (
+        <label htmlFor={inputId} className={FIELD_LABEL}>
+          {label}
+        </label>
+      )}
+      <textarea
+        id={inputId}
+        rows={rows}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || hint ? messageId : undefined}
+        className={cn(FIELD_INPUT, "min-h-[88px] resize-none py-3 leading-[22px]", error ? FIELD_BORDER_ERROR : FIELD_BORDER_OK)}
+        {...rest}
+      />
+      {error ? (
+        <FieldError id={messageId}>{error}</FieldError>
+      ) : hint ? (
+        <span id={messageId} className="text-right text-xs text-fg-muted tabular-nums">
+          {hint}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
 const STRENGTH_COLORS: Record<PasswordStrength, string> = {
   0: "bg-danger",
   1: "bg-danger",
