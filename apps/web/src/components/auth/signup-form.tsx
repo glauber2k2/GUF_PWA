@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signUpWithEmail, type AuthError } from "@guf/api";
@@ -17,18 +17,8 @@ import {
 } from "@/components/ds";
 import { useSignupDocuments } from "@/hooks/use-pending-documents";
 import { getSupabaseClient } from "@/lib/supabase";
-import { AuthFooter, AuthLink, AuthScreen } from "./auth-screen";
+import { AuthFooter, AuthLink, AuthScreen, LegalLink } from "./auth-screen";
 import { useGoogleSignIn } from "./use-google-sign-in";
-
-/** Link para o documento legal (URL publicada em legal_documents), em nova aba. */
-function LegalLink({ href, children }: { href: string | undefined; children: ReactNode }) {
-  if (!href) return <span className="font-medium">{children}</span>;
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-accent-text underline">
-      {children}
-    </a>
-  );
-}
 
 export function SignUpForm() {
   const [formError, setFormError] = useState<string | null>(null);
