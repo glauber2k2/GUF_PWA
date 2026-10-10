@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArchiveRestore, CalendarCheck, Check, ChevronDown, ChevronRight, CircleDashed, Ellipsis } from "lucide-react";
+import { ArchiveRestore, CalendarCheck, Check, ChevronDown, ChevronRight, CircleDashed, Ellipsis, Star } from "lucide-react";
 import { archivedLabel, projectMeta, routineLetter } from "@guf/core";
 import type { Project, ProjectRoutine } from "@guf/api";
 import { Button, Icon, IconButton } from "@/components/ds";
@@ -47,7 +47,10 @@ export function ActiveProjectCard({
         <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${project.name}`} disabled={disabled} onClick={onMenu} />
       </div>
       <div className="-mt-2 flex flex-col gap-1 pr-2">
-        <h2 className="m-0 text-[21px] leading-[26px] font-semibold tracking-[-0.015em] text-pretty">{project.name}</h2>
+        <h2 className="m-0 flex items-center gap-1.5 text-[21px] leading-[26px] font-semibold tracking-[-0.015em] text-pretty">
+          {project.isFavorites && <Icon icon={Star} size={18} className="text-accent-text" label="Projeto padrão" />}
+          {project.name}
+        </h2>
         {project.description && <span className="text-sm leading-5 text-pretty text-fg-secondary">{project.description}</span>}
       </div>
       {project.routines.length > 0 && (
@@ -127,7 +130,10 @@ export function ProjectListItem({
         onClick={onOpen}
         className="flex min-w-0 flex-1 cursor-pointer flex-col gap-2 rounded-[14px] bg-transparent py-2.5 pr-2 pl-4 text-left text-fg"
       >
-        <span className="truncate text-base leading-[22px] font-semibold">{project.name}</span>
+        <span className="flex min-w-0 items-center gap-1.5 text-base leading-[22px] font-semibold">
+          {project.isFavorites && <Icon icon={Star} size={16} className="flex-none text-accent-text" label="Projeto padrão" />}
+          <span className="truncate">{project.name}</span>
+        </span>
         <span className="flex items-center gap-1.5">
           {project.routines.slice(0, 6).map((r) => (
             <span

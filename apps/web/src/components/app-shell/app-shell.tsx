@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Info, ListPlus, Play, Plus, type LucideIcon } from "lucide-react";
-import { routineLetter, routineMeta, routineShortName, startedAgoLabel, suggestNextRoutine, toLocalISODate } from "@guf/core";
+import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
 import { BottomNav, BottomSheet, SheetOption, Toast } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
@@ -66,8 +66,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname().replace(/(.)\/$/, "$1");
   const { active, track, clear } = useActiveWorkout();
   const devHome = useDevHomeState();
-  // Tela de treino é imersiva: sem menu inferior e sem mini card (ela tem o próprio rodapé).
-  const immersive = pathname === "/treino";
+  // Treino e edição de rotina são imersivos: sem menu inferior e sem mini card (têm o próprio rodapé).
+  const immersive = pathname === "/treino" || pathname === "/rotina";
   const summary = useHomeSummary();
   const start = useStartWorkout();
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -168,7 +168,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const today = toLocalISODate(new Date());
   const routines = data?.activeProject?.routines ?? [];
   const trainedToday = data?.weekSessions.some((s) => s.performedOn === today) ?? false;
-  const suggested = trainedToday ? null : suggestNextRoutine(routines, data?.lastFinishedRoutineId ?? null);
+  // Destaque = treino de hoje (pelos dias da semana ou, sem dias marcados, pela ordem); dia de descanso: nenhum.
+  const plan = todayPlan(routines, data?.lastFinishedRoutineId ?? null, fromLocalISODate(today));
+  const suggested = trainedToday || (plan.kind !== "scheduled" && plan.kind !== "sequence") ? null : plan.routine;
 
   return (
     <AppShellContext.Provider value={api}>

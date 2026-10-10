@@ -15,13 +15,12 @@
 | Tela Início com dados reais (treino de hoje, semana, sequência) | `feat/inicio`, `feat/inicio-dados` | Na `main` |
 | Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
 | Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
-| Projetos (`/projetos`, `/projetos/detalhe`): criar, editar, ativar (RPC atômica), arquivar/restaurar projetos; criar, renomear, reordenar e arquivar rotinas | `feat/projetos` | **Em andamento** (falta a tela de Rotina) |
+| Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | **Aguardando PR/merge** |
 
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
 |---|---|---|
-| Não há como montar os exercícios planejados de uma rotina pelo app (projetos e rotinas já podem ser criados) | Tocar numa rotina em Projetos mostra "chega em breve" | **Alto:** rotina nova fica sem exercícios até a tela de Rotina |
 | Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
@@ -57,7 +56,7 @@ e do `CLAUDE.md` → commit/push e PR.
 
 **Branch:** `feat/projetos` · **Prioridade:** alta (sem ela o usuário não planeja treinos)
 
-**Andamento:** [x] migration `activate_project` · [x] lista e detalhe de projetos (criar, editar, ativar, desativar, arquivar, restaurar; rotinas: criar, renomear, reordenar, arquivar) · [ ] tela de Rotina (exercícios planejados) · [ ] PR
+**Andamento:** [x] migration `activate_project` · [x] lista e detalhe de projetos · [x] migration `routine_schedule_and_favorites` (dias da semana, Favoritos, `save_routine`) · [x] tela de Rotina · [x] treino de hoje por dia e dia de descanso na Início · [ ] PR
 
 **Escopo**
 - Lista de projetos (ativo em destaque, arquivados separados) e criação/edição/arquivamento.

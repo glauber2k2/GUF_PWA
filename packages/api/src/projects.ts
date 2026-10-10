@@ -1,4 +1,3 @@
-import { nextPosition } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { currentUserId } from "./shared";
@@ -18,6 +17,8 @@ export interface ProjectRoutine {
   id: string;
   name: string;
   position: number;
+  /** Dias da semana (ISO: 1 = segunda … 7 = domingo); vazio = sem dia fixo. */
+  weekdays: number[];
   exercises: PlannedSetup[];
 }
 
@@ -26,6 +27,8 @@ export interface Project {
   name: string;
   description: string | null;
   isActive: boolean;
+  /** Projeto padrão "Favoritos": não pode ser renomeado, arquivado nem excluído. */
+  isFavorites: boolean;
   /** ISO; null = em uso. */
   archivedAt: string | null;
   createdAt: string;
@@ -58,8 +61,6 @@ export interface ProjectsApi {
   /** Arquiva (e desativa, se era o ativo). Treinos feitos continuam no histórico. */
   archiveProject: (client: GufClient, input: { projectId: string }) => Result;
   restoreProject: (client: GufClient, input: { projectId: string }) => Result;
-  /** Cria a rotina no fim da lista do projeto. */
-  createRoutine: (client: GufClient, input: { projectId: string; name: string }) => Result<{ id: string }>;
   renameRoutine: (client: GufClient, input: { routineId: string; name: string }) => Result;
   archiveRoutine: (client: GufClient, input: { routineId: string }) => Result;
   restoreRoutine: (client: GufClient, input: { routineId: string }) => Result;
@@ -89,7 +90,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
       client
         .from("projects")
         .select(
-          "id, name, description, is_active, archived_at, created_at, routines(id, name, position, archived_at, routine_exercises(target_sets, rest_seconds))",
+          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, routine_exercises(target_sets, rest_seconds))",
         )
         .order("created_at", { ascending: false })
         .order("position", { referencedTable: "routines", ascending: true }),
@@ -113,6 +114,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
           name: p.name,
           description: p.description,
           isActive: p.is_active,
+          isFavorites: p.is_favorites,
           archivedAt: p.archived_at,
           createdAt: p.created_at,
           routines: p.routines
@@ -121,6 +123,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
               id: r.id,
               name: r.name,
               position: r.position,
+              weekdays: r.weekdays,
               exercises: r.routine_exercises.map((e) => ({ targetSets: e.target_sets, restSeconds: e.rest_seconds })),
             })),
         })),
@@ -170,25 +173,6 @@ export const archiveProject: ProjectsApi["archiveProject"] = (client, { projectI
 export const restoreProject: ProjectsApi["restoreProject"] = (client, { projectId }) =>
   write(() => client.from("projects").update({ archived_at: null }).eq("id", projectId));
 
-export const createRoutine: ProjectsApi["createRoutine"] = async (client, { projectId, name }) => {
-  try {
-    const userId = await currentUserId(client);
-    if (!userId) return { data: null, error: apiError("not_authenticated") };
-    // Posição no fim, contando as arquivadas (não repete posição ao restaurar).
-    const positions = await client.from("routines").select("position").eq("project_id", projectId);
-    if (positions.error) return { data: null, error: toApiError(positions.error) };
-    const { data, error } = await client
-      .from("routines")
-      .insert({ user_id: userId, project_id: projectId, name: name.trim(), position: nextPosition(positions.data.map((r) => r.position)) })
-      .select("id")
-      .single();
-    if (error) return { data: null, error: toApiError(error) };
-    return { data: { id: data.id }, error: null };
-  } catch (e) {
-    return { data: null, error: toApiError(e) };
-  }
-};
-
 export const renameRoutine: ProjectsApi["renameRoutine"] = (client, { routineId, name }) =>
   write(() => client.from("routines").update({ name: name.trim() }).eq("id", routineId));
 
@@ -216,7 +200,6 @@ export const projectsApi = {
   deactivateProject,
   archiveProject,
   restoreProject,
-  createRoutine,
   renameRoutine,
   archiveRoutine,
   restoreRoutine,

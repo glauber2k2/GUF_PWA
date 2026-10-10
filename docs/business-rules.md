@@ -41,7 +41,11 @@
 |---|---|
 | Projeto = grupo de rotinas; rotina = lista ordenada de exercícios planejados (séries, repetições alvo em texto livre como "10", "8-12" ou "falha", e descanso). | Banco |
 | **No máximo um projeto ativo por usuário** (índice único). A troca é feita pela função `activate_project`, que desativa o atual e ativa o novo na mesma transação (nunca fica com dois ou nenhum por erro). Projeto arquivado ou de outro usuário não pode ser ativado (erro `GP001`). | Banco (`activate_project`) |
-| **Rotina sugerida para hoje:** a próxima do projeto ativo depois da última concluída, seguindo a ordem (`position`) e voltando para a primeira depois da última. Sem histórico, a primeira. | Core (`home.ts`) |
+| **Treino de hoje (projeto ativo):** pelos dias da semana das rotinas (`routines.weekdays`, ISO 1 = segunda … 7 = domingo). Rotina marcada para hoje → é o treino de hoje (várias no mesmo dia: a primeira pela ordem; as demais em "Trocar rotina"). O projeto usa dias e nenhuma rotina é de hoje → **dia de descanso** + o próximo treino da semana ("Amanhã" ou "Qua, 14 out"). Nenhuma rotina com dia marcado → a próxima pela ordem (`position`) depois da última concluída, voltando para a primeira; sem histórico, a primeira. | Core (`schedule.ts`: `todayPlan`) |
+| Rotina tem dias da semana opcionais; a tela avisa quando outra rotina do mesmo projeto já usa o dia (é permitido). | Banco (`routines.weekdays`) + Web |
+| **Favoritos:** todo usuário tem um projeto padrão "Favoritos", criado no cadastro (ativo para usuário novo; para quem já existia, ativo só se não houvesse outro). Não existe rotina avulsa — rotinas sem outro projeto ficam nele. Não pode ser renomeado, arquivado nem excluído (pode ser ativado/desativado). | Banco (`is_favorites`, `handle_new_user`, `protect_favorites_project`) |
+| Montar/editar rotina: nome obrigatório (até 100), projeto, dias, e pelo menos 1 exercício; cada exercício com séries 1–20, repetições alvo (texto livre até 20, ex.: "10", "8-12", "falha"), descanso 45 s a 3 min e observação opcional (até 500). Exercício novo entra com 3 × 10 e 90 s. | Schemas (`routines.ts`) + Core |
+| Salvar a rotina grava tudo numa transação (`save_routine`); mudar de projeto põe a rotina no fim da lista do novo projeto. Trocar exercício mantém séries, repetições, descanso e observação. Sair com mudanças não salvas pede confirmação. | Banco + Web |
 | Duração estimada da rotina = Σ séries × (40 s de execução + descanso), arredondada para múltiplos de 5 min; sem meta, 3 séries e 90 s. | Core (`workout.ts`) |
 | Observação de exercício feita no treino é salva também na rotina e aparece nos próximos treinos dela. | API (`workout.ts`) |
 | Ficar sem projeto ativo é permitido (desativar o atual); arquivar o projeto ativo também o desativa. | Regra de projeto (Etapa 1) |
@@ -53,7 +57,7 @@
 | Nova rotina entra no fim da lista; reordenar grava posições sequenciais (1, 2, 3…), só das que mudaram. | Core (`nextPosition`, `changedPositions`) + API |
 | Nome de projeto e de rotina: 1 a 100 caracteres; descrição do projeto: até 500 (opcional). | Schemas (`projects.ts`) |
 | No projeto ativo, a rotina sugerida aparece como "Hoje" (ou "Próximo", se já treinou hoje). | Core (`suggestedRoutine`) |
-| *A edição dos exercícios da rotina (tela de Rotina) é a próxima entrega da Etapa 1.* | — |
+| Nova rotina e edição dos exercícios na tela de Rotina (`/rotina`); a folha de Projetos só renomeia. | Web |
 
 ## 4. Treino
 
@@ -136,7 +140,7 @@
 | Regra | Onde |
 |---|---|
 | Saudação pela hora local: 5h–11h "Bom dia", 12h–17h "Boa tarde", demais "Boa noite", com o primeiro nome. | Core (`home.ts`) |
-| Card "Treino de hoje", em ordem de prioridade: em andamento > concluído hoje > rotina sugerida > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina). | Web (`home-screen.tsx`) |
+| Card "Treino de hoje", em ordem de prioridade: em andamento > concluído hoje > treino de hoje do projeto ativo (pelos dias) **ou** dia de descanso com o próximo treino da semana > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina). | Web (`home-screen.tsx`, `today-card.tsx`) |
 | Card "Esta semana": dias treinados de segunda a domingo e contagem vs. meta. | Web + Banco (`get_training_days`) |
 
 ## 8. Histórico

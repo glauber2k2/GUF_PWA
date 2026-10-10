@@ -269,6 +269,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          is_favorites: boolean
           name: string
           position: number
           updated_at: string
@@ -280,6 +281,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_favorites?: boolean
           name: string
           position?: number
           updated_at?: string
@@ -291,6 +293,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_favorites?: boolean
           name?: string
           position?: number
           updated_at?: string
@@ -360,6 +363,7 @@ export type Database = {
           project_id: string | null
           updated_at: string
           user_id: string
+          weekdays: number[]
         }
         Insert: {
           archived_at?: string | null
@@ -371,6 +375,7 @@ export type Database = {
           project_id?: string | null
           updated_at?: string
           user_id: string
+          weekdays?: number[]
         }
         Update: {
           archived_at?: string | null
@@ -382,6 +387,7 @@ export type Database = {
           project_id?: string | null
           updated_at?: string
           user_id?: string
+          weekdays?: number[]
         }
         Relationships: [
           {
@@ -706,6 +712,16 @@ export type Database = {
       revoke_health_consent: {
         Args: { p_platform?: string }
         Returns: undefined
+      }
+      save_routine: {
+        Args: {
+          p_exercises: Json
+          p_name: string
+          p_project_id: string
+          p_routine_id: string
+          p_weekdays: number[]
+        }
+        Returns: string
       }
     }
     Enums: {

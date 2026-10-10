@@ -10,3 +10,4 @@ export * from "./session";
 export * from "./units";
 export * from "./history";
 export * from "./projects";
+export * from "./schedule";
