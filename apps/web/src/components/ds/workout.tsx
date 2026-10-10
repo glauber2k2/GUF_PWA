@@ -109,7 +109,8 @@ export function SetRow({
   );
 }
 
-export function SetRowHeader() {
+/** Cabeçalho das colunas de série; `unit` segue a unidade do usuário (o banco guarda kg). */
+export function SetRowHeader({ unit = "kg" }: { unit?: "kg" | "lb" }) {
   return (
     <div
       className={cn(
@@ -119,7 +120,7 @@ export function SetRowHeader() {
     >
       <span className="text-center">Série</span>
       <span>Anterior</span>
-      <span className="text-center">kg</span>
+      <span className="text-center">{unit}</span>
       <span className="text-center">Reps</span>
       <span />
     </div>
