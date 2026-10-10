@@ -14,6 +14,11 @@ export function toLocalISODate(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
 
+/** Data local deslocada em dias (sem passar por UTC). */
+export function addLocalDays(date: Date, days: number): Date {
+  return addDays(date, days);
+}
+
 /** Converte "2026-10-09" em Date local (meia-noite no fuso do aparelho). */
 export function fromLocalISODate(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);

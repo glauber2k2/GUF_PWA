@@ -55,11 +55,11 @@ import {
 } from "@/components/ds";
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/hooks/use-dev-workout-state";
-import { HOME_SUMMARY_KEY } from "@/hooks/use-home-summary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import type { OutboxOp } from "@/lib/offline/db";
 import { dismissOutboxFailure, enqueue, flushOutbox, hasPendingFor, useOutboxStatus } from "@/lib/offline/outbox";
 import { loadWorkout, removeWorkoutSnapshot, saveWorkoutSnapshot, type DataSource } from "@/lib/offline/workout-repo";
+import { invalidateTrainingData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { mockWorkoutApi } from "@/mocks/workout";
@@ -509,7 +509,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     setSheet(null);
     skipRest();
     clear();
-    void queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] });
+    invalidateTrainingData(queryClient);
   };
 
   const finish = async () => {

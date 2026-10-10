@@ -1,9 +1,20 @@
-import { durationSeconds, sessionTotals, targetRepsMin, type ActivePeriod, type LoggedSet, type SetType } from "@guf/core";
+import { sessionTotals, targetRepsMin, type ActivePeriod, type SetType } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
+import {
+  currentUserId,
+  FREE_WORKOUT_NAME,
+  sessionDurationSeconds,
+  toLoggedSets,
+  toStreakSummary,
+  toTrainingDay,
+  type StreakSummary,
+  type TrainingDay,
+} from "./shared";
 import { addWorkoutExercises, type NewWorkoutExercise } from "./workout";
 
 export * from "./result";
+export type { StreakSummary, TrainingDay } from "./shared";
 
 /* =====================================================================
  * Contrato
@@ -50,21 +61,6 @@ export interface InProgressSession {
   startedAt: string;
   /** Períodos em que o treino estava rodando (relógio do mini card). */
   activePeriods: ActivePeriod[];
-}
-
-/** Dia treinado da semana (get_training_days). */
-export interface TrainingDay {
-  performedOn: string;
-  sessions: number;
-  volumeKg: number;
-}
-
-export interface StreakSummary {
-  currentStreak: number;
-  bestStreak: number;
-  currentWeekCount: number;
-  weekSecured: boolean;
-  streakAtRisk: boolean;
 }
 
 export interface HomeSummary {
@@ -116,13 +112,7 @@ export interface HomeApi {
  * Implementação (Supabase)
  * ===================================================================== */
 
-const FREE_WORKOUT_NAME = "Treino livre";
 const DEFAULT_PLANNED_SETS = 3;
-
-async function currentUserId(client: GufClient): Promise<string | null> {
-  const { data } = await client.auth.getSession();
-  return data.session?.user.id ?? null;
-}
 
 export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEnd }) => {
   try {
@@ -196,36 +186,24 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
     }
 
     const weekSessions: FinishedSession[] = (weekRes.data ?? []).map((s) => {
-      const sets: LoggedSet[] = s.set_logs.map((l) => ({
-        setType: l.set_type as SetType,
-        weightKg: l.weight_kg,
-        reps: l.reps,
-        isCompleted: l.is_completed,
-      }));
-      const totals = sessionTotals(sets);
+      const totals = sessionTotals(toLoggedSets(s.set_logs));
       return {
         id: s.id,
         routineId: s.routine_id,
         name: s.name ?? FREE_WORKOUT_NAME,
         performedOn: s.performed_on,
-        // Tempo efetivo (sem pausas); treinos antigos sem o campo usam início → fim.
-        durationSeconds: s.active_seconds ?? durationSeconds(s.started_at, s.finished_at),
+        durationSeconds: sessionDurationSeconds(s),
         volumeKg: totals.volumeKg,
         setCount: totals.setCount,
       };
     });
 
-    const streakRow = streakRes.data?.[0];
     const summary: HomeSummary = {
       profile: { name: profileRes.data?.name ?? null, weeklyGoal: profileRes.data?.weekly_goal ?? null },
       activeProject,
       hasAnyRoutine: (anyRoutineRes.count ?? 0) > 0,
       lastFinishedRoutineId: lastRes.data?.routine_id ?? null,
-      trainingDays: (daysRes.data ?? []).map((d) => ({
-        performedOn: d.performed_on,
-        sessions: d.sessions,
-        volumeKg: Number(d.total_volume_kg),
-      })),
+      trainingDays: (daysRes.data ?? []).map(toTrainingDay),
       weekSessions,
       inProgress: inProgressRes.data
         ? {
@@ -240,13 +218,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
             })),
           }
         : null,
-      streak: {
-        currentStreak: streakRow?.current_streak ?? 0,
-        bestStreak: streakRow?.best_streak ?? 0,
-        currentWeekCount: streakRow?.current_week_count ?? 0,
-        weekSecured: streakRow?.week_secured ?? false,
-        streakAtRisk: streakRow?.streak_at_risk ?? false,
-      },
+      streak: toStreakSummary(streakRes.data?.[0]),
     };
     return { data: summary, error: null };
   } catch (e) {

@@ -5,7 +5,8 @@ import type { ActiveWorkout, LibraryExercise, NewWorkoutExercise, SetInput } fro
  * Banco local (IndexedDB via Dexie) do treino em andamento — CLAUDE.md: offline do treino.
  * - workouts: retrato do treino com as alterações locais (abre sem internet);
  * - outbox: fila de gravações pendentes, enviadas em ordem quando a conexão volta;
- * - library: biblioteca de exercícios para o seletor funcionar sem internet.
+ * - library: biblioteca de exercícios para o seletor funcionar sem internet;
+ * - history: últimas respostas do Histórico (mostradas sem internet).
  * Tudo é apagado ao sair da conta (privacidade).
  */
 
@@ -45,10 +46,18 @@ export interface CachedLibrary {
   updatedAt: number;
 }
 
+/** Resposta guardada de uma consulta (chave = consulta + parâmetros). */
+export interface CachedQuery {
+  key: string;
+  value: unknown;
+  updatedAt: number;
+}
+
 class GufOfflineDB extends Dexie {
   workouts!: Table<CachedWorkout, string>;
   outbox!: Table<OutboxEntry, number>;
   library!: Table<CachedLibrary, string>;
+  history!: Table<CachedQuery, string>;
 
   constructor() {
     super("guf-offline");
@@ -57,6 +66,7 @@ class GufOfflineDB extends Dexie {
       outbox: "++seq, sessionId",
       library: "key",
     });
+    this.version(2).stores({ history: "key" });
   }
 }
 
@@ -71,5 +81,5 @@ export function offlineDb(): GufOfflineDB {
 /** Apaga todos os dados locais (ao sair da conta). */
 export async function clearOfflineData(): Promise<void> {
   const db = offlineDb();
-  await Promise.all([db.workouts.clear(), db.outbox.clear(), db.library.clear()]);
+  await Promise.all([db.workouts.clear(), db.outbox.clear(), db.library.clear(), db.history.clear()]);
 }

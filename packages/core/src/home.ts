@@ -56,3 +56,20 @@ export function streakStatus({ currentStreak, weekSecured }: Pick<StreakInput, "
 export function isStreakRecord({ currentStreak, bestStreak }: Pick<StreakInput, "currentStreak" | "bestStreak">): boolean {
   return currentStreak > 0 && currentStreak >= bestStreak;
 }
+
+/** Textos da sequência (CLAUDE.md) — os mesmos na Início e no Histórico. */
+export const STREAK_MESSAGES = {
+  risk: "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência.",
+  zero: "Treine 1 vez até domingo e comece sua sequência.",
+  secured: "Semana garantida",
+} as const;
+
+/** "semana"/"semanas" e "seguida(s) treinando" conforme o número da sequência. */
+export function streakWords(weeks: number): { unit: string; caption: string } {
+  return weeks === 1 ? { unit: "semana", caption: "seguida treinando" } : { unit: "semanas", caption: "seguidas treinando" };
+}
+
+/** "X de Y treinos da sua meta" (meta semanal é só exibição; nunca passa de Y). */
+export function weeklyGoalLabel(count: number, goal: number): string {
+  return `${Math.min(count, goal)} de ${goal} treinos da sua meta`;
+}

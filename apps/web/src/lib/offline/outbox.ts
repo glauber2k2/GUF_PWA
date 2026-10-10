@@ -39,6 +39,7 @@ export interface OutboxStatus {
 
 let status: OutboxStatus = { pending: 0, syncing: false, lastFailure: null };
 const listeners = new Set<() => void>();
+const closedListeners = new Set<(sessionId: string) => void>();
 let flushing: Promise<void> | null = null;
 let started = false;
 
@@ -97,6 +98,8 @@ async function runFlush() {
         // Treino finalizado/descartado no servidor: o retrato local não serve mais.
         if ((entry.op.kind === "finish" || entry.op.kind === "discard") && entry.sessionId) {
           await db.workouts.delete(entry.sessionId);
+          const closedId = entry.sessionId;
+          closedListeners.forEach((l) => l(closedId));
         }
         continue;
       }
@@ -159,6 +162,12 @@ export function startOutboxSync() {
     if (status.pending > 0 && navigator.onLine) void flushOutbox();
   }, RETRY_INTERVAL_MS);
   void refreshPending().then(() => flushOutbox());
+}
+
+/** Avisa quando um treino finalizado/descartado no aparelho chega ao servidor. Retorna o cancelamento. */
+export function onWorkoutClosedSynced(listener: (sessionId: string) => void): () => void {
+  closedListeners.add(listener);
+  return () => closedListeners.delete(listener);
 }
 
 /** Situação da fila (pendências, enviando, última falha). */
