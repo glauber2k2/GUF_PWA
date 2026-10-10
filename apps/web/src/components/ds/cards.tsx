@@ -159,7 +159,7 @@ export function WorkoutSummaryCard({
         <strong className="text-base">{title}</strong>
         {date && <span className="text-[13px] whitespace-nowrap text-fg-muted">{date}</span>}
       </div>
-      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(1, stats.length)}, 1fr)` }}>
+      <div className="grid auto-cols-fr grid-flow-col gap-2">
         {stats.map((s) => (
           <div key={s.label} className="grid gap-0.5">
             <span className="font-display text-[28px] font-semibold tabular-nums">{s.value}</span>

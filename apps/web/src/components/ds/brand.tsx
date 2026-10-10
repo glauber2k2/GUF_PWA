@@ -1,11 +1,10 @@
-import type { CSSProperties } from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Símbolo "Anel": anel de progresso aberto + ponto (a próxima série). Grade 48. */
-function RingMark({ size }: { size: number }) {
+function RingMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 48 48" width={size} height={size} fill="none" aria-hidden="true">
+    <svg viewBox="0 0 48 48" fill="none" aria-hidden="true" className={className}>
       <circle
         cx="24"
         cy="24"
@@ -21,33 +20,36 @@ function RingMark({ size }: { size: number }) {
   );
 }
 
+/** Tamanhos do logo (símbolo · espaço · wordmark). A partir de 40px o wordmark cresce 1,286×. */
+const LOGO_SIZES = {
+  sm: { mark: "size-[26px]", gap: "gap-1.5", text: "text-[26px]" },
+  md: { mark: "size-8", gap: "gap-[7px]", text: "text-[32px]" },
+  lg: { mark: "size-10", gap: "gap-[9px]", text: "text-[51px]" },
+  xl: { mark: "size-14", gap: "gap-3", text: "text-[72px]" },
+} as const;
+
 export interface LogoProps {
-  size?: number;
+  size?: keyof typeof LOGO_SIZES;
   /** "brand": símbolo em volt (accent-text); "mono": herda a cor do texto. */
   tone?: "brand" | "mono";
   wordmark?: boolean;
   className?: string;
 }
 
-export function Logo({ size = 26, tone = "brand", wordmark = true, className }: LogoProps) {
-  const textSize = size >= 40 ? Math.round(size * 1.286) : size;
+export function Logo({ size = "sm", tone = "brand", wordmark = true, className }: LogoProps) {
+  const s = LOGO_SIZES[size];
   return (
-    <span
-      role="img"
-      aria-label="Guf"
-      className={cn("inline-flex items-center", className)}
-      style={{ gap: Math.round(size * 0.22) }}
-    >
+    <span role="img" aria-label="Guf" className={cn("inline-flex items-center", s.gap, className)}>
       <span className={cn("flex", tone === "brand" ? "text-accent-text" : "text-current")}>
-        <RingMark size={size} />
+        <RingMark className={s.mark} />
       </span>
       {wordmark && (
         <span
           className={cn(
             "font-display leading-none font-bold tracking-[-0.02em]",
+            s.text,
             tone === "brand" ? "text-fg" : "text-current",
           )}
-          style={{ fontSize: textSize }}
         >
           guf
         </span>
@@ -56,14 +58,18 @@ export function Logo({ size = 26, tone = "brand", wordmark = true, className }: 
   );
 }
 
-/** Ícone do app: símbolo volt sobre fundo ink, raio 25% do tamanho. */
-export function AppIcon({ size = 48, className }: { size?: number; className?: string }) {
+/** Ícone do app: símbolo volt sobre fundo ink, raio = 25% do lado, símbolo = 2/3 do lado. */
+const APP_ICON_SIZES = {
+  sm: { box: "size-10 rounded-[10px]", mark: "size-[27px]" },
+  md: { box: "size-12 rounded-md", mark: "size-8" },
+  lg: { box: "size-16 rounded-lg", mark: "size-[43px]" },
+} as const;
+
+export function AppIcon({ size = "md", className }: { size?: keyof typeof APP_ICON_SIZES; className?: string }) {
+  const s = APP_ICON_SIZES[size];
   return (
-    <div
-      className={cn("grid flex-none place-items-center bg-[var(--ink-950)] text-[var(--volt-400)]", className)}
-      style={{ width: size, height: size, borderRadius: size * 0.25 }}
-    >
-      <RingMark size={size * 0.667} />
+    <div className={cn("grid flex-none place-items-center bg-brand-ink text-brand-volt", s.box, className)}>
+      <RingMark className={s.mark} />
     </div>
   );
 }
@@ -75,11 +81,10 @@ export interface IconProps {
   label?: string;
   spin?: boolean;
   className?: string;
-  style?: CSSProperties;
 }
 
 /** Wrapper fino do Lucide: traço 2px, currentColor. */
-export function Icon({ icon: IconComponent, size = 20, label, spin = false, className, style }: IconProps) {
+export function Icon({ icon: IconComponent, size = 20, label, spin = false, className }: IconProps) {
   return (
     <IconComponent
       size={size}
@@ -88,7 +93,6 @@ export function Icon({ icon: IconComponent, size = 20, label, spin = false, clas
       aria-label={label}
       role={label ? "img" : undefined}
       className={cn("shrink-0", spin && "animate-guf-spin", className)}
-      style={style}
     />
   );
 }

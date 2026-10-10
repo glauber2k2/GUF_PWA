@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { CircleAlert, CircleCheck, Dumbbell, Info, WifiOff, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
@@ -8,25 +8,25 @@ const BANNER_TONES = {
     icon: WifiOff,
     role: "status",
     text: "text-warning",
-    box: "bg-[color-mix(in_oklab,var(--warning)_14%,var(--surface))] border-warning/40",
+    box: "bg-banner-warning border-warning/40",
   },
   danger: {
     icon: CircleAlert,
     role: "alert",
     text: "text-danger",
-    box: "bg-[color-mix(in_oklab,var(--danger)_12%,var(--surface))] border-danger/40",
+    box: "bg-banner-danger border-danger/40",
   },
   success: {
     icon: CircleCheck,
     role: "status",
     text: "text-success",
-    box: "bg-[color-mix(in_oklab,var(--success)_12%,var(--surface))] border-success/40",
+    box: "bg-banner-success border-success/40",
   },
   info: {
     icon: Info,
     role: "status",
     text: "text-info",
-    box: "bg-[color-mix(in_oklab,var(--info)_12%,var(--surface))] border-info/40",
+    box: "bg-banner-info border-info/40",
   },
 } as const;
 
@@ -91,7 +91,7 @@ export function EmptyState({ icon = Dumbbell, title, message, actionLabel, onAct
         className,
       )}
     >
-      <div className="grid size-[72px] place-items-center rounded-xl bg-[color-mix(in_oklab,var(--accent)_14%,var(--surface-3))] text-accent-text">
+      <div className="grid size-[72px] place-items-center rounded-xl bg-empty-tile text-accent-text">
         <Icon icon={icon} size={32} />
       </div>
       <strong className="text-[17px]">{title}</strong>
@@ -109,24 +109,19 @@ export function EmptyState({ icon = Dumbbell, title, message, actionLabel, onAct
   );
 }
 
-export interface SkeletonProps {
-  width?: CSSProperties["width"];
-  height?: CSSProperties["height"];
-  radius?: number;
-  className?: string;
-}
-
-/** Placeholder de carregamento com shimmer (gradiente funcional). */
-export function Skeleton({ width = "100%", height = 14, radius = 6, className }: SkeletonProps) {
+/**
+ * Placeholder de carregamento com shimmer (gradiente funcional).
+ * Tamanho e raio por classes: padrão `h-3.5 w-full rounded-[6px]`; ex.: `<Skeleton className="h-[18px] w-3/5" />`.
+ */
+export function Skeleton({ className }: { className?: string }) {
   return (
     <span
       aria-hidden="true"
       className={cn(
-        "block flex-none animate-guf-shimmer bg-[length:200%_100%]",
-        "bg-[linear-gradient(90deg,var(--surface-3)_25%,var(--border-strong)_50%,var(--surface-3)_75%)]",
+        "block h-3.5 w-full flex-none animate-guf-shimmer rounded-[6px] bg-[length:200%_100%]",
+        "bg-linear-90 from-surface-3 from-25% via-border-strong via-50% to-surface-3 to-75%",
         className,
       )}
-      style={{ width, height, borderRadius: radius }}
     />
   );
 }
@@ -135,13 +130,13 @@ export function SkeletonCard({ className }: { className?: string }) {
   return (
     <div aria-busy="true" className={cn("grid gap-2.5 rounded-lg border border-border bg-surface-elevated p-4", className)}>
       <div className="flex items-center gap-3">
-        <Skeleton width={44} height={44} radius={12} />
+        <Skeleton className="size-11 rounded-md" />
         <div className="grid flex-1 gap-2">
-          <Skeleton width="70%" height={14} />
-          <Skeleton width="40%" height={10} />
+          <Skeleton className="w-[70%]" />
+          <Skeleton className="h-2.5 w-2/5" />
         </div>
       </div>
-      <Skeleton height={48} radius={10} />
+      <Skeleton className="h-12 rounded-[10px]" />
     </div>
   );
 }

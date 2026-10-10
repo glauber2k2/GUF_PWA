@@ -43,10 +43,28 @@
   --color-pr-foreground: var(--pr-foreground);
   --color-pr-text: var(--pr-text);
   --color-scrim: var(--scrim);
+  /* Marca fixa (não muda com o tema): ícone do app */
+  --color-brand-ink: var(--ink-950);
+  --color-brand-volt: var(--volt-400);
+
+  /* Tints sobre superfície (misturas nomeadas do design) */
+  --color-pr-highlight: color-mix(in oklab, var(--pr) 14%, var(--surface));
+  --color-volume-1: color-mix(in oklab, var(--accent) 30%, var(--surface-3));
+  --color-volume-2: color-mix(in oklab, var(--accent) 62%, var(--surface-3));
+  --color-empty-tile: color-mix(in oklab, var(--accent) 14%, var(--surface-3));
+  --color-banner-warning: color-mix(in oklab, var(--warning) 14%, var(--surface));
+  --color-banner-danger: color-mix(in oklab, var(--danger) 12%, var(--surface));
+  --color-banner-success: color-mix(in oklab, var(--success) 12%, var(--surface));
+  --color-banner-info: color-mix(in oklab, var(--info) 12%, var(--surface));
+
   --color-google-surface: var(--google-surface);
   --color-google-surface-hover: var(--google-surface-hover);
   --color-google-border: var(--google-border);
   --color-google-text: var(--google-text);
+  --color-google-red: var(--google-red);
+  --color-google-blue: var(--google-blue);
+  --color-google-yellow: var(--google-yellow);
+  --color-google-green: var(--google-green);
 
   /* Aliases shadcn/ui */
   --color-foreground: var(--foreground);

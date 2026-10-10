@@ -54,7 +54,6 @@ import {
   CHART_PERIOD_OPTIONS,
   CHART_VALUES,
   COLOR_GROUPS,
-  COLOR_ON,
   DURATIONS,
   EASES,
   EXERCISE,
@@ -95,7 +94,7 @@ export function DesignSystemShowcase() {
     <div className="min-h-screen bg-background font-sans text-fg">
       <header className="flex flex-wrap items-end justify-between gap-6 border-b border-border px-4 pt-12 pb-8 sm:px-10">
         <div className="grid gap-4">
-          <Logo size={40} />
+          <Logo size="lg" />
           <div className="grid gap-1.5">
             <span className={cn(OVERLINE, "text-fg-muted")}>Design system · v1.0</span>
             <h1 className="m-0 text-[40px] leading-[44px] font-bold tracking-[-0.02em]">Guf — Evolução Fitness</h1>
@@ -184,19 +183,14 @@ function ColorsSection({ id }: { id?: string }) {
         <div key={g.name} className="grid gap-2.5">
           <span className="text-xs font-medium text-fg-muted">{g.name}</span>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-2.5">
-            {g.tokens.map((token) => (
-              <div key={token} className="grid overflow-hidden rounded-md border border-border bg-surface">
-                <div
-                  className="flex h-16 items-end border-b border-border px-2.5 py-2"
-                  style={{ background: `var(--${token})` }}
-                >
-                  <span className="text-xs font-semibold" style={{ color: `var(--${g.on ?? COLOR_ON[token] ?? "text-primary"})` }}>
-                    Aa
-                  </span>
+            {g.swatches.map((c) => (
+              <div key={c.token} className="grid overflow-hidden rounded-md border border-border bg-surface">
+                <div className={cn("flex h-16 items-end border-b border-border px-2.5 py-2", c.bg)}>
+                  <span className={cn("text-xs font-semibold", c.on)}>Aa</span>
                 </div>
                 <div className="grid gap-0.5 px-2.5 pt-2 pb-2.5">
-                  <span className="font-mono text-xs font-semibold">--{token}</span>
-                  <span ref={readToken(token)} className="font-mono text-xs text-fg-muted" />
+                  <span className="font-mono text-xs font-semibold">--{c.token}</span>
+                  <span ref={readToken(c.token)} className="font-mono text-xs text-fg-muted" />
                 </div>
               </div>
             ))}
@@ -244,14 +238,14 @@ function SpacingSection({ id }: { id?: string }) {
           <div key={s.n} className="grid grid-cols-[90px_44px_minmax(0,1fr)] items-center gap-3">
             <span className="font-mono text-xs text-fg-secondary">--space-{s.n}</span>
             <span className="text-right font-mono text-xs text-fg-muted">{s.px}px</span>
-            <div className="h-4 rounded-[4px] bg-accent" style={{ width: s.px }} />
+            <div className={cn("h-4 rounded-[4px] bg-accent", s.bar)} />
           </div>
         ))}
       </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2.5">
         {RADII.map((r) => (
           <div key={r.name} className="grid justify-items-center gap-2 rounded-md border border-border bg-surface px-2 py-3.5">
-            <div className="size-14 border-[1.5px] border-accent-text bg-surface-3" style={{ borderRadius: r.value }} />
+            <div className={cn("size-14 border-[1.5px] border-accent-text bg-surface-3", r.radius)} />
             <span className="text-xs font-semibold">{r.name}</span>
             <span className="text-center text-[11px] text-fg-muted">{r.use}</span>
           </div>
@@ -327,11 +321,11 @@ function MotionSection({ id }: { id?: string }) {
             </div>
             <div className="relative h-6 rounded-pill bg-surface-3">
               <div
-                className="absolute top-1 size-4 rounded-pill bg-accent"
-                style={{
-                  left: played ? "calc(100% - 20px)" : "4px",
-                  transition: `left 700ms var(${e.token})`,
-                }}
+                className={cn(
+                  "absolute top-1 size-4 rounded-pill bg-accent transition-[left] duration-700",
+                  e.ease,
+                  played ? "left-[calc(100%-20px)]" : "left-1",
+                )}
               />
             </div>
           </div>
@@ -369,11 +363,11 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
 
       <Group title="Marca e ícones">
         <div className={cn(PANEL, "flex flex-wrap items-center gap-6 p-5")}>
-          <Logo size={56} />
-          <Logo size={26} />
-          <Logo size={32} wordmark={false} />
-          <AppIcon size={64} />
-          <AppIcon size={40} />
+          <Logo size="xl" />
+          <Logo size="sm" />
+          <Logo size="md" wordmark={false} />
+          <AppIcon size="lg" />
+          <AppIcon size="sm" />
         </div>
         <div className={cn(PANEL, "grid grid-cols-[repeat(auto-fill,minmax(44px,1fr))] gap-2 p-4")}>
           {ICONS.map((ic) => (
@@ -591,9 +585,9 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
           actionLabel="Criar rotina"
         />
         <div className={cn(PANEL, "grid gap-2.5 p-5")}>
-          <Skeleton width="60%" height={18} />
-          <Skeleton width="100%" height={12} />
-          <Skeleton width="80%" height={12} />
+          <Skeleton className="h-[18px] w-3/5" />
+          <Skeleton className="h-3" />
+          <Skeleton className="h-3 w-4/5" />
         </div>
         <SkeletonCard />
       </Group>

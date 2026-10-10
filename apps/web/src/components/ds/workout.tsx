@@ -369,7 +369,7 @@ export function QuickLoad({
   className?: string;
 }) {
   return (
-    <div className={cn("grid gap-2", className)} style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+    <div className={cn("grid auto-cols-fr grid-flow-col gap-2", className)}>
       {options.map((o) => (
         <button
           key={o.label}
@@ -474,18 +474,19 @@ export function RestTimer({
     <div className={cn("grid justify-items-center gap-4", className)}>
       <div className="relative size-[220px]">
         <svg viewBox="0 0 200 200" width="220" height="220" className="-rotate-90" aria-hidden="true">
-          <circle cx="100" cy="100" r="88" fill="none" stroke="var(--surface-3)" strokeWidth="12" />
+          <circle cx="100" cy="100" r="88" strokeWidth="12" className="fill-none stroke-surface-3" />
           <circle
             cx="100"
             cy="100"
             r="88"
-            fill="none"
-            stroke={endingSoon ? "var(--warning)" : "var(--accent)"}
             strokeWidth="12"
             strokeLinecap="round"
             strokeDasharray={RING_CIRCUMFERENCE}
             strokeDashoffset={(RING_CIRCUMFERENCE * (1 - frac)).toFixed(2)}
-            className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+            className={cn(
+              "fill-none transition-[stroke-dashoffset] duration-1000 ease-linear",
+              endingSoon ? "stroke-warning" : "stroke-accent",
+            )}
           />
         </svg>
         <div aria-live="polite" className="absolute inset-0 grid place-items-center content-center gap-0.5">

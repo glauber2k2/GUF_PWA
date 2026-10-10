@@ -51,43 +51,93 @@ export const THEMES: Record<ThemeKey, { key: ThemeKey; label: string; icon: Luci
   light: { key: "light", label: "claro", icon: Sun, note: 'data-theme="light"', elevNote: "Sombras suaves em três níveis" },
 };
 
-/** Grupos de tokens exibidos. `on` = token da amostra "Aa" sobre a cor. */
-export const COLOR_GROUPS: Array<{ name: string; tokens: string[]; on?: string }> = [
-  { name: "Fundos e superfícies", tokens: ["background", "surface", "surface-elevated", "surface-3", "border", "border-strong"], on: "text-primary" },
-  { name: "Texto", tokens: ["text-primary", "text-secondary", "text-muted"], on: "background" },
-  { name: "Marca e foco", tokens: ["accent", "accent-foreground", "accent-text", "focus"] },
-  { name: "Dados e estados", tokens: ["data", "success", "warning", "danger", "info"], on: "background" },
-  { name: "Recorde pessoal", tokens: ["pr", "pr-foreground", "pr-text"] },
+/**
+ * Amostras de cor. `token` = variável CSS exibida; `bg` = classe da amostra;
+ * `on` = classe do "Aa" sobre a cor. Classes literais para o Tailwind encontrá-las.
+ */
+export interface ColorSwatch {
+  token: string;
+  bg: string;
+  on: string;
+}
+
+export const COLOR_GROUPS: Array<{ name: string; swatches: ColorSwatch[] }> = [
+  {
+    name: "Fundos e superfícies",
+    swatches: [
+      { token: "background", bg: "bg-background", on: "text-fg" },
+      { token: "surface", bg: "bg-surface", on: "text-fg" },
+      { token: "surface-elevated", bg: "bg-surface-elevated", on: "text-fg" },
+      { token: "surface-3", bg: "bg-surface-3", on: "text-fg" },
+      { token: "border", bg: "bg-border", on: "text-fg" },
+      { token: "border-strong", bg: "bg-border-strong", on: "text-fg" },
+    ],
+  },
+  {
+    name: "Texto",
+    swatches: [
+      { token: "text-primary", bg: "bg-fg", on: "text-background" },
+      { token: "text-secondary", bg: "bg-fg-secondary", on: "text-background" },
+      { token: "text-muted", bg: "bg-fg-muted", on: "text-background" },
+    ],
+  },
+  {
+    name: "Marca e foco",
+    swatches: [
+      { token: "accent", bg: "bg-accent", on: "text-accent-foreground" },
+      { token: "accent-foreground", bg: "bg-accent-foreground", on: "text-accent" },
+      { token: "accent-text", bg: "bg-accent-text", on: "text-background" },
+      { token: "focus", bg: "bg-focus", on: "text-background" },
+    ],
+  },
+  {
+    name: "Dados e estados",
+    swatches: [
+      { token: "data", bg: "bg-data", on: "text-background" },
+      { token: "success", bg: "bg-success", on: "text-background" },
+      { token: "warning", bg: "bg-warning", on: "text-background" },
+      { token: "danger", bg: "bg-danger", on: "text-background" },
+      { token: "info", bg: "bg-info", on: "text-background" },
+    ],
+  },
+  {
+    name: "Recorde pessoal",
+    swatches: [
+      { token: "pr", bg: "bg-pr", on: "text-pr-foreground" },
+      { token: "pr-foreground", bg: "bg-pr-foreground", on: "text-pr" },
+      { token: "pr-text", bg: "bg-pr-text", on: "text-background" },
+    ],
+  },
 ];
 
-/** Contraste da amostra para tokens sem `on` de grupo. */
-export const COLOR_ON: Record<string, string> = {
-  accent: "accent-foreground",
-  "accent-foreground": "accent",
-  "accent-text": "background",
-  focus: "background",
-  pr: "pr-foreground",
-  "pr-foreground": "pr",
-  "pr-text": "background",
-};
-
-export const SPACES = [1, 2, 3, 4, 5, 6, 8, 10, 12].map((n) => ({ n, px: n * 4 }));
+/** Escala de espaço (grid 4px); `bar` = largura igual ao token (w-n = n × 4px). */
+export const SPACES = [
+  { n: 1, px: 4, bar: "w-1" },
+  { n: 2, px: 8, bar: "w-2" },
+  { n: 3, px: 12, bar: "w-3" },
+  { n: 4, px: 16, bar: "w-4" },
+  { n: 5, px: 20, bar: "w-5" },
+  { n: 6, px: 24, bar: "w-6" },
+  { n: 8, px: 32, bar: "w-8" },
+  { n: 10, px: 40, bar: "w-10" },
+  { n: 12, px: 48, bar: "w-12" },
+];
 
 export const RADII = [
-  { name: "8", value: "8px", use: "Chips, tags" },
-  { name: "10", value: "10px", use: "Células de série" },
-  { name: "12", value: "12px", use: "Botões, inputs" },
-  { name: "14", value: "14px", use: "Sheet option, toast" },
-  { name: "16", value: "16px", use: "Cards" },
-  { name: "24", value: "24px", use: "Sheet, modal" },
-  { name: "pill", value: "9999px", use: "Segmented, FAB" },
+  { name: "8", radius: "rounded-sm", use: "Chips, tags" },
+  { name: "10", radius: "rounded-[10px]", use: "Células de série" },
+  { name: "12", radius: "rounded-md", use: "Botões, inputs" },
+  { name: "14", radius: "rounded-[14px]", use: "Sheet option, toast" },
+  { name: "16", radius: "rounded-lg", use: "Cards" },
+  { name: "24", radius: "rounded-xl", use: "Sheet, modal" },
+  { name: "pill", radius: "rounded-pill", use: "Segmented, FAB" },
 ];
 
 export const EASES = [
-  { name: "Standard", token: "--ease-standard", curve: "cubic-bezier(.2,0,0,1)" },
-  { name: "Enter", token: "--ease-enter", curve: "cubic-bezier(.05,.7,.1,1)" },
-  { name: "Exit", token: "--ease-exit", curve: "cubic-bezier(.3,0,.8,.15)" },
-  { name: "Overshoot", token: "--ease-overshoot", curve: "cubic-bezier(.34,1.56,.64,1)" },
+  { name: "Standard", ease: "ease-standard", curve: "cubic-bezier(.2,0,0,1)" },
+  { name: "Enter", ease: "ease-enter", curve: "cubic-bezier(.05,.7,.1,1)" },
+  { name: "Exit", ease: "ease-exit", curve: "cubic-bezier(.3,0,.8,.15)" },
+  { name: "Overshoot", ease: "ease-overshoot", curve: "cubic-bezier(.34,1.56,.64,1)" },
 ];
 
 export const DURATIONS = (

@@ -135,8 +135,7 @@ export function PRHighlight({ label, value, className }: PRHighlightProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-lg border border-pr/50 px-4 py-3 shadow-pr-glow",
-        "bg-[color-mix(in_oklab,var(--pr)_14%,var(--surface))]",
+        "flex items-center gap-3 rounded-lg border border-pr/50 bg-pr-highlight px-4 py-3 shadow-pr-glow",
         className,
       )}
     >
@@ -206,31 +205,23 @@ export function ProgressChart({
         </div>
       )}
       <svg viewBox="0 0 320 150" className="h-auto w-full overflow-visible" role="img" aria-label={ariaLabel}>
-        <line x1="0" y1="20" x2="320" y2="20" stroke="var(--border)" strokeDasharray="3 4" />
-        <line x1="0" y1="75" x2="320" y2="75" stroke="var(--border)" strokeDasharray="3 4" />
-        <line x1="0" y1="130" x2="320" y2="130" stroke="var(--border)" />
-        <path d={area} fill="color-mix(in oklab, var(--data) 16%, transparent)" />
+        <line x1="0" y1="20" x2="320" y2="20" strokeDasharray="3 4" className="stroke-border" />
+        <line x1="0" y1="75" x2="320" y2="75" strokeDasharray="3 4" className="stroke-border" />
+        <line x1="0" y1="130" x2="320" y2="130" className="stroke-border" />
+        <path d={area} className="fill-data/16" />
         <polyline
           points={points.join(" ")}
-          fill="none"
-          stroke="var(--data)"
           strokeWidth="2.5"
           strokeLinejoin="round"
           strokeLinecap="round"
+          className="fill-none stroke-data"
         />
-        <circle cx={x(maxIndex)} cy={y(max)} r="9" fill="color-mix(in oklab, var(--pr) 30%, transparent)" />
-        <circle cx={x(maxIndex)} cy={y(max)} r="4.5" fill="var(--pr)" stroke="var(--surface)" strokeWidth="2" />
-        <text x="0" y="146" fontSize="10" fill="var(--text-muted)" style={{ fontFamily: "var(--font-sans)" }}>
+        <circle cx={x(maxIndex)} cy={y(max)} r="9" className="fill-pr/30" />
+        <circle cx={x(maxIndex)} cy={y(max)} r="4.5" strokeWidth="2" className="fill-pr stroke-surface" />
+        <text x="0" y="146" className="fill-fg-muted font-sans text-[10px]">
           {startLabel}
         </text>
-        <text
-          x="320"
-          y="146"
-          fontSize="10"
-          fill="var(--text-muted)"
-          textAnchor="end"
-          style={{ fontFamily: "var(--font-sans)" }}
-        >
+        <text x="320" y="146" textAnchor="end" className="fill-fg-muted font-sans text-[10px]">
           {endLabel}
         </text>
       </svg>
@@ -249,8 +240,8 @@ export type VolumeLevel = 0 | 1 | 2 | 3;
 
 const CALENDAR_LEVELS: Record<VolumeLevel, string> = {
   0: "bg-surface-3",
-  1: "bg-[color-mix(in_oklab,var(--accent)_30%,var(--surface-3))]",
-  2: "bg-[color-mix(in_oklab,var(--accent)_62%,var(--surface-3))]",
+  1: "bg-volume-1",
+  2: "bg-volume-2",
   3: "bg-accent",
 };
 

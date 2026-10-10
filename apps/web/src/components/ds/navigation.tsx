@@ -86,10 +86,9 @@ export function BottomNav({
     <nav
       aria-label="Principal"
       className={cn(
-        "grid h-[76px] items-center border-t border-border bg-surface/92 px-1 pb-3 backdrop-blur-[12px]",
+        "grid h-[76px] auto-cols-fr grid-flow-col items-center border-t border-border bg-surface/92 px-1 pb-3 backdrop-blur-[12px]",
         className,
       )}
-      style={{ gridTemplateColumns: `repeat(${items.length}, 1fr)` }}
     >
       {items.map((item, i) => {
         const on = current === i;
