@@ -21,7 +21,6 @@
 | Lacuna | Onde | Impacto |
 |---|---|---|
 | Não há como criar projetos, rotinas e exercícios planejados pelo app | Aba "Projetos" e botão "Criar rotina" da Início mostram "chega em breve" | **Alto:** um usuário novo só consegue fazer treino livre |
-| "Ver no histórico" no resumo do treino ainda mostra "O Histórico chega em breve" | `apps/web/src/components/workout/workout-screen.tsx` | Baixo: a tela já existe; basta navegar para `/historico` |
 | Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
@@ -45,9 +44,9 @@ e do `CLAUDE.md` → commit/push e PR.
 
 **Branch:** `fix/ajustes-historico`
 
-- "Ver no histórico" do resumo do treino → navegar para `/historico`.
-- Abrir o PR da `feat/historico` e fazer o merge.
-- Confirmar no painel do Supabase as Redirect URLs com curinga (`http://localhost:3000/**` e o domínio de testes).
+- [x] "Ver no histórico" do resumo do treino → navega para `/historico` (finalizado sem internet: avisa que o treino aparece quando a conexão voltar).
+- [ ] Abrir os PRs da `feat/historico`, da `chore/documentacao` e desta branch, nessa ordem, e fazer o merge.
+- [ ] Confirmar no painel do Supabase as Redirect URLs com curinga (`http://localhost:3000/**` e o domínio de testes).
 
 **Critério de aceite:** nenhum "chega em breve" para telas que já existem.
 
