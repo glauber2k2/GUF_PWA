@@ -7,12 +7,12 @@ import {
   formatShortDate,
   fromLocalISODate,
   plural,
+  routineLetter,
   TIMES_SIGN,
   toDisplayWeight,
   type WeightUnit,
 } from "@guf/core";
 import type { DaySession } from "@guf/api";
-import { routineLetter } from "@/components/app-shell/app-shell";
 import { Banner, BottomSheet, Icon, Skeleton } from "@/components/ds";
 import { useDaySessions } from "@/hooks/use-history";
 

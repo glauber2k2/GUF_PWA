@@ -50,6 +50,8 @@ guf-app/
 - **Estilo:** classes utilitárias do Tailwind usando os tokens do `@theme` (ex.: `bg-surface`, `text-fg`, `rounded-lg`). Sem estilos inline (`style={{…}}`), exceto valores realmente dinâmicos (ex.: % de uma barra de progresso, atraso escalonado de animação). Sem CSS por componente. O CSS global fica só para tokens, reset, fontes e keyframes (`src/styles/tokens/` + `src/app/globals.css`).
 - **Cores de texto:** `text-fg`, `text-fg-secondary`, `text-fg-muted`. Atenção: `text-primary` é o volt (alias do shadcn), não a cor do texto. Misturas de cor (`color-mix`) viram tokens nomeados no `@theme`, nunca classes arbitrárias com `var()`.
 - **Componentes:** reutilizar os de `apps/web/src/components/ds/` antes de criar novos; componente novo só se não existir. Componentes de uma tela ficam em `src/components/<tela>/`.
+- **Reordenar listas:** usar o hook `usePointerReorder` (`apps/web/src/hooks/`; toque, mouse e setas do teclado) + positions sequenciais (`changedPositions` em packages/core). O `ReorderList` do design system usa o arrastar nativo do HTML5, que não funciona no toque do celular — não usar em telas do app.
+- **Toast:** `useAppShell().showToast(mensagem, { icon, actionLabel, onAction })`; com ação (ex.: "Desfazer") fica 4 s. Tela com barra de ação fixa acima do menu chama `setToastRaised(true)`.
 - **Fontes:** Inter (interface) e Barlow Condensed (números, sempre `tabular-nums`), locais via `next/font/local` em `src/app/fonts/`.
 - **Dados fictícios:** sempre em `apps/web/src/mocks/`, com a **mesma assinatura** das funções reais de `packages/api` (mesmos nomes, parâmetros e retorno, inclusive erros), validada com `satisfies <Contrato>Api`. Integrar = trocar a importação.
 - **Contrato das funções de `packages/api`:** `(client, input) => Promise<{ data, error }>` (nunca os dois); `error` = `{ code, message }` com mensagem pronta em português (o que aconteceu e como resolver).
@@ -68,6 +70,13 @@ guf-app/
 - **Não funciona offline:** iniciar treino (a sessão é criada no servidor).
 - **Mini card / aba Treinar:** o `AppShell` acompanha `inProgress` do banco (sem redirecionar; a Início mostra o card em destaque) e some o mini card quando o banco não tem treino aberto e não há nada pendente no aparelho.
 - **Demonstração (só dev):** `/treino?id=demo&estado=demo` usa o mock e não grava nada.
+
+## Projetos (/projetos e /projetos/detalhe?id=…)
+- **Dados:** `packages/api/src/projects.ts` (`ProjectsApi`): visão geral (projetos com rotinas em uso e último treino concluído) e gravações de projetos e rotinas. Regras puras em `packages/core/src/projects.ts`; validação em `packages/schemas/src/projects.ts`.
+- **Só online:** sem fila offline; `useCanEditPlanning()` bloqueia as ações sem internet e o banner "Sem conexão – para criar ou editar rotinas, conecte-se à internet." aparece; formulários mantêm o que foi digitado e oferecem "Tentar de novo" (`save-state.tsx`).
+- **Ações** (`use-project-actions.ts`): ativar (RPC `activate_project`), desativar, arquivar (também desativa), restaurar, arquivar rotina e reordenar — cada uma com toast e "Desfazer". Após gravar: `invalidatePlanningData` (Projetos + Início).
+- **Menus, folhas e confirmações** ficam em `project-flows.tsx` (usado pela lista e pelo detalhe).
+- **Estados de desenvolvimento:** `?estado=` padrao · nenhum-ativo · novo · sem-rotinas · erro · carregando · offline · queda (gravações falham como queda de conexão).
 
 ## Histórico (/historico)
 - **Dados:** `packages/api/src/history.ts` — `getHistoryOverview` (dias treinados das últimas 104 semanas + `get_streak()` + meta + unidade + data do 1º treino), `getTrainingDays` (mês do calendário) e `getDaySessions` (treinos do dia, com recordes). Mapeadores comuns com a Início em `packages/api/src/shared.ts`.

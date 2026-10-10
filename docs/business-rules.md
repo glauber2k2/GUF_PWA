@@ -46,7 +46,14 @@
 | Observação de exercício feita no treino é salva também na rotina e aparece nos próximos treinos dela. | API (`workout.ts`) |
 | Ficar sem projeto ativo é permitido (desativar o atual); arquivar o projeto ativo também o desativa. | Regra de projeto (Etapa 1) |
 | **Montar e editar projetos e rotinas exige internet** (não há fila offline para essas telas). Sem conexão, as ações de edição ficam bloqueadas com o aviso "Sem conexão – para criar ou editar rotinas, conecte-se à internet."; o que já foi carregado continua visível. | Regra de projeto (Etapa 1) |
-| *A criação e edição de projetos e rotinas pelo app está na Etapa 1 do plano (em andamento).* | — |
+| Lista de projetos: o ativo em destaque; os demais em uso (mais recentes primeiro); arquivados numa seção recolhível (arquivados mais recentemente primeiro). | Core (`groupProjects`) |
+| Ativar outro projeto quando já existe um ativo pede confirmação ("O projeto 'X' deixa de ser o ativo…"). Criar projeto pode já ativá-lo (padrão: ativar quando não há projeto ativo). | Web (`project-flows.tsx`, `project-form-sheet.tsx`) |
+| Arquivar projeto ou rotina nunca apaga treinos feitos (o treino guarda o nome da rotina). Projeto arquivado pode ser restaurado (volta inativo). | Banco + API |
+| Ativar, desativar, arquivar, restaurar e arquivar rotina oferecem "Desfazer" por 4 s (desfazer a ativação volta para o ativo anterior, ou para nenhum). | Web (`use-project-actions.ts`) |
+| Nova rotina entra no fim da lista; reordenar grava posições sequenciais (1, 2, 3…), só das que mudaram. | Core (`nextPosition`, `changedPositions`) + API |
+| Nome de projeto e de rotina: 1 a 100 caracteres; descrição do projeto: até 500 (opcional). | Schemas (`projects.ts`) |
+| No projeto ativo, a rotina sugerida aparece como "Hoje" (ou "Próximo", se já treinou hoje). | Core (`suggestedRoutine`) |
+| *A edição dos exercícios da rotina (tela de Rotina) é a próxima entrega da Etapa 1.* | — |
 
 ## 4. Treino
 

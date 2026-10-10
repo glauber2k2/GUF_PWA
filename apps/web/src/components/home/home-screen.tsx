@@ -10,11 +10,13 @@ import {
   formatShortDate,
   fromLocalISODate,
   greeting,
+  routineLetter,
+  routineMeta,
   suggestNextRoutine,
   toLocalISODate,
 } from "@guf/core";
 import type { HomeSummary } from "@guf/api";
-import { routineLetter, routineMeta, useAppShell } from "@/components/app-shell/app-shell";
+import { useAppShell } from "@/components/app-shell/app-shell";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
@@ -164,7 +166,7 @@ function HomeContent({
             onSwapRoutine: () => onOpenSheet({ kind: "swap" }),
             onStartEmpty: () => shell.startWorkout(null),
             onChooseRoutine: shell.openStartSheet,
-            onCreateRoutine: () => onSoon("A criação de rotinas"),
+            onCreateRoutine: () => router.push("/projetos"),
             onOpenSummary: () => onSoon("O resumo do treino"),
           }}
         />
@@ -212,7 +214,7 @@ function SwapSheet({
           key={r.id}
           letter={routineLetter(r.name)}
           title={r.name}
-          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r)}` : routineMeta(r)}
+          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r.exercises)}` : routineMeta(r.exercises)}
           highlighted={r.id === currentId}
           onClick={() => {
             onClose();
