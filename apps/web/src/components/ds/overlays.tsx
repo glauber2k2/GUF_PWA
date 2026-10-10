@@ -152,6 +152,8 @@ export interface ConfirmDialogProps {
   destructive?: boolean;
   onCancel?: () => void;
   onConfirm?: () => void;
+  /** "container": dentro do pai, no topo (vitrine) · "screen": fixo na tela, na zona do polegar (app). */
+  placement?: "container" | "screen";
   className?: string;
 }
 
@@ -164,16 +166,23 @@ export function ConfirmDialog({
   destructive = false,
   onCancel,
   onConfirm,
+  placement = "container",
   className,
 }: ConfirmDialogProps) {
   if (!open) return null;
+  const screen = placement === "screen";
   return (
-    <div className="absolute inset-0 z-40">
+    <div className={cn("inset-0", screen ? "fixed z-50" : "absolute z-40")}>
       <div onClick={onCancel} className="absolute inset-0 bg-scrim" />
       <div
         role="alertdialog"
         aria-label={title}
-        className={cn("absolute inset-x-4 top-10 grid gap-3 rounded-xl bg-surface-elevated p-5 shadow-e3", className)}
+        aria-modal={screen || undefined}
+        className={cn(
+          "absolute inset-x-4 grid gap-3 rounded-xl bg-surface-elevated p-5 shadow-e3",
+          screen ? "bottom-[calc(40px+env(safe-area-inset-bottom))] mx-auto max-w-[398px] animate-guf-up" : "top-10",
+          className,
+        )}
       >
         <strong className="text-lg">{title}</strong>
         {message && <span className="text-sm leading-5 text-fg-secondary">{message}</span>}

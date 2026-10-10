@@ -505,8 +505,44 @@ export type Database = {
           },
         ]
       }
+      workout_active_periods: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          session_id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          session_id: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          session_id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_active_periods_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workout_sessions: {
         Row: {
+          active_seconds: number | null
           created_at: string
           finished_at: string | null
           id: string
@@ -520,6 +556,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          active_seconds?: number | null
           created_at?: string
           finished_at?: string | null
           id?: string
@@ -533,6 +570,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          active_seconds?: number | null
           created_at?: string
           finished_at?: string | null
           id?: string
@@ -637,6 +675,10 @@ export type Database = {
       }
       has_health_consent: { Args: never; Returns: boolean }
       is_premium: { Args: never; Returns: boolean }
+      pause_workout: {
+        Args: { p_at?: string; p_session_id: string }
+        Returns: undefined
+      }
       pending_documents: {
         Args: never
         Returns: {
@@ -655,6 +697,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      resume_workout: {
+        Args: { p_at?: string; p_session_id: string }
+        Returns: undefined
       }
       revoke_health_consent: {
         Args: { p_platform?: string }

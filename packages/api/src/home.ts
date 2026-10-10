@@ -1,34 +1,13 @@
-import { durationSeconds, sessionTotals, type LoggedSet, type SetType } from "@guf/core";
-import type { Database } from "@guf/types";
+import { durationSeconds, sessionTotals, targetRepsMin, type ActivePeriod, type LoggedSet, type SetType } from "@guf/core";
 import type { GufClient } from "./client";
+import { apiError, toApiError, type ApiResult } from "./result";
+import { addWorkoutExercises, type NewWorkoutExercise } from "./workout";
 
-type SessionExerciseInsert = Database["public"]["Tables"]["session_exercises"]["Insert"];
+export * from "./result";
 
 /* =====================================================================
  * Contrato
  * ===================================================================== */
-
-export type ApiErrorCode = "workout_in_progress" | "not_authenticated" | "network_error" | "unknown";
-
-export interface ApiError {
-  code: ApiErrorCode;
-  /** Mensagem pronta para o usuário: diz o que aconteceu e como resolver. */
-  message: string;
-}
-
-/** Mesmo formato do supabase-js: sucesso com `data` ou falha com `error`, nunca os dois. */
-export type ApiResult<T> = { data: T; error: null } | { data: null; error: ApiError };
-
-export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
-  workout_in_progress: "Você já tem um treino em andamento. Retome ou finalize esse treino antes de começar outro.",
-  not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
-  network_error: "Sem conexão. Verifique a internet e tente de novo.",
-  unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
-};
-
-export function apiError(code: ApiErrorCode): ApiError {
-  return { code, message: API_ERROR_MESSAGES[code] };
-}
 
 export interface PlannedExercise {
   name: string;
@@ -69,6 +48,8 @@ export interface InProgressSession {
   performedOn: string;
   /** ISO timestamp de início. */
   startedAt: string;
+  /** Períodos em que o treino estava rodando (relógio do mini card). */
+  activePeriods: ActivePeriod[];
 }
 
 /** Dia treinado da semana (get_training_days). */
@@ -136,18 +117,7 @@ export interface HomeApi {
  * ===================================================================== */
 
 const FREE_WORKOUT_NAME = "Treino livre";
-
-/** Converte erros do PostgREST/rede no ApiError do app. */
-export function toApiError(error: unknown): ApiError {
-  if (error && typeof error === "object") {
-    const { code, message } = error as { code?: string; message?: string };
-    if (code === "23505") return apiError("workout_in_progress"); // índice único: 1 treino em andamento
-    if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");
-    if (typeof message === "string" && /fetch|network/i.test(message)) return apiError("network_error");
-  }
-  if (error instanceof TypeError) return apiError("network_error");
-  return apiError("unknown");
-}
+const DEFAULT_PLANNED_SETS = 3;
 
 async function currentUserId(client: GufClient): Promise<string | null> {
   const { data } = await client.auth.getSession();
@@ -174,14 +144,14 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
         .maybeSingle(),
       client
         .from("workout_sessions")
-        .select("id, routine_id, name, performed_on, started_at, finished_at, set_logs(set_type, weight_kg, reps, is_completed)")
+        .select("id, routine_id, name, performed_on, started_at, finished_at, active_seconds, set_logs(set_type, weight_kg, reps, is_completed)")
         .eq("status", "completed")
         .gte("performed_on", weekStart)
         .lte("performed_on", weekEnd)
         .order("finished_at", { ascending: true }),
       client
         .from("workout_sessions")
-        .select("id, routine_id, name, performed_on, started_at")
+        .select("id, routine_id, name, performed_on, started_at, workout_active_periods(started_at, ended_at)")
         .eq("status", "in_progress")
         .maybeSingle(),
       client.rpc("get_training_days", { p_from: weekStart, p_to: weekEnd }),
@@ -238,7 +208,8 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
         routineId: s.routine_id,
         name: s.name ?? FREE_WORKOUT_NAME,
         performedOn: s.performed_on,
-        durationSeconds: durationSeconds(s.started_at, s.finished_at),
+        // Tempo efetivo (sem pausas); treinos antigos sem o campo usam início → fim.
+        durationSeconds: s.active_seconds ?? durationSeconds(s.started_at, s.finished_at),
         volumeKg: totals.volumeKg,
         setCount: totals.setCount,
       };
@@ -263,6 +234,10 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
             name: inProgressRes.data.name ?? FREE_WORKOUT_NAME,
             performedOn: inProgressRes.data.performed_on,
             startedAt: inProgressRes.data.started_at,
+            activePeriods: inProgressRes.data.workout_active_periods.map((p) => ({
+              startedAt: p.started_at,
+              endedAt: p.ended_at,
+            })),
           }
         : null,
       streak: {
@@ -280,9 +255,10 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
 };
 
 /**
- * Inicia o treino: cria a sessão (performed_on local, nome da rotina como snapshot)
- * e copia os exercícios planejados da rotina para session_exercises.
- * Se a cópia falhar, a sessão recém-criada é apagada (sem treino "pela metade").
+ * Inicia o treino: cria a sessão (performed_on local, nome da rotina como snapshot; o gatilho
+ * abre o 1º período ativo), copia os exercícios da rotina e já cria as séries planejadas
+ * (target_sets) preenchidas com carga/reps do último desempenho (ou as reps alvo da rotina).
+ * Se algo falhar, a sessão recém-criada é apagada (sem treino "pela metade").
  */
 export const startWorkout: StartWorkout = async (client, { routineId, performedOn }) => {
   try {
@@ -290,17 +266,22 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
     if (!userId) return { data: null, error: apiError("not_authenticated") };
 
     let name = FREE_WORKOUT_NAME;
-    let planned: { exercise_id: string; position: number }[] = [];
+    let planned: { exercise_id: string; position: number; target_sets: number | null; target_reps: string | null }[] = [];
     if (routineId) {
       const routineRes = await client
         .from("routines")
-        .select("name, routine_exercises(exercise_id, position)")
+        .select("name, routine_exercises(exercise_id, position, target_sets, target_reps)")
         .eq("id", routineId)
         .maybeSingle();
       if (routineRes.error || !routineRes.data) return { data: null, error: toApiError(routineRes.error) };
       name = routineRes.data.name;
-      planned = routineRes.data.routine_exercises;
+      planned = [...routineRes.data.routine_exercises].sort((a, b) => a.position - b.position);
     }
+
+    const lastRes = planned.length
+      ? await client.rpc("get_last_performance", { p_exercise_ids: planned.map((p) => p.exercise_id) })
+      : { data: [], error: null };
+    if (lastRes.error) return { data: null, error: toApiError(lastRes.error) };
 
     const sessionRes = await client
       .from("workout_sessions")
@@ -310,16 +291,33 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
     if (sessionRes.error) return { data: null, error: toApiError(sessionRes.error) };
     const sessionId = sessionRes.data.id;
 
-    if (planned.length > 0) {
-      // user_id NÃO é enviado: o gatilho session_exercises_fill copia da sessão (CLAUDE.md).
-      // O tipo gerado o marca como obrigatório só porque a coluna é NOT NULL sem default.
-      const rows = planned
-        .sort((a, b) => a.position - b.position)
-        .map((p, i) => ({ session_id: sessionId, exercise_id: p.exercise_id, position: i })) as SessionExerciseInsert[];
-      const { error } = await client.from("session_exercises").insert(rows);
-      if (error) {
+    const exercises: NewWorkoutExercise[] = planned.map((p, position) => {
+      const previous = (lastRes.data ?? []).filter((l) => l.exercise_id === p.exercise_id);
+      const count = p.target_sets ?? Math.max(previous.length, DEFAULT_PLANNED_SETS);
+      const lastPrev = previous[previous.length - 1];
+      return {
+        id: crypto.randomUUID(),
+        exerciseId: p.exercise_id,
+        position,
+        sets: Array.from({ length: count }, (_, i) => {
+          const prev = previous.find((l) => l.set_number === i + 1) ?? lastPrev;
+          return {
+            id: crypto.randomUUID(),
+            setNumber: i + 1,
+            setType: "normal" as SetType,
+            weightKg: prev?.weight_kg ?? null,
+            reps: prev?.reps ?? targetRepsMin(p.target_reps),
+            isCompleted: false,
+          };
+        }),
+      };
+    });
+
+    if (exercises.length > 0) {
+      const added = await addWorkoutExercises(client, { sessionId, exercises });
+      if (added.error) {
         await client.from("workout_sessions").delete().eq("id", sessionId);
-        return { data: null, error: toApiError(error) };
+        return { data: null, error: added.error };
       }
     }
     return { data: { sessionId }, error: null };

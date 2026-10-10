@@ -85,3 +85,9 @@ export function startedAgoLabel(startedAt: string, now: Date = new Date()): stri
   const rest = minutes % 60;
   return `começou há ${hours} h${rest ? ` ${rest} min` : ""}`;
 }
+
+/** Menor número das repetições alvo da rotina ("8-12" → 8, "10" → 10, "falha" → null). */
+export function targetRepsMin(targetReps: string | null | undefined): number | null {
+  const match = targetReps?.match(/\d+/);
+  return match ? Number(match[0]) : null;
+}

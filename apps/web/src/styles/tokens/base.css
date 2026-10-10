@@ -78,3 +78,48 @@
     background-position: -60% 0;
   }
 }
+
+/* Entrada de baixo (barras flutuantes, mini card, diálogos) */
+@keyframes guf-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Tela que entra pela direita (seletor de exercícios) */
+@keyframes guf-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+/* Destaque volt de item recém-adicionado */
+@keyframes guf-flash {
+  0%,
+  45% {
+    box-shadow:
+      0 0 0 1.5px var(--accent-text),
+      inset 0 0 0 999px color-mix(in oklab, var(--accent) 14%, transparent);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 transparent,
+      inset 0 0 0 999px transparent;
+  }
+}
+/* Pulso do indicador "ao vivo" */
+@keyframes guf-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
