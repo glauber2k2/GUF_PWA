@@ -4,6 +4,7 @@ import { apiError, toApiError, type ApiResult } from "./result";
 import {
   currentUserId,
   FREE_WORKOUT_NAME,
+  resolveAvatarUrl,
   sessionDurationSeconds,
   toLoggedSets,
   toStreakSummary,
@@ -68,6 +69,8 @@ export interface InProgressSession {
 export interface HomeSummary {
   profile: {
     name: string | null;
+    /** Foto a exibir (enviada > Google > null = inicial). */
+    avatarUrl: string | null;
     /** Meta semanal (só exibição). */
     weeklyGoal: number | null;
   };
@@ -122,7 +125,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
     if (!userId) return { data: null, error: apiError("not_authenticated") };
 
     const [profileRes, projectRes, anyRoutineRes, lastRes, weekRes, inProgressRes, daysRes, streakRes] = await Promise.all([
-      client.from("profiles").select("name, weekly_goal").eq("id", userId).maybeSingle(),
+      client.from("profiles").select("name, avatar_url, weekly_goal").eq("id", userId).maybeSingle(),
       client.from("projects").select("id, name").eq("is_active", true).is("archived_at", null).maybeSingle(),
       client.from("routines").select("id", { count: "exact", head: true }).is("archived_at", null),
       client
@@ -201,8 +204,14 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       };
     });
 
+    // Foto social atual vem da sessão (lida do armazenamento local, sem ir à rede).
+    const sessionUser = (await client.auth.getSession()).data.session?.user;
     const summary: HomeSummary = {
-      profile: { name: profileRes.data?.name ?? null, weeklyGoal: profileRes.data?.weekly_goal ?? null },
+      profile: {
+        name: profileRes.data?.name ?? null,
+        avatarUrl: resolveAvatarUrl(client, profileRes.data?.avatar_url, sessionUser),
+        weeklyGoal: profileRes.data?.weekly_goal ?? null,
+      },
       activeProject,
       hasAnyRoutine: (anyRoutineRes.count ?? 0) > 0,
       lastFinishedRoutineId: lastRes.data?.routine_id ?? null,

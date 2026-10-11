@@ -1,6 +1,6 @@
 # Plano de implementação — Guf App
 
-> Atualizado em 10/10/2026 · Branch de referência: `feat/historico`
+> Atualizado em 11/10/2026 · Branch de referência: `feat/perfil`
 > Regras de negócio: [`business-rules.md`](./business-rules.md) · Instruções técnicas: [`CLAUDE.md`](../CLAUDE.md)
 
 ## 1. Situação atual
@@ -16,6 +16,7 @@
 | Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
 | Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
 | Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | **Aguardando PR/merge** |
+| Perfil (`/perfil`): nome, instalar o app (por plataforma), unidade, meta, tema, exportar dados, documentos aceitos, revogar consentimento de saúde, excluir conta, versão e sair | `feat/perfil` | **Em revisão (sem commit)** |
 
 ### Lacunas conhecidas no que já existe
 
@@ -24,7 +25,6 @@
 | Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
-| Aba "Perfil" sem tela (só "Sair" numa folha da Início) | AppShell / Início | Médio; obrigatório para os direitos LGPD |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 
@@ -115,6 +115,15 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 - Trocar kg/lb muda só a exibição (banco continua em kg).
 
 **Riscos:** textos legais precisam de **validação jurídica** antes da produção.
+
+**Implementado (`feat/perfil`)**
+- Tela `/perfil` (aba Perfil): `components/profile/*`, dados em `packages/api/src/profile.ts` (`getProfile`, `updateProfile`, `getConsents`, `revokeHealthConsent`, `exportMyData`, `deleteAccount`), regras puras em `packages/core/src/profile.ts` e `pwa.ts`, validação em `packages/schemas/src/profile.ts`.
+- Mock em `apps/web/src/mocks/profile.ts` (`satisfies ProfileApi`) com `?estado=` só em desenvolvimento: `padrao`, `sem-saude`, `erro`, `carregando`, `offline`, `pendente` e a plataforma (`android`, `ios-safari`, `ios-outro`, `instalado`, `desconhecido`). O mock nunca exclui conta nem revoga de verdade.
+- Tema Escuro/Claro/Sistema salvo no aparelho (`lib/theme/theme.ts`), aplicado antes da pintura por script no `<head>`.
+- Estado do PWA (`lib/pwa/pwa-store.ts`): convite de instalação guardado, app instalado e versão nova esperando (o mesmo estado do aviso "Nova versão do guf disponível").
+- Versão do app = `version` do `apps/web/package.json` (`NEXT_PUBLIC_APP_VERSION`).
+- Foto do usuário no Perfil e na Início: foto do Google (inclusive conta de e-mail vinculada ao Google depois) com a inicial como reserva; prioridade já preparada para a foto enviada pelo usuário.
+- **Pendente:** upload de foto própria (migration do bucket `avatars` + políticas de acesso e tela de envio/corte) e as páginas `/termos`, `/privacidade` e `/termo-de-saude` (dependem dos textos definitivos com validação jurídica).
 
 ---
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ServiceWorkerUpdater } from "@/components/pwa/service-worker-updater";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme/theme";
 import { Providers } from "@/providers/providers";
 import "./globals.css";
 
@@ -45,7 +46,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="pt-BR"
       className={`${inter.variable} ${barlowCondensed.variable} h-full antialiased`}
+      // data-theme é aplicado pelo script abaixo antes da hidratação (preferência do aparelho).
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>
         <ServiceWorkerUpdater />

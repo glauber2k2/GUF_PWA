@@ -143,7 +143,7 @@ export const getHomeSummary: HomeApi["getHomeSummary"] = async (client, { today,
   const startedAt = new Date(Date.now() - 25 * 60_000).toISOString();
 
   const summary: HomeSummary = {
-    profile: { name: "Lucas Almeida", weeklyGoal: streakScenario === "zerada" ? 3 : 4 },
+    profile: { name: "Lucas Almeida", avatarUrl: null, weeklyGoal: streakScenario === "zerada" ? 3 : 4 },
     activeProject: hasProject ? { ...PROJECT, routines } : null,
     hasAnyRoutine: !isNew,
     lastFinishedRoutineId: isNew ? null : "routine-a",

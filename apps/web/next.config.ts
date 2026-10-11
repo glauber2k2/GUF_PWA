@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/** Versão do app (package.json), exibida no Perfil · "Sobre". */
+const APP_VERSION = (JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as { version: string }).version;
 
 const DEFAULT_PAGE_EXTENSIONS = ["tsx", "ts", "jsx", "js"];
 
@@ -15,6 +20,7 @@ export default function config(phase: string): NextConfig {
 
   return {
     output: "export",
+    env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
     trailingSlash: true,
     images: { unoptimized: true },
     pageExtensions: isDevServer
