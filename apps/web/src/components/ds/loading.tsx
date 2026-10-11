@@ -1,6 +1,39 @@
+"use client";
+
+import { useLayoutEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { GufLoader, type GufLoaderVariant } from "./loader";
 import { ScreenPortal } from "./portal";
+
+/**
+ * Início (no relógio do documento) das animações da abertura. A tela de abertura é montada várias
+ * vezes em sequência (fallback do Suspense → guarda de sessão → AppShell esperando os dados) e cada
+ * montagem nova reiniciaria a animação do zero ("pulo"). A primeira guarda o início; as seguintes
+ * herdam o mesmo, e a animação continua de onde estava.
+ */
+let openingStart: CSSNumberish | null = null;
+
+function useContinuousAnimation() {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || typeof el.getAnimations !== "function") return;
+    const animations = el.getAnimations({ subtree: true });
+    if (openingStart !== null) {
+      for (const animation of animations) animation.startTime = openingStart;
+      return;
+    }
+    // Primeira abertura: o início só existe depois que a animação começa de fato.
+    void Promise.all(animations.map((a) => a.ready))
+      .then(() => {
+        openingStart ??= animations[0]?.startTime ?? null;
+      })
+      .catch(() => {
+        // Animação cancelada (a tela saiu antes de começar): a próxima vira a referência.
+      });
+  }, []);
+  return ref;
+}
 
 export interface LoadingScreenProps {
   /** Frase abaixo da logo animada. */
@@ -15,8 +48,10 @@ export interface LoadingScreenProps {
  * Usada enquanto a sessão e os dados do usuário carregam.
  */
 export function LoadingScreen({ message = "Preparando seu treino", placement = "screen", className }: LoadingScreenProps) {
+  const ref = useContinuousAnimation();
   return (
     <div
+      ref={ref}
       aria-busy="true"
       className={cn(
         "flex w-full flex-col items-center justify-center gap-7 bg-background",
