@@ -25,7 +25,7 @@ const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/historico", name: "Histórico" },
   { path: null, name: "Treinar" },
   { path: "/projetos", name: "Projetos" },
-  { path: null, name: "Perfil" },
+  { path: "/perfil", name: "Perfil" },
 ];
 
 export interface ToastOptions {

@@ -25,6 +25,8 @@ export function LoginForm() {
       errorCode: searchParams.get("error_code"),
       errorDescription: searchParams.get("error_description"),
     }) ?? initError;
+  // Volta da exclusão de conta (Perfil → Excluir minha conta).
+  const accountDeleted = searchParams.get("conta-excluida") === "1";
   const google = useGoogleSignIn(setFormError);
   const startGoogle = () => {
     setReturnErrorDismissed(true);
@@ -66,6 +68,11 @@ export function LoginForm() {
       }
     >
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
+        {accountDeleted && (
+          <Banner tone="success" title="Sua conta foi excluída.">
+            Seus dados foram apagados. Você pode criar uma nova conta quando quiser.
+          </Banner>
+        )}
         {returnError && !returnErrorDismissed && <Banner tone="danger">{returnError.message}</Banner>}
         <GoogleButton onClick={startGoogle} disabled={busy} aria-busy={google.pending || undefined} />
         <TextDivider />

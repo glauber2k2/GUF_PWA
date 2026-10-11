@@ -6,3 +6,4 @@ export * from "./workout";
 export * from "./history";
 export * from "./projects";
 export * from "./routines";
+export * from "./profile";
