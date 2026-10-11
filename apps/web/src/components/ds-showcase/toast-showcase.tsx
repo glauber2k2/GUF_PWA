@@ -21,7 +21,7 @@ const SAMPLES: Record<ToastTone, Sample> = {
     title: "Sem conexão",
     options: { tone: "warning", icon: WifiOff, message: "Seu treino está salvo no aparelho." },
   },
-  info: { label: "Informativo", when: "Explicação neutra", title: "Dica", options: { tone: "info", message: "Segure + para subir a carga de 2,5 em 2,5 kg." } },
+  info: { label: "Informativo", when: "Explicação neutra", title: "Dica", options: { tone: "info", message: "Toque em + para subir a carga de 2 em 2 kg." } },
   pr: { label: "Recorde", when: "Conquista, sempre com troféu", title: "Recorde pessoal", options: { tone: "pr", message: "Supino reto – 82,5 kg × 8" } },
   undo: { label: "Desfazer", when: "Ação reversível", title: "Série excluída", options: { tone: "undo", icon: Trash2, actionLabel: "Desfazer" } },
   loading: { label: "Carregando", when: "Vira sucesso ao concluir", title: "Salvando treino…", options: { tone: "loading" } },
