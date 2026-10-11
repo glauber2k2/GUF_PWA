@@ -73,8 +73,8 @@ export function Button({
       {...rest}
     >
       {loading ? (
-        // Loading 02 (Desenho): sobre volt usa a cor do texto do volt; nas demais, a cor do botão.
-        <GufLoader variant={2} size={s.icon} tone={variant === "primary" && !disabled ? "onAccent" : "mono"} />
+        // Loading 08 (Cometa): sobre volt usa a cor do texto do volt; nas demais, a cor do botão.
+        <GufLoader variant={8} size={s.icon} tone={variant === "primary" && !disabled ? "onAccent" : "mono"} />
       ) : icon ? (
         <Icon icon={icon} size={s.icon} />
       ) : null}
