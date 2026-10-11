@@ -1,4 +1,4 @@
-import { durationSeconds, type LoggedSet, type SetType } from "@guf/core";
+import { AVATAR_BUCKET, durationSeconds, pickAvatar, sizedAvatarUrl, type AvatarAuthUser, type LoggedSet, type SetType } from "@guf/core";
 import type { Database } from "@guf/types";
 import type { GufClient } from "./client";
 
@@ -20,6 +20,18 @@ export interface StreakSummary {
 }
 
 export const FREE_WORKOUT_NAME = "Treino livre";
+
+/**
+ * URL da foto a exibir (regra em @guf/core avatar.ts): foto enviada (Storage) > foto social atual
+ * (sessão) > foto social do cadastro (profiles.avatar_url) > null (a tela mostra a inicial).
+ */
+export function resolveAvatarUrl(client: GufClient, profileAvatar: string | null | undefined, user: AvatarAuthUser | null | undefined): string | null {
+  const source = pickAvatar(profileAvatar, user);
+  if (!source) return null;
+  if (source.kind === "url") return sizedAvatarUrl(source.url);
+  // Upload próprio (futuro): o bucket público de fotos é criado junto com o upload, por migration.
+  return client.storage.from(AVATAR_BUCKET).getPublicUrl(source.path).data.publicUrl;
+}
 
 type Functions = Database["public"]["Functions"];
 

@@ -1,6 +1,6 @@
 # Regras de negócio — Guf App
 
-> Atualizado em 10/10/2026 · Reflete o código da branch `feat/historico`.
+> Atualizado em 11/10/2026 · Reflete o código da branch `feat/perfil`.
 > Regras implementadas no banco valem para todos os apps (web e futuro mobile); regras do `packages/core` são compartilhadas.
 > Plano das próximas etapas: [`implementation-plan.md`](./implementation-plan.md).
 
@@ -157,6 +157,24 @@
 | Média do período = média das semanas com treino. Variação % = comparação com o período anterior de mesmo tamanho (sem dados → "Sem dados do período anterior"). Alta em verde; queda em cor neutra (queda não é erro). | Core + Web |
 | Menos de 2 semanas com volume em todo o histórico → aviso "Treine mais algumas semanas para ver sua evolução." | Core + Web |
 | Sem internet, mostra a última cópia salva no aparelho com aviso. | Web (`lib/offline/device-cache.ts`) |
+
+## 8.1 Perfil
+
+| Regra | Onde |
+|---|---|
+| Alterar nome, unidade de peso e meta semanal **exige internet**; sem conexão, aviso "Sem conexão – para alterar seu perfil, conecte-se à internet." Instalar o app, trocar o tema e sair funcionam sem internet. | Web (`components/profile/`) |
+| Meta semanal: toques rápidos em + / − mudam o número na hora, mas geram **uma** gravação (o último valor, 600 ms após o último toque; nunca duas ao mesmo tempo; voltar ao valor salvo não grava). | Core (`coalesce.ts`) + Web (`useCoalescedSave`) |
+| Nome: 1 a 100 caracteres (espaços nas pontas são removidos). Meta semanal: 1 a 7, só exibição (a sequência conta com 1 treino por semana). | Schemas (`profile.ts`) |
+| Unidade kg/lb muda **só a exibição**; o banco guarda sempre kg. Alterações do perfil atualizam Perfil, Início e Histórico. | Web + Banco |
+| Tema Escuro/Claro/Sistema é salvo **no aparelho** (não vai para o banco) e aplicado antes da primeira pintura. | Web (`lib/theme/theme.ts`) |
+| "Treinando desde mmm aaaa · N treinos" usa o primeiro treino concluído; sem treino → "Nenhum treino concluído ainda". | Core (`profile.ts`) |
+| Foto do usuário (Perfil e Início): foto enviada pelo usuário (futuro upload; vale para login social e e-mail/senha) > foto atual da conta Google > foto do Google guardada no cadastro > inicial do nome. Se a foto não carregar (sem internet), aparece a inicial. | Core (`avatar.ts`) + API (`resolveAvatarUrl`) + Web (`Avatar`) |
+| Instalar: Android/Chromium com convite → convite nativo; iPhone no Safari → 3 passos; iPhone em outro navegador → "Copiar link" (só o Safari instala no iPhone); já instalado → cartão "App instalado"; demais → passos pelo menu do navegador. | Core (`pwa.ts`) + Web |
+| Exportar meus dados: JSON da `export_my_data()` gerado no aparelho, arquivo `guf-meus-dados-AAAA-MM-DD.json` (data local). O conteúdo nunca vai para logs. | API + Core + Web |
+| Documentos aceitos: o último aceite de cada documento (data e versão); o consentimento de saúde só aparece se estiver ativo. | API (`getConsents`) |
+| Revogar consentimento de saúde apaga **todas** as medidas; confirmação com "Cancelar" e "Revogar" de mesmo peso visual. | Banco (`revoke_health_consent`) + Web |
+| Excluir conta: confirmação digitando **EXCLUIR**, com atalho para exportar antes; chama a Edge Function `delete-account`, sai da conta (o aparelho é limpo) e abre o login com "Sua conta foi excluída." | API + Web |
+| Sair com gravações de treino ainda não enviadas: confirmação com "Ficar" e "Sair mesmo assim" de mesmo peso visual. | Web (`profile-sign-out.tsx`) |
 
 ## 9. Mensagens ao usuário
 

@@ -5,6 +5,7 @@ import { ArrowUpRight, CircleCheck, Dumbbell, Ellipsis, Play, Plus, StickyNote, 
 import {
   AppHeader,
   AppIcon,
+  Avatar,
   Banner,
   BottomNav,
   BottomSheet,
@@ -418,6 +419,14 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
 
       <Group title="Exibição">
         <div className={cn(PANEL, "grid gap-4 p-5")}>
+          {/* Foto do usuário: com foto (ícone do app como exemplo), sem foto e foto que falhou (volta para a inicial). */}
+          <div className="flex flex-wrap items-center gap-3">
+            <Avatar size="lg" tone="accent" name="Rafael" src="/icons/icon-192.png" />
+            <Avatar size="lg" tone="accent" name="Rafael" />
+            <Avatar size="md" name="Lucas" src="/icons/icon-192.png" />
+            <Avatar size="md" name="Lucas" />
+            <Avatar size="sm" name="Ana" src="/foto-que-nao-existe.png" />
+          </div>
           <div className="flex flex-wrap gap-2">
             {MUSCLE_FILTERS.map((m, i) => (
               <Chip key={m} label={m} defaultSelected={i === 0} icon={m === "Pernas" ? Dumbbell : undefined} />

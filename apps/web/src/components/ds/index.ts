@@ -14,3 +14,4 @@ export * from "./portal";
 export * from "./loader";
 export * from "./loading";
 export * from "./muscle-icon";
+export * from "./avatar";

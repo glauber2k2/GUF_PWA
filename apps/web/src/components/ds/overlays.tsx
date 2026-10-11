@@ -154,6 +154,11 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   confirmLabel?: string;
   destructive?: boolean;
+  /**
+   * Botões com o MESMO peso visual (contorno), confirmar em vermelho. Para escolhas que o usuário
+   * precisa fazer sem ser empurrado (LGPD: revogar consentimento, sair com dados pendentes).
+   */
+  balanced?: boolean;
   onCancel?: () => void;
   onConfirm?: () => void;
   /** "container": dentro do pai, no topo (vitrine) · "screen": fixo na tela, na zona do polegar (app). */
@@ -168,6 +173,7 @@ export function ConfirmDialog({
   cancelLabel = "Continuar",
   confirmLabel = "Finalizar",
   destructive = false,
+  balanced = false,
   onCancel,
   onConfirm,
   placement = "container",
@@ -194,6 +200,8 @@ export function ConfirmDialog({
           <button
             type="button"
             onClick={onCancel}
+            // Foco começa na opção segura.
+            autoFocus={balanced}
             className="h-12 cursor-pointer rounded-md border border-border-strong bg-transparent text-[15px] font-semibold text-fg"
           >
             {cancelLabel}
@@ -202,8 +210,12 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             className={cn(
-              "h-12 cursor-pointer rounded-md text-[15px] font-bold",
-              destructive ? "bg-danger text-danger-foreground" : "bg-accent text-accent-foreground active:bg-accent-pressed",
+              "h-12 cursor-pointer rounded-md text-[15px]",
+              balanced
+                ? "border border-border-strong bg-transparent font-semibold text-danger hover:bg-danger/12"
+                : destructive
+                  ? "bg-danger font-bold text-danger-foreground"
+                  : "bg-accent font-bold text-accent-foreground active:bg-accent-pressed",
             )}
           >
             {confirmLabel}
