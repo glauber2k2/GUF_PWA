@@ -111,11 +111,11 @@ export function SignUpForm() {
         />
         <div className="flex flex-col gap-1">
           <Checkbox error={errors.isAdult?.message} {...register("isAdult")}>
-            Tenho 18 anos ou mais
+            Tenho 18 anos ou mais · <LegalLink docType="age_declaration" url={docs?.age_declaration.url}>ler a declaração de idade</LegalLink>
           </Checkbox>
           <Checkbox error={errors.acceptsTerms?.message} {...register("acceptsTerms")}>
-            Li e aceito os <LegalLink href={docs?.terms.url}>Termos de Uso</LegalLink> e a{" "}
-            <LegalLink href={docs?.privacy.url}>Política de Privacidade</LegalLink>
+            Li e aceito os <LegalLink docType="terms" url={docs?.terms.url}>Termos de Uso</LegalLink> e a{" "}
+            <LegalLink docType="privacy" url={docs?.privacy.url}>Política de Privacidade</LegalLink>
           </Checkbox>
         </div>
         {documentsError && (

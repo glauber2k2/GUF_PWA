@@ -60,6 +60,11 @@
   --color-active-surface: color-mix(in oklab, var(--accent) 6%, var(--surface-elevated));
   --color-risk-surface: color-mix(in oklab, var(--warning) 8%, var(--surface));
   --color-record-surface: color-mix(in oklab, var(--pr) 8%, var(--surface));
+  /* Leitor de documentos legais */
+  --color-accent-tile: color-mix(in oklab, var(--accent) 12%, var(--surface-3));
+  --color-danger-tile: color-mix(in oklab, var(--danger) 14%, var(--surface-3));
+  --color-legal-note: color-mix(in oklab, var(--warning) 12%, var(--surface));
+  --color-legal-changes: color-mix(in oklab, var(--info) 12%, var(--surface));
   --color-sheen: var(--sheen);
 
   --color-google-surface: var(--google-surface);
@@ -156,6 +161,9 @@
   --animate-guf-from-left: guf-from-left 0.25s var(--ease-enter) both;
   --animate-guf-from-right: guf-from-right 0.25s var(--ease-enter) both;
   --animate-guf-fade: guf-fade 0.15s var(--ease-standard) both;
+  /* Leitor de documentos: seção destacada ao tocar no sumário (duas cópias para reiniciar) */
+  --animate-guf-legal-flash-a: guf-legal-flash-a 1.4s var(--ease-standard) both;
+  --animate-guf-legal-flash-b: guf-legal-flash-b 1.4s var(--ease-standard) both;
   /* Toast (ver base.css) */
   --animate-guf-toast-pop: guf-toast-pop 0.45s var(--ease-overshoot) 0.12s both;
   --animate-guf-toast-pop-glow: guf-toast-pop 0.45s var(--ease-overshoot) 0.12s both, guf-toast-glow 1.6s var(--ease-standard) 0.6s 3;

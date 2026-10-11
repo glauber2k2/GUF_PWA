@@ -156,6 +156,27 @@
   }
 }
 
+/* Leitor de documentos: seção destacada (volt 16%) ao tocar no sumário */
+@keyframes guf-legal-flash-a {
+  0%,
+  30% {
+    background-color: color-mix(in oklab, var(--accent) 16%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes guf-legal-flash-b {
+  0%,
+  30% {
+    background-color: color-mix(in oklab, var(--accent) 16%, transparent);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
 /* ---------------------------------------------------------------------
  * Toast: ícone (pop com overshoot + efeito do tipo), texto e barra de tempo.
  * Sucesso/recorde = onda; erro = tremida; aviso = balanço; recorde também brilha.

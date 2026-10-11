@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { AppHeader, Banner, LargeTitle } from "@/components/ds";
 import { useCanEditProfile, useConsents, useProfile, useProfileSource } from "@/hooks/use-profile";
 import { useScrolled } from "@/hooks/use-scrolled";
@@ -25,6 +26,13 @@ export function ProfileScreen() {
   const detected = useInstallPlatform();
   const platform = dev.platform ?? detected;
   const loading = dev.forceLoading || profile.isPending;
+
+  // Aberto por um atalho (ex.: /perfil#pf-privacy, vindo de um documento legal): rola até a seção
+  // quando o conteúdo carrega (antes disso só há o esqueleto).
+  useEffect(() => {
+    if (loading || !window.location.hash) return;
+    document.getElementById(decodeURIComponent(window.location.hash.slice(1)))?.scrollIntoView({ block: "start" });
+  }, [loading]);
 
   return (
     <main className="flex flex-col px-4">

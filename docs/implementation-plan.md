@@ -31,14 +31,16 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Página 404 personalizada | `feat/pagina-404` | #22 |
 | Ajustes visuais: loader 09 (Sonar) na abertura e 08 (Cometa) nos botões; fechar o `BottomSheet` arrastando para baixo; ícone `NotepadText` na observação | `feat/ajustes-visuais` | #23 |
 | Novo Toast (protótipo `Toast.dc.html`): 7 tipos com ícone animado, pilha com até 3 visíveis, barra de tempo de 5 s, expandir/pausar, arrastar para dispensar e "carregando → sucesso" | `feat/toast` | — |
+| Documentos legais no app: leitor único (`/termos`, `/privacidade`, `/termo-de-saude`), central `/documentos`, leitura por cima da tela no cadastro, `/aceite` ("O que mudou") e Perfil | `feat/documentos-legais` | — |
 
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
 |---|---|---|
-| Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
+| Textos dos documentos legais são rascunho do protótipo (marcadores [RAZÃO SOCIAL], [CNPJ]…), sem validação jurídica | `packages/core/src/legal-content.ts` | **Bloqueia o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
-| Links dos documentos legais abrem em **nova aba**; com o app instalado (PWA), isso tira o usuário do app. Falta a leitura dentro do app (telas a desenhar no Claude Design) | `LegalLink` (cadastro e `/aceite`), Perfil › Sobre, folha "Documentos aceitos" | Alto para o lançamento (junto com as páginas) |
+| Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `components/legal/legal-reader-provider.tsx` | Baixo |
+| Tela de consentimento de saúde ainda não existe (chega com o módulo de medidas); o `LegalSummary` já está pronto para ela | Etapa 4 | Médio |
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `hooks/use-sheet-drag.ts` | Baixo |
 | Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `components/ds/toast.tsx` | Baixo |
@@ -145,11 +147,11 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 - Estado do PWA (`lib/pwa/pwa-store.ts`): convite de instalação guardado, app instalado e versão nova esperando (o mesmo estado do aviso "Nova versão do guf disponível").
 - Versão do app = `version` do `apps/web/package.json` (`NEXT_PUBLIC_APP_VERSION`).
 - Foto do usuário no Perfil e na Início: foto do Google (inclusive conta de e-mail vinculada ao Google depois) com a inicial como reserva; prioridade já preparada para a foto enviada pelo usuário.
-- **Pendente:** upload de foto própria (migration do bucket `avatars` + políticas de acesso e tela de envio/corte) e as páginas `/termos`, `/privacidade` e `/termo-de-saude` (dependem dos textos definitivos com validação jurídica).
+- **Pendente:** upload de foto própria (migration do bucket `avatars` + políticas de acesso e tela de envio/corte) e os textos definitivos dos documentos legais (validação jurídica).
 - **Documentos legais — próximos passos (definidos em 11/10/2026):**
   1. Desenhar no Claude Design: leitor de documento único para os 3 documentos (cabeçalho com voltar, versão e "em vigor desde", bloco "Em resumo" sempre visível, sumário com âncoras — inclusive `/termos#idade` —, atalhos para exportar/revogar/excluir, rodapé com contato do encarregado), central "Documentos legais" no Perfil › Sobre, "O que mudou nesta versão" no `/aceite` e os estados visitante / aceito / versão antiga aceita / sem internet, nos dois temas.
   2. Em paralelo, o jurídico redige os textos (dados reais do controlador e do encarregado, base legal, dados de saúde, transferência internacional, retenção). O design usa marcadores entre colchetes, nunca texto jurídico inventado.
-  3. Implementar as páginas estáticas (funcionam sem login e sem internet), trocar os links para abrir dentro do app e publicar as versões definitivas por nova migration (versão e hash reais).
+  3. ~~Implementar as páginas estáticas e o leitor dentro do app~~ (feito em `feat/documentos-legais`). Falta publicar as versões definitivas por nova migration (versão e hash reais) e trocar o rascunho de `legal-content.ts` pelo texto do jurídico.
 
 ---
 
