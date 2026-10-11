@@ -129,7 +129,7 @@ function repsAtLoad(sets: readonly LoggedSet[], weightKg: number): number | null
 }
 
 /** Histórico por treino de cada exercício (get_exercise_history), para achar os recordes do dia. */
-async function exerciseHistories(client: GufClient, exerciseIds: readonly string[]): Promise<ApiResult<Map<string, ExerciseSessionBest[]>>> {
+export async function exerciseHistories(client: GufClient, exerciseIds: readonly string[]): Promise<ApiResult<Map<string, ExerciseSessionBest[]>>> {
   const results = await Promise.all(exerciseIds.map((id) => client.rpc("get_exercise_history", { p_exercise_id: id })));
   const failed = results.find((r) => r.error);
   if (failed?.error) return { data: null, error: toApiError(failed.error) };

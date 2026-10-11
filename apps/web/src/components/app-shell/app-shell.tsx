@@ -19,6 +19,9 @@ const TOAST_MS = 1800;
 /** Toast com ação ("Desfazer") fica mais tempo na tela. */
 const TOAST_ACTION_MS = 4000;
 
+/** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
+const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exercicio", "/exercicio/busca"]);
+
 /** Rotas de cada aba (índice do BottomNav). null = tela ainda não construída. */
 const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/", name: "Início" },
@@ -68,8 +71,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname().replace(/(.)\/$/, "$1");
   const { active, track, clear } = useActiveWorkout();
   const devHome = useDevHomeState();
-  // Treino e edição de rotina são imersivos: sem menu inferior e sem mini card (têm o próprio rodapé).
-  const immersive = pathname === "/treino" || pathname === "/rotina";
+  // Treino, edição de rotina, resumo e evolução são imersivos: sem menu inferior e sem mini card.
+  const immersive = IMMERSIVE_ROUTES.has(pathname);
   const summary = useHomeSummary();
   const online = useOnlineStatus();
   // Abertura: depois do login, a tela de carregamento fica até os dados do usuário chegarem

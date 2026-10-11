@@ -16,6 +16,7 @@ import {
 } from "@guf/core";
 import type { HomeSummary } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
+import { summaryPath } from "@/components/evolution/paths";
 import { newRoutinePathFor } from "@/components/projects/paths";
 import { Avatar, Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
@@ -49,6 +50,7 @@ function todayState(data: HomeSummary, today: string): TodayCardState {
 }
 
 export function HomeScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const shell = useAppShell();
   const dev = useDevHomeState();
@@ -66,7 +68,6 @@ export function HomeScreen() {
   const loading = dev.forceLoading || summary.isPending;
   const data = summary.data;
 
-  const soon = (what: string) => shell.showToast(`${what} chega em breve`);
 
   return (
     <main className="flex flex-col gap-4 px-4 pt-[env(safe-area-inset-top)]">
@@ -94,7 +95,6 @@ export function HomeScreen() {
           week={week}
           userEmail={user?.email ?? null}
           onOpenSheet={setSheet}
-          onSoon={soon}
         />
       )}
 
@@ -105,7 +105,7 @@ export function HomeScreen() {
             iso={sheet?.kind === "day" ? sheet.iso : null}
             data={data}
             onClose={closeSheet}
-            onOpenSummary={() => soon("O resumo do treino")}
+            onOpenSummary={(sessionId) => router.push(summaryPath(sessionId))}
           />
         </>
       )}
@@ -120,7 +120,6 @@ function HomeContent({
   week,
   userEmail,
   onOpenSheet,
-  onSoon,
 }: {
   data: HomeSummary;
   today: string;
@@ -128,7 +127,6 @@ function HomeContent({
   week: ReturnType<typeof currentWeek>;
   userEmail: string | null;
   onOpenSheet: (sheet: Sheet) => void;
-  onSoon: (what: string) => void;
 }) {
   const shell = useAppShell();
   const router = useRouter();
@@ -163,7 +161,11 @@ function HomeContent({
             onChooseRoutine: shell.openStartSheet,
             // Todo usuário tem projeto (Favoritos): cria a rotina direto no projeto ativo.
             onCreateRoutine: () => router.push(newRoutinePathFor(data.activeProject?.id)),
-            onOpenSummary: () => onSoon("O resumo do treino"),
+            // Vários treinos hoje: abre o mais recente.
+            onOpenSummary: () => {
+              const last = data.weekSessions.filter((s) => s.performedOn === today).at(-1);
+              if (last) router.push(summaryPath(last.id));
+            },
           }}
         />
       </div>
@@ -232,9 +234,10 @@ function DaySheet({
   iso: string | null;
   data: HomeSummary;
   onClose: () => void;
-  onOpenSummary: () => void;
+  onOpenSummary: (sessionId: string) => void;
 }) {
   const sessions = iso ? data.weekSessions.filter((s) => s.performedOn === iso) : [];
+  const latest = sessions.at(-1);
   const names = sessions.map((s) => s.name).join(" · ");
   return (
     <BottomSheet
@@ -246,7 +249,7 @@ function DaySheet({
     >
       <span className="text-[15px] font-medium text-fg-secondary">{names}</span>
       <StatGrid stats={sessionStats(sessions)} className="pt-2 pb-1" />
-      <Button variant="secondary" size="tall" iconRight={ChevronRight} fullWidth onClick={onOpenSummary}>
+      <Button variant="secondary" size="tall" iconRight={ChevronRight} fullWidth onClick={() => latest && onOpenSummary(latest.id)}>
         Ver resumo completo
       </Button>
     </BottomSheet>
