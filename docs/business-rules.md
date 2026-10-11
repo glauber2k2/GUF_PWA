@@ -30,7 +30,7 @@
 | Regra | Onde |
 |---|---|
 | Peso **sempre em kg no banco**; a conversão para lb (1 lb = 0,45359237 kg) é só na exibição, conforme `profiles.weight_unit`. Exibição com até 1 casa; gravação em kg com 2 casas. | Core (`units.ts`) |
-| Edição de carga: passo de 2,5 em kg e de 5 em lb; atalhos −2,5 / +1 / +2,5 na unidade exibida. | Web (`set-edit-sheet.tsx`, DS `QuickLoad`) |
+| Edição de carga: passo de 2 em kg e de 5 em lb; atalhos +1 / +5 / +10 / +20 na unidade exibida (para diminuir, o − do passo). | Web (`set-edit-sheet.tsx`, DS `QuickLoad`) |
 | Datas de calendário (`performed_on`) são a **data local** do aparelho ("yyyy-MM-dd"), nunca a data UTC do banco. | Core (`dates.ts`) |
 | Semana vai de **segunda a domingo**. | Core |
 | Números em pt-BR (vírgula decimal, ponto de milhar); sinal de menos tipográfico (−) e "×" em carga × repetições. | Core (`format.ts`) |

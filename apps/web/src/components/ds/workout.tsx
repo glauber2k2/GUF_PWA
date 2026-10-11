@@ -353,13 +353,13 @@ export interface QuickLoadOption {
 }
 
 const QUICK_LOAD_DEFAULTS: QuickLoadOption[] = [
-  { delta: -2.5, label: `${MINUS_SIGN}2,5` },
   { delta: 1, label: "+1" },
-  { delta: 2.5, label: "+2,5" },
   { delta: 5, label: "+5" },
+  { delta: 10, label: "+10" },
+  { delta: 20, label: "+20" },
 ];
 
-/** Atalhos de carga rápida (±kg). */
+/** Atalhos de carga rápida (somam na unidade exibida; para diminuir, o − do Stepper). */
 export function QuickLoad({
   options = QUICK_LOAD_DEFAULTS,
   onSelect,
