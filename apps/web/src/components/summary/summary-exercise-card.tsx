@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronRight, StickyNote, TrendingUp } from "lucide-react";
+import { ChevronRight, NotepadText, TrendingUp } from "lucide-react";
 import { formatNumber, muscleGroupLabel, plural, setMarks, TIMES_SIGN, toDisplayWeight, type WeightUnit } from "@guf/core";
 import type { SummaryExercise } from "@guf/api";
 import { Icon, PRBadge, SET_TYPE_META, Tag } from "@/components/ds";
@@ -75,7 +75,7 @@ export function SummaryExerciseCard({ exercise, unit, index }: { exercise: Summa
 
       {exercise.note && (
         <div className="flex items-start gap-2 rounded-[10px] bg-surface-3 px-3 py-2.5 text-[13px] leading-[18px] text-fg-secondary">
-          <Icon icon={StickyNote} size={15} className="mt-0.5 text-fg-muted" />
+          <Icon icon={NotepadText} size={15} className="mt-0.5 text-fg-muted" />
           <span>
             <span className="sr-only">Observação: </span>
             {exercise.note}

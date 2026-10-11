@@ -12,7 +12,7 @@ import {
   Info,
   Play,
   Plus,
-  StickyNote,
+  NotepadText,
   Timer,
   Trash2,
   Trophy,
@@ -500,7 +500,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       queue({ kind: "exerciseNote", sessionId: workout.id, sessionExerciseId: sheet.target, note });
     }
     setSheet(null);
-    showToast("Observação salva", StickyNote);
+    showToast("Observação salva", NotepadText);
   };
 
   /* ---------- Finalizar / descartar ---------- */
@@ -735,7 +735,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       </BottomSheet>
 
       <BottomSheet placement="screen" open={sheet?.kind === "workout-menu"} onClose={() => setSheet(null)} title="Treino" subtitle={workout.name}>
-        <SheetOption icon={StickyNote} title="Observação do treino" subtitle={state.note || "Sem observação"} onClick={() => openNote("workout")} />
+        <SheetOption icon={NotepadText} title="Observação do treino" subtitle={state.note || "Sem observação"} onClick={() => openNote("workout")} />
         <SheetOption
           icon={Trash2}
           title="Descartar treino"
@@ -749,7 +749,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
 
       <BottomSheet placement="screen" open={Boolean(menuExercise)} onClose={() => setSheet(null)} title={menuExercise?.name}>
         <SheetOption
-          icon={StickyNote}
+          icon={NotepadText}
           title="Observação"
           subtitle="Fica salva para os próximos treinos"
           onClick={() => menuExercise && openNote(menuExercise.id)}

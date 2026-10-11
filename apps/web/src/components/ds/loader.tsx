@@ -14,14 +14,14 @@ export type GufLoaderVariant = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 /** Nome, uso e ciclo de cada animação (vitrine do design system). */
 export const GUF_LOADER_VARIANTS: ReadonlyArray<{ variant: GufLoaderVariant; name: string; description: string; cycle: string }> = [
   { variant: 1, name: "Giro", description: "O símbolo gira em ritmo constante. O mais discreto; bom dentro de botões.", cycle: "1.000ms" },
-  { variant: 2, name: "Desenho", description: "O anel se desenha, o ponto entra com pop, segura e recolhe. Abertura do app.", cycle: "1.800ms" },
+  { variant: 2, name: "Desenho", description: "O anel se desenha, o ponto entra com pop, segura e recolhe.", cycle: "1.800ms" },
   { variant: 3, name: "Pulso do ponto", description: "Anel parado; o ponto (a próxima série) pulsa soltando uma onda.", cycle: "1.200ms" },
   { variant: 4, name: "Fechar o anel", description: "O arco fecha o espaço, absorve o ponto e reabre: a série completa.", cycle: "1.600ms" },
   { variant: 5, name: "Respiração", description: "O símbolo cresce e encolhe com a opacidade, num ritmo calmo.", cycle: "1.800ms (ida e volta)" },
   { variant: 6, name: "Arco elástico", description: "Só o arco: estica e encolhe enquanto gira (spinner indeterminado).", cycle: "1.400ms" },
   { variant: 7, name: "Ponto saltitante", description: "Anel parado e o ponto quica, como quem conta repetições.", cycle: "760ms (ida e volta)" },
-  { variant: 8, name: "Cometa", description: "Trilha suave do anel com um arco curto e o ponto à frente dando voltas.", cycle: "1.100ms" },
-  { variant: 9, name: "Sonar", description: "O símbolo parado emite dois halos que se expandem e somem.", cycle: "1.800ms (halos a cada 900ms)" },
+  { variant: 8, name: "Cometa", description: "Trilha suave do anel com um arco curto e o ponto à frente dando voltas. Botões com loading.", cycle: "1.100ms" },
+  { variant: 9, name: "Sonar", description: "O símbolo parado emite dois halos que se expandem e somem. Abertura do app.", cycle: "1.800ms (halos a cada 900ms)" },
   { variant: 10, name: "Pêndulo", description: "O símbolo balança de −35° a 35°, lembrando o movimento de uma série.", cycle: "1.400ms (ida e volta)" },
 ];
 

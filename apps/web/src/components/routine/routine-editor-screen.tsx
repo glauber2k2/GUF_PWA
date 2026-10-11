@@ -3,7 +3,7 @@
 import { useMemo, useReducer, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, Check, ChevronDown, ChevronLeft, CircleCheck, ClipboardList, Dumbbell, Plus, SearchX, Star, StickyNote, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ChevronLeft, CircleCheck, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
 import { routineDraftSummary, routineLetter, routineShortName, type IsoWeekday } from "@guf/core";
 import { routineDraftSchema } from "@guf/schemas";
 import { apiError, type ApiError, type LibraryExercise, type Project, type RoutineDraft } from "@guf/api";
@@ -277,7 +277,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
         {target && (
           <>
             <SheetOption
-              icon={StickyNote}
+              icon={NotepadText}
               title={target.notes ? "Editar observação" : "Adicionar observação"}
               subtitle="Aparece no treino, acima das séries"
               onClick={() => {
