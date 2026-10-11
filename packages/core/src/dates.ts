@@ -66,3 +66,8 @@ export function currentWeek(today: Date): WeekDay[] {
     };
   });
 }
+
+/** "12 mar 2026" (data por extenso curta, sem dia da semana). */
+export function formatDayMonthYear(date: Date): string {
+  return format(date, "d MMM yyyy", { locale: ptBR }).replace(".", "");
+}
