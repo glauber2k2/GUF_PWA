@@ -2,6 +2,7 @@ import { addMonths, differenceInCalendarDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { formatShortDate, fromLocalISODate, toLocalISODate } from "./dates";
 import { formatClock, formatNumber, MINUS_SIGN, plural } from "./format";
+import { searchFilter } from "./session";
 import { estimate1RM, type SetType } from "./training";
 import { toDisplayWeight, type WeightUnit } from "./units";
 
@@ -311,14 +312,11 @@ export interface TrainedExerciseLike {
 }
 
 export function filterTrainedExercises<T extends TrainedExerciseLike>(items: readonly T[], query: string, group: string | null): T[] {
-  const q = normalizeText(query);
-  return items
-    .filter((e) => (!group || e.muscleGroup === group) && (!q || normalizeText(e.name).includes(q)))
+  const byRecent = items
+    .filter((e) => !group || e.muscleGroup === group)
     .sort((a, b) => b.lastPerformedOn.localeCompare(a.lastPerformedOn) || a.name.localeCompare(b.name, "pt-BR"));
-}
-
-function normalizeText(text: string): string {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  // Busca flexível por pedaços de palavras; com o mesmo grau de parecença, os mais recentes primeiro.
+  return searchFilter(byRecent, query, (e) => [e.name]);
 }
 
 /** Marca de cada série no resumo: número para as normais (1, 2, 3…) e letra para os tipos (A, D, F). */
