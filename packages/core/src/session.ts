@@ -50,6 +50,41 @@ export function normalizeSearch(text: string): string {
   return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 }
 
+/** Palavras de um texto já normalizado (separa por espaço, hífen, pontuação). */
+function searchWords(text: string): string[] {
+  return normalizeSearch(text).split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+/**
+ * Pontua um texto para a busca flexível: cada pedaço digitado precisa aparecer no texto, em qualquer
+ * ordem e sem acento ("elev lat" → "Elevação lateral", "su reto" → "Supino reto", "reto sup" também).
+ * Retorna null quando não combina. Quanto maior, mais parecido: pedaço que é início de palavra vale
+ * mais que pedaço no meio da palavra, e o texto que começa com o primeiro pedaço ganha um bônus.
+ * Sem nada digitado, tudo combina com pontuação 0.
+ */
+export function searchScore(query: string, ...texts: Array<string | null | undefined>): number | null {
+  const tokens = searchWords(query);
+  if (tokens.length === 0) return 0;
+  const words = texts.flatMap((t) => (t ? searchWords(t) : []));
+  if (words.length === 0) return null;
+  let score = 0;
+  for (const token of tokens) {
+    if (words.some((w) => w.startsWith(token))) score += 2;
+    else if (words.some((w) => w.includes(token))) score += 1;
+    else return null;
+  }
+  return words[0]?.startsWith(tokens[0] ?? "") ? score + 1 : score;
+}
+
+/** Filtra e ordena pela busca flexível (mais parecidos primeiro; empate mantém a ordem original). */
+export function searchFilter<T>(items: readonly T[], query: string, texts: (item: T) => Array<string | null | undefined>): T[] {
+  return items
+    .map((item, index) => ({ item, index, score: searchScore(query, ...texts(item)) }))
+    .filter((x): x is { item: T; index: number; score: number } => x.score !== null)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((x) => x.item);
+}
+
 /** Tempo decorrido com horas quando passar de 1h: "32:14", "1:01:05". */
 export function formatElapsed(totalSeconds: number): string {
   const s = Math.max(0, Math.round(totalSeconds));

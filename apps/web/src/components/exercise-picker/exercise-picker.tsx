@@ -10,7 +10,7 @@ import {
   equipmentLabel,
   muscleGroupLabel,
   muscleGroupView,
-  normalizeSearch,
+  searchFilter,
   plural,
 } from "@guf/core";
 import {
@@ -113,14 +113,14 @@ export function ExercisePicker({
   const exercises = useMemo(() => library.data ?? [], [library.data]);
 
   const sections = useMemo(() => {
-    const q = normalizeSearch(query);
+    // Busca flexível: "elev lat" acha "Elevação lateral"; também busca pelo equipamento ("halter").
     return MUSCLE_GROUP_ORDER.filter((g) => filter === "todos" || g === filter)
       .map((group) => ({
         group,
-        items: exercises.filter(
-          (e) =>
-            e.muscleGroup === group &&
-            (!q || normalizeSearch(e.name).includes(q) || normalizeSearch(equipmentLabel(e.equipment)).includes(q)),
+        items: searchFilter(
+          exercises.filter((e) => e.muscleGroup === group),
+          query,
+          (e) => [e.name, equipmentLabel(e.equipment)],
         ),
       }))
       .filter((s) => s.items.length > 0);
