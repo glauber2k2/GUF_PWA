@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, StickyNote, Timer, type LucideIcon } from "lucide-react";
+import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, NotepadText, Timer, type LucideIcon } from "lucide-react";
 import { formatClock, formatNumber, isLoadRecord, MINUS_SIGN, type SetType } from "@guf/core";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
@@ -286,7 +286,7 @@ export function ExerciseCard({
               aria-label="Observação"
               className="grid size-11 cursor-pointer place-items-center rounded-md bg-surface-3 text-fg-secondary"
             >
-              <Icon icon={StickyNote} size={18} />
+              <Icon icon={NotepadText} size={18} />
             </button>
           </div>
         </>
