@@ -18,3 +18,14 @@ export function invalidatePlanningData(queryClient: QueryClient): Promise<unknow
     queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] }),
   ]);
 }
+
+export const PROFILE_KEY = "profile";
+
+/** Perfil mudou (nome, unidade, meta): Perfil, Início e Histórico (unidade e meta aparecem lá) recarregam. */
+export function invalidateProfileData(queryClient: QueryClient): Promise<unknown> {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] }),
+    queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] }),
+    queryClient.invalidateQueries({ queryKey: [HISTORY_KEY] }),
+  ]);
+}

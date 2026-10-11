@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import {
   currentWeek,
-  firstName,
   formatLongDate,
   formatShortDate,
   fromLocalISODate,
@@ -17,9 +16,8 @@ import {
 } from "@guf/core";
 import type { HomeSummary } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
-import { SignOutButton } from "@/components/auth/sign-out-button";
 import { newRoutinePathFor } from "@/components/projects/paths";
-import { Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
+import { Avatar, Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -29,7 +27,7 @@ import { StreakCard } from "./streak-card";
 import { sessionStats, TodayCard, type TodayCardState } from "./today-card";
 import { WeekCard } from "./week-card";
 
-type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | { kind: "account" } | null;
+type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | null;
 
 /**
  * Estado do card "Treino de hoje":
@@ -111,10 +109,6 @@ export function HomeScreen() {
           />
         </>
       )}
-      <BottomSheet placement="screen" open={sheet?.kind === "account"} onClose={closeSheet} title="Sua conta" subtitle={user?.email}>
-        <p className="m-0 text-sm text-fg-secondary">A tela de Perfil chega em breve. Por enquanto, daqui você pode sair da conta.</p>
-        <SignOutButton />
-      </BottomSheet>
     </main>
   );
 }
@@ -138,8 +132,6 @@ function HomeContent({
 }) {
   const shell = useAppShell();
   const router = useRouter();
-  const name = firstName(data.profile.name);
-  const initial = (name ?? userEmail ?? "?").charAt(0).toUpperCase();
   // Calendário pela RPC get_training_days (dias com treino concluído).
   const trainedDays = new Set(data.trainingDays.map((d) => d.performedOn));
 
@@ -153,13 +145,10 @@ function HomeContent({
         <button
           type="button"
           aria-label="Abrir perfil"
-          onClick={() => onOpenSheet({ kind: "account" })}
-          className={[
-            "grid size-11 flex-none cursor-pointer place-items-center rounded-pill border border-border-strong bg-surface-3",
-            "text-base font-semibold text-fg transition-transform duration-100 ease-standard active:scale-[.94] motion-reduce:active:scale-100",
-          ].join(" ")}
+          onClick={() => router.push("/perfil")}
+          className="flex-none cursor-pointer rounded-pill transition-transform duration-100 ease-standard active:scale-[.94] motion-reduce:active:scale-100"
         >
-          {initial}
+          <Avatar src={data.profile.avatarUrl} name={data.profile.name} email={userEmail} />
         </button>
       </header>
 
