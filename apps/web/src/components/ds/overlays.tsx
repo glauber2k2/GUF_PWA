@@ -2,6 +2,7 @@
 
 import { useEffect, type ReactNode } from "react";
 import { Play, Plus, type LucideIcon } from "lucide-react";
+import { useSheetDrag } from "@/hooks/use-sheet-drag";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
 import { ScreenPortal } from "./portal";
@@ -33,6 +34,8 @@ export function BottomSheet({
   className,
 }: BottomSheetProps) {
   const screen = placement === "screen";
+  const { sheetRef, offset, progress, dragProps } = useSheetDrag(onClose);
+  const dragging = offset !== null;
 
   // Esc fecha a folha aberta.
   useEffect(() => {
@@ -57,31 +60,46 @@ export function BottomSheet({
     >
       <div
         onClick={onClose}
+        // Durante o arraste, o fundo clareia junto (valor dinâmico).
+        style={dragging ? { opacity: 1 - progress } : undefined}
         className={cn(
-          "absolute inset-0 bg-scrim transition-opacity duration-300 ease-standard",
+          "absolute inset-0 bg-scrim",
+          dragging ? "transition-none" : "transition-opacity duration-300 ease-standard",
           open ? "opacity-100" : "opacity-0",
         )}
       />
       <div
+        ref={sheetRef}
         role="dialog"
         aria-modal={open || undefined}
         aria-label={title}
+        // Durante o arraste, a folha acompanha o dedo (valor dinâmico).
+        style={dragging ? { translate: `0 ${offset}px` } : undefined}
         className={cn(
           "absolute inset-x-0 bottom-0 grid gap-2.5 rounded-t-xl bg-surface-elevated px-4 pt-2 pb-5 shadow-e3",
           screen && "mx-auto max-w-[430px] pb-[calc(20px+env(safe-area-inset-bottom))]",
-          open
-            ? "translate-y-0 transition-transform duration-300 ease-enter"
-            : "translate-y-full transition-transform duration-200 ease-exit",
+          open ? "translate-y-0" : "translate-y-full",
+          dragging
+            ? "transition-none"
+            : open
+              ? "transition-transform duration-300 ease-enter"
+              : "transition-transform duration-200 ease-exit",
           className,
         )}
       >
-        <span className="mb-1.5 h-[5px] w-9 justify-self-center rounded-pill bg-border-strong" />
-        {(title || subtitle) && (
-          <div className="flex items-baseline justify-between gap-2">
-            <strong className="text-lg">{title}</strong>
-            {subtitle && <span className="text-xs text-fg-muted">{subtitle}</span>}
-          </div>
-        )}
+        {/* Área de arraste: alça + título (arrastar para baixo fecha). Ocupa a largura toda e o topo da folha. */}
+        <div
+          {...dragProps}
+          className={cn("-mx-4 -mt-2 -mb-2 grid gap-2.5 px-4 pt-2 pb-2", onClose && "cursor-grab touch-none select-none active:cursor-grabbing")}
+        >
+          <span className="mb-1.5 h-[5px] w-9 justify-self-center rounded-pill bg-border-strong" />
+          {(title || subtitle) && (
+            <div className="flex items-baseline justify-between gap-2">
+              <strong className="text-lg">{title}</strong>
+              {subtitle && <span className="text-xs text-fg-muted">{subtitle}</span>}
+            </div>
+          )}
+        </div>
         {children}
       </div>
     </div>
