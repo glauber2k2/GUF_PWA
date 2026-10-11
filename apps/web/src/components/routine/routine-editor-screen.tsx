@@ -19,7 +19,7 @@ import { flushOutbox } from "@/lib/offline/outbox";
 import { invalidatePlanningData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
-import { draftReducer, isDraftDirty } from "./routine-draft";
+import { draftReducer, isDraftDirty, toPlannedExercise } from "./routine-draft";
 import { RoutineExerciseCard } from "./routine-exercise-card";
 import { WeekdayPicker } from "./weekday-picker";
 
@@ -158,7 +158,10 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
       dispatch({ type: "replaceExercise", id: current.exerciseId, exercise: first });
       return shell.showToast("Exercício trocado", { icon: ArrowLeftRight });
     }
-    dispatch({ type: "addExercises", exercises: chosen });
+    const planned = chosen.map(toPlannedExercise);
+    dispatch({ type: "addExercises", exercises: planned });
+    // Um exercício só: o cartão já abre para ajustar séries, repetições e descanso.
+    if (planned.length === 1) setOpenId(planned[0]?.id ?? null);
     shell.showToast(chosen.length === 1 ? `${first.name} adicionado` : `${chosen.length} exercícios adicionados`, { icon: Plus });
     // Rola até o fim, onde os novos entraram.
     requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));

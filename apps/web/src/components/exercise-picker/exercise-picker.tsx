@@ -1,27 +1,45 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, Check, CircleCheck, Plus, SearchX, X } from "lucide-react";
+import {
+  Activity,
+  ArrowLeftRight,
+  Cable,
+  Check,
+  CircleCheck,
+  CircleDot,
+  Cog,
+  Dumbbell,
+  GripHorizontal,
+  PersonStanding,
+  Plus,
+  SearchX,
+  Spline,
+  Weight,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import type { LibraryExercise } from "@guf/api";
 import {
   EQUIPMENT_LABELS,
   MUSCLE_GROUP_ORDER,
   equipmentLabel,
   muscleGroupLabel,
-  muscleGroupView,
   searchFilter,
   plural,
 } from "@guf/core";
 import {
   Banner,
-  BodyMap,
   BottomSheet,
   Button,
   Chip,
   EmptyState,
   Icon,
   IconButton,
+  MuscleFilterTile,
+  MuscleIcon,
+  muscleIconKey,
   ScreenPortal,
   SearchField,
   SheetOption,
@@ -40,6 +58,69 @@ export type ExercisePickerMode = "rotina" | "treino" | "troca";
 export const EXERCISE_LIBRARY_KEY = "exercise-library";
 
 const TOAST_MS = 1800;
+
+/** Grupos com cartão no filtro (ordem do protótipo); corpo inteiro e cardio não têm ícone de músculo. */
+const FILTER_GROUPS = ["peito", "ombros", "costas", "abdomen", "biceps", "triceps", "antebraco", "gluteos", "quadriceps", "posterior", "panturrilha"].filter(
+  (g) => muscleIconKey(g) !== null,
+);
+
+/** Ícone do equipamento no selo do exercício. */
+const EQUIPMENT_ICONS: Record<string, LucideIcon> = {
+  barra: Dumbbell,
+  halter: Dumbbell,
+  maquina: Cog,
+  polia: Cable,
+  peso_corporal: PersonStanding,
+  kettlebell: Weight,
+  smith: GripHorizontal,
+  elastico: Spline,
+  outro: CircleDot,
+};
+
+/** Dica de rolagem do filtro de músculos: mostra uma vez por aparelho, até o usuário rolar. */
+const FILTER_HINT_KEY = "guf-muscle-filter-scrolled";
+
+function useScrollHint() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const doneRef = useRef(false);
+  const animRef = useRef<Animation | null>(null);
+
+  useEffect(() => {
+    let seen = false;
+    try {
+      seen = localStorage.getItem(FILTER_HINT_KEY) === "1";
+    } catch {
+      // Sem armazenamento: mostra a dica.
+    }
+    if (seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const timer = setTimeout(() => {
+      const track = trackRef.current;
+      if (!track?.animate || doneRef.current) return;
+      animRef.current = track.animate(
+        [{ transform: "translateX(0)" }, { transform: "translateX(-44px)", offset: 0.35 }, { transform: "translateX(0)", offset: 0.7 }, { transform: "translateX(0)" }],
+        { duration: 1300, easing: "cubic-bezier(.2,0,0,1)", iterations: 2 },
+      );
+    }, 700);
+    return () => {
+      clearTimeout(timer);
+      animRef.current?.cancel();
+    };
+  }, []);
+
+  const onScroll = () => {
+    if (doneRef.current || (scrollRef.current?.scrollLeft ?? 0) < 8) return;
+    doneRef.current = true;
+    animRef.current?.cancel();
+    try {
+      localStorage.setItem(FILTER_HINT_KEY, "1");
+    } catch {
+      // Sem armazenamento: a dica pode voltar na próxima vez.
+    }
+  };
+
+  return { scrollRef, trackRef, onScroll };
+}
 const SKELETON_WIDTHS = ["w-40", "w-32", "w-44", "w-28", "w-36", "w-[140px]"];
 
 export interface ExercisePickerProps {
@@ -59,6 +140,16 @@ export interface ExercisePickerProps {
  * do corpo. Tocar marca 1 (ou vários) e o botão adiciona todos de uma vez. Em "troca",
  * a escolha é única.
  */
+/** Ícone do grupo no cabeçalho da seção (corpo inteiro e cardio não têm silhueta de músculo). */
+function SectionIcon({ group }: { group: string }) {
+  const key = muscleIconKey(group);
+  return (
+    <span className="grid size-11 flex-none place-items-center overflow-hidden rounded-md border border-border bg-surface text-fg-secondary">
+      {key ? <MuscleIcon muscle={key} zoom size={42} animate="none" label="" /> : <Icon icon={group === "cardio" ? Activity : PersonStanding} size={22} />}
+    </span>
+  );
+}
+
 export function ExercisePicker({
   mode,
   addedExerciseIds,
@@ -83,7 +174,9 @@ export function ExercisePicker({
 
   const single = mode === "troca";
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<string>("todos");
+  /** Grupos marcados no filtro (vários); vazio = todos. */
+  const [groups, setGroups] = useState<string[]>([]);
+  const { scrollRef: filterScrollRef, trackRef: filterTrackRef, onScroll: onFilterScroll } = useScrollHint();
   const [selected, setSelected] = useState<string[]>([]);
   const [lastPicked, setLastPicked] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -114,7 +207,7 @@ export function ExercisePicker({
 
   const sections = useMemo(() => {
     // Busca flexível: "elev lat" acha "Elevação lateral"; também busca pelo equipamento ("halter").
-    return MUSCLE_GROUP_ORDER.filter((g) => filter === "todos" || g === filter)
+    return MUSCLE_GROUP_ORDER.filter((g) => groups.length === 0 || groups.includes(g))
       .map((group) => ({
         group,
         items: searchFilter(
@@ -124,7 +217,7 @@ export function ExercisePicker({
         ),
       }))
       .filter((s) => s.items.length > 0);
-  }, [exercises, filter, query]);
+  }, [exercises, groups, query]);
 
   const create = useMutation({
     mutationFn: async (): Promise<LibraryExercise> => {
@@ -151,7 +244,7 @@ export function ExercisePicker({
       setLastPicked(exercise.id);
       setCreateOpen(false);
       setQuery("");
-      setFilter(exercise.muscleGroup);
+      setGroups(FILTER_GROUPS.includes(exercise.muscleGroup) ? [exercise.muscleGroup] : []);
       setToast(`${exercise.name} criado`);
     },
     onError: (error) => setNameError(error.message),
@@ -204,17 +297,47 @@ export function ExercisePicker({
             )}
           </div>
 
-          <div
-            role="group"
-            aria-label="Filtrar por grupo muscular"
-            className="flex flex-none gap-2 overflow-x-auto px-4 pt-3 pb-1 [scrollbar-width:none]"
-          >
-            <Chip label="Todos" selected={filter === "todos"} onChange={() => setFilter("todos")} />
-            {MUSCLE_GROUP_ORDER.map((g) => (
-              <Chip key={g} label={muscleGroupLabel(g)} selected={filter === g} onChange={() => setFilter(g)} />
-            ))}
+          <div role="group" aria-label="Filtrar por grupo muscular" className="flex flex-none flex-col gap-2 pt-3">
+            <div className="flex min-h-6 items-center justify-between px-5">
+              <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">Grupos musculares</span>
+              <span className="flex items-center gap-3">
+                <span className="text-[13px] text-fg-secondary">
+                  {groups.length === 0 ? "Todos" : groups.length === 1 ? "1 selecionado" : `${groups.length} selecionados`}
+                </span>
+                {groups.length > 0 && (
+                  <button type="button" onClick={() => setGroups([])} className="cursor-pointer bg-transparent py-1 text-[13px] font-semibold text-accent-text">
+                    Limpar
+                  </button>
+                )}
+              </span>
+            </div>
+            <div
+              ref={filterScrollRef}
+              onScroll={onFilterScroll}
+              className="snap-x snap-proximity scroll-px-4 overflow-x-auto overflow-y-hidden [scrollbar-width:none]"
+            >
+              <div ref={filterTrackRef} className="flex w-max gap-2 px-4">
+                {FILTER_GROUPS.map((g) => {
+                  const key = muscleIconKey(g);
+                  if (!key) return null;
+                  const on = groups.includes(g);
+                  return (
+                    <MuscleFilterTile
+                      key={g}
+                      muscle={key}
+                      size="sm"
+                      selected={on}
+                      onToggle={() => setGroups(on ? groups.filter((x) => x !== g) : [...groups, g])}
+                      className="w-[83px] flex-none snap-start"
+                    >
+                      {g === "ombros" ? "Ombro" : g === "posterior" ? "Posterior" : muscleGroupLabel(g)}
+                    </MuscleFilterTile>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <span className="flex-none px-4 pt-1.5 pb-1 text-[13px] leading-[18px] text-pretty text-fg-muted">{helper}</span>
+          <span className="flex-none px-4 pt-2.5 pb-1 text-[13px] leading-[18px] text-pretty text-fg-muted">{helper}</span>
 
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-[168px] [scrollbar-width:none]">
             {library.isPending && (
@@ -249,64 +372,77 @@ export function ExercisePicker({
                   <section
                     key={s.group}
                     aria-label={muscleGroupLabel(s.group)}
-                    className="flex animate-guf-rise flex-col pt-4"
+                    className="flex animate-guf-rise flex-col gap-2 pt-5"
                     style={{ animationDelay: `${Math.min(si, 6) * 40}ms` }}
                   >
-                    <div className="flex items-center gap-3 border-b border-border pb-2">
-                      <span className="grid h-16 w-11 flex-none place-items-center rounded-md border border-border bg-surface text-fg-muted">
-                        <BodyMap muscleGroup={s.group} />
-                      </span>
-                      <div className="flex min-w-0 flex-col gap-0.5">
-                        <h2 className="m-0 text-lg leading-6 font-semibold">{muscleGroupLabel(s.group)}</h2>
-                        <span className="text-[13px] leading-[18px] text-fg-muted">
-                          {plural(s.items.length, "exercício", "exercícios")} ·{" "}
-                          {muscleGroupView(s.group) === "back" ? "vista de costas" : "vista de frente"}
-                        </span>
+                    <div className="flex items-center gap-3 px-0.5 pb-1">
+                      <SectionIcon group={s.group} />
+                      <div className="flex min-w-0 flex-1 flex-col">
+                        <h2 className="m-0 text-lg leading-6 font-semibold tracking-[-0.01em]">{muscleGroupLabel(s.group)}</h2>
+                        <span className="text-[13px] leading-[18px] text-fg-muted">{plural(s.items.length, "exercício", "exercícios")}</span>
                       </div>
                     </div>
                     {s.items.map((e) => {
                       const isAdded = added.has(e.id);
                       const isOn = selected.includes(e.id) && !isAdded;
-                      const sub = `${equipmentLabel(e.equipment)}${e.isCustom ? " · Personalizado" : ""}`;
+                      const equipment = equipmentLabel(e.equipment);
                       return (
                         <button
                           key={e.id}
                           type="button"
                           disabled={isAdded}
                           aria-pressed={isOn}
-                          aria-label={`${e.name}, ${sub}${isAdded ? ", já adicionado" : isOn ? ", selecionado" : ""}`}
+                          aria-label={`${e.name}, ${equipment}${e.isCustom ? ", personalizado" : ""}${isAdded ? ", já adicionado" : isOn ? ", selecionado" : ""}`}
                           onClick={() => toggle(e.id)}
                           className={cn(
-                            "-mx-1.5 flex min-h-[60px] items-center gap-3 rounded-[10px] border-b border-border px-1.5 py-2 text-left",
-                            "transition-colors duration-150 ease-standard",
-                            isAdded ? "cursor-default" : "cursor-pointer",
-                            isOn ? "bg-accent/10" : "bg-transparent",
+                            "flex items-center gap-3 rounded-lg py-2.5 pr-2.5 pl-3.5 text-left text-fg",
+                            "transition-[background-color,border-color,transform] duration-150 ease-standard",
+                            isAdded ? "cursor-default border border-border bg-surface opacity-60" : "cursor-pointer active:scale-[.98] motion-reduce:active:scale-100",
+                            !isAdded && (isOn ? "border-[1.5px] border-accent-text bg-done-surface" : "border border-border bg-surface"),
                           )}
                         >
-                          <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                            <span className={cn("truncate text-[15px] leading-5 font-medium", isAdded ? "text-fg-muted" : "text-fg")}>
-                              {e.name}
-                            </span>
-                            <span className="text-[13px] leading-[18px] text-fg-muted">{sub}</span>
-                          </span>
-                          {isAdded ? (
-                            <span className="flex items-center gap-1 text-xs font-semibold whitespace-nowrap text-fg-muted">
-                              <Icon icon={Check} size={14} />
-                              Já adicionado
-                            </span>
-                          ) : isOn ? (
-                            <span
-                              aria-hidden="true"
-                              className={cn(
-                                "grid size-7 flex-none place-items-center rounded-pill bg-accent text-accent-foreground",
-                                lastPicked === e.id && "animate-guf-pop",
+                          <span className="flex min-w-0 flex-1 flex-col gap-2">
+                            <span className={cn("text-base leading-[21px] font-semibold text-pretty", isAdded ? "text-fg-muted" : "text-fg")}>{e.name}</span>
+                            <span className="flex flex-wrap items-center gap-1.5">
+                              <span className="inline-flex h-6 items-center gap-[5px] rounded-[8px] bg-surface-3 px-2 text-xs font-semibold whitespace-nowrap text-fg-secondary">
+                                <Icon icon={EQUIPMENT_ICONS[e.equipment] ?? Dumbbell} size={13} />
+                                {equipment}
+                              </span>
+                              {e.isCustom && (
+                                <span className="inline-flex h-6 items-center rounded-[8px] bg-info/14 px-2 text-xs font-semibold whitespace-nowrap text-info">Personalizado</span>
                               )}
-                            >
-                              <Icon icon={Check} size={16} />
+                              {isAdded && (
+                                <span className="inline-flex h-6 items-center gap-1 text-xs font-semibold whitespace-nowrap text-fg-muted">
+                                  <Icon icon={Check} size={13} />
+                                  Já adicionado
+                                </span>
+                              )}
                             </span>
-                          ) : (
-                            <span aria-hidden="true" className="size-7 flex-none rounded-pill border-[1.5px] border-border-strong" />
-                          )}
+                          </span>
+                          {/* Espaço da foto do exercício (fotos ainda não existem). */}
+                          <span className="relative size-[76px] flex-none">
+                            <span aria-hidden="true" className="absolute inset-0 rounded-md border border-dashed border-border-strong bg-surface-3" />
+                            {isOn ? (
+                              <span
+                                aria-hidden="true"
+                                className={cn(
+                                  "absolute -top-1.5 -right-1.5 grid size-[26px] place-items-center rounded-pill bg-accent text-accent-foreground ring-3 ring-background",
+                                  lastPicked === e.id && "animate-guf-pop",
+                                )}
+                              >
+                                <Icon icon={Check} size={15} />
+                              </span>
+                            ) : (
+                              !isAdded && (
+                                <span
+                                  aria-hidden="true"
+                                  className="absolute -top-1.5 -right-1.5 grid size-[26px] place-items-center rounded-pill border-[1.5px] border-border-strong bg-surface-elevated text-fg-secondary ring-3 ring-background"
+                                >
+                                  <Icon icon={Plus} size={14} />
+                                </span>
+                              )
+                            )}
+                          </span>
                         </button>
                       );
                     })}
