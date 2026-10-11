@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CircleCheck, Copy, Download, EllipsisVertical, Info, Share, Smartphone, SquarePlus, type LucideIcon } from "lucide-react";
+import { Check, Copy, Download, EllipsisVertical, Info, Share, Smartphone, SquarePlus, type LucideIcon } from "lucide-react";
 import type { InstallPlatform } from "@guf/core";
 import { useAppShell } from "@/components/app-shell/app-shell";
 import { BottomSheet, Button, Icon } from "@/components/ds";
@@ -58,14 +58,14 @@ export function InstallCard({ platform }: { platform: InstallPlatform }) {
   const install = async () => {
     // Sem o convite nativo (outros navegadores, ou simulado em desenvolvimento): mostra os passos.
     if (platform !== "android-prompt" || !installPrompt) return setStepsOpen(true);
-    if (await promptInstall()) shell.showToast("guf instalado na tela inicial", { icon: CircleCheck });
+    if (await promptInstall()) shell.showToast("guf instalado na tela inicial", { tone: "success" });
   };
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(window.location.origin);
-      shell.showToast("Link copiado. Cole no Safari para instalar.", { icon: Copy });
+      shell.showToast("Link copiado", { tone: "success", icon: Copy, message: "Cole no Safari para instalar." });
     } catch {
-      shell.showToast("Não foi possível copiar. Abra o Safari e digite o endereço do guf.");
+      shell.showToast("Não foi possível copiar", { tone: "error", message: "Abra o Safari e digite o endereço do guf." });
     }
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, CircleCheck, Dumbbell, Ellipsis, Play, Plus, NotepadText, Timer, Trash2 } from "lucide-react";
+import { ArrowUpRight, Dumbbell, Ellipsis, Play, Plus, NotepadText, Timer, Trash2 } from "lucide-react";
 import {
   AppHeader,
   AppIcon,
@@ -46,9 +46,9 @@ import {
   Switch,
   Tag,
   TextField,
-  Toast,
   WorkoutSummaryCard,
 } from "@/components/ds";
+import { ToastShowcase } from "./toast-showcase";
 import { cn } from "@/lib/utils";
 import { BrandLoadingSection, MuscleSection } from "./brand-sections";
 import { Group, OVERLINE, PANEL, Section, SectionHeader } from "./layout";
@@ -542,10 +542,7 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
             />
           </div>
         </div>
-        <div className="grid gap-2">
-          <Toast message="Série removida" icon={Trash2} actionLabel="Desfazer" />
-          <Toast message="Treino salvo" icon={CircleCheck} />
-        </div>
+        <ToastShowcase />
       </Group>
 
       <Group title="Feedback">

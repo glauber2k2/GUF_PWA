@@ -5,18 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
-  CircleCheck,
   CloudOff,
   Dumbbell,
   Flag,
-  Info,
   Play,
   Plus,
   NotepadText,
   Timer,
   Trash2,
-  Trophy,
-  type LucideIcon,
 } from "lucide-react";
 import {
   finishWorkout,
@@ -39,7 +35,7 @@ import {
   toDisplayWeight,
   toLocalISODate,
 } from "@guf/core";
-import { useAppShell } from "@/components/app-shell/app-shell";
+import { useAppShell, useRaisedToast, type ToastOptions } from "@/components/app-shell/app-shell";
 import {
   Banner,
   BottomSheet,
@@ -52,7 +48,6 @@ import {
   SheetOption,
   SkeletonCard,
   TextField,
-  Toast,
 } from "@/components/ds";
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/hooks/use-dev-workout-state";
@@ -72,11 +67,14 @@ import { WorkoutHeader } from "./workout-header";
 import { WorkoutSummary } from "./workout-summary";
 import { initWorkoutView, newSetFrom, workoutReducer, type EditableField, type ExerciseView } from "./workout-state";
 
-const TOAST_MS = 1800;
-const UNDO_MS = 4000;
 const FLASH_MS = 1300;
 const SET_LETTER: Record<string, string> = { warmup: "A", dropset: "D", failure: "F" };
 const WORKOUT_KEY = "workout";
+/** Treino finalizado sem internet: fica no aparelho até a fila enviar. */
+const PENDING_TOAST: [string, ToastOptions] = [
+  "Treino salvo no aparelho",
+  { tone: "warning", icon: CloudOff, message: "Ele aparece no histórico quando a internet voltar." },
+];
 
 function vibrate(pattern: number | number[]) {
   try {
@@ -205,12 +203,6 @@ type Sheet =
   | { kind: "timer" }
   | null;
 
-interface ToastState {
-  message: string;
-  icon: LucideIcon;
-  undo?: () => void;
-}
-
 interface WorkoutViewProps {
   workout: ActiveWorkout;
   source: DataSource;
@@ -237,10 +229,9 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const [picker, setPicker] = useState<{ mode: "treino" | "troca"; exerciseId?: string } | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [popped, setPopped] = useState<string | null>(null);
-  const [toast, setToast] = useState<ToastState | null>(null);
   const [summary, setSummary] = useState<{ data: FinishedWorkoutSummary; pending: boolean } | null>(null);
   const [finishing, setFinishing] = useState(false);
-  const pendingExerciseRemoval = useRef<{ id: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+  const pendingExerciseRemovals = useRef(new Set<string>());
 
   // Relógio: o do provider (compartilhado com o mini card) ou, até registrar, o do próprio treino.
   const baseClock = { startedAt: workout.startedAt, periods: workout.activePeriods };
@@ -266,21 +257,30 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     void saveWorkoutSnapshot(workoutSnapshot(workout, state, clock));
   }, [persist, summary, workout, state, clock]);
 
-  const showToast = useCallback((message: string, icon: LucideIcon = CircleCheck, undo?: () => void) => {
-    setToast({ message, icon, undo });
-  }, []);
-
+  // Avisos com ação ("Desfazer") só valem nesta tela: saem junto com ela.
+  const { showToast: shellToast, dismissToast } = shell;
+  const actionToasts = useRef(new Set<number>());
+  const showToast = useCallback(
+    (title: string, options: ToastOptions = {}) => {
+      const id = shellToast(title, options);
+      if (options.onAction) actionToasts.current.add(id);
+      return id;
+    },
+    [shellToast],
+  );
   useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), toast.undo ? UNDO_MS : TOAST_MS);
-    return () => clearTimeout(timer);
-  }, [toast]);
+    const ids = actionToasts.current;
+    return () => ids.forEach((id) => dismissToast(id));
+  }, [dismissToast]);
+
+  // Descanso no rodapé: a pilha de avisos sobe para não cobri-lo.
+  useRaisedToast(Boolean(current.rest) && !summary);
 
   // Fila: avisa quando uma alteração foi descartada por erro.
   useEffect(() => {
     if (!outbox.lastFailure) return;
     const timer = setTimeout(() => {
-      showToast(`Uma alteração não foi salva: ${outbox.lastFailure}`, Info);
+      showToast("Uma alteração não foi salva", { tone: "error", message: outbox.lastFailure ?? undefined });
       dismissOutboxFailure();
     }, 0);
     return () => clearTimeout(timer);
@@ -291,7 +291,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     () =>
       onRestEnd(() => {
         setSheet((s) => (s?.kind === "timer" ? null : s));
-        showToast("Descanso concluído", Timer);
+        showToast("Descanso concluído", { tone: "info", icon: Timer });
       }),
     [onRestEnd, showToast],
   );
@@ -312,17 +312,18 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     [persist],
   );
 
-  // Confirma a remoção pendente de exercício ao sair da tela.
-  useEffect(
-    () => () => {
-      const pending = pendingExerciseRemoval.current;
-      if (pending) {
-        clearTimeout(pending.timer);
-        queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: pending.id });
-      }
+  // Remoção de exercício só entra na fila quando o aviso com "Desfazer" some (ou ao sair da tela).
+  const commitExerciseRemoval = useCallback(
+    (exerciseId: string) => {
+      if (!pendingExerciseRemovals.current.delete(exerciseId)) return;
+      queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: exerciseId });
     },
     [queue, workout.id],
   );
+  useEffect(() => {
+    const pending = pendingExerciseRemovals.current;
+    return () => [...pending].forEach(commitExerciseRemoval);
+  }, [commitExerciseRemoval]);
 
   const saveSetOp = (exerciseId: string, set: WorkoutSet) =>
     queue({
@@ -363,7 +364,15 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         setIndex,
       ),
     );
-    if (isRecord) showToast(`Recorde pessoal · ${ex.name} ${formatNumber(displayLoad(set.weightKg) ?? 0)} ${unit}`, Trophy);
+    if (isRecord) {
+      const load = `${formatNumber(displayLoad(set.weightKg) ?? 0)} ${unit}`;
+      // A conclusão da série já vibrou com o padrão de recorde.
+      showToast("Recorde pessoal", {
+        tone: "pr",
+        message: `${ex.name} – ${set.reps ? `${load} × ${set.reps}` : load}`,
+        haptic: false,
+      });
+    }
   };
 
   const cycleType = (ex: ExerciseView, setIndex: number) => {
@@ -388,10 +397,15 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     setPopped(null);
     vibrate(15);
     queue({ kind: "deleteSet", sessionId: workout.id, setId: set.id });
-    showToast(`Série removida · ${ex.name}`, Trash2, () => {
-      dispatch({ type: "restoreSet", exerciseId: ex.id, setIndex, set });
-      saveSetOp(ex.id, set);
-      setToast(null);
+    showToast("Série removida", {
+      tone: "undo",
+      icon: Trash2,
+      message: ex.name,
+      actionLabel: "Desfazer",
+      onAction: () => {
+        dispatch({ type: "restoreSet", exerciseId: ex.id, setIndex, set });
+        saveSetOp(ex.id, set);
+      },
     });
   };
 
@@ -427,26 +441,17 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     if (!exercise) return;
     setSheet(null);
     dispatch({ type: "removeExercise", exerciseId });
-    // A remoção só entra na fila depois do prazo do "Desfazer".
-    const pending = pendingExerciseRemoval.current;
-    if (pending) {
-      clearTimeout(pending.timer);
-      queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: pending.id });
-    }
-    pendingExerciseRemoval.current = {
-      id: exerciseId,
-      timer: setTimeout(() => {
-        pendingExerciseRemoval.current = null;
-        queue({ kind: "removeExercise", sessionId: workout.id, sessionExerciseId: exerciseId });
-      }, UNDO_MS),
-    };
-    showToast(`${exercise.name} removido`, Trash2, () => {
-      if (pendingExerciseRemoval.current?.id === exerciseId) {
-        clearTimeout(pendingExerciseRemoval.current.timer);
-        pendingExerciseRemoval.current = null;
-      }
-      dispatch({ type: "restoreExercise", index, exercise });
-      setToast(null);
+    // A remoção só entra na fila quando o prazo do "Desfazer" acaba.
+    pendingExerciseRemovals.current.add(exerciseId);
+    showToast(`${exercise.name} removido`, {
+      tone: "undo",
+      icon: Trash2,
+      actionLabel: "Desfazer",
+      onAction: () => {
+        pendingExerciseRemovals.current.delete(exerciseId);
+        dispatch({ type: "restoreExercise", index, exercise });
+      },
+      onClose: () => commitExerciseRemoval(exerciseId),
     });
   };
 
@@ -469,7 +474,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         sessionExerciseId: old.id,
         exercise: toNewWorkoutExercise(replacement, index),
       });
-      return showToast("Exercício trocado", ArrowLeftRight);
+      return showToast("Exercício trocado", { tone: "success", icon: ArrowLeftRight });
     }
 
     const created = chosen.map((e) => buildWorkoutExercise(e, context[e.id]));
@@ -479,7 +484,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       sessionId: workout.id,
       exercises: created.map((e, i) => toNewWorkoutExercise(e, state.exercises.length + i)),
     });
-    showToast(created.length === 1 ? `${created[0]?.name} adicionado` : `${created.length} exercícios adicionados`, Plus);
+    showToast(created.length === 1 ? `${created[0]?.name} adicionado` : `${created.length} exercícios adicionados`, { tone: "success", icon: Plus });
   };
 
   /* ---------- Observações ---------- */
@@ -500,7 +505,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       queue({ kind: "exerciseNote", sessionId: workout.id, sessionExerciseId: sheet.target, note });
     }
     setSheet(null);
-    showToast("Observação salva", NotepadText);
+    showToast("Observação salva", { tone: "success", icon: NotepadText });
   };
 
   /* ---------- Finalizar / descartar ---------- */
@@ -519,7 +524,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     try {
       if (!persist) {
         const { data, error } = await mockWorkoutApi.finishWorkout(getSupabaseClient(), { sessionId: workout.id });
-        if (error) return showToast(error.message, Info);
+        if (error) return showToast(error.message, { tone: "error" });
         closeOut();
         return setSummary({ data, pending: false });
       }
@@ -532,7 +537,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           closeOut();
           return setSummary({ data, pending: false });
         }
-        if (!isNetworkError(error)) return showToast(error.message, Info);
+        if (!isNetworkError(error)) return showToast(error.message, { tone: "error" });
       }
       // Sem conexão: finaliza no aparelho e envia quando a internet voltar.
       await enqueue({ kind: "finish", sessionId: workout.id });
@@ -551,7 +556,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       await mockWorkoutApi.discardWorkout(getSupabaseClient(), { sessionId: workout.id });
     }
     closeOut();
-    shell.showToast("Treino descartado");
+    shell.showToast("Treino descartado", { tone: "success", icon: Trash2 });
     router.replace("/");
   };
 
@@ -565,12 +570,13 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         unit={unit}
         pending={summary.pending}
         onDone={() => {
-          shell.showToast(summary.pending ? "Treino salvo no aparelho" : "Treino salvo no histórico");
+          if (summary.pending) shell.showToast(...PENDING_TOAST);
+          else shell.showToast("Treino salvo", { tone: "success", message: "Já está no seu histórico." });
           router.replace("/");
         }}
         onOpenHistory={() => {
           // Finalizado sem internet: o treino entra no histórico quando a fila sincronizar.
-          if (summary.pending) shell.showToast("O treino aparece no histórico quando a internet voltar");
+          if (summary.pending) shell.showToast(...PENDING_TOAST);
           router.replace("/historico");
         }}
       />
@@ -678,17 +684,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           )}
         </div>
       </footer>
-
-      {toast && (
-        <div
-          className={cn(
-            "fixed inset-x-4 z-[25] mx-auto max-w-[398px] animate-guf-rise-fast",
-            resting ? "bottom-[calc(186px+env(safe-area-inset-bottom))]" : "bottom-[calc(114px+env(safe-area-inset-bottom))]",
-          )}
-        >
-          <Toast message={toast.message} icon={toast.icon} actionLabel={toast.undo ? "Desfazer" : undefined} onAction={toast.undo} />
-        </div>
-      )}
 
       <SetEditSheet
         open={Boolean(edit && editSet)}

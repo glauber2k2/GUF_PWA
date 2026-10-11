@@ -3,7 +3,7 @@
 import { useMemo, useReducer, useState, type ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, Check, ChevronDown, ChevronLeft, CircleCheck, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ChevronLeft, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
 import { routineDraftSummary, routineLetter, routineShortName, type IsoWeekday } from "@guf/core";
 import { routineDraftSchema } from "@guf/schemas";
 import { apiError, type ApiError, type LibraryExercise, type Project, type RoutineDraft } from "@guf/api";
@@ -128,7 +128,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     const parsed = routineDraftSchema.safeParse(draft);
     if (!parsed.success) {
       setShowErrors(true);
-      if (draft.exercises.length === 0) shell.showToast("Adicione pelo menos 1 exercício");
+      if (draft.exercises.length === 0) shell.showToast("Adicione pelo menos 1 exercício", { tone: "warning" });
       const invalid = draft.exercises.find((e) => !e.targetReps.trim());
       if (invalid) setOpenId(invalid.id);
       return;
@@ -144,7 +144,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
       return setSaveError(error);
     }
     await invalidatePlanningData(queryClient);
-    shell.showToast(draft.id ? "Rotina salva" : "Rotina criada", { icon: CircleCheck });
+    shell.showToast(draft.id ? "Rotina salva" : "Rotina criada", { tone: "success" });
     // Salvou: volta para o projeto da rotina (o "Salvando rotina" fica até a troca de tela).
     router.replace(projectDetailPath(draft.projectId));
   };
@@ -156,13 +156,13 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     if (!current || !first) return;
     if (current.mode === "troca" && current.exerciseId) {
       dispatch({ type: "replaceExercise", id: current.exerciseId, exercise: first });
-      return shell.showToast("Exercício trocado", { icon: ArrowLeftRight });
+      return shell.showToast("Exercício trocado", { tone: "success", icon: ArrowLeftRight });
     }
     const planned = chosen.map(toPlannedExercise);
     dispatch({ type: "addExercises", exercises: planned });
     // Um exercício só: o cartão já abre para ajustar séries, repetições e descanso.
     if (planned.length === 1) setOpenId(planned[0]?.id ?? null);
-    shell.showToast(chosen.length === 1 ? `${first.name} adicionado` : `${chosen.length} exercícios adicionados`, { icon: Plus });
+    shell.showToast(chosen.length === 1 ? `${first.name} adicionado` : `${chosen.length} exercícios adicionados`, { tone: "success", icon: Plus });
     // Rola até o fim, onde os novos entraram.
     requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }));
   };
@@ -174,6 +174,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     if (!exercise) return;
     dispatch({ type: "removeExercise", id: exerciseId });
     shell.showToast(`${exercise.name} removido`, {
+      tone: "undo",
       icon: Trash2,
       actionLabel: "Desfazer",
       onAction: () => dispatch({ type: "restoreExercise", index, exercise }),
