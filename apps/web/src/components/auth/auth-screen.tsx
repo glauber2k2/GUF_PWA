@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link, { type LinkProps } from "next/link";
+import { LegalDocLink } from "@/components/legal/legal-reader-provider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -61,15 +62,13 @@ export function AuthFooter({ question, children, className }: { question: string
 }
 
 /**
- * Link para um documento legal (URL publicada em legal_documents), em nova aba.
- * Dentro de um Checkbox, abre o documento sem marcar a caixa (input nativo + label).
+ * Link para um documento legal: abre o leitor DENTRO do app (por cima da tela; voltar mantém
+ * campos e caixas como estavam). Dentro de um Checkbox, abre o documento sem marcar a caixa.
  */
-export function LegalLink({ href, children }: { href: string | undefined; children: ReactNode }) {
-  if (!href) return <span className="font-medium">{children}</span>;
+export function LegalLink({ docType, url, children }: { docType: string; url?: string; children: ReactNode }) {
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium text-accent-text underline">
+    <LegalDocLink docType={docType} url={url} className="font-medium text-accent-text underline underline-offset-[3px]">
       {children}
-      <span className="sr-only"> (abre em nova aba)</span>
-    </a>
+    </LegalDocLink>
   );
 }

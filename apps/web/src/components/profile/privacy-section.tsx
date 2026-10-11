@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { CircleCheck, Download, FileCheck, FileDown, FileText, HeartPulse, Trash2 } from "lucide-react";
-import { acceptedLabel, LEGAL_DOC_TITLES } from "@guf/core";
+import { acceptedLabel, LEGAL_DOC_TITLES, legalReaderTarget } from "@guf/core";
 import type { Consents } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
 import { BottomSheet, Button, ConfirmDialog, GufLoader, Icon } from "@/components/ds";
+import { useLegalReader } from "@/components/legal/legal-reader-provider";
 import { useRevokeHealthConsent } from "@/hooks/use-profile";
 import { DeleteAccountSheet } from "./delete-account-sheet";
 import { ProfileSection, RowButton, RowGroup, RowIcon } from "./profile-ui";
@@ -104,6 +105,7 @@ export function PrivacySection({ consents, canEdit }: { consents: Consents | und
 
 function DocumentsSheet({ open, consents, onClose }: { open: boolean; consents: Consents | undefined; onClose: () => void }) {
   const documents = consents?.documents ?? [];
+  const { openLegal } = useLegalReader();
   return (
     <BottomSheet placement="screen" open={open} onClose={onClose} title="Documentos aceitos">
       <div className="flex flex-col gap-2">
@@ -119,9 +121,14 @@ function DocumentsSheet({ open, consents, onClose }: { open: boolean; consents: 
               </span>
               <a
                 href={doc.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Ler ${title} (abre em nova aba)`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  // A folha fica acima do leitor: fecha antes de abrir o documento.
+                  onClose();
+                  const target = legalReaderTarget(doc.docType);
+                  if (target) openLegal(target.doc, target.anchor);
+                }}
+                aria-label={`Ler ${title}`}
                 className="flex h-11 min-w-11 items-center justify-center rounded-md px-2.5 text-sm font-semibold text-accent-text hover:bg-surface-3"
               >
                 Ler

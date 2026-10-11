@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 export function ProfileSection({ id, title, className, children }: { id: string; title: string; className?: string; children: ReactNode }) {
   return (
     <section aria-labelledby={id} className={cn("flex animate-guf-rise flex-col gap-2", className)}>
-      <h2 id={id} className="mt-2 ml-1 text-lg leading-6 font-semibold tracking-[-0.015em]">
+      <h2 id={id} className="mt-2 ml-1 scroll-mt-[calc(64px+env(safe-area-inset-top))] text-lg leading-6 font-semibold tracking-[-0.015em]">
         {title}
       </h2>
       <div className="flex flex-col rounded-lg border border-border bg-surface shadow-e1">{children}</div>
