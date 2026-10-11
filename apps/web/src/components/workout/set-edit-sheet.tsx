@@ -69,7 +69,7 @@ export function SetEditSheet({ open, title, set, field, unit, onFieldChange, onV
           <Stepper
             label={isLoad ? loadLabel : "Repetições"}
             value={value}
-            step={isLoad ? (unit === "lb" ? 5 : 2.5) : 1}
+            step={isLoad ? (unit === "lb" ? 5 : 2) : 1}
             min={0}
             onChange={(v) => onValueChange(field, v)}
             decreaseLabel={isLoad ? "Diminuir carga" : "Menos uma repetição"}
