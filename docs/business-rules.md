@@ -209,7 +209,7 @@
 
 ## 10. Pontos em aberto (decisões de produto)
 
-- Leitura dos documentos legais dentro do app: hoje os links abrem em nova aba e as páginas `/termos`, `/privacidade` e `/termo-de-saude` ainda não existem. Telas a desenhar no Claude Design e textos a redigir pelo jurídico (ver o plano, Etapa 3).
+- Documentos legais: o leitor dentro do app já existe, com texto de rascunho. Falta a redação final do jurídico (dados do controlador e do encarregado, base legal, prazos) e as versões definitivas em `legal_documents` por nova migration.
 
 - Quais medidas corporais entram no módulo de medidas.
 - Uso do esforço percebido (RPE): a coluna existe no banco, sem uso no app.
