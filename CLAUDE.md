@@ -20,7 +20,7 @@ Nome da marca: **guf** (Guf App) — nunca "guff" (o design system do Claude Des
 - Formulários: React Hook Form + Zod (integração via @hookform/resolvers)
 - Gráficos: Recharts (instalado no apps/web; cores via `var(--color-…)` dos tokens) · Datas: date-fns (só em packages/core; o app usa as funções de `dates.ts`) · Ícones: lucide-react
 - Animações: Anime.js (v4), React Bits, Motion — sempre respeitando prefers-reduced-motion. Ainda não instaladas: por enquanto as animações são keyframes CSS do design system.
-- PWA: Serwist · Offline do treino em andamento: Dexie (IndexedDB)
+- PWA: Serwist (`@serwist/cli` + `serwist`; o `esbuild` é dependência obrigatória do CLI, só no build) · Offline do treino em andamento: Dexie (IndexedDB)
 - Hospedagem: testes na **Vercel** (atual). Produção: **Cloudflare Pages** ou plano pago da Vercel, antes de monetizar. Em todos os casos, site estático.
 - Futuro: app React Native (Expo) reaproveitando os pacotes compartilhados
 - Não adicionar bibliotecas fora desta lista sem perguntar.
@@ -87,6 +87,14 @@ guf-app/
 - Exercícios criados no seletor entram pela fila offline: `flushOutbox()` antes de salvar a rotina.
 - Só online (mesma regra de Projetos). Estados de desenvolvimento: os mesmos `?estado=` de Projetos (mock compartilha a memória).
 - **Atalhos:** "Criar minha primeira rotina" (Início) e "Montar uma rotina" (folha Iniciar treino) abrem `/rotina?projeto=<projeto ativo>` (`newRoutinePathFor`); sem projeto ativo, a lista de Projetos.
+
+## PWA (instalável e abre offline)
+- **Service worker** gerado DEPOIS do `next build`: `apps/web` → `"build": "next build && serwist build serwist.config.mjs"`. O `serwist build` empacota `apps/web/sw/sw.ts` (esbuild) e injeta o pré-cache de `out/` em `out/sw.js`. Sem Route Handler nem servidor (o pacote `@serwist/turbopack` exige Route Handler — não usar).
+- **`sw/sw.ts`** tem tsconfig próprio (lib webworker) e fica fora do tsconfig do app; o `pnpm typecheck` do web checa os dois.
+- **Pré-cache:** HTML, payloads `.txt` da navegação, JS, CSS, fontes e ícones (sem `.map`). Rotas com query string usam o mesmo HTML (`ignoreURLParametersMatching`). **Nunca** cachear respostas do Supabase no service worker (dados do usuário ficam só no Dexie/TanStack).
+- **Registro e atualização:** `ServiceWorkerUpdater` (layout raiz; só no build de produção) registra `/sw.js`; versão nova espera e mostra "Nova versão do guf disponível · Atualizar" (`SKIP_WAITING`); só recarrega quando o usuário toca.
+- **Manifesto:** `src/app/manifest.ts` (estático → `/manifest.webmanifest`): standalone, retrato, cores ink-950. Ícones: `public/icons/icon-192.png`, `icon-512.png`, `icon-maskable-512.png`; `src/app/icon.svg` (favicon) e `src/app/apple-icon.png` (iPhone). Não definir `icons` no `metadata` (desliga os ícones por arquivo).
+- **No iPhone:** instalar por Safari → Compartilhar → "Adicionar à Tela de Início" (o iOS não mostra convite automático).
 
 ## Histórico (/historico)
 - **Dados:** `packages/api/src/history.ts` — `getHistoryOverview` (dias treinados das últimas 104 semanas + `get_streak()` + meta + unidade + data do 1º treino), `getTrainingDays` (mês do calendário) e `getDaySessions` (treinos do dia, com recordes). Mapeadores comuns com a Início em `packages/api/src/shared.ts`.

@@ -25,7 +25,6 @@
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
 | Aba "Perfil" sem tela (só "Sair" numa folha da Início) | AppShell / Início | Médio; obrigatório para os direitos LGPD |
-| PWA (Serwist) não configurado: o app não é instalável e não abre sem internet | `apps/web` | Médio |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 
@@ -137,6 +136,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 ### Etapa 5 — PWA instalável e offline do app
 
 **Branch:** `feat/pwa` · **Prioridade:** média (uso na academia com sinal ruim)
+
+**Andamento:** [x] manifesto e ícones (logo nova) · [x] service worker Serwist (pré-cache do app, abre offline; testado em navegador headless com o servidor desligado) · [x] aviso "Nova versão disponível" · [ ] teste de instalação em aparelhos reais (Android e iPhone) · [ ] PR
 
 **Escopo**
 - Serwist: manifest, ícones, tela de instalação, cache do app (páginas estáticas e assets) para abrir sem internet.
