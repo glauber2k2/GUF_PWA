@@ -171,6 +171,7 @@
 | Recordes pessoais do exercício: maior carga (empate → mais repetições), melhor 1RM estimado e maior volume num treino; tocar abre o treino em que foi feito. Com 1 treino só, os cartões ficam neutros ("Recordes contam a partir do segundo treino"). | Core + Web |
 | Números da evolução vêm do `get_exercise_history` (mesma regra do banco); o app só completa as repetições da melhor série e a série do melhor 1RM. | API |
 | Busca "Ver evolução de um exercício": só exercícios já feitos em treinos concluídos, mais recentes primeiro, com busca sem acento e filtro por grupo muscular. | Core (`filterTrainedExercises`) + API |
+| Busca de exercícios (seletor do treino/rotina e "Ver evolução") é flexível: cada pedaço digitado precisa aparecer no nome, em qualquer ordem e sem acento ("elev lat" → Elevação lateral, "su reto" → Supino reto); o seletor também busca pelo equipamento. Mais parecidos primeiro (início de palavra vale mais). | Core (`searchScore`, `searchFilter` em session.ts) |
 | Sem internet, resumo, evolução e busca abrem com a última cópia salva no aparelho; um treino finalizado offline e ainda não enviado mostra o resumo calculado no aparelho, sem a opção de excluir. | Web |
 
 ## 8.2 Perfil
