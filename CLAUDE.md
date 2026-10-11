@@ -34,7 +34,7 @@ guf-app/
 ├── packages/api/        # cliente Supabase + funções de consulta (usadas por web e mobile)
 ├── packages/types/      # tipos gerados do banco (src/database.ts)
 ├── supabase/            # migrations, seed e Edge Functions (backend JÁ PRONTO)
-├── design/              # referências exportadas do Claude Design
+├── design/              # (prevista, ainda não criada) referências exportadas do Claude Design
 └── docs/                # plano de implementação e regras de negócio (manter atualizados a cada etapa)
 ```
 
@@ -52,7 +52,7 @@ guf-app/
 - **Componentes:** reutilizar os de `apps/web/src/components/ds/` antes de criar novos; componente novo só se não existir. Componentes de uma tela ficam em `src/components/<tela>/`.
 - **Reordenar listas:** usar o hook `usePointerReorder` (`apps/web/src/hooks/`; toque, mouse e setas do teclado) + positions sequenciais (`changedPositions` em packages/core). O `ReorderList` do design system usa o arrastar nativo do HTML5, que não funciona no toque do celular — não usar em telas do app.
 - **Camadas fixas na tela** (folhas `BottomSheet`/`ConfirmDialog` com `placement="screen"`, seletor de exercícios e qualquer tela cheia nova): renderizar por portal no `<body>` (`ScreenPortal` do design system). Um ancestral com `transform` (ex.: a animação de entrada `animate-guf-rise`) vira a referência do `position: fixed` e a camada "escondida" aparece no meio da página. Camadas: folhas `z-[60]`, diálogos `z-[70]` (acima de telas cheias `z-50`).
-- **Fechar o `BottomSheet`:** toque fora, Esc ou arrastar para baixo pela alça/título (`useSheetDrag` em apps/web/src/hooks; fecha ao soltar com > 30% da altura ou gesto rápido, senão volta). Só a área do topo arrasta, para não brigar com campos e rolagem do conteúdo. Sem `onClose`, a folha não fecha por nenhum desses meios.
+- **Fechar o `BottomSheet`:** toque fora, Esc ou arrastar para baixo pela alça/título (`useSheetDrag` em apps/web/src/hooks; fecha ao soltar com > 30% da altura ou gesto rápido, senão volta). Só a área do topo arrasta, para não brigar com campos e rolagem do conteúdo. Sem `onClose`, a folha não fecha por nenhum desses meios. O `ConfirmDialog` ainda NÃO fecha com Esc nem prende o foco (pendência de acessibilidade).
 - **Toques repetidos que gravam** (ex.: + / − da meta semanal): `useCoalescedSave` (apps/web/src/hooks; lógica pura `createCoalescedSaver` em packages/core/src/coalesce.ts). A tela muda na hora e só o último valor é enviado 600 ms depois do último toque; nunca duas gravações ao mesmo tempo; voltar ao valor salvo não envia; ao sair da tela, envia o que estiver esperando.
 - **Toast:** `useAppShell().showToast(mensagem, { icon, actionLabel, onAction })`; com ação (ex.: "Desfazer") fica 4 s. Tela com barra de ação fixa acima do menu chama `setToastRaised(true)`.
 - **Fontes:** Inter (interface) e Barlow Condensed (números, sempre `tabular-nums`), locais via `next/font/local` em `src/app/fonts/`.
@@ -191,13 +191,15 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - Portão /aceite: lista os documentos pendentes; mostra só as confirmações do que está pendente ("Tenho 18 anos ou mais" para age_declaration; a de Termos/Privacidade para terms ou privacy), sempre desmarcadas; botão só habilita com todas marcadas; botão "Sair" com o mesmo peso. `source` do aceite: `reaccept` se já houver aceite anterior; senão `signup_google` (entrou com Google) ou `signup_email`.
 - Consentimento de saúde em camadas: resumo SEMPRE visível (5 itens) + "Ler termo completo" expansível + checkbox desmarcada + botões "Agora não" e "Autorizar e continuar" com o MESMO peso visual.
 - Nunca enviar dados de medidas para logs, Sentry ou analytics.
+- **Documentos legais (pendente):** as páginas `/termos` (com a seção `#idade` da declaração de idade), `/privacidade` e `/termo-de-saude` ainda não existem (caem na 404). As URLs vêm de `legal_documents.url`. Os links (`LegalLink` no cadastro e no `/aceite`, Perfil › Sobre, folha "Documentos aceitos") abrem em nova aba, o que tira o usuário do app instalado. Próximo passo: leitor de documento dentro do app (design no Claude Design), páginas estáticas que funcionam sem login e sem internet, e versões definitivas por nova migration. Os textos dependem de validação jurídica; nunca inventar redação jurídica nem dados da empresa (usar marcadores como [RAZÃO SOCIAL]).
 
 ## Autenticação (implementação)
 - Google com PKCE: `redirectTo` = `<origem atual>/login?next=<destino validado>`; o código é trocado ao carregar a página. Erros de retorno (`?error=…` ou falha na troca do código) viram mensagem em português na tela de login (`oauthReturnError` em packages/api).
 - No painel do Supabase, Redirect URLs com curinga: `http://localhost:3000/**` e `https://<domínio>/**`.
 
 ## Design
-- Seguir o design system do Guf (Claude Design) e as referências em `design/`.
+- Seguir o design system do Guf (Claude Design). A pasta `design/` ainda não existe no repositório: as referências ficam no Claude Design (pedir ao usuário quando precisar).
+- **Ícones com significado fixo:** observação (treino, rotina, resumo) = `NotepadText`; editar/renomear = `Pencil`; documento legal = `FileText`. Não reutilizar um desses ícones para outro significado.
 - Verde volt `#C6F432` = ação, seleção e conquista. Texto escuro sobre volt. No tema claro, textos/ícones usam verde mais escuro (contraste AA).
 - Tema escuro padrão (`#0B0D10`, superfícies `#14171C` / `#1C2027`); tema claro equivalente (`#F6F7F9`). Cores sempre como tokens (variáveis CSS), nunca soltas.
 - Toques ≥ 44px; ações de treino ≥ 56px; ação principal na zona do polegar.
