@@ -244,33 +244,3 @@ export function ConfirmDialog({
   );
   return screen ? <ScreenPortal>{dialog}</ScreenPortal> : dialog;
 }
-
-export interface ToastProps {
-  message: string;
-  icon?: LucideIcon;
-  actionLabel?: string;
-  onAction?: () => void;
-  className?: string;
-}
-
-/** Toast invertido (fundo text-primary, texto background). */
-export function Toast({ message, icon, actionLabel, onAction, className }: ToastProps) {
-  return (
-    <div
-      role="status"
-      className={cn("flex h-[52px] items-center gap-2.5 rounded-[14px] bg-fg pr-1.5 pl-4 text-background shadow-e3", className)}
-    >
-      {icon && <Icon icon={icon} size={16} />}
-      <span className="flex-1 text-sm font-medium">{message}</span>
-      {actionLabel && (
-        <button
-          type="button"
-          onClick={onAction}
-          className="h-10 cursor-pointer rounded-[10px] bg-transparent px-3 text-sm font-bold text-background underline underline-offset-[3px]"
-        >
-          {actionLabel}
-        </button>
-      )}
-    </div>
-  );
-}

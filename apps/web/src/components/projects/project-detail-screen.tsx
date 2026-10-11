@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Archive, ChevronLeft, CircleCheck, Ellipsis, ListPlus, Plus, SearchX } from "lucide-react";
 import { groupProjects, highlightedRoutine, projectMeta, toLocalISODate } from "@guf/core";
 import type { Project, ProjectsOverview } from "@guf/api";
-import { useAppShell } from "@/components/app-shell/app-shell";
+import { useRaisedToast } from "@/components/app-shell/app-shell";
 import { Banner, Button, EmptyState, IconButton, SheetOption, Skeleton } from "@/components/ds";
 import { useProjectsOverview, useProjectsSource } from "@/hooks/use-projects";
 import { OfflineEditBanner } from "./offline-edit-banner";
@@ -80,7 +80,6 @@ function DetailContent({
   actions: ProjectActions;
   onBack: () => void;
 }) {
-  const shell = useAppShell();
   const router = useRouter();
   const newRoutine = () => router.push(newRoutinePath(project.id));
   const { active } = groupProjects(overview.projects);
@@ -91,11 +90,7 @@ function DetailContent({
   const showActivateBar = !project.isActive;
 
   // Barra "Ativar este projeto" fixa acima do menu: o toast sobe para não cobri-la.
-  const { setToastRaised } = shell;
-  useEffect(() => {
-    setToastRaised(showActivateBar);
-    return () => setToastRaised(false);
-  }, [showActivateBar, setToastRaised]);
+  useRaisedToast(showActivateBar);
 
   return (
     <DetailFrame

@@ -1,23 +1,20 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Info, ListPlus, Play, Plus, type LucideIcon } from "lucide-react";
+import { ListPlus, Play, Plus } from "lucide-react";
 import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BottomNav, BottomSheet, LoadingScreen, SheetOption, Toast } from "@/components/ds";
+import { BottomNav, BottomSheet, LoadingScreen, ScreenPortal, SheetOption, ToastStack } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
 import { hasPendingFor, isClosedLocally } from "@/lib/offline/outbox";
+import { createToastStore, TOAST_DURATION_MS, type ToastOptions } from "@/lib/toast/toast-store";
 import { cn } from "@/lib/utils";
 import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
 import { newRoutinePathFor } from "@/components/projects/paths";
 import { useActiveWorkout } from "@/components/workout/workout-provider";
-
-const TOAST_MS = 1800;
-/** Toast com ação ("Desfazer") fica mais tempo na tela. */
-const TOAST_ACTION_MS = 4000;
 
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
 const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exercicio", "/exercicio/busca"]);
@@ -31,21 +28,23 @@ const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/perfil", name: "Perfil" },
 ];
 
-export interface ToastOptions {
-  icon?: LucideIcon;
-  /** Ação do toast (ex.: "Desfazer"); com ação, o toast fica 4 s. */
-  actionLabel?: string;
-  onAction?: () => void;
-}
-
-interface ToastState extends ToastOptions {
-  message: string;
-}
+export type { ToastOptions, ToastTone } from "@/lib/toast/toast-store";
 
 interface AppShellApi {
-  showToast: (message: string, options?: ToastOptions) => void;
-  /** Tela com barra de ação fixa acima do menu: o toast sobe para não cobri-la. */
-  setToastRaised: (raised: boolean) => void;
+  /**
+   * Mostra um aviso na pilha (5 s; "carregando" não expira) e devolve o id.
+   * Ex.: showToast("Projeto salvo", { tone: "success" }) ·
+   * showToast("Série removida", { tone: "undo", icon: Trash2, actionLabel: "Desfazer", onAction }).
+   */
+  showToast: (title: string, options?: ToastOptions) => number;
+  /** Troca o conteúdo de um aviso (ex.: "carregando" → "success"); reinicia o tempo. */
+  updateToast: (id: number, title: string, options?: ToastOptions) => void;
+  dismissToast: (id: number) => void;
+  /**
+   * Barra de ação fixa no rodapé (ex.: "Ativar este projeto", descanso do treino): a pilha sobe para
+   * não cobri-la. Devolve a função que desfaz. Nas telas, use o hook `useRaisedToast(ativo)`.
+   */
+  raiseToast: () => () => void;
   openStartSheet: () => void;
   /** Inicia um treino (rotina ou vazio) e avisa o resultado. */
   startWorkout: (routine: Pick<RoutineSummary, "id" | "name"> | null) => void;
@@ -59,6 +58,12 @@ export function useAppShell(): AppShellApi {
   const ctx = useContext(AppShellContext);
   if (!ctx) throw new Error("useAppShell precisa estar dentro de <AppShell>.");
   return ctx;
+}
+
+/** Sobe a pilha de avisos enquanto `raised` (barra de ação fixa no rodapé da tela). */
+export function useRaisedToast(raised: boolean) {
+  const { raiseToast } = useAppShell();
+  useEffect(() => (raised ? raiseToast() : undefined), [raised, raiseToast]);
 }
 
 /**
@@ -80,19 +85,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [booted, setBooted] = useState(false);
   if (!booted && (summary.data || summary.isError || !online)) setBooted(true);
   const start = useStartWorkout();
-  const [toast, setToast] = useState<ToastState | null>(null);
-  const [toastRaised, setToastRaised] = useState(false);
+  const [toasts] = useState(() => createToastStore(TOAST_DURATION_MS));
+  // Contador: mais de uma barra pode pedir ao mesmo tempo (ex.: seletor aberto sobre o treino).
+  const [raisedCount, setRaisedCount] = useState(0);
   const [startOpen, setStartOpen] = useState(false);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showToast = useCallback((message: string, options?: ToastOptions) => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
-    setToast({ message, ...options });
-    toastTimer.current = setTimeout(() => setToast(null), options?.actionLabel ? TOAST_ACTION_MS : TOAST_MS);
-  }, [setToast]);
-
-  useEffect(() => () => {
-    if (toastTimer.current) clearTimeout(toastTimer.current);
+  const showToast = toasts.show;
+  const raiseToast = useCallback(() => {
+    setRaisedCount((n) => n + 1);
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      setRaisedCount((n) => n - 1);
+    };
   }, []);
 
   const startWorkoutFor = useCallback(
@@ -100,10 +106,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       setStartOpen(false);
       start.mutate(routine?.id ?? null, {
         onSuccess: ({ sessionId }) => {
-          showToast(routine ? `${routineShortName(routine.name)} iniciado` : "Treino vazio iniciado");
+          showToast(routine ? `${routineShortName(routine.name)} iniciado` : "Treino vazio iniciado", { tone: "success", icon: Play });
           router.push(`/treino?id=${encodeURIComponent(sessionId)}`);
         },
-        onError: (error) => showToast(error.message),
+        onError: (error) => showToast(error.message, { tone: "error" }),
       });
     },
     [start, showToast, router, setStartOpen],
@@ -118,8 +124,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const api = useMemo<AppShellApi>(
-    () => ({ showToast, setToastRaised, openStartSheet: () => setStartOpen(true), startWorkout: startWorkoutFor, openWorkout }),
-    [showToast, startWorkoutFor, openWorkout, setToastRaised, setStartOpen],
+    () => ({
+      showToast,
+      updateToast: toasts.update,
+      dismissToast: toasts.dismiss,
+      raiseToast,
+      openStartSheet: () => setStartOpen(true),
+      startWorkout: startWorkoutFor,
+      openWorkout,
+    }),
+    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
@@ -170,7 +184,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (!tab || tab.path === pathname) return;
     // Na tela interna de uma aba, tocar na aba volta para a lista dela.
     if (tab.path) return router.push(tab.path);
-    showToast(`${tab.name} chega em breve`);
+    showToast(`${tab.name} chega em breve`, { tone: "info" });
   };
 
   // Rotinas do projeto ativo, com a sugerida de hoje em destaque (se ainda não treinou hoje).
@@ -199,28 +213,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </div>
 
-      {toast && (
-        <div
+      {/* Pilha de avisos no <body>, acima de telas cheias e folhas (z-65) e abaixo dos diálogos (z-70). */}
+      <ScreenPortal>
+        <ToastStack
+          store={toasts}
+          duration={TOAST_DURATION_MS}
           className={cn(
-            "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
+            "fixed inset-x-3 z-[65] mx-auto max-w-[406px]",
             immersive
-              ? "bottom-[calc(114px+env(safe-area-inset-bottom))]"
-              : showMiniCard || toastRaised
+              ? raisedCount > 0
+                ? "bottom-[calc(186px+env(safe-area-inset-bottom))]"
+                : "bottom-[calc(114px+env(safe-area-inset-bottom))]"
+              : showMiniCard || raisedCount > 0
                 ? "bottom-[calc(168px+env(safe-area-inset-bottom))]"
                 : "bottom-[calc(92px+env(safe-area-inset-bottom))]",
           )}
-        >
-          <Toast
-            message={toast.message}
-            icon={toast.icon ?? Info}
-            actionLabel={toast.actionLabel}
-            onAction={() => {
-              toast.onAction?.();
-              setToast(null);
-            }}
-          />
-        </div>
-      )}
+        />
+      </ScreenPortal>
 
       {showMiniCard && (
         <MiniWorkoutCard

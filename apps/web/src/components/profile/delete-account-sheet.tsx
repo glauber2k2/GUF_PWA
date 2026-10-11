@@ -54,7 +54,7 @@ export function DeleteAccountSheet({ open, exporter, onClose }: { open: boolean;
     if (mock) {
       setBusy(false);
       onClose();
-      return shell.showToast("Simulação: a conta seria excluída e você voltaria ao login.");
+      return shell.showToast("Simulação: a conta seria excluída e você voltaria ao login.", { tone: "info" });
     }
     // A conta já não existe: sai sem enviar a fila offline (o SIGNED_OUT limpa os dados do aparelho).
     await signOut(getSupabaseClient());

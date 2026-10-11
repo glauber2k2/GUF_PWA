@@ -30,6 +30,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Novo visual do seletor de exercícios (Treino e Rotina) | `feat/seletor-exercicios` | #21 |
 | Página 404 personalizada | `feat/pagina-404` | #22 |
 | Ajustes visuais: loader 09 (Sonar) na abertura e 08 (Cometa) nos botões; fechar o `BottomSheet` arrastando para baixo; ícone `NotepadText` na observação | `feat/ajustes-visuais` | #23 |
+| Novo Toast (protótipo `Toast.dc.html`): 7 tipos com ícone animado, pilha com até 3 visíveis, barra de tempo de 5 s, expandir/pausar, arrastar para dispensar e "carregando → sucesso" | `feat/toast` | — |
 
 ### Lacunas conhecidas no que já existe
 
@@ -40,6 +41,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Links dos documentos legais abrem em **nova aba**; com o app instalado (PWA), isso tira o usuário do app. Falta a leitura dentro do app (telas a desenhar no Claude Design) | `LegalLink` (cadastro e `/aceite`), Perfil › Sobre, folha "Documentos aceitos" | Alto para o lançamento (junto com as páginas) |
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `hooks/use-sheet-drag.ts` | Baixo |
+| Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `components/ds/toast.tsx` | Baixo |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 

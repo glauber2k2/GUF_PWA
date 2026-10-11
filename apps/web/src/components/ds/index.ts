@@ -7,6 +7,7 @@ export * from "./cards";
 export * from "./workout";
 export * from "./navigation";
 export * from "./overlays";
+export * from "./toast";
 export * from "./feedback";
 export * from "./body-map";
 export * from "./swipe-to-delete";
