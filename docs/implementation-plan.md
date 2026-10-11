@@ -1,6 +1,6 @@
 # Plano de implementação — Guf App
 
-> Atualizado em 11/10/2026 · Branch de referência: `feat/perfil`
+> Atualizado em 11/10/2026 · Branch de referência: `feat/evolucao`
 > Regras de negócio: [`business-rules.md`](./business-rules.md) · Instruções técnicas: [`CLAUDE.md`](../CLAUDE.md)
 
 ## 1. Situação atual
@@ -16,13 +16,13 @@
 | Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
 | Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
 | Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | **Aguardando PR/merge** |
-| Perfil (`/perfil`): nome, instalar o app (por plataforma), unidade, meta, tema, exportar dados, documentos aceitos, revogar consentimento de saúde, excluir conta, versão e sair | `feat/perfil` | **Em revisão (sem commit)** |
+| Perfil (`/perfil`): nome, foto, instalar o app (por plataforma), unidade, meta, tema, exportar dados, documentos aceitos, revogar consentimento de saúde, excluir conta, versão e sair | `feat/perfil` | **Aguardando PR/merge** |
+| Resumo do treino (`/treino/resumo`), evolução por exercício (`/exercicio`), busca (`/exercicio/busca`) e excluir treino | `feat/evolucao` | **Em revisão (sem commit)** |
 
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
 |---|---|---|
-| Resumo de um treino passado não existe | Folha do dia (Histórico) e card "Concluído" da Início | Médio |
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
@@ -95,7 +95,12 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Critérios de aceite:** valores do app iguais aos do banco (mesmas regras de volume, 1RM e recorde); primeira vez do exercício não gera recorde; peso em kg ou lb conforme o perfil.
 
-**Decisões pendentes:** design das duas telas; se o histórico por exercício deve ter cópia offline.
+**Implementado (`feat/evolucao`)**
+- API `packages/api/src/evolution.ts` (`EvolutionApi`): `getWorkoutSummary`, `deleteWorkout`, `getExerciseEvolution` (números oficiais do `get_exercise_history` + séries para as repetições e a série do 1RM) e `listTrainedExercises`. Regras puras em `packages/core/src/evolution.ts`. Sem migration.
+- Telas: `components/summary/` (resumo + excluir) e `components/evolution/` (evolução com gráfico Recharts, busca, cabeçalho e rotas). Abertas pela folha do dia do Histórico, pelo card "Concluído" e pela folha do dia da Início (vários treinos no dia → o mais recente), pelos recordes e exercícios do resumo e pelo atalho "Ver evolução de um exercício" do Histórico.
+- Offline: cópia no aparelho (`withDeviceCache`, mesma tabela do Histórico); treino finalizado sem internet e ainda não enviado mostra o resumo calculado no aparelho (`lib/offline/local-summary.ts`).
+- Mock `apps/web/src/mocks/evolution.ts` + `?estado=` (ver CLAUDE.md).
+- O atalho no cartão do exercício na tela de Treino não entrou (o protótipo não mostra).
 
 ---
 

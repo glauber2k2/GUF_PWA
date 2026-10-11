@@ -60,7 +60,7 @@ guf-app/
 - **Só em desenvolvimento:** páginas com extensão `.dev.tsx` (ex.: `/design-system`, reconhecidas só no `next dev` via `pageExtensions`) e parâmetros de teste como `?estado=` (protegidos por `process.env.NODE_ENV === "development"`, eliminados do build de produção).
 - **Rotas e proteção (no cliente; quem protege os dados é o RLS):** grupo `(app)` exige sessão e aceite (`RequireAuth` + `AppShell` com menu inferior); `(auth)` = /login e /cadastro (logado segue para o app); `(consent)` = /aceite. `?next=` só aceita caminhos internos (`safeNextPath`).
 - **Datas:** sempre no fuso local do aparelho (`packages/core/src/dates.ts`); semana de segunda a domingo.
-- **Erros da API:** códigos e mensagens em `packages/api/src/result.ts` (`toApiError`): `workout_in_progress` (23505), `workout_not_found` (P0002), `project_not_found` (GP001), `project_locked` (GP002, Favoritos), `routine_empty` (GP003), `routine_not_found` (GP004), `not_authenticated`, `network_error`, `unknown`.
+- **Erros da API:** códigos e mensagens em `packages/api/src/result.ts` (`toApiError`): `workout_in_progress` (23505), `workout_not_found` (P0002), `project_not_found` (GP001), `project_locked` (GP002, Favoritos), `routine_empty` (GP003), `routine_not_found` (GP004), `session_not_found` (treino concluído inexistente ou excluído), `exercise_not_found`, `not_authenticated`, `network_error`, `unknown`.
 
 ## Treino em andamento (offline-first)
 - **Escrita sempre pela fila** (`apps/web/src/lib/offline/`, Dexie): a tela altera o estado local na hora e enfileira a operação com `enqueue(op)`; `flushOutbox()` envia em ordem quando há internet (eventos online/visibilidade + intervalo de 20s). Nunca chamar as funções de escrita da API direto da tela, exceto `finishWorkout` online.
@@ -120,6 +120,16 @@ guf-app/
 - **Offline:** `withDeviceCache` (`apps/web/src/lib/offline/device-cache.ts`, tabela `history` do Dexie) guarda a última resposta e mostra o banner "Sem conexão – mostrando o último histórico salvo".
 - **Atualização:** finalizar/descartar treino chama `invalidateTrainingData` (`apps/web/src/lib/query-keys.ts`) → Início e Histórico recarregam; o mesmo acontece quando a fila offline envia um treino finalizado sem internet.
 - **Estados de desenvolvimento:** `/historico?estado=` padrao · risco · recorde · novo · poucos · erro · carregando · offline · dia (combináveis).
+
+## Resumo do treino (/treino/resumo?id=…) e Evolução (/exercicio?id=…&metrica=…&periodo=…, /exercicio/busca)
+- **Dados:** `packages/api/src/evolution.ts` (`EvolutionApi`): `getWorkoutSummary` (só séries concluídas; recordes com `sessionLoadRecord`, como na folha do dia), `deleteWorkout` (só `status = 'completed'`; cascade de exercícios, séries e períodos), `getExerciseEvolution` (números do `get_exercise_history` + séries para as reps da melhor série e a série do 1RM) e `listTrainedExercises`. Regras puras em `packages/core/src/evolution.ts` (recordes por métrica, séries do gráfico, tendência, variação, textos).
+- **Telas imersivas** (sem menu inferior; `IMMERSIVE_ROUTES` no AppShell) com `DetailHeader` e `useGoBack` (sem histórico de navegação → /historico). Links: `summaryPath`, `exercisePath`, `exerciseSearchPath` (`components/evolution/paths.ts`; em dev levam o `?estado=` junto).
+- **Vários treinos no dia:** `getWorkoutSummary` devolve `daySessionIds` (ordem de término); o `DetailHeader` mostra `position` ("1/2") só com 2 ou mais; a Início abre o mais recente.
+- **Excluir treino:** menu de três pontos → `ConfirmDialog` `balanced`; só online e sem pendências na fila (`hasPendingFor`); depois `invalidateTrainingData(qc, { refetchType: "none" })` (não recarrega o treino que sumiu), descarta resumos guardados fora da tela e a cópia no aparelho; toast "Treino excluído" e mostra o mais recente que sobrou no dia (`router.replace`) ou sai da tela.
+- **Offline:** `withDeviceCache` (chaves `summary:`, `exercise:`, `trained-exercises`); treino finalizado sem internet e não enviado → `pendingWorkoutSummary` (`lib/offline/local-summary.ts`).
+- **Gráfico:** Recharts (`evolution-chart.tsx`), eixo X proporcional ao tempo, pontos de recorde dourados, tendência tracejada, resumo em texto no `aria-label`.
+- **Estados de desenvolvimento:** `?estado=` padrao · sem-recordes · livre · pausas · excluir · nao-encontrado · primeira-vez · um-treino · erro · carregando · offline (combináveis; sem `id`, o mock escolhe um exemplo).
+- **Mocks:** nada pode rodar no carregamento do módulo (ex.: gerar dados numa constante); senão o build de produção não descarta o mock. Gerar sob demanda.
 
 ## Backend (Supabase) — já implementado
 Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, workout_active_periods, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.

@@ -15,3 +15,4 @@ export * from "./pwa";
 export * from "./profile";
 export * from "./avatar";
 export * from "./coalesce";
+export * from "./evolution";

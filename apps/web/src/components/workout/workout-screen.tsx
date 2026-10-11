@@ -510,7 +510,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     setSheet(null);
     skipRest();
     clear();
-    invalidateTrainingData(queryClient);
+    void invalidateTrainingData(queryClient);
   };
 
   const finish = async () => {
