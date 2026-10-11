@@ -11,7 +11,7 @@ export interface LoadingScreenProps {
 }
 
 /**
- * Abertura do app: logo completa animada (02 Desenho) + mensagem + "Evolução fitness" no rodapé.
+ * Abertura do app: logo completa animada (09 Sonar) + mensagem + "Evolução fitness" no rodapé.
  * Usada enquanto a sessão e os dados do usuário carregam.
  */
 export function LoadingScreen({ message = "Preparando seu treino", placement = "screen", className }: LoadingScreenProps) {
@@ -24,7 +24,7 @@ export function LoadingScreen({ message = "Preparando seu treino", placement = "
         className,
       )}
     >
-      <GufLoader variant={2} size={76} wordmark label={`Abrindo o guf. ${message}`} />
+      <GufLoader variant={9} size={76} wordmark label={`Abrindo o guf. ${message}`} />
       <span className="text-[15px] leading-5 text-fg-secondary">{message}</span>
       <span className="absolute inset-x-0 bottom-[calc(48px+env(safe-area-inset-bottom))] text-center text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">
         Evolução fitness
