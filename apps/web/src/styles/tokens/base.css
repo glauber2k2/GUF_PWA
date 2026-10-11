@@ -364,3 +364,35 @@
     display: none;
   }
 }
+
+/* Página 404: o ponto do anel escapa do "0", quica e volta (3,6 s em loop).
+   Movimento reduzido: o ponto fica parado no chão, ao lado do anel girado. */
+@keyframes guf-404-dot {
+  0%, 12% { transform: translate(0, 0); animation-timing-function: cubic-bezier(.3, 0, .7, 1); }
+  22% { transform: translate(9px, -9px); animation-timing-function: cubic-bezier(.5, 0, 1, 1); }
+  36% { transform: translate(16px, 34px); animation-timing-function: cubic-bezier(0, 0, .5, 1); }
+  45% { transform: translate(20px, 22px); animation-timing-function: cubic-bezier(.5, 0, 1, 1); }
+  53% { transform: translate(23px, 34px); animation-timing-function: cubic-bezier(0, 0, .5, 1); }
+  58% { transform: translate(24.5px, 29px); animation-timing-function: cubic-bezier(.5, 0, 1, 1); }
+  63%, 80% { transform: translate(26px, 34px); animation-timing-function: cubic-bezier(.3, 0, .3, 1); }
+  90% { transform: translate(12px, -12px); animation-timing-function: cubic-bezier(.5, 0, 1, 1); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes guf-404-ring {
+  0%, 20% { transform: rotate(0deg); }
+  40% { transform: rotate(18deg); }
+  66% { transform: rotate(34deg); }
+  74% { transform: rotate(26deg); }
+  80% { transform: rotate(34deg); }
+  92%, 100% { transform: rotate(0deg); }
+}
+@keyframes guf-404-shadow {
+  0%, 12%, 90%, 100% { opacity: 0; transform: scaleX(.4); }
+  36%, 53%, 63%, 80% { opacity: .5; transform: scaleX(1); }
+  45%, 58% { opacity: .2; transform: scaleX(.6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes guf-404-dot { from, to { transform: translate(26px, 34px); } }
+  @keyframes guf-404-ring { from, to { transform: rotate(34deg); } }
+  @keyframes guf-404-shadow { from, to { opacity: .5; transform: none; } }
+}

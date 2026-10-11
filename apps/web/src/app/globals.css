@@ -154,6 +154,10 @@
   --animate-guf-from-left: guf-from-left 0.25s var(--ease-enter) both;
   --animate-guf-from-right: guf-from-right 0.25s var(--ease-enter) both;
   --animate-guf-fade: guf-fade 0.15s var(--ease-standard) both;
+  /* Página 404 (ver base.css) */
+  --animate-guf-404-dot: guf-404-dot 3600ms infinite;
+  --animate-guf-404-ring: guf-404-ring 3600ms cubic-bezier(.45, 0, .55, 1) infinite;
+  --animate-guf-404-shadow: guf-404-shadow 3600ms linear infinite;
   /* GufLoader (ver base.css) */
   --animate-gl-spin-1000: gl-spin 1000ms linear infinite;
   --animate-gl-spin-1100: gl-spin 1100ms linear infinite;
