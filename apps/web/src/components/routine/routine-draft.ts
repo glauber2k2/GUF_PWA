@@ -6,7 +6,8 @@ export type DraftAction =
   | { type: "setName"; name: string }
   | { type: "setProject"; projectId: string }
   | { type: "toggleDay"; day: IsoWeekday }
-  | { type: "addExercises"; exercises: LibraryExercise[] }
+  /** Já convertidos com toPlannedExercise (o id é gerado fora do reducer, que precisa ser puro). */
+  | { type: "addExercises"; exercises: RoutineExerciseDraft[] }
   | { type: "replaceExercise"; id: string; exercise: LibraryExercise }
   | { type: "updateExercise"; id: string; patch: Partial<Pick<RoutineExerciseDraft, "targetSets" | "targetReps" | "restSeconds" | "notes">> }
   | { type: "removeExercise"; id: string }
@@ -38,7 +39,7 @@ export function draftReducer(draft: RoutineDraft, action: DraftAction): RoutineD
     case "toggleDay":
       return { ...draft, weekdays: toggleWeekday(draft.weekdays, action.day) };
     case "addExercises":
-      return { ...draft, exercises: [...draft.exercises, ...action.exercises.map(toPlannedExercise)] };
+      return { ...draft, exercises: [...draft.exercises, ...action.exercises] };
     case "replaceExercise":
       // Trocar mantém séries, repetições, descanso e observação.
       return mapExercise(action.id, (e) => ({
