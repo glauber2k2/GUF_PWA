@@ -8,10 +8,10 @@ import { routineDraftSummary, routineLetter, routineShortName, type IsoWeekday }
 import { routineDraftSchema } from "@guf/schemas";
 import { apiError, type ApiError, type LibraryExercise, type Project, type RoutineDraft } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
-import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, Icon, IconButton, SheetOption, Skeleton, TextField } from "@/components/ds";
+import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, Icon, IconButton, SavingOverlay, SheetOption, Skeleton, TextField } from "@/components/ds";
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { OfflineEditBanner } from "@/components/projects/offline-edit-banner";
-import { PROJECTS_PATH, projectDetailPath, routinePath } from "@/components/projects/paths";
+import { PROJECTS_PATH, projectDetailPath } from "@/components/projects/paths";
 import { usePointerReorder } from "@/hooks/use-pointer-reorder";
 import { useCanEditPlanning, useProjectsOverview, useProjectsSource } from "@/hooks/use-projects";
 import { useRoutine, useRoutinesSource } from "@/hooks/use-routine";
@@ -90,7 +90,6 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
   const canEdit = useCanEditPlanning();
   const { api, mock } = useRoutinesSource();
   const [draft, dispatch] = useReducer(draftReducer, initial);
-  const [saved, setSaved] = useState(initial);
   const [openId, setOpenId] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const [saveError, setSaveError] = useState<ApiError | null>(null);
@@ -101,7 +100,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
   const [confirmLeave, setConfirmLeave] = useState(false);
 
   const project = projects.find((p) => p.id === draft.projectId) ?? null;
-  const dirty = isDraftDirty(saved, draft);
+  const dirty = isDraftDirty(initial, draft);
   const disabled = !canEdit || saving;
   const target = sheet && "exerciseId" in sheet ? draft.exercises.find((e) => e.id === sheet.exerciseId) : undefined;
   const nameError = showErrors && !draft.name.trim() ? "Dê um nome para a rotina, como “Treino A”." : undefined;
@@ -122,7 +121,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     return byDay;
   }, [project, draft.id]);
 
-  const leave = () => router.push(projectDetailPath(saved.projectId));
+  const leave = () => router.push(projectDetailPath(initial.projectId));
   const requestLeave = () => (dirty ? setConfirmLeave(true) : leave());
 
   const save = async () => {
@@ -139,17 +138,15 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     setSaveError(null);
     // Exercícios criados no seletor entram pela fila: enviar antes de gravar a rotina.
     if (!mock) await flushOutbox();
-    const { data, error } = await api.saveRoutine(getSupabaseClient(), draft);
-    setSaving(false);
-    if (error) return setSaveError(error);
-    await invalidatePlanningData(queryClient);
-    if (draft.id) {
-      setSaved(draft);
-      shell.showToast("Rotina salva", { icon: CircleCheck });
-    } else {
-      shell.showToast("Rotina criada", { icon: CircleCheck });
-      router.replace(routinePath(data.id));
+    const { error } = await api.saveRoutine(getSupabaseClient(), draft);
+    if (error) {
+      setSaving(false);
+      return setSaveError(error);
     }
+    await invalidatePlanningData(queryClient);
+    shell.showToast(draft.id ? "Rotina salva" : "Rotina criada", { icon: CircleCheck });
+    // Salvou: volta para o projeto da rotina (o "Salvando rotina" fica até a troca de tela).
+    router.replace(projectDetailPath(draft.projectId));
   };
 
   const onPicked = (chosen: LibraryExercise[]) => {
@@ -338,6 +335,9 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
           );
         })}
       </BottomSheet>
+
+      {/* Gravando: bloqueia a tela (evita toque duplo) até voltar para o projeto. */}
+      <SavingOverlay open={saving} title="Salvando rotina" message="Leva só um instante." variant={2} />
 
       <ConfirmDialog
         placement="screen"
