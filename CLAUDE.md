@@ -82,7 +82,7 @@ guf-app/
 
 ## Rotina (/rotina?id=… para editar · /rotina?projeto=… para nova)
 - **Tela imersiva** (sem menu inferior): nome, projeto, dias da semana, exercícios planejados (séries 1–20, repetições alvo em texto livre até 20 caracteres, descanso 45 s/1:00/1:30/2:00/3:00, observação), trocar (mantém séries, repetições, descanso e observação), remover (com "Desfazer") e reordenar (`usePointerReorder`).
-- **Rascunho + "Salvar":** as mudanças ficam na tela (`routine-draft.ts`) e são gravadas de uma vez pela RPC `save_routine` (transação: nome, projeto, dias e exercícios; ids dos exercícios gerados no app; os que saíram da lista são apagados). Sair com mudanças pede confirmação.
+- **Rascunho + "Salvar":** as mudanças ficam na tela (`routine-draft.ts`) e são gravadas de uma vez pela RPC `save_routine` (transação: nome, projeto, dias e exercícios; ids dos exercícios gerados no app; os que saíram da lista são apagados). Enquanto grava, o `SavingOverlay` "Salvando rotina" (loading 02) bloqueia a tela; salvou → volta para o detalhe do projeto da rotina com o toast "Rotina salva"/"Rotina criada". Sair com mudanças pede confirmação.
 - **Validação** (`routineDraftSchema` em packages/schemas): nome obrigatório e pelo menos 1 exercício com repetições. Exercício novo: 3 × 10, descanso 90 s.
 - Exercícios criados no seletor entram pela fila offline: `flushOutbox()` antes de salvar a rotina.
 - Só online (mesma regra de Projetos). Estados de desenvolvimento: os mesmos `?estado=` de Projetos (mock compartilha a memória).
