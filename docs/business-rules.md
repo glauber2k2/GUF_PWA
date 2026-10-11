@@ -1,6 +1,6 @@
 # Regras de negócio — Guf App
 
-> Atualizado em 11/10/2026 · Reflete o código da branch `feat/evolucao`.
+> Atualizado em 11/10/2026 · Reflete o código da `main` (até o PR #23).
 > Regras implementadas no banco valem para todos os apps (web e futuro mobile); regras do `packages/core` são compartilhadas.
 > Plano das próximas etapas: [`implementation-plan.md`](./implementation-plan.md).
 
@@ -199,7 +199,17 @@
 | Toda mensagem de erro diz **o que aconteceu e como resolver**, em português. | API (`result.ts`) |
 | Erros padronizados: treino já em andamento, treino não encontrado/finalizado, sessão expirada, sem conexão e erro desconhecido. | API (`result.ts`) |
 
+## 9.1 Padrões de interface
+
+| Regra | Onde |
+|---|---|
+| Folhas que sobem de baixo (`BottomSheet`) fecham de três formas: toque fora, tecla Esc ou arrastar para baixo pela alça/título. Ao soltar, fecham se desceram mais de 30% da altura ou se o gesto foi rápido; senão, voltam ao lugar. O conteúdo da folha não arrasta (para não atrapalhar campos e rolagem). | Web (`ds/overlays.tsx` + `hooks/use-sheet-drag.ts`) |
+| Carregamento com a animação da logo (`GufLoader`): **08 (Cometa)** nos botões com `loading`; **09 (Sonar)** na abertura do app (verificação da sessão e carregamento da Início depois do login); **07 (Ponto saltitante)** no "Salvando". Botão carregando não aceita toques (evita gravar duas vezes). | Web (`ds/actions.tsx`, `ds/loading.tsx`) |
+| Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
+
 ## 10. Pontos em aberto (decisões de produto)
+
+- Leitura dos documentos legais dentro do app: hoje os links abrem em nova aba e as páginas `/termos`, `/privacidade` e `/termo-de-saude` ainda não existem. Telas a desenhar no Claude Design e textos a redigir pelo jurídico (ver o plano, Etapa 3).
 
 - Quais medidas corporais entram no módulo de medidas.
 - Uso do esforço percebido (RPE): a coluna existe no banco, sem uso no app.
