@@ -1,6 +1,6 @@
 # Regras de negócio — Guf App
 
-> Atualizado em 11/10/2026 · Reflete o código da branch `feat/perfil`.
+> Atualizado em 11/10/2026 · Reflete o código da branch `feat/evolucao`.
 > Regras implementadas no banco valem para todos os apps (web e futuro mobile); regras do `packages/core` são compartilhadas.
 > Plano das próximas etapas: [`implementation-plan.md`](./implementation-plan.md).
 
@@ -158,7 +158,22 @@
 | Menos de 2 semanas com volume em todo o histórico → aviso "Treine mais algumas semanas para ver sua evolução." | Core + Web |
 | Sem internet, mostra a última cópia salva no aparelho com aviso. | Web (`lib/offline/device-cache.ts`) |
 
-## 8.1 Perfil
+## 8.1 Resumo do treino e evolução por exercício
+
+| Regra | Onde |
+|---|---|
+| Resumo: duração efetiva (sem pausas), volume e séries com a mesma regra da Início/Histórico (séries concluídas, sem aquecimento); linha "Tempo efetivo · N pausas · m:ss parado" quando houve pausa (pausas = períodos ativos − 1). | Core (`evolution.ts`) + API |
+| Recordes do treino: carga máxima maior que a de todos os treinos concluídos ANTES (dias anteriores e, no mesmo dia, os que terminaram antes); primeira vez não gera recorde. A série marcada é a de mais repetições com a carga do recorde. | Core (`sessionLoadRecord`, `recordSetIndex`) + API |
+| Dia com vários treinos: "Ver resumo" abre o mais recente; o cabeçalho mostra discretamente a posição no dia ("1/2", "2/2", pela ordem de término). Ao excluir um deles, a tela mostra o mais recente que sobrou; excluído o último do dia, sai da tela. | API (`daySessionIds`) + Web |
+| A lista de exercícios mostra só séries concluídas (aquecimento, drop set e falha identificados por letra). | API + Web |
+| Excluir treino: só treino concluído, só com internet e sem gravações pendentes na fila; confirmação com "Cancelar" e "Excluir" de mesmo peso. Séries, exercícios e pausas saem junto; calendário, sequência, recordes e evolução se recalculam (o banco calcula tudo a partir dos treinos existentes). | API (`deleteWorkout`) + Banco (cascade) + Web |
+| Evolução: um ponto por treino; métricas carga máxima, 1RM estimado (Epley) e volume; períodos 3 meses, 6 meses, 1 ano e tudo; variação = último − primeiro do período (alta em volt, queda neutra); tendência por mínimos quadrados. | Core (`evolution.ts`) |
+| Recordes pessoais do exercício: maior carga (empate → mais repetições), melhor 1RM estimado e maior volume num treino; tocar abre o treino em que foi feito. Com 1 treino só, os cartões ficam neutros ("Recordes contam a partir do segundo treino"). | Core + Web |
+| Números da evolução vêm do `get_exercise_history` (mesma regra do banco); o app só completa as repetições da melhor série e a série do melhor 1RM. | API |
+| Busca "Ver evolução de um exercício": só exercícios já feitos em treinos concluídos, mais recentes primeiro, com busca sem acento e filtro por grupo muscular. | Core (`filterTrainedExercises`) + API |
+| Sem internet, resumo, evolução e busca abrem com a última cópia salva no aparelho; um treino finalizado offline e ainda não enviado mostra o resumo calculado no aparelho, sem a opção de excluir. | Web |
+
+## 8.2 Perfil
 
 | Regra | Onde |
 |---|---|
