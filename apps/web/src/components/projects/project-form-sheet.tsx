@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { CircleCheck } from "lucide-react";
 import { PROJECT_DESCRIPTION_MAX_LENGTH, PROJECT_NAME_MAX_LENGTH, projectFormSchema, type ProjectFormValues } from "@guf/schemas";
 import type { Project } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
@@ -68,7 +67,7 @@ export function ProjectFormSheet({ open, project, activeProject, onClose, onSave
     setSubmitting(false);
     if (result.error) return save.fail(result.error);
     await invalidatePlanningData(queryClient);
-    shell.showToast(creating ? (values.activate ? "Projeto criado e ativado" : "Projeto criado") : "Projeto salvo", { icon: CircleCheck });
+    shell.showToast(creating ? (values.activate ? "Projeto criado e ativado" : "Projeto criado") : "Projeto salvo", { tone: "success" });
     onSaved(result.data.id, creating);
   });
 

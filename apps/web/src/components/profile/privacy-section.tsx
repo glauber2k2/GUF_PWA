@@ -25,8 +25,8 @@ export function PrivacySection({ consents, canEdit }: { consents: Consents | und
   const confirmRevoke = () => {
     close();
     revoke.mutate(undefined, {
-      onSuccess: () => shell.showToast("Medidas apagadas e consentimento revogado", { icon: CircleCheck }),
-      onError: (e) => shell.showToast(e.message),
+      onSuccess: () => shell.showToast("Medidas apagadas e consentimento revogado", { tone: "success" }),
+      onError: (e) => shell.showToast(e.message, { tone: "error" }),
     });
   };
 

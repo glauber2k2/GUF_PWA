@@ -21,7 +21,7 @@ export function ServiceWorkerUpdater() {
   return (
     <ScreenPortal>
       <div className="fixed inset-x-4 top-[calc(12px+env(safe-area-inset-top))] z-[80] mx-auto max-w-[398px] animate-guf-rise-fast">
-        <Toast message="Nova versão do guf disponível" icon={RefreshCw} actionLabel="Atualizar" onAction={applyUpdate} />
+        <Toast tone="info" title="Nova versão do guf disponível" icon={RefreshCw} actionLabel="Atualizar" onAction={applyUpdate} />
       </div>
     </ScreenPortal>
   );

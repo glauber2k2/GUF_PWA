@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, CalendarX, CircleCheck, Pause, Trash2 } from "lucide-react";
+import { CalendarDays, CalendarX, Pause, Trash2 } from "lucide-react";
 import { formatElapsed, formatNumber, pauseSummaryLabel, plural, toDisplayWeight, workoutDateTimeLabel } from "@guf/core";
 import type { WorkoutSummaryDetail } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
@@ -102,13 +102,13 @@ function SummaryContent({
     setOverlay(null);
     remove.mutate(summary.id, {
       onSuccess: () => {
-        shell.showToast("Treino excluído", { icon: CircleCheck });
+        shell.showToast("Treino excluído", { tone: "success" });
         // Ainda há treino neste dia: mostra o mais recente que sobrou; senão, sai da tela.
         const next = summary.daySessionIds.filter((id) => id !== summary.id).at(-1);
         if (next) router.replace(summaryPath(next));
         else onBack();
       },
-      onError: (e) => shell.showToast(e.message),
+      onError: (e) => shell.showToast(e.message, { tone: "error" }),
     });
   };
 

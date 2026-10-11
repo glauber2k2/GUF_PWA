@@ -7,7 +7,6 @@ import {
   ArrowLeftRight,
   Cable,
   Check,
-  CircleCheck,
   CircleDot,
   Cog,
   Dumbbell,
@@ -45,8 +44,8 @@ import {
   SheetOption,
   Skeleton,
   TextField,
-  Toast,
 } from "@/components/ds";
+import { useAppShell, useRaisedToast } from "@/components/app-shell/app-shell";
 import { enqueue } from "@/lib/offline/outbox";
 import { addToLibraryCache, loadExerciseLibrary } from "@/lib/offline/workout-repo";
 import { getSupabaseClient } from "@/lib/supabase";
@@ -57,7 +56,6 @@ export type ExercisePickerMode = "rotina" | "treino" | "troca";
 
 export const EXERCISE_LIBRARY_KEY = "exercise-library";
 
-const TOAST_MS = 1800;
 
 /** Grupos com cartão no filtro (ordem do protótipo); corpo inteiro e cardio não têm ícone de músculo. */
 const FILTER_GROUPS = ["peito", "ombros", "costas", "abdomen", "biceps", "triceps", "antebraco", "gluteos", "quadriceps", "posterior", "panturrilha"].filter(
@@ -179,18 +177,14 @@ export function ExercisePicker({
   const { scrollRef: filterScrollRef, trackRef: filterTrackRef, onScroll: onFilterScroll } = useScrollHint();
   const [selected, setSelected] = useState<string[]>([]);
   const [lastPicked, setLastPicked] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
+  const shell = useAppShell();
   const [createOpen, setCreateOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newGroup, setNewGroup] = useState<string>("peito");
   const [newEquipment, setNewEquipment] = useState<string>("maquina");
   const [nameError, setNameError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const timer = setTimeout(() => setToast(null), TOAST_MS);
-    return () => clearTimeout(timer);
-  }, [toast]);
+  // Barra "Adicionar N" fixa no rodapé: a pilha de avisos sobe para não cobri-la.
+  useRaisedToast(selected.length > 0 && !single);
 
   // Esc fecha o seletor (quando a folha de criar não está aberta).
   useEffect(() => {
@@ -245,7 +239,7 @@ export function ExercisePicker({
       setCreateOpen(false);
       setQuery("");
       setGroups(FILTER_GROUPS.includes(exercise.muscleGroup) ? [exercise.muscleGroup] : []);
-      setToast(`${exercise.name} criado`);
+      shell.showToast(`${exercise.name} criado`, { tone: "success" });
     },
     onError: (error) => setNameError(error.message),
   });
@@ -488,19 +482,6 @@ export function ExercisePicker({
             </Button>
           </div>
         </div>
-
-        {toast && (
-          <div
-            className={cn(
-              "fixed inset-x-4 z-20 mx-auto max-w-[398px] animate-guf-rise-fast",
-              count > 0 && !single
-                ? "bottom-[calc(162px+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(114px+env(safe-area-inset-bottom))]",
-            )}
-          >
-            <Toast message={toast} icon={CircleCheck} />
-          </div>
-        )}
 
         <BottomSheet placement="screen" open={createOpen} onClose={() => setCreateOpen(false)} title="Criar exercício" subtitle="Personalizado">
           <TextField

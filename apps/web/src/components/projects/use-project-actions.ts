@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Info, Trash2, WifiOff, type LucideIcon } from "lucide-react";
+import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Trash2, WifiOff, type LucideIcon } from "lucide-react";
 import { changedPositions, OFFLINE_EDIT_MESSAGE } from "@guf/core";
 import type { ApiResult, GufClient, Project, ProjectRoutine } from "@guf/api";
-import { useAppShell } from "@/components/app-shell/app-shell";
+import { useAppShell, type ToastOptions } from "@/components/app-shell/app-shell";
 import { useCanEditPlanning, useProjectsSource } from "@/hooks/use-projects";
 import { invalidatePlanningData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 
 /** Aviso de quem tenta editar sem internet (edição de projetos/rotinas é só online). */
-export const OFFLINE_TOAST = `Sem conexão – ${OFFLINE_EDIT_MESSAGE}`;
+export const OFFLINE_TOAST: [string, ToastOptions] = [
+  "Sem conexão",
+  { tone: "warning", icon: WifiOff, message: OFFLINE_EDIT_MESSAGE.charAt(0).toUpperCase() + OFFLINE_EDIT_MESSAGE.slice(1) },
+];
 
 type Operation = (client: GufClient) => Promise<ApiResult<unknown>>;
 
@@ -36,14 +39,15 @@ export function useProjectActions() {
 
   const run = async (operation: Operation, feedback?: Feedback): Promise<boolean> => {
     if (!canEdit) {
-      shell.showToast(OFFLINE_TOAST, { icon: WifiOff });
+      shell.showToast(...OFFLINE_TOAST);
       return false;
     }
     setBusy(true);
     const { error } = await operation(getSupabaseClient());
     setBusy(false);
     if (error) {
-      shell.showToast(error.code === "network_error" ? OFFLINE_TOAST : error.message, { icon: error.code === "network_error" ? WifiOff : Info });
+      if (error.code === "network_error") shell.showToast(...OFFLINE_TOAST);
+      else shell.showToast(error.message, { tone: "error" });
       await invalidatePlanningData(queryClient);
       return false;
     }
@@ -51,6 +55,7 @@ export function useProjectActions() {
     if (feedback) {
       const undo = feedback.undo;
       shell.showToast(feedback.message, {
+        tone: undo ? "undo" : "success",
         icon: feedback.icon,
         actionLabel: undo ? "Desfazer" : undefined,
         onAction: undo ? () => void run(undo) : undefined,

@@ -38,9 +38,9 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
   const save = (input: ProfileUpdate, done?: string) =>
     update.mutate(input, {
       onSuccess: () => {
-        if (done) shell.showToast(done);
+        if (done) shell.showToast(done, { tone: "success" });
       },
-      onError: (e) => shell.showToast(e.message),
+      onError: (e) => shell.showToast(e.message, { tone: "error" }),
     });
 
   // Meta: o número muda na hora a cada toque, mas só UMA gravação sai quando o usuário para de tocar
@@ -55,7 +55,7 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
         setDraftGoal((d) => (d === weeklyGoal ? null : d));
       } catch (e) {
         setDraftGoal(null);
-        shell.showToast((e as { message?: string }).message ?? "Não foi possível salvar a meta. Tente de novo.");
+        shell.showToast((e as { message?: string }).message ?? "Não foi possível salvar a meta. Tente de novo.", { tone: "error" });
       }
     },
     (weeklyGoal) => weeklyGoal === profile.weeklyGoal,
