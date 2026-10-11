@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
-import { CircleCheck } from "lucide-react";
 import { ROUTINE_NAME_MAX_LENGTH, routineNameSchema, type RoutineNameValues } from "@guf/schemas";
 import type { Project, ProjectRoutine } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
@@ -52,7 +51,7 @@ export function RoutineNameSheet({ open, project, routine, onClose }: RoutineNam
     setSubmitting(false);
     if (result.error) return save.fail(result.error);
     await invalidatePlanningData(queryClient);
-    shell.showToast("Rotina renomeada", { icon: CircleCheck });
+    shell.showToast("Rotina renomeada", { tone: "success" });
     onClose();
   });
 

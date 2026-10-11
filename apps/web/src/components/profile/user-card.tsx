@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CalendarCheck, CircleCheck, Pencil } from "lucide-react";
+import { CalendarCheck, Pencil } from "lucide-react";
 import { trainingSinceLabel } from "@guf/core";
 import { NAME_MAX_LENGTH, profileNameSchema, type ProfileNameValues } from "@guf/schemas";
 import type { Profile } from "@guf/api";
@@ -77,7 +77,7 @@ function NameSheet({ open, name, canEdit, onClose }: { open: boolean; name: stri
       { name: next },
       {
         onSuccess: () => {
-          shell.showToast("Nome atualizado", { icon: CircleCheck });
+          shell.showToast("Nome atualizado", { tone: "success" });
           onClose();
         },
         onError: (e) => setError(e.message),
