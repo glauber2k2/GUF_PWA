@@ -131,6 +131,9 @@ guf-app/
 - **Estados de desenvolvimento:** `?estado=` padrao · sem-recordes · livre · pausas · excluir · nao-encontrado · primeira-vez · um-treino · erro · carregando · offline (combináveis; sem `id`, o mock escolhe um exemplo).
 - **Mocks:** nada pode rodar no carregamento do módulo (ex.: gerar dados numa constante); senão o build de produção não descarta o mock. Gerar sob demanda.
 
+## Página 404
+- `src/app/not-found.tsx` → `NotFoundScreen` (`components/not-found/`), exportada como `out/404.html`. Logado → "Voltar ao início" (/); sem sessão → "Ir para o login". Redireciona sozinha em 10 s (conta só depois de saber se há sessão); "Ficar aqui" pausa. Animação do anel com keyframes `guf-404-*` (base.css), parada em movimento reduzido.
+
 ## Backend (Supabase) — já implementado
 Tabelas: profiles, exercises, projects, routines, routine_exercises, workout_sessions, workout_active_periods, session_exercises, set_logs, body_measurements, measurement_values, legal_documents, consent_records, entitlements.
 
