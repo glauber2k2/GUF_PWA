@@ -7,6 +7,8 @@ export type ApiErrorCode =
   | "project_locked"
   | "routine_empty"
   | "routine_not_found"
+  | "session_not_found"
+  | "exercise_not_found"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -27,6 +29,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   project_locked: "O projeto Favoritos é fixo: não dá para renomear, arquivar nem excluir.",
   routine_empty: "Adicione pelo menos 1 exercício para salvar a rotina.",
   routine_not_found: "Esta rotina não existe mais ou está arquivada. Volte para Projetos e tente de novo.",
+  session_not_found: "Este treino foi excluído ou não está mais disponível. Volte e escolha outro.",
+  exercise_not_found: "Este exercício não está mais disponível. Volte e escolha outro.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",

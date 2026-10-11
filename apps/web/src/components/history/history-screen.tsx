@@ -13,8 +13,10 @@ import {
   type ChartPeriod,
 } from "@guf/core";
 import type { HistoryOverview } from "@guf/api";
-import { useAppShell } from "@/components/app-shell/app-shell";
-import { AppHeader, Banner, LargeTitle } from "@/components/ds";
+import { useRouter } from "next/navigation";
+import { Search, TrendingUp } from "lucide-react";
+import { AppHeader, Banner, Icon, LargeTitle } from "@/components/ds";
+import { exerciseSearchPath, summaryPath } from "@/components/evolution/paths";
 import { useDevHistoryState } from "@/hooks/use-dev-history-state";
 import { useHistoryOverview, useMonthTrainingDays } from "@/hooks/use-history";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -58,15 +60,34 @@ export function HistoryScreen() {
             Não foi possível carregar o histórico. Verifique a internet e tente de novo.
           </Banner>
         ) : (
-          <HistoryContent overview={overview.data.value} today={today} openLatestDay={dev.openDay} />
+          <>
+            {overview.data.value.firstTrainedOn && <EvolutionShortcut />}
+            <HistoryContent overview={overview.data.value} today={today} openLatestDay={dev.openDay} />
+          </>
         )}
       </div>
     </main>
   );
 }
 
+/** Atalho "Ver evolução de um exercício" (abre a busca de exercícios já feitos). */
+function EvolutionShortcut() {
+  const router = useRouter();
+  return (
+    <button
+      type="button"
+      onClick={() => router.push(exerciseSearchPath())}
+      className="flex h-12 flex-none animate-guf-rise cursor-pointer items-center gap-2.5 rounded-md border border-border-strong bg-surface pr-3 pl-3.5 text-left text-[15px] text-fg-secondary transition-colors duration-150 ease-standard hover:bg-surface-3 active:scale-[.98] motion-reduce:active:scale-100"
+    >
+      <Icon icon={TrendingUp} size={18} className="text-accent-text" />
+      <span className="flex-1">Ver evolução de um exercício</span>
+      <Icon icon={Search} size={18} className="text-fg-muted" />
+    </button>
+  );
+}
+
 function HistoryContent({ overview, today, openLatestDay }: { overview: HistoryOverview; today: Date; openLatestDay: boolean }) {
-  const shell = useAppShell();
+  const router = useRouter();
   const { month, period, setMonth, setPeriod } = useHistoryParams(today);
   const monthDays = useMonthTrainingDays(month);
   const [direction, setDirection] = useState<"back" | "forward" | null>(null);
@@ -124,9 +145,9 @@ function HistoryContent({ overview, today, openLatestDay }: { overview: HistoryO
         iso={openDay}
         unit={weightUnit}
         onClose={() => setOpenDay(null)}
-        onOpenSession={() => {
+        onOpenSession={(session) => {
           setOpenDay(null);
-          shell.showToast("O resumo do treino chega em breve");
+          router.push(summaryPath(session.id));
         }}
       />
     </>
