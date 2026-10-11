@@ -1,23 +1,35 @@
 # Plano de implementação — Guf App
 
-> Atualizado em 11/10/2026 · Branch de referência: `feat/evolucao`
+> Atualizado em 11/10/2026 · Branch de referência: `main` (até o PR #23)
 > Regras de negócio: [`business-rules.md`](./business-rules.md) · Instruções técnicas: [`CLAUDE.md`](../CLAUDE.md)
 
 ## 1. Situação atual
 
 ### Entregue
 
-| Etapa | Branch | Situação |
+Tudo abaixo está na `main` (número do PR entre parênteses).
+
+| Etapa | Branch | PR |
 |---|---|---|
-| Design system do Guf (tokens, componentes, vitrine `/design-system` só em dev) | `feat/design-system` | Na `main` |
-| Login e cadastro por e-mail com aceite LGPD | — | Na `main` |
-| Login com Google (PKCE) e portão `/aceite` | `feat/login-google` | Na `main` |
-| Tela Início com dados reais (treino de hoje, semana, sequência) | `feat/inicio`, `feat/inicio-dados` | Na `main` |
-| Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | Na `main` |
-| Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | **Aguardando PR/merge** |
-| Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | **Aguardando PR/merge** |
-| Perfil (`/perfil`): nome, foto, instalar o app (por plataforma), unidade, meta, tema, exportar dados, documentos aceitos, revogar consentimento de saúde, excluir conta, versão e sair | `feat/perfil` | **Aguardando PR/merge** |
-| Resumo do treino (`/treino/resumo`), evolução por exercício (`/exercicio`), busca (`/exercicio/busca`) e excluir treino | `feat/evolucao` | **Em revisão (sem commit)** |
+| Design system do Guf (tokens, componentes, vitrine `/design-system` só em dev) | `feat/design-system` | #1 |
+| Login e cadastro por e-mail com aceite LGPD | — | — |
+| Tela Início com dados reais (treino de hoje, semana, sequência) | `feat/inicio`, `feat/inicio-dados` | #2, #3 |
+| Login com Google (PKCE) e portão `/aceite` | `feat/login-google` | #4, #5 |
+| Treino em andamento (`/treino`): séries, exercícios, descanso, pausas, tempo efetivo, offline, mini card | `feat/treino`, `feat/treino-integracao` | #7 |
+| Histórico (`/historico`): sequência, calendário, folha do dia com recordes, gráfico de volume | `feat/historico` | #8 |
+| Documentação (`docs/`: plano e regras de negócio) | `chore/documentacao` | #9 |
+| "Ver no histórico" do resumo do treino abre `/historico` | `fix/ajustes-historico` | #10 |
+| Projetos e Rotina (`/projetos`, `/projetos/detalhe`, `/rotina`): projetos (Favoritos padrão), rotinas com dias da semana e exercícios planejados; treino de hoje e dia de descanso na Início | `feat/projetos` | #11, #12 |
+| Excluir projeto (exceto Favoritos) com as rotinas dele | `feat/excluir-projeto` | #14 |
+| Logo em SVG, `GufLoader` (10 animações), telas de carregamento e ícones de músculo | `feat/marca-e-loading` | #15 |
+| PWA instalável (Serwist), abertura offline e aviso de nova versão | `feat/pwa` | #16 |
+| Salvar rotina volta para o projeto e mostra "Salvando rotina" | `fix/salvar-rotina` | #17 |
+| Perfil (`/perfil`): nome, foto, instalar o app (por plataforma), unidade, meta, tema, exportar dados, documentos aceitos, revogar consentimento de saúde, excluir conta, versão e sair | `feat/perfil` | #18 |
+| Resumo do treino (`/treino/resumo`), evolução por exercício (`/exercicio`), busca (`/exercicio/busca`) e excluir treino | `feat/evolucao` | #19 |
+| Busca flexível de exercícios por pedaços de palavras | `feat/busca-flexivel` | #20 |
+| Novo visual do seletor de exercícios (Treino e Rotina) | `feat/seletor-exercicios` | #21 |
+| Página 404 personalizada | `feat/pagina-404` | #22 |
+| Ajustes visuais: loader 09 (Sonar) na abertura e 08 (Cometa) nos botões; fechar o `BottomSheet` arrastando para baixo; ícone `NotepadText` na observação | `feat/ajustes-visuais` | #23 |
 
 ### Lacunas conhecidas no que já existe
 
@@ -25,6 +37,9 @@
 |---|---|---|
 | Páginas `/termos`, `/privacidade` e `/termo-de-saude` não existem (404) | Links do cadastro e do `/aceite` (URLs vêm de `legal_documents`) | **Alto para o lançamento** (LGPD) |
 | Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
+| Links dos documentos legais abrem em **nova aba**; com o app instalado (PWA), isso tira o usuário do app. Falta a leitura dentro do app (telas a desenhar no Claude Design) | `LegalLink` (cadastro e `/aceite`), Perfil › Sobre, folha "Documentos aceitos" | Alto para o lançamento (junto com as páginas) |
+| `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
+| Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `hooks/use-sheet-drag.ts` | Baixo |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 
@@ -44,7 +59,7 @@ e do `CLAUDE.md` → commit/push e PR.
 **Branch:** `fix/ajustes-historico`
 
 - [x] "Ver no histórico" do resumo do treino → navega para `/historico` (finalizado sem internet: avisa que o treino aparece quando a conexão voltar).
-- [ ] Abrir os PRs da `feat/historico`, da `chore/documentacao` e desta branch, nessa ordem, e fazer o merge.
+- [x] Abrir os PRs da `feat/historico`, da `chore/documentacao` e desta branch, nessa ordem, e fazer o merge (#8, #9, #10).
 - [ ] Confirmar no painel do Supabase as Redirect URLs com curinga (`http://localhost:3000/**` e o domínio de testes).
 
 **Critério de aceite:** nenhum "chega em breve" para telas que já existem.
@@ -55,7 +70,7 @@ e do `CLAUDE.md` → commit/push e PR.
 
 **Branch:** `feat/projetos` · **Prioridade:** alta (sem ela o usuário não planeja treinos)
 
-**Andamento:** [x] migration `activate_project` · [x] lista e detalhe de projetos · [x] migration `routine_schedule_and_favorites` (dias da semana, Favoritos, `save_routine`) · [x] tela de Rotina · [x] treino de hoje por dia e dia de descanso na Início · [ ] PR
+**Andamento:** [x] migration `activate_project` · [x] lista e detalhe de projetos · [x] migration `routine_schedule_and_favorites` (dias da semana, Favoritos, `save_routine`) · [x] tela de Rotina · [x] treino de hoje por dia e dia de descanso na Início · [x] PR (#11, #12; excluir projeto em #14)
 
 **Escopo**
 - Lista de projetos (ativo em destaque, arquivados separados) e criação/edição/arquivamento.
@@ -69,7 +84,7 @@ e do `CLAUDE.md` → commit/push e PR.
 **Dados:** tabelas `projects`, `routines`, `routine_exercises` (já existem, com RLS).
 Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_activate_project.sql`, **já aplicada** no Supabase): atômica, erro próprio `GP001`.
 
-**Reaproveitar:** `ExercisePicker`, `ReorderList`, `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
+**Reaproveitar:** `ExercisePicker`, `usePointerReorder` (o `ReorderList` do design system não funciona no toque), `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
 
 **Critérios de aceite**
 - Usuário novo cria projeto → rotina → exercícios e inicia o treino planejado pela Início.
@@ -129,6 +144,10 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 - Versão do app = `version` do `apps/web/package.json` (`NEXT_PUBLIC_APP_VERSION`).
 - Foto do usuário no Perfil e na Início: foto do Google (inclusive conta de e-mail vinculada ao Google depois) com a inicial como reserva; prioridade já preparada para a foto enviada pelo usuário.
 - **Pendente:** upload de foto própria (migration do bucket `avatars` + políticas de acesso e tela de envio/corte) e as páginas `/termos`, `/privacidade` e `/termo-de-saude` (dependem dos textos definitivos com validação jurídica).
+- **Documentos legais — próximos passos (definidos em 11/10/2026):**
+  1. Desenhar no Claude Design: leitor de documento único para os 3 documentos (cabeçalho com voltar, versão e "em vigor desde", bloco "Em resumo" sempre visível, sumário com âncoras — inclusive `/termos#idade` —, atalhos para exportar/revogar/excluir, rodapé com contato do encarregado), central "Documentos legais" no Perfil › Sobre, "O que mudou nesta versão" no `/aceite` e os estados visitante / aceito / versão antiga aceita / sem internet, nos dois temas.
+  2. Em paralelo, o jurídico redige os textos (dados reais do controlador e do encarregado, base legal, dados de saúde, transferência internacional, retenção). O design usa marcadores entre colchetes, nunca texto jurídico inventado.
+  3. Implementar as páginas estáticas (funcionam sem login e sem internet), trocar os links para abrir dentro do app e publicar as versões definitivas por nova migration (versão e hash reais).
 
 ---
 
@@ -151,7 +170,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Branch:** `feat/pwa` · **Prioridade:** média (uso na academia com sinal ruim)
 
-**Andamento:** [x] manifesto e ícones (logo nova) · [x] service worker Serwist (pré-cache do app, abre offline; testado em navegador headless com o servidor desligado) · [x] aviso "Nova versão disponível" · [ ] teste de instalação em aparelhos reais (Android e iPhone) · [ ] PR
+**Andamento:** [x] manifesto e ícones (logo nova) · [x] service worker Serwist (pré-cache do app, abre offline; testado em navegador headless com o servidor desligado) · [x] aviso "Nova versão disponível" · [ ] teste de instalação em aparelhos reais (Android e iPhone) · [x] PR (#16)
 
 **Escopo**
 - Serwist: manifest, ícones, tela de instalação, cache do app (páginas estáticas e assets) para abrir sem internet.
