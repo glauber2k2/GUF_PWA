@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Dumbbell, Ellipsis, Plus, StickyNote, Timer } from "lucide-react";
+import { ChevronDown, ChevronUp, Dumbbell, Ellipsis, Plus, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
   formatClock,
@@ -99,7 +99,7 @@ export function WorkoutExerciseCard({
 
       {e.note && (
         <span className="-mt-1 flex items-start gap-1.5 pr-4 pb-2.5 pl-[72px] text-[13px] leading-[18px] text-fg-secondary">
-          <Icon icon={StickyNote} size={14} className="mt-0.5 text-fg-muted" />
+          <Icon icon={NotepadText} size={14} className="mt-0.5 text-fg-muted" />
           {e.note}
         </span>
       )}
@@ -134,7 +134,7 @@ export function WorkoutExerciseCard({
             <Button variant="secondary" icon={Plus} fullWidth onClick={onAddSet}>
               Adicionar série
             </Button>
-            <IconButton icon={StickyNote} label={`Observação de ${e.name}`} onClick={onOpenNote} />
+            <IconButton icon={NotepadText} label={`Observação de ${e.name}`} onClick={onOpenNote} />
           </div>
         </>
       )}

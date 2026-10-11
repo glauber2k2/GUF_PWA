@@ -1,6 +1,6 @@
 "use client";
 
-import { Ellipsis, GripVertical, StickyNote, Timer } from "lucide-react";
+import { Ellipsis, GripVertical, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
   formatClock,
@@ -100,7 +100,7 @@ export function RoutineExerciseCard({
 
       {exercise.notes && (
         <span className="-mt-1 flex items-start gap-1.5 pr-4 pb-3 pl-10 text-[13px] leading-[18px] text-fg-secondary">
-          <Icon icon={StickyNote} size={14} className="mt-0.5 text-fg-muted" />
+          <Icon icon={NotepadText} size={14} className="mt-0.5 text-fg-muted" />
           {exercise.notes}
         </span>
       )}

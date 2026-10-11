@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowUpRight, CircleCheck, Dumbbell, Ellipsis, Play, Plus, StickyNote, Timer, Trash2 } from "lucide-react";
+import { ArrowUpRight, CircleCheck, Dumbbell, Ellipsis, Play, Plus, NotepadText, Timer, Trash2 } from "lucide-react";
 import {
   AppHeader,
   AppIcon,
@@ -376,7 +376,7 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
           </Button>
           <div className="flex flex-wrap items-center gap-2">
             <IconButton icon={Ellipsis} label="Mais opções" />
-            <IconButton icon={StickyNote} label="Nota" variant="ghost" />
+            <IconButton icon={NotepadText} label="Nota" variant="ghost" />
             <IconButton icon={Plus} label="Adicionar" variant="primary" />
             <IconButton icon={Timer} label="Descanso" pressed />
             <Fab label="Adicionar exercício" />
