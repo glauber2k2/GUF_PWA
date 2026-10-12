@@ -28,7 +28,6 @@ const THEME_OPTIONS = [
 
 const REST_ALERT_OPTIONS = [
   { value: "sound", label: "Som" },
-  { value: "vibrate", label: "Vibrar" },
   { value: "silent", label: "Silencioso" },
 ];
 
@@ -146,7 +145,7 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
           }}
         />
         <span className="text-[13px] leading-[18px] text-pretty text-fg-muted">
-          Avisa quando o descanso termina, com o app aberto. Alguns aparelhos, como o iPhone, não vibram pelo navegador.
+          Avisa quando o descanso termina, com o app aberto.
         </span>
       </RowGroup>
 
