@@ -1,7 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { powerUp7Sound } from "@/lib/power-up-7";
+import { createDevicePreference } from "@/lib/device-preference";
 import { decodeAudioData, getAudioContext, playSound } from "@/lib/sound-engine";
 
 /*
@@ -14,41 +14,12 @@ import { decodeAudioData, getAudioContext, playSound } from "@/lib/sound-engine"
 
 export type RestAlertPreference = "sound" | "vibrate" | "silent";
 
-const STORAGE_KEY = "guf.rest-alert";
-const DEFAULT_PREFERENCE: RestAlertPreference = "sound";
 const VIBRATION_MS = 200;
 
-const listeners = new Set<() => void>();
-
-function readPreference(): RestAlertPreference {
-  try {
-    const value = localStorage.getItem(STORAGE_KEY);
-    return value === "vibrate" || value === "silent" || value === "sound" ? value : DEFAULT_PREFERENCE;
-  } catch {
-    return DEFAULT_PREFERENCE;
-  }
-}
-
-export function setRestAlertPreference(preference: RestAlertPreference) {
-  try {
-    localStorage.setItem(STORAGE_KEY, preference);
-  } catch {
-    // Sem armazenamento (navegação privada): vale só até fechar.
-  }
-  listeners.forEach((l) => l());
-}
-
-export function useRestAlertPreference(): [RestAlertPreference, (preference: RestAlertPreference) => void] {
-  const preference = useSyncExternalStore(
-    (onChange) => {
-      listeners.add(onChange);
-      return () => listeners.delete(onChange);
-    },
-    readPreference,
-    () => DEFAULT_PREFERENCE,
-  );
-  return [preference, setRestAlertPreference];
-}
+const preference = createDevicePreference<RestAlertPreference>("guf.rest-alert", ["sound", "vibrate", "silent"], "sound");
+const readPreference = preference.read;
+export const setRestAlertPreference = preference.set;
+export const useRestAlertPreference = preference.use;
 
 function vibrate(ms: number) {
   try {
