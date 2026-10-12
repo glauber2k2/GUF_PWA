@@ -171,6 +171,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     0,
     TAB_ROUTES.findIndex((t) => t.path === pathname || (t.path && t.path !== "/" && pathname.startsWith(`${t.path}/`))),
   );
+  // Aba tocada: o indicador desliza no toque, sem esperar a rota trocar. Vale enquanto a rota
+  // ainda é a de onde o toque saiu; trocou a rota, manda a aba da rota.
+  const [navIntent, setNavIntent] = useState<{ index: number; from: string } | null>(null);
+  const navValue = navIntent?.from === pathname ? navIntent.index : tabIndex;
   // Treino aberto: o acompanhado no aparelho ou o que o banco informa.
   const inProgress = active
     ? { id: active.sessionId, name: active.name, startedAt: active.clock.startedAt }
@@ -183,7 +187,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     const tab = TAB_ROUTES[index];
     if (!tab || tab.path === pathname) return;
     // Na tela interna de uma aba, tocar na aba volta para a lista dela.
-    if (tab.path) return router.push(tab.path);
+    if (tab.path) {
+      setNavIntent({ index, from: pathname });
+      return router.push(tab.path);
+    }
     showToast(`${tab.name} chega em breve`, { tone: "info" });
   };
 
@@ -245,7 +252,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       >
         <BottomNav
-          value={tabIndex}
+          value={navValue}
           onChange={onNav}
           className="mx-auto max-w-[430px] border-t-0 bg-transparent backdrop-blur-none"
         />
