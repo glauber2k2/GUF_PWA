@@ -206,7 +206,7 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - Verde volt `#C6F432` = ação, seleção e conquista. Texto escuro sobre volt. No tema claro, textos/ícones usam verde mais escuro (contraste AA).
 - Tema escuro padrão (`#0B0D10`, superfícies `#14171C` / `#1C2027`); tema claro equivalente (`#F6F7F9`). Cores sempre como tokens (variáveis CSS), nunca soltas.
 - Toques ≥ 44px; ações de treino ≥ 56px; ação principal na zona do polegar.
-- Bottom navigation: Início, Histórico, Treinar (central), Projetos, Perfil.
+- Bottom navigation: Início, Histórico, Treinar (central), Projetos, Perfil. O destaque da aba ativa (tint volt 16%) é UM indicador que desliza e estica até a aba tocada (`useSlidingIndicator` em `components/ds/navigation.tsx`, Web Animations API, sem biblioteca; mede o ícone da aba; movimento reduzido troca direto; some no item central). O `AppShell` move o indicador já no toque (`navIntent`), sem esperar a rota trocar.
 - Acessibilidade WCAG AA, foco visível, labels acima dos campos.
 - Sem emoji nem caractere unicode como ícone: usar ícones do lucide-react.
 - **Logo:** sempre o componente `Logo` (SVG em traços, sem texto de fonte; geometria em `components/ds/brand-geometry.ts`, igual a `assets/guf-logo-*.svg` do Claude Design). Cores pelos tokens: volt + texto no escuro, verde escuro AA + texto escuro no claro; `tone="mono"` herda a cor. Favicon: `src/app/icon.svg`.

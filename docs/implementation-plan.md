@@ -32,6 +32,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Ajustes visuais: loader 09 (Sonar) na abertura e 08 (Cometa) nos botões; fechar o `BottomSheet` arrastando para baixo; ícone `NotepadText` na observação | `feat/ajustes-visuais` | #23 |
 | Novo Toast (protótipo `Toast.dc.html`): 7 tipos com ícone animado, pilha com até 3 visíveis, barra de tempo de 5 s, expandir/pausar, arrastar para dispensar e "carregando → sucesso" | `feat/toast` | — |
 | Documentos legais no app: leitor único (`/termos`, `/privacidade`, `/termo-de-saude`), central `/documentos`, leitura por cima da tela no cadastro, `/aceite` ("O que mudou") e Perfil | `feat/documentos-legais` | — |
+| Menu inferior: indicador da aba ativa desliza (e estica) até a aba tocada, já no toque | `feat/indicador-aba-animado` | — |
 
 ### Lacunas conhecidas no que já existe
 
