@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { CalendarDays, ClipboardList, Dumbbell, GripVertical, House, User, type LucideIcon } from "lucide-react";
+import { prefersReducedMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { Icon } from "./brand";
 
@@ -71,7 +72,92 @@ export interface BottomNavProps {
   className?: string;
 }
 
-/** Bottom navigation de 76px; item central volt; ativo com tint volt 16%. */
+/** Duração do deslize do indicador entre abas. */
+const INDICATOR_MS = 420;
+/** No meio do deslize, a borda da frente já andou 75% e a de trás só 20%: o indicador estica e depois alcança. */
+const LEAD = 0.75;
+const TRAIL = 0.2;
+
+interface IndicatorBox {
+  x: number;
+  y: number;
+  w: number;
+}
+
+/** Quadros do deslize "elástico" (Web Animations API): posição pela borda esquerda + largura. */
+function stretchKeyframes(from: IndicatorBox, to: IndicatorBox): Keyframe[] {
+  const d = to.x - from.x;
+  const [left, right] = d > 0 ? [TRAIL, LEAD] : [LEAD, TRAIL];
+  const midLeft = from.x + d * left;
+  const midRight = from.x + from.w + d * right;
+  const frame = (x: number, y: number, w: number, offset: number): Keyframe => ({ transform: `translate(${x}px, ${y}px)`, width: `${w}px`, offset });
+  return [
+    frame(from.x, from.y, from.w, 0),
+    frame(midLeft, (from.y + to.y) / 2, midRight - midLeft, 0.45),
+    frame(to.x, to.y, to.w, 1),
+  ];
+}
+
+/**
+ * Indicador da aba ativa (tint volt 16%) que desliza e estica até a aba tocada.
+ * Mede o ícone da aba ativa (funciona com qualquer largura) e se ajusta ao redimensionar.
+ * Interromper no meio (toques rápidos) parte da posição visível. Movimento reduzido: troca direto.
+ * Sem aba ativa (item central ou nav oculto): some.
+ */
+function useSlidingIndicator(current: number, centerIndex: number) {
+  const navRef = useRef<HTMLElement>(null);
+  const pillRef = useRef<HTMLSpanElement>(null);
+  const iconRefs = useRef<Array<HTMLSpanElement | null>>([]);
+  const placed = useRef(false);
+
+  useLayoutEffect(() => {
+    const nav = navRef.current;
+    const pill = pillRef.current;
+    if (!nav || !pill) return;
+
+    const place = (animate: boolean) => {
+      const navBox = nav.getBoundingClientRect();
+      const target = current === centerIndex ? null : iconRefs.current[current];
+      if (!target || navBox.width === 0) {
+        pill.style.opacity = "0";
+        placed.current = false;
+        return;
+      }
+      // Posição VISÍVEL agora (inclusive no meio de um deslize) antes de cancelar o anterior.
+      const seen = pill.getBoundingClientRect();
+      const from: IndicatorBox = { x: seen.left - navBox.left, y: seen.top - navBox.top, w: seen.width };
+      const box = target.getBoundingClientRect();
+      const to: IndicatorBox = { x: box.left - navBox.left, y: box.top - navBox.top, w: box.width };
+      const wasPlaced = placed.current;
+
+      pill.getAnimations().forEach((a) => a.cancel());
+      pill.style.opacity = "1";
+      pill.style.transform = `translate(${to.x}px, ${to.y}px)`;
+      pill.style.width = `${to.w}px`;
+      placed.current = true;
+
+      if (!animate || !wasPlaced || Math.abs(to.x - from.x) < 1 || prefersReducedMotion()) return;
+      pill.animate(stretchKeyframes(from, to), { duration: INDICATOR_MS, easing: "cubic-bezier(0.33, 1, 0.68, 1)" });
+    };
+
+    place(true);
+    // Tamanho mudou (rotação, nav que estava oculto voltou): reposiciona sem animar. O aviso inicial
+    // do observer (mesmo tamanho) é ignorado para não cortar o deslize que acabou de começar.
+    let size = `${nav.offsetWidth}x${nav.offsetHeight}`;
+    const observer = new ResizeObserver(() => {
+      const next = `${nav.offsetWidth}x${nav.offsetHeight}`;
+      if (next === size) return;
+      size = next;
+      place(false);
+    });
+    observer.observe(nav);
+    return () => observer.disconnect();
+  }, [current, centerIndex]);
+
+  return { navRef, pillRef, iconRefs };
+}
+
+/** Bottom navigation de 76px; item central volt; ativo com tint volt 16% que desliza entre as abas. */
 export function BottomNav({
   items = BOTTOM_NAV_ITEMS,
   value,
@@ -82,14 +168,18 @@ export function BottomNav({
 }: BottomNavProps) {
   const [inner, setInner] = useState(defaultValue);
   const current = value ?? inner;
+  const { navRef, pillRef, iconRefs } = useSlidingIndicator(current, centerIndex);
   return (
     <nav
+      ref={navRef}
       aria-label="Principal"
       className={cn(
-        "grid h-[76px] auto-cols-fr grid-flow-col items-center border-t border-border bg-surface/92 px-1 pb-3 backdrop-blur-[12px]",
+        "relative grid h-[76px] auto-cols-fr grid-flow-col items-center border-t border-border bg-surface/92 px-1 pb-3 backdrop-blur-[12px]",
         className,
       )}
     >
+      {/* Posição e largura definidas pelo hook (valores medidos); os botões (relative) ficam por cima. */}
+      <span ref={pillRef} aria-hidden="true" className="pointer-events-none absolute top-0 left-0 h-8 rounded-pill bg-accent/16 opacity-0" />
       {items.map((item, i) => {
         const on = current === i;
         const center = i === centerIndex;
@@ -103,15 +193,19 @@ export function BottomNav({
               onChange?.(i);
             }}
             className={cn(
-              "grid h-14 cursor-pointer content-center justify-items-center gap-[3px] bg-transparent text-[11px] font-semibold",
+              "relative grid h-14 cursor-pointer content-center justify-items-center gap-[3px] bg-transparent text-[11px] font-semibold",
+              "transition-colors duration-300 ease-standard",
               on ? "text-fg" : "text-fg-muted",
             )}
           >
             <span
+              ref={(el) => {
+                iconRefs.current[i] = el;
+              }}
               className={cn(
-                "grid h-8 place-items-center rounded-pill",
+                "grid h-8 place-items-center rounded-pill transition-colors duration-300 ease-standard",
                 center ? "w-14 bg-accent text-accent-foreground" : "w-12",
-                !center && (on ? "bg-accent/16 text-accent-text" : "bg-transparent"),
+                !center && on && "text-accent-text",
               )}
             >
               <Icon icon={item.icon} size={20} />
