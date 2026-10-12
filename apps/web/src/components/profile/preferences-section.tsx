@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BellRing, Minus, Plus, SunMoon, Target, Weight } from "lucide-react";
+import { BellRing, MonitorSmartphone, Minus, Plus, SunMoon, Target, Weight } from "lucide-react";
 import type { WeightUnit } from "@guf/core";
 import { WEEKLY_GOAL_MAX, WEEKLY_GOAL_MIN } from "@guf/schemas";
 import type { Profile, ProfileUpdate } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
-import { IconButton, SegmentedControl } from "@/components/ds";
+import { IconButton, SegmentedControl, Switch } from "@/components/ds";
 import { useCoalescedSave } from "@/hooks/use-coalesced-save";
+import { keepScreenOnPreference } from "@/hooks/use-screen-wake-lock";
 import { useUpdateProfile } from "@/hooks/use-profile";
 import { playRestAlert, useRestAlertPreference, type RestAlertPreference } from "@/lib/rest-alert/rest-alert";
 import { useThemePreference, type ThemePreference } from "@/lib/theme/theme";
@@ -32,7 +33,7 @@ const REST_ALERT_OPTIONS = [
 ];
 
 /**
- * Unidade de peso e meta semanal (salvas no perfil, só com internet) tema e aviso de fim do descanso (salvos no aparelho,
+ * Unidade de peso e meta semanal (salvas no perfil, só com internet) tema, aviso de fim do descanso e tela ligada (salvos no aparelho,
  * funciona sem internet). O banco guarda sempre kg: a unidade muda só a exibição.
  */
 export function PreferencesSection({ profile, canEdit }: { profile: Profile; canEdit: boolean }) {
@@ -40,6 +41,7 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
   const update = useUpdateProfile();
   const [theme, setTheme] = useThemePreference();
   const [restAlert, setRestAlert] = useRestAlertPreference();
+  const [keepScreenOn, setKeepScreenOn] = keepScreenOnPreference.use();
   const locked = !canEdit;
   const lockedRow = locked && "pointer-events-none opacity-50";
 
@@ -145,6 +147,21 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
         />
         <span className="text-[13px] leading-[18px] text-pretty text-fg-muted">
           Avisa quando o descanso termina, com o app aberto. Alguns aparelhos, como o iPhone, não vibram pelo navegador.
+        </span>
+      </RowGroup>
+
+      <RowGroup padded className="flex flex-col gap-2.5">
+        <div className="flex items-center gap-3">
+          <RowIcon icon={MonitorSmartphone} />
+          <Switch
+            label="Manter tela ligada no treino"
+            checked={keepScreenOn === "on"}
+            onChange={(on) => setKeepScreenOn(on ? "on" : "off")}
+            className="flex-1 leading-5 font-semibold"
+          />
+        </div>
+        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+          A tela não apaga sozinha durante o treino, para o aviso do descanso tocar. Gasta um pouco mais de bateria.
         </span>
       </RowGroup>
     </ProfileSection>
