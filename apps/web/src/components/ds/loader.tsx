@@ -118,14 +118,17 @@ function LoaderMark({ variant, tone }: { variant: GufLoaderVariant; tone: GufLoa
     case 9:
       return (
         <g>
-          {["", "[animation-delay:900ms]"].map((delay) => (
+          {/* Atraso negativo: o 2º halo já nasce no meio do ciclo. Com atraso positivo ele ficava
+              parado, opaco, colado ao anel até começar (parecia uma borda). opacity-0 = invisível
+              enquanto a animação não roda. */}
+          {["", "[animation-delay:-900ms]"].map((delay) => (
             <circle
               key={delay || "first"}
               cx={RING.cx}
               cy={RING.cy}
               r={19.5}
               strokeWidth={2}
-              className={cn("fill-none", TONES[tone].stroke, AROUND_RING, "animate-gl-sonar", delay, HALO)}
+              className={cn("fill-none opacity-0", TONES[tone].stroke, AROUND_RING, "animate-gl-sonar", delay, HALO)}
             />
           ))}
           <Ring tone={tone} />
