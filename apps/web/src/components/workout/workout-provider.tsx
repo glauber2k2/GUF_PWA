@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { isWorkoutPaused, toggleWorkoutPause, workoutElapsedSeconds, type WorkoutClock } from "@guf/core";
+import { keepScreenOnPreference, useScreenWakeLock } from "@/hooks/use-screen-wake-lock";
 import { enqueue } from "@/lib/offline/outbox";
 import { playRestAlert, primeRestAlert } from "@/lib/rest-alert/rest-alert";
 
@@ -104,6 +105,10 @@ export function restRemaining(rest: RestState | null, now = Date.now()): number 
 export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<ActiveWorkoutState | null>(readStored);
   const listeners = useRef(new Set<() => void>());
+  const [keepScreenOn] = keepScreenOnPreference.use();
+
+  // Tela ligada enquanto houver treino em andamento (opção do Perfil).
+  useScreenWakeLock(active !== null && keepScreenOn === "on");
 
   const update = useCallback((fn: (prev: ActiveWorkoutState | null) => ActiveWorkoutState | null) => {
     setActive((prev) => {
