@@ -125,7 +125,7 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(
       () => {
         update((prev) => (prev ? { ...prev, rest: null } : prev));
-        // Som, vibração ou nada, conforme a preferência do Perfil.
+        // Som ou nada, conforme a preferência do Perfil.
         playRestAlert();
         listeners.current.forEach((listener) => listener());
       },
