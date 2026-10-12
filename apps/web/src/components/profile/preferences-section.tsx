@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Minus, Plus, SunMoon, Target, Weight } from "lucide-react";
+import { BellRing, Minus, Plus, SunMoon, Target, Weight } from "lucide-react";
 import type { WeightUnit } from "@guf/core";
 import { WEEKLY_GOAL_MAX, WEEKLY_GOAL_MIN } from "@guf/schemas";
 import type { Profile, ProfileUpdate } from "@guf/api";
@@ -9,6 +9,7 @@ import { useAppShell } from "@/components/app-shell/app-shell";
 import { IconButton, SegmentedControl } from "@/components/ds";
 import { useCoalescedSave } from "@/hooks/use-coalesced-save";
 import { useUpdateProfile } from "@/hooks/use-profile";
+import { playRestAlert, useRestAlertPreference, type RestAlertPreference } from "@/lib/rest-alert/rest-alert";
 import { useThemePreference, type ThemePreference } from "@/lib/theme/theme";
 import { cn } from "@/lib/utils";
 import { ProfileSection, RowGroup, RowIcon } from "./profile-ui";
@@ -24,14 +25,21 @@ const THEME_OPTIONS = [
   { value: "system", label: "Sistema" },
 ];
 
+const REST_ALERT_OPTIONS = [
+  { value: "sound", label: "Som" },
+  { value: "vibrate", label: "Vibrar" },
+  { value: "silent", label: "Silencioso" },
+];
+
 /**
- * Unidade de peso e meta semanal (salvas no perfil, só com internet) e tema (salvo no aparelho,
+ * Unidade de peso e meta semanal (salvas no perfil, só com internet) tema e aviso de fim do descanso (salvos no aparelho,
  * funciona sem internet). O banco guarda sempre kg: a unidade muda só a exibição.
  */
 export function PreferencesSection({ profile, canEdit }: { profile: Profile; canEdit: boolean }) {
   const shell = useAppShell();
   const update = useUpdateProfile();
   const [theme, setTheme] = useThemePreference();
+  const [restAlert, setRestAlert] = useRestAlertPreference();
   const locked = !canEdit;
   const lockedRow = locked && "pointer-events-none opacity-50";
 
@@ -118,6 +126,26 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
           <span className="flex-1 text-[15px] leading-5 font-semibold">Tema</span>
         </div>
         <SegmentedControl label="Tema" options={THEME_OPTIONS} value={theme} onChange={(v) => setTheme(v as ThemePreference)} />
+      </RowGroup>
+
+      <RowGroup padded className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <RowIcon icon={BellRing} />
+          <span className="flex-1 text-[15px] leading-5 font-semibold">Fim do descanso</span>
+        </div>
+        <SegmentedControl
+          label="Aviso de fim do descanso"
+          options={REST_ALERT_OPTIONS}
+          value={restAlert}
+          onChange={(v) => {
+            setRestAlert(v as RestAlertPreference);
+            // Prévia do aviso escolhido (o toque também libera o áudio no iPhone).
+            playRestAlert(v as RestAlertPreference);
+          }}
+        />
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted">
+          Avisa quando o descanso termina, com o app aberto. Alguns aparelhos, como o iPhone, não vibram pelo navegador.
+        </span>
       </RowGroup>
     </ProfileSection>
   );
