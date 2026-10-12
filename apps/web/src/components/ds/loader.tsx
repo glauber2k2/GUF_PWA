@@ -118,10 +118,9 @@ function LoaderMark({ variant, tone }: { variant: GufLoaderVariant; tone: GufLoa
     case 9:
       return (
         <g>
-          {/* Atraso negativo: o 2º halo já nasce no meio do ciclo. Com atraso positivo ele ficava
-              parado, opaco, colado ao anel até começar (parecia uma borda). opacity-0 = invisível
-              enquanto a animação não roda. */}
-          {["", "[animation-delay:-900ms]"].map((delay) => (
+          {/* 2º halo 900 ms depois; durante o atraso fica no 1º quadro, que é invisível (gl-sonar em
+              base.css). opacity-0 = invisível enquanto a animação não roda. */}
+          {["", "[animation-delay:900ms] [animation-fill-mode:backwards]"].map((delay) => (
             <circle
               key={delay || "first"}
               cx={RING.cx}
