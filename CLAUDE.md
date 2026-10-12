@@ -20,6 +20,7 @@ Nome da marca: **guf** (Guf App) — nunca "guff" (o design system do Claude Des
 - Formulários: React Hook Form + Zod (integração via @hookform/resolvers)
 - Gráficos: Recharts (instalado no apps/web; cores via `var(--color-…)` dos tokens) · Datas: date-fns (só em packages/core; o app usa as funções de `dates.ts`) · Ícones: lucide-react
 - Animações: Anime.js (v4), React Bits, Motion — sempre respeitando prefers-reduced-motion. Ainda não instaladas: por enquanto as animações são keyframes CSS do design system.
+- Sons: registry **soundcn** pela CLI do shadcn (`pnpm dlx shadcn add @soundcn/<som>`; som em base64 no próprio arquivo, funciona offline; motor em `src/lib/sound-engine.ts`). Usar só sons CC0 de origem conhecida (ex.: Kenney).
 - PWA: Serwist (`@serwist/cli` + `serwist`; o `esbuild` é dependência obrigatória do CLI, só no build) · Offline do treino em andamento: Dexie (IndexedDB)
 - Hospedagem: testes na **Vercel** (atual). Produção: **Cloudflare Pages** ou plano pago da Vercel, antes de monetizar. Em todos os casos, site estático.
 - Futuro: app React Native (Expo) reaproveitando os pacotes compartilhados
@@ -100,7 +101,8 @@ guf-app/
 
 ## Perfil (/perfil)
 - **Dados:** `packages/api/src/profile.ts` (`ProfileApi`): `getProfile` (perfil + e-mail da sessão + 1º treino e total de concluídos), `updateProfile` (nome, unidade, meta), `getConsents` (último aceite de cada documento; saúde só se `has_health_consent`), `revokeHealthConsent`, `exportMyData`, `deleteAccount` (Edge Function). Regras puras em `packages/core/src/profile.ts` e `pwa.ts` (`installPlatform`); validação em `packages/schemas/src/profile.ts`.
-- **Só online:** nome, unidade, meta, exportar, revogar e excluir (`useCanEditProfile`); banner "Sem conexão – para alterar seu perfil, conecte-se à internet." Instalar, tema e sair funcionam offline. Alterações usam atualização otimista e `invalidateProfileData` (Perfil + Início + Histórico).
+- **Só online:** nome, unidade, meta, exportar, revogar e excluir (`useCanEditProfile`); banner "Sem conexão – para alterar seu perfil, conecte-se à internet." Instalar, tema, fim do descanso e sair funcionam offline. Alterações usam atualização otimista e `invalidateProfileData` (Perfil + Início + Histórico).
+- **Fim do descanso:** `src/lib/rest-alert/rest-alert.ts` — preferência no aparelho (`localStorage` "guf.rest-alert": sound · vibrate · silent; padrão sound). Som = efeito `power-up-7` + vibração. O `WorkoutProvider` chama `primeRestAlert()` no toque que inicia o descanso (libera o áudio no iPhone) e `playRestAlert()` quando ele termina sozinho; escolher no Perfil toca uma prévia. Só toca com o app aberto.
 - **Tema:** `src/lib/theme/theme.ts` — preferência no aparelho (`localStorage` "guf.theme": dark · light · system), aplicada antes da pintura por `THEME_BOOT_SCRIPT` no `<head>` (`<html suppressHydrationWarning>`), inclusive a meta theme-color.
 - **Exportar:** JSON gerado no aparelho (Blob) com nome `guf-meus-dados-AAAA-MM-DD.json` e "Baixar"; o conteúdo nunca vai para logs.
 - **Excluir conta:** digitar EXCLUIR → `deleteAccount` → `signOut` (sem enviar a fila offline) → `/login/?conta-excluida=1` ("Sua conta foi excluída."). O mock só simula.
