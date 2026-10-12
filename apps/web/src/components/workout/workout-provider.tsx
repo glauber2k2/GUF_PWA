@@ -12,6 +12,7 @@ import {
 } from "react";
 import { isWorkoutPaused, toggleWorkoutPause, workoutElapsedSeconds, type WorkoutClock } from "@guf/core";
 import { enqueue } from "@/lib/offline/outbox";
+import { playRestAlert, primeRestAlert } from "@/lib/rest-alert/rest-alert";
 
 /*
  * Estado do treino em andamento compartilhado pela tela de treino e pelo mini card:
@@ -21,7 +22,6 @@ import { enqueue } from "@/lib/offline/outbox";
  */
 
 export const ACTIVE_WORKOUT_STORAGE_KEY = "guf.active-workout";
-const REST_END_VIBRATION_MS = 200;
 
 export interface RestState {
   total: number;
@@ -101,14 +101,6 @@ export function restRemaining(rest: RestState | null, now = Date.now()): number 
   return Math.max(0, Math.ceil((rest.endsAt - now) / 1000));
 }
 
-function vibrate(pattern: number | number[]) {
-  try {
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(pattern);
-  } catch {
-    // ignorar
-  }
-}
-
 export function WorkoutProvider({ children }: { children: ReactNode }) {
   const [active, setActive] = useState<ActiveWorkoutState | null>(readStored);
   const listeners = useRef(new Set<() => void>());
@@ -128,7 +120,8 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(
       () => {
         update((prev) => (prev ? { ...prev, rest: null } : prev));
-        vibrate(REST_END_VIBRATION_MS);
+        // Som, vibração ou nada, conforme a preferência do Perfil.
+        playRestAlert();
         listeners.current.forEach((listener) => listener());
       },
       Math.max(0, restEndsAt - Date.now()),
@@ -164,12 +157,15 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
           return { ...prev, clock, rest };
         });
       },
-      startRest: (seconds, next) =>
+      startRest: (seconds, next) => {
+        // Roda no toque que inicia o descanso: libera o áudio para o som do fim.
+        if (seconds > 0) primeRestAlert();
         update((prev) =>
           prev && seconds > 0
             ? { ...prev, rest: { total: seconds, next, endsAt: Date.now() + seconds * 1000, remainingWhenPaused: seconds } }
             : prev,
-        ),
+        );
+      },
       adjustRest: (delta) =>
         update((prev) => {
           if (!prev?.rest) return prev;
