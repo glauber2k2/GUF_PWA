@@ -1,11 +1,11 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ListPlus, Play, Plus } from "lucide-react";
 import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BottomNav, BottomSheet, LoadingScreen, ScreenPortal, SheetOption, ToastStack } from "@/components/ds";
+import { BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack } from "@/components/ds";
 import { useDevHomeState } from "@/hooks/use-dev-home-state";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import { useHomeSummary, useStartWorkout } from "@/hooks/use-home-summary";
@@ -27,6 +27,9 @@ const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
   { path: "/projetos", name: "Projetos" },
   { path: "/perfil", name: "Perfil" },
 ];
+
+/** Limite do overlay "Iniciando treino" depois que a sessão foi criada (se a tela do treino não abrir). */
+const OPENING_TIMEOUT_MS = 8000;
 
 export type { ToastOptions, ToastTone } from "@/lib/toast/toast-store";
 
@@ -101,11 +104,30 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Iniciando: da criação da sessão até a tela do treino abrir (o overlay cobre também a navegação).
+  // Guarda a rota de onde saiu: qualquer troca de rota encerra o overlay; se a navegação não
+  // acontecer, ele some sozinho depois de OPENING_TIMEOUT_MS (nunca fica preso na tela).
+  const [openingFrom, setOpeningFrom] = useState<string | null>(null);
+  const pathnameRef = useRef(pathname);
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
+  if (openingFrom !== null && pathname !== openingFrom) setOpeningFrom(null);
+  useEffect(() => {
+    if (openingFrom === null) return;
+    const timer = setTimeout(() => setOpeningFrom(null), OPENING_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [openingFrom]);
+  const startingWorkout = start.isPending || openingFrom !== null;
+
   const startWorkoutFor = useCallback(
     (routine: Pick<RoutineSummary, "id" | "name"> | null) => {
       setStartOpen(false);
+      // Toque repetido enquanto a sessão é criada não inicia outro treino.
+      if (start.isPending) return;
       start.mutate(routine?.id ?? null, {
         onSuccess: ({ sessionId }) => {
+          setOpeningFrom(pathnameRef.current);
           showToast(routine ? `${routineShortName(routine.name)} iniciado` : "Treino vazio iniciado", { tone: "success", icon: Play });
           router.push(`/treino?id=${encodeURIComponent(sessionId)}`);
         },
@@ -306,6 +328,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </>
         )}
       </BottomSheet>
+
+      <SavingOverlay open={startingWorkout} title="Iniciando treino" message="Preparando seus exercícios." variant={7} />
     </AppShellContext.Provider>
   );
 }
