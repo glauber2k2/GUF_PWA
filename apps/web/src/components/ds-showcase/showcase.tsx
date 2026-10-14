@@ -50,7 +50,7 @@ import {
 } from "@/components/ds";
 import { ToastShowcase } from "./toast-showcase";
 import { cn } from "@/lib/utils";
-import { BrandLoadingSection, MuscleSection } from "./brand-sections";
+import { BrandLoadingSection, MuscleSection, StreakSection } from "./brand-sections";
 import { Group, OVERLINE, PANEL, Section, SectionHeader } from "./layout";
 import {
   CALENDAR,
@@ -89,6 +89,7 @@ const SECTIONS = [
   { id: "componentes", label: "Componentes" },
   { id: "marca", label: "Marca e loading" },
   { id: "musculos", label: "Músculos" },
+  { id: "sequencia", label: "Sequência" },
 ];
 
 
@@ -145,6 +146,7 @@ function ThemeColumn({ theme, anchors = false }: { theme: ThemeKey; anchors?: bo
       <ComponentsSection id={id("componentes")} theme={theme} />
       <BrandLoadingSection id={id("marca")} />
       <MuscleSection id={id("musculos")} />
+      <StreakSection id={id("sequencia")} />
     </div>
   );
 }
