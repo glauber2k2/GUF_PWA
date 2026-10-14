@@ -35,6 +35,19 @@ function useContinuousAnimation() {
   return ref;
 }
 
+/** Trava a rolagem do documento enquanto a tela de abertura estiver montada (nada atrás dela rola). */
+function useLockDocumentScroll(active: boolean) {
+  useLayoutEffect(() => {
+    if (!active) return;
+    const root = document.documentElement;
+    const previous = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = previous;
+    };
+  }, [active]);
+}
+
 export interface LoadingScreenProps {
   /** Frase abaixo da logo animada. */
   message?: string;
@@ -49,13 +62,15 @@ export interface LoadingScreenProps {
  */
 export function LoadingScreen({ message = "Preparando seu treino", placement = "screen", className }: LoadingScreenProps) {
   const ref = useContinuousAnimation();
+  useLockDocumentScroll(placement === "screen");
   return (
     <div
       ref={ref}
       aria-busy="true"
       className={cn(
-        "flex w-full flex-col items-center justify-center gap-7 bg-background",
-        placement === "screen" ? "relative min-h-dvh" : "absolute inset-0",
+        "flex w-full flex-col items-center justify-center gap-7 overflow-hidden bg-background",
+        // Fixa na tela: os anéis do Sonar (scale) e a barra do navegador não geram rolagem.
+        placement === "screen" ? "fixed inset-0 overscroll-none" : "absolute inset-0",
         className,
       )}
     >
