@@ -60,7 +60,10 @@ export function useStartWorkout() {
       if (error) throw error;
       return data;
     },
-    // Atualiza a Início: o treino recém-criado aparece como "em andamento".
-    onSettled: () => invalidateTrainingData(queryClient),
+    // Atualiza a Início: o treino recém-criado aparece como "em andamento". Sem esperar a recarga
+    // (devolver a promessa seguraria a abertura do treino até a Início recarregar).
+    onSettled: () => {
+      void invalidateTrainingData(queryClient);
+    },
   });
 }
