@@ -305,6 +305,10 @@ export interface StepperProps {
   onChange?: (value: number) => void;
   decreaseLabel?: string;
   increaseLabel?: string;
+  /** Torna o número tocável (ex.: abrir o teclado para digitar o valor). */
+  onValueClick?: () => void;
+  /** Nome acessível do número tocável (ex.: "Digitar carga"). */
+  valueClickLabel?: string;
   className?: string;
 }
 
@@ -319,6 +323,8 @@ export function Stepper({
   onChange,
   decreaseLabel = "Diminuir",
   increaseLabel = "Aumentar",
+  onValueClick,
+  valueClickLabel = "Digitar valor",
   className,
 }: StepperProps) {
   const [inner, setInner] = useState(defaultValue);
@@ -336,9 +342,25 @@ export function Stepper({
         <button type="button" aria-label={decreaseLabel} onClick={() => set(current - step)} className={btn}>
           <Icon icon={Minus} size={20} />
         </button>
-        <span aria-live="polite" className="text-center font-display text-[34px] font-semibold tabular-nums">
-          {formatNumber(current)}
-        </span>
+        {onValueClick ? (
+          <button
+            type="button"
+            aria-label={`${valueClickLabel}: ${formatNumber(current)}`}
+            onClick={onValueClick}
+            className={cn(btn, "active:bg-surface-elevated")}
+          >
+            <span
+              aria-live="polite"
+              className="font-display text-[34px] font-semibold tabular-nums underline decoration-fg-muted decoration-dotted decoration-2 underline-offset-[6px]"
+            >
+              {formatNumber(current)}
+            </span>
+          </button>
+        ) : (
+          <span aria-live="polite" className="text-center font-display text-[34px] font-semibold tabular-nums">
+            {formatNumber(current)}
+          </span>
+        )}
         <button type="button" aria-label={increaseLabel} onClick={() => set(current + step)} className={btn}>
           <Icon icon={Plus} size={20} />
         </button>

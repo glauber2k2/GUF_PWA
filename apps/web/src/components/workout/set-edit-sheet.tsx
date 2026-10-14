@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Grid3x3, Minus } from "lucide-react";
+import { Minus } from "lucide-react";
 import { adjustLoad, parseKeypadValue, previousLabel, toDisplayWeight, toKeypadValue, type WeightUnit } from "@guf/core";
 import type { WorkoutSet } from "@guf/api";
 import { BottomSheet, Button, NumericKeypad, QuickLoad, SegmentedControl, Stepper } from "@/components/ds";
@@ -74,22 +74,30 @@ export function SetEditSheet({ open, title, set, field, unit, onFieldChange, onV
             onChange={(v) => onValueChange(field, v)}
             decreaseLabel={isLoad ? "Diminuir carga" : "Menos uma repetição"}
             increaseLabel={isLoad ? "Aumentar carga" : "Mais uma repetição"}
+            onValueClick={() => {
+              setTyped(null);
+              setKeypad(true);
+            }}
+            valueClickLabel={isLoad ? "Digitar carga" : "Digitar repetições"}
           />
+          <span className="-mt-1 text-center text-xs text-fg-muted">Toque no número para digitar</span>
           {isLoad && <QuickLoad onSelect={(delta) => onValueChange(field, adjustLoad(displayLoad, delta))} />}
         </>
       )}
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2 pt-1">
-        <Button
-          variant="ghost"
-          size="tall"
-          icon={keypad ? Minus : Grid3x3}
-          onClick={() => {
-            setTyped(null);
-            setKeypad(!keypad);
-          }}
-        >
-          {keypad ? "Usar botões" : "Digitar valor"}
-        </Button>
+      <div className={keypad ? "grid grid-cols-[auto_minmax(0,1fr)] gap-2 pt-1" : "grid pt-1"}>
+        {keypad && (
+          <Button
+            variant="ghost"
+            size="tall"
+            icon={Minus}
+            onClick={() => {
+              setTyped(null);
+              setKeypad(false);
+            }}
+          >
+            Usar botões
+          </Button>
+        )}
         <Button size="tall" fullWidth onClick={close}>
           Salvar
         </Button>
