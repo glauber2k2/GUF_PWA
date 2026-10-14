@@ -510,3 +510,58 @@
   @keyframes guf-404-ring { from, to { transform: rotate(34deg); } }
   @keyframes guf-404-shadow { from, to { opacity: .5; transform: none; } }
 }
+
+/* ---------------------------------------------------------------------
+ * StreakFlame (Claude Design · "Streak Chama"): a chama cresce da base (origem 24/43 da grade 48)
+ * e o núcleo vazado (máscara) escala a partir de 24/36. Eventos rodam uma vez; o tremular é loop.
+ * --------------------------------------------------------------------- */
+@keyframes guf-streak-ignite {
+  0% { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes guf-streak-core-pop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+@keyframes guf-streak-flicker {
+  0%, 100% { transform: scaleY(1) skewX(0); }
+  30% { transform: scaleY(1.04) skewX(-1.5deg); }
+  65% { transform: scaleY(0.98) skewX(1.5deg); }
+}
+@keyframes guf-streak-core-flick {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.86); }
+}
+@keyframes guf-streak-bump {
+  0% { transform: scale(1); animation-timing-function: var(--ease-standard); }
+  27% { transform: scale(0.9); animation-timing-function: var(--ease-overshoot); }
+  100% { transform: scale(1); }
+}
+@keyframes guf-streak-milestone {
+  0% { transform: scale(1); animation-timing-function: var(--ease-standard); }
+  25% { transform: scale(0.92); animation-timing-function: var(--ease-overshoot); }
+  100% { transform: scale(1); }
+}
+@keyframes guf-streak-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  40% { filter: drop-shadow(0 0 14px color-mix(in oklab, currentColor 55%, transparent)); }
+}
+@keyframes guf-streak-ring {
+  0% { transform: scale(0.6); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+@keyframes guf-streak-out {
+  0% { transform: scale(1); opacity: 1; animation-timing-function: var(--ease-exit); }
+  45%, 65% { transform: scale(0.8, 0.4); opacity: 0.55; animation-timing-function: var(--ease-enter); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes guf-streak-out-color {
+  0% { color: var(--accent-text); }
+  45%, 100% { color: var(--text-muted); }
+}
+@keyframes guf-streak-core-out {
+  0% { transform: scale(1); }
+  35%, 70% { transform: scale(0); }
+  100% { transform: scale(1); }
+}

@@ -13,6 +13,8 @@ import {
   MuscleFilterTile,
   MuscleIcon,
   SavingOverlay,
+  StreakFlame,
+  type StreakFlameAnimation,
   type MuscleIconKey,
 } from "@/components/ds";
 import { cn } from "@/lib/utils";
@@ -188,6 +190,84 @@ export function MuscleSection({ id }: { id?: string }) {
               <MuscleFilterTile key={key} muscle={key} selected={selected.has(key)} onToggle={() => toggle(key)} />
             ))}
           </div>
+        </div>
+      </Group>
+    </Section>
+  );
+}
+
+const FLAME_SIZES = [16, 20, 24, 32, 48];
+const FLAME_ANIMATIONS: { id: string; animate: StreakFlameAnimation; title: string; note: string }[] = [
+  { id: "A1", animate: "ignite", title: "Acender", note: "Sequência começa. A chama cresce da base e o núcleo aparece logo depois (600 ms)." },
+  { id: "A2", animate: "flicker", title: "Tremular", note: "Loop sutil enquanto a sequência está ativa e a semana ainda não foi garantida." },
+  { id: "A3", animate: "bump", title: "Somar", note: "Treino finalizado que soma à sequência: a chama pulsa (350 ms)." },
+  { id: "A4", animate: "milestone", title: "Marco", note: "Marcos da sequência: brilho e um anel que se expande (800 ms)." },
+  { id: "A5", animate: "out", title: "Apagar", note: "Sequência perdida: encolhe, perde o núcleo e fica cinza (600 ms)." },
+];
+
+/** 09 · Símbolo da sequência (chama sólida), estados e as 5 animações de evento. */
+export function StreakSection({ id }: { id?: string }) {
+  const [replay, setReplay] = useState(0);
+  const chip = "flex items-center gap-1 rounded-pill py-1 pr-2.5 pl-1.5";
+  const number = "font-display text-lg leading-5 font-bold tabular-nums";
+
+  return (
+    <Section id={id} gap="gap-10">
+      <SectionHeader
+        index="09 · Sequência"
+        title="Símbolo de sequência"
+        action={
+          <Button variant="secondary" onClick={() => setReplay((n) => n + 1)}>
+            Repetir animações
+          </Button>
+        }
+      >
+        Chama sólida em grade 48, cor por currentColor e núcleo vazado por máscara (funciona em qualquer fundo). Mínimo 16px; ao lado do
+        número, Barlow Condensed tabular. Com movimento reduzido, vai direto ao estado final.
+      </SectionHeader>
+
+      <Group title="Tamanhos e estados">
+        <div className={cn(PANEL, "grid gap-5 p-5")}>
+          <div className="flex flex-wrap items-end gap-6 text-accent-text">
+            {FLAME_SIZES.map((size) => (
+              <div key={size} className="flex flex-col items-center gap-1.5">
+                <StreakFlame size={size} />
+                <span className="text-[11px] text-fg-muted">{size}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className={cn(chip, "border border-border-strong bg-surface-elevated text-accent-text")}>
+              <StreakFlame size={20} />
+              <span className={cn(number, "text-fg")}>12</span>
+            </span>
+            <span className={cn(chip, "border border-border bg-surface-elevated text-fg-muted")}>
+              <StreakFlame size={20} />
+              <span className={number}>0</span>
+            </span>
+            <span className={cn(chip, "bg-accent text-accent-foreground")}>
+              <StreakFlame size={20} />
+              <span className={number}>30</span>
+            </span>
+          </div>
+          <span className="text-xs text-fg-muted">Ativo · Sem sequência · Destaque sobre volt</span>
+        </div>
+      </Group>
+
+      <Group title="Animações">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+          {FLAME_ANIMATIONS.map((a) => (
+            <div key={a.id} className={cn(PANEL, "flex flex-col gap-3 p-3.5")}>
+              <div className="flex items-center gap-2">
+                <span className="rounded-pill bg-surface-3 px-2 py-0.5 font-display text-sm font-bold">{a.id}</span>
+                <span className="text-sm font-semibold">{a.title}</span>
+              </div>
+              <div className="grid h-[140px] place-items-center rounded-md bg-surface-elevated text-accent-text">
+                <StreakFlame key={replay} size={80} animate={a.animate} />
+              </div>
+              <p className="m-0 text-xs leading-[18px] text-pretty text-fg-muted">{a.note}</p>
+            </div>
+          ))}
         </div>
       </Group>
     </Section>

@@ -173,6 +173,18 @@
   --animate-guf-toast-text: guf-toast-text 0.3s var(--ease-enter) 0.1s both;
   /* Duração real vem do style (tempo do aviso); pausa com [animation-play-state:paused]. */
   --animate-guf-toast-timer: guf-toast-timer 5s linear both;
+  /* StreakFlame (ver base.css) */
+  --animate-guf-streak-ignite: guf-streak-ignite 600ms var(--ease-overshoot) both;
+  --animate-guf-streak-core-pop: guf-streak-core-pop 480ms var(--ease-overshoot) 120ms both;
+  --animate-guf-streak-flicker: guf-streak-flicker 1600ms ease-in-out infinite;
+  --animate-guf-streak-core-flick: guf-streak-core-flick 1200ms ease-in-out infinite;
+  --animate-guf-streak-bump: guf-streak-bump 350ms both;
+  --animate-guf-streak-milestone: guf-streak-milestone 800ms both;
+  --animate-guf-streak-glow: guf-streak-glow 800ms var(--ease-standard) both;
+  --animate-guf-streak-ring: guf-streak-ring 800ms var(--ease-enter) 60ms both;
+  --animate-guf-streak-out: guf-streak-out 600ms both;
+  --animate-guf-streak-out-color: guf-streak-out-color 600ms var(--ease-exit) both;
+  --animate-guf-streak-core-out: guf-streak-core-out 600ms var(--ease-standard) both;
   /* Página 404 (ver base.css) */
   --animate-guf-404-dot: guf-404-dot 3600ms infinite;
   --animate-guf-404-ring: guf-404-ring 3600ms cubic-bezier(.45, 0, .55, 1) infinite;

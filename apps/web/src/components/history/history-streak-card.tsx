@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarPlus, Check, TriangleAlert, Trophy, Zap, type LucideIcon } from "lucide-react";
+import { CalendarPlus, Check, TriangleAlert, Trophy, type LucideIcon } from "lucide-react";
 import { isStreakRecord, STREAK_MESSAGES, streakStatus, weeklyGoalLabel, type StreakStatus, type StripWeek } from "@guf/core";
 import type { StreakSummary } from "@guf/api";
-import { Icon } from "@/components/ds";
+import { Icon, StreakFlame } from "@/components/ds";
 import { StreakCount } from "@/components/streak/streak-count";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ const STATUS_MESSAGE: Record<StreakStatus, { icon: LucideIcon; badge: string }> 
 const CARD_TONES: Record<StreakStatus | "record", { card: string; tile: string }> = {
   record: { card: "border-[1.5px] border-pr/50 bg-record-surface", tile: "bg-pr/18 text-pr-text" },
   risk: { card: "border-[1.5px] border-warning/45 bg-risk-surface", tile: "bg-warning/16 text-warning" },
-  zero: { card: "border border-border bg-surface", tile: "bg-surface-3 text-fg-secondary" },
+  zero: { card: "border border-border bg-surface", tile: "bg-surface-3 text-fg-muted" },
   secured: { card: "border border-border bg-surface", tile: "bg-accent/16 text-accent-text" },
 };
 
@@ -38,7 +38,7 @@ export function HistoryStreakCard({ streak, goal, weeks }: { streak: StreakSumma
     <section aria-label="Sequência de semanas" className={cn("flex flex-col gap-4 rounded-lg p-5 shadow-e1", tone.card)}>
       <div className="flex items-center gap-3.5">
         <span className={cn("grid size-[52px] flex-none place-items-center rounded-md", tone.tile)}>
-          <Icon icon={record ? Trophy : Zap} size={26} />
+          <StreakFlame size={32} animate={status === "risk" ? "flicker" : "none"} />
         </span>
         <StreakCount weeks={streak.currentStreak} record={record} />
         {record && (

@@ -1,9 +1,9 @@
 "use client";
 
-import { Check, Clock, Trophy, Zap } from "lucide-react";
+import { Check, Clock, Trophy } from "lucide-react";
 import { isStreakRecord, STREAK_MESSAGES, streakStatus, weeklyGoalLabel } from "@guf/core";
 import type { StreakSummary } from "@guf/api";
-import { Icon } from "@/components/ds";
+import { Icon, StreakFlame } from "@/components/ds";
 import { StreakCount } from "@/components/streak/streak-count";
 import { cn } from "@/lib/utils";
 
@@ -35,8 +35,8 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
     return (
       <section aria-label="Sequência de semanas" className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 shadow-e1">
         <div className="flex items-center gap-3.5">
-          <span className="grid size-[52px] flex-none place-items-center rounded-md bg-accent/16 text-accent-text">
-            <Icon icon={Zap} size={28} />
+          <span className="grid size-[52px] flex-none place-items-center rounded-md bg-surface-3 text-fg-muted">
+            <StreakFlame size={32} />
           </span>
           <div className="flex flex-col gap-0.5">
             <h3 className="m-0 text-lg leading-6 font-semibold text-pretty">Comece sua sequência esta semana</h3>
@@ -65,7 +65,7 @@ export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: numb
             risk ? "bg-warning/16 text-warning" : record ? "bg-pr/18 text-pr-text" : "bg-accent/16 text-accent-text",
           )}
         >
-          <Icon icon={Zap} size={28} />
+          <StreakFlame size={32} animate={risk ? "flicker" : "none"} />
         </span>
         <StreakCount weeks={streak.currentStreak} />
         {risk && (
