@@ -339,8 +339,15 @@ export const discardWorkout: WorkoutApi["discardWorkout"] = async (client, { ses
   return ok;
 };
 
+export const getWorkoutStatus: WorkoutApi["getWorkoutStatus"] = async (client, { sessionId }) => {
+  ignoreClient(client);
+  await wait();
+  return { data: { status: sessions.has(sessionId) ? "in_progress" : "missing", autoFinished: false }, error: null };
+};
+
 /** Garante em tempo de compilação que o mock segue o contrato completo. */
 export const mockWorkoutApi = {
+  getWorkoutStatus,
   getWorkout,
   getExerciseLibrary,
   getExerciseContext,

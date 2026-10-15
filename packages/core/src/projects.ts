@@ -21,15 +21,15 @@ export function routineLetter(name: string): string {
 }
 
 /**
- * "6 exercícios · média de 52 min" (já treinada) ou "6 exercícios · ~55 min" (estimativa);
- * sem exercícios → "Nenhum exercício ainda".
+ * "6 exercícios · ~52 min" (tempo médio dos últimos treinos) ou só "6 exercícios" se nunca foi
+ * treinada; sem exercícios → "Nenhum exercício ainda".
  */
 export function routineMeta(
   exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>,
   averageSeconds: number | null = null,
 ): string {
   if (exercises.length === 0) return "Nenhum exercício ainda";
-  return [plural(exercises.length, "exercício", "exercícios"), routineDurationLabel(exercises, averageSeconds)]
+  return [plural(exercises.length, "exercício", "exercícios"), routineDurationLabel(averageSeconds)]
     .filter(Boolean)
     .join(" · ");
 }

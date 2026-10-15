@@ -228,6 +228,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auto_finish_workout: boolean
           avatar_url: string | null
           created_at: string
           id: string
@@ -239,6 +240,7 @@ export type Database = {
           weight_unit: string
         }
         Insert: {
+          auto_finish_workout?: boolean
           avatar_url?: string | null
           created_at?: string
           id: string
@@ -250,6 +252,7 @@ export type Database = {
           weight_unit?: string
         }
         Update: {
+          auto_finish_workout?: boolean
           avatar_url?: string | null
           created_at?: string
           id?: string
@@ -550,6 +553,7 @@ export type Database = {
       workout_sessions: {
         Row: {
           active_seconds: number | null
+          auto_finished: boolean
           created_at: string
           finished_at: string | null
           id: string
@@ -564,6 +568,7 @@ export type Database = {
         }
         Insert: {
           active_seconds?: number | null
+          auto_finished?: boolean
           created_at?: string
           finished_at?: string | null
           id?: string
@@ -578,6 +583,7 @@ export type Database = {
         }
         Update: {
           active_seconds?: number | null
+          auto_finished?: boolean
           created_at?: string
           finished_at?: string | null
           id?: string
@@ -614,6 +620,7 @@ export type Database = {
         Returns: undefined
       }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      auto_finish_idle_workouts: { Args: { p_idle?: string }; Returns: number }
       average_duration_seconds: {
         Args: { "": Database["public"]["Tables"]["routines"]["Row"] }
         Returns: {
