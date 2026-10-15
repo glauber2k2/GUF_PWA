@@ -212,7 +212,7 @@ function SwapSheet({
           key={r.id}
           letter={routineLetter(r.name)}
           title={r.name}
-          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r.exercises)}` : routineMeta(r.exercises)}
+          subtitle={r.id === currentId ? `Hoje · ${routineMeta(r.exercises, r.averageDurationSeconds)}` : routineMeta(r.exercises, r.averageDurationSeconds)}
           highlighted={r.id === currentId}
           onClick={() => {
             onClose();
