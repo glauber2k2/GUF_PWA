@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BellRing, MonitorSmartphone, Minus, Plus, SunMoon, Target, Weight } from "lucide-react";
+import { BellRing, MonitorSmartphone, Minus, Plus, SunMoon, Target, TimerOff, Weight } from "lucide-react";
 import type { WeightUnit } from "@guf/core";
 import { WEEKLY_GOAL_MAX, WEEKLY_GOAL_MIN } from "@guf/schemas";
 import type { Profile, ProfileUpdate } from "@guf/api";
@@ -32,7 +32,7 @@ const REST_ALERT_OPTIONS = [
 ];
 
 /**
- * Unidade de peso e meta semanal (salvas no perfil, só com internet) tema, aviso de fim do descanso e tela ligada (salvos no aparelho,
+ * Unidade de peso, meta semanal e finalizar treino automaticamente (salvas no perfil, só com internet); tema, aviso de fim do descanso e tela ligada (salvos no aparelho,
  * funciona sem internet). O banco guarda sempre kg: a unidade muda só a exibição.
  */
 export function PreferencesSection({ profile, canEdit }: { profile: Profile; canEdit: boolean }) {
@@ -161,6 +161,28 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
         </div>
         <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
           A tela não apaga sozinha durante o treino, para o aviso do descanso tocar. Gasta um pouco mais de bateria.
+        </span>
+      </RowGroup>
+
+      <RowGroup padded className={cn("flex flex-col gap-2.5", lockedRow)}>
+        <div aria-disabled={locked || undefined} className="flex items-center gap-3">
+          <RowIcon icon={TimerOff} />
+          <Switch
+            label="Finalizar treino automaticamente"
+            checked={profile.autoFinishWorkout}
+            disabled={locked}
+            onChange={(on) =>
+              save(
+                { autoFinishWorkout: on },
+                on ? "Finalização automática ligada" : "Finalização automática desligada",
+              )
+            }
+            className="flex-1 leading-5 font-semibold"
+          />
+        </div>
+        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+          Com todas as séries concluídas, o treino é finalizado sozinho após 30 minutos sem atividade, com o horário da última série. Funciona
+          mesmo com o app fechado.
         </span>
       </RowGroup>
     </ProfileSection>

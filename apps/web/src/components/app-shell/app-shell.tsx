@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { MiniWorkoutCard } from "@/components/workout/mini-workout-card";
 import { newRoutinePathFor } from "@/components/projects/paths";
 import { useActiveWorkout } from "@/components/workout/workout-provider";
+import { useClosedWorkoutWatcher } from "./use-closed-workout-watcher";
 
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
 const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exercicio", "/exercicio/busca"]);
@@ -53,6 +54,11 @@ interface AppShellApi {
   startWorkout: (routine: Pick<RoutineSummary, "id" | "name"> | null) => void;
   /** Abre o treino em andamento (tela de treino: /treino?id=…). */
   openWorkout: (sessionId: string) => void;
+  /**
+   * Treino encerrado no servidor (finalização automática ou outro aparelho)? Se sim, descarta o que
+   * estiver no aparelho, avisa e leva ao resumo; devolve true. Em andamento ou sem internet: false.
+   */
+  resolveClosedWorkout: (sessionId: string) => Promise<boolean>;
 }
 
 const AppShellContext = createContext<AppShellApi | null>(null);
@@ -94,6 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [startOpen, setStartOpen] = useState(false);
 
   const showToast = toasts.show;
+  // Treino encerrado pelo servidor (finalização automática): fecha no aparelho e mostra o resumo.
+  const resolveClosedWorkout = useClosedWorkoutWatcher(showToast);
   const raiseToast = useCallback(() => {
     setRaisedCount((n) => n + 1);
     let released = false;
@@ -154,8 +162,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       openStartSheet: () => setStartOpen(true),
       startWorkout: startWorkoutFor,
       openWorkout,
+      resolveClosedWorkout,
     }),
-    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen],
+    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
