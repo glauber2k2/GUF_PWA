@@ -20,6 +20,8 @@ export interface ProjectRoutine {
   /** Dias da semana (ISO: 1 = segunda … 7 = domingo); vazio = sem dia fixo. */
   weekdays: number[];
   exercises: PlannedSetup[];
+  /** Média (s) dos últimos 5 treinos concluídos com a rotina (average_duration_seconds no banco); null = nunca treinada. */
+  averageDurationSeconds: number | null;
 }
 
 export interface Project {
@@ -92,7 +94,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
       client
         .from("projects")
         .select(
-          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, routine_exercises(target_sets, rest_seconds))",
+          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, average_duration_seconds, routine_exercises(target_sets, rest_seconds))",
         )
         .order("created_at", { ascending: false })
         .order("position", { referencedTable: "routines", ascending: true }),
@@ -127,6 +129,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
               position: r.position,
               weekdays: r.weekdays,
               exercises: r.routine_exercises.map((e) => ({ targetSets: e.target_sets, restSeconds: e.rest_seconds })),
+              averageDurationSeconds: r.average_duration_seconds ?? null,
             })),
         })),
         lastFinished:

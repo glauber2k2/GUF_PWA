@@ -57,6 +57,7 @@ const ROUTINES: RoutineSummary[] = [
       ex("Tríceps corda", "triceps", 3, "10-12", 60),
       ex("Tríceps testa", "triceps", 3, "10-12", 60),
     ],
+    averageDurationSeconds: 3120,
   },
   {
     id: "routine-b",
@@ -71,6 +72,7 @@ const ROUTINES: RoutineSummary[] = [
       ex("Rosca martelo", "biceps", 3, "10-12", 60),
       ex("Rosca inversa", "antebraco", 3, "12-15", 60),
     ],
+    averageDurationSeconds: 2820,
   },
   {
     id: "routine-c",
@@ -86,6 +88,8 @@ const ROUTINES: RoutineSummary[] = [
       ex("Elevação lateral", "ombros", 3, "12-15", 45),
       ex("Desenvolvimento militar", "ombros", 3, "8-10"),
     ],
+    // Nunca treinada → estimativa pelo plano
+    averageDurationSeconds: null,
   },
 ];
 
