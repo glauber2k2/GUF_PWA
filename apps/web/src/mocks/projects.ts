@@ -19,12 +19,20 @@ function ignoreClient(client: GufClient) {
 }
 
 const planned = (count: number) => Array.from({ length: count }, () => ({ targetSets: 3, restSeconds: 90 }));
-const routine = (id: string, name: string, position: number, exercises: number, weekdays: number[] = []): ProjectRoutine => ({
+const routine = (
+  id: string,
+  name: string,
+  position: number,
+  exercises: number,
+  weekdays: number[] = [],
+  averageDurationSeconds: number | null = null,
+): ProjectRoutine => ({
   id,
   name,
   position,
   weekdays,
   exercises: planned(exercises),
+  averageDurationSeconds,
 });
 
 /** Projeto padrão de todo usuário (fixo; criado no cadastro). */
@@ -53,8 +61,8 @@ function seed(scenario: ProjectsMockScenario): Project[] {
       archivedAt: null,
       createdAt: "2026-09-02T12:00:00Z",
       routines: [
-        routine("r-a", "Treino A – Peito e Tríceps", 1, 6, [1, 4]),
-        routine("r-b", "Treino B – Costas e Bíceps", 2, 6, [2, 5]),
+        routine("r-a", "Treino A – Peito e Tríceps", 1, 6, [1, 4], 3120),
+        routine("r-b", "Treino B – Costas e Bíceps", 2, 6, [2, 5], 2820),
         routine("r-c", "Treino C – Pernas e Ombros", 3, 7, [3, 6]),
       ],
     },
@@ -242,7 +250,14 @@ export function saveMockRoutine(input: { id: string; projectId: string; name: st
   if (!target) return false;
   const current = findMockRoutine(input.id);
   const position = current && current.project.id === input.projectId ? current.routine.position : nextPosition(target.routines.map((r) => r.position));
-  const saved: ProjectRoutine = { id: input.id, name: input.name.trim(), position, weekdays: input.weekdays, exercises: input.exercises };
+  const saved: ProjectRoutine = {
+    id: input.id,
+    name: input.name.trim(),
+    position,
+    weekdays: input.weekdays,
+    exercises: input.exercises,
+    averageDurationSeconds: current?.routine.averageDurationSeconds ?? null,
+  };
   store = store.map((p) => {
     const others = p.routines.filter((r) => r.id !== input.id);
     if (p.id !== input.projectId) return { ...p, routines: others };

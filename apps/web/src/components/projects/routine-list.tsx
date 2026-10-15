@@ -90,7 +90,7 @@ export function RoutineList({ routines, nextRoutineId, nextLabel, disabled, onOp
                 </span>
                 <span className="text-[13px] leading-[18px] text-fg-muted tabular-nums">
                   {r.weekdays.length > 0 ? `${weekdaysLabel(r.weekdays)} · ` : ""}
-                  {routineMeta(r.exercises)}
+                  {routineMeta(r.exercises, r.averageDurationSeconds)}
                 </span>
               </span>
             </button>

@@ -364,6 +364,7 @@ export type Database = {
           updated_at: string
           user_id: string
           weekdays: number[]
+          average_duration_seconds: number | null
         }
         Insert: {
           archived_at?: string | null
@@ -613,6 +614,12 @@ export type Database = {
         Returns: undefined
       }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      average_duration_seconds: {
+        Args: { "": Database["public"]["Tables"]["routines"]["Row"] }
+        Returns: {
+          error: true
+        } & "the function public.average_duration_seconds with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+      }
       current_legal_document: {
         Args: { p_doc_type: string }
         Returns: {
