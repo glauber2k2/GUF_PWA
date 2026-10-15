@@ -49,17 +49,11 @@ export function estimateRoutineMinutes(
 }
 
 /**
- * Duração exibida da rotina: média real dos últimos treinos ("média de 52 min", calculada no banco
- * por average_duration_seconds) ou, se nunca foi treinada, a estimativa pelo plano ("~55 min").
- * Sem exercícios e sem treinos → null.
+ * Tempo médio da rotina ("~52 min"): média dos últimos treinos concluídos, calculada no banco
+ * (average_duration_seconds). Nunca treinada → null (não mostra tempo).
  */
-export function routineDurationLabel(
-  exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>,
-  averageSeconds: number | null = null,
-): string | null {
-  if (averageSeconds !== null) return `média de ${Math.max(1, Math.round(averageSeconds / 60))} min`;
-  const estimate = estimateRoutineMinutes(exercises);
-  return estimate ? `~${estimate} min` : null;
+export function routineDurationLabel(averageSeconds: number | null): string | null {
+  return averageSeconds === null ? null : `~${Math.max(1, Math.round(averageSeconds / 60))} min`;
 }
 
 /** Total de séries planejadas (séries não definidas contam como o padrão de 3). */

@@ -16,6 +16,8 @@ export interface Profile {
   weightUnit: WeightUnit;
   /** Meta semanal (1–7, só exibição). */
   weeklyGoal: number;
+  /** Finalizar o treino sozinho 30 min depois da última série, quando todas estão concluídas (servidor). */
+  autoFinishWorkout: boolean;
   /** Primeiro treino concluído ("yyyy-MM-dd") e total de treinos concluídos. */
   firstTrainedOn: string | null;
   completedSessions: number;
@@ -25,6 +27,7 @@ export interface ProfileUpdate {
   name?: string;
   weightUnit?: WeightUnit;
   weeklyGoal?: number;
+  autoFinishWorkout?: boolean;
 }
 
 /** Último aceite de cada documento (versão, data e onde ler). */
@@ -67,7 +70,7 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
     if (!userId) return { data: null, error: apiError("not_authenticated") };
     const [session, profileRes, firstRes, countRes] = await Promise.all([
       client.auth.getSession(),
-      client.from("profiles").select("name, avatar_url, weight_unit, weekly_goal").eq("id", userId).maybeSingle(),
+      client.from("profiles").select("name, avatar_url, weight_unit, weekly_goal, auto_finish_workout").eq("id", userId).maybeSingle(),
       client
         .from("workout_sessions")
         .select("performed_on")
@@ -86,6 +89,7 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
         avatarUrl: resolveAvatarUrl(client, profileRes.data?.avatar_url, session.data.session?.user),
         weightUnit: profileRes.data?.weight_unit === "lb" ? "lb" : "kg",
         weeklyGoal: profileRes.data?.weekly_goal ?? 3,
+        autoFinishWorkout: profileRes.data?.auto_finish_workout ?? false,
         firstTrainedOn: firstRes.data?.performed_on ?? null,
         completedSessions: countRes.count ?? 0,
       },
@@ -96,7 +100,7 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
   }
 };
 
-export const updateProfile: ProfileApi["updateProfile"] = async (client, { name, weightUnit, weeklyGoal }) => {
+export const updateProfile: ProfileApi["updateProfile"] = async (client, { name, weightUnit, weeklyGoal, autoFinishWorkout }) => {
   try {
     const userId = await currentUserId(client);
     if (!userId) return { data: null, error: apiError("not_authenticated") };
@@ -104,6 +108,7 @@ export const updateProfile: ProfileApi["updateProfile"] = async (client, { name,
       ...(name !== undefined && { name: name.trim() }),
       ...(weightUnit !== undefined && { weight_unit: weightUnit }),
       ...(weeklyGoal !== undefined && { weekly_goal: weeklyGoal }),
+      ...(autoFinishWorkout !== undefined && { auto_finish_workout: autoFinishWorkout }),
     };
     const { error } = await client.from("profiles").update(changes).eq("id", userId);
     return error ? { data: null, error: toApiError(error) } : { data: null, error: null };

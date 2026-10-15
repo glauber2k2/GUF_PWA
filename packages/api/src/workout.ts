@@ -156,6 +156,14 @@ export type FinishWorkout = (client: GufClient, input: { sessionId: string }) =>
 /** Descartar = apagar a sessão (séries e períodos saem em cascata). */
 export type DiscardWorkout = (client: GufClient, input: { sessionId: string }) => Promise<ApiResult<null>>;
 
+/** Situação do treino no servidor: em andamento, concluído (pelo usuário ou automaticamente) ou inexistente. */
+export type WorkoutStatus = "in_progress" | "completed" | "missing";
+/** Consulta leve para o app saber se o treino ativo foi encerrado fora dele (ex.: finalização automática). */
+export type GetWorkoutStatus = (
+  client: GufClient,
+  input: { sessionId: string },
+) => Promise<ApiResult<{ status: WorkoutStatus; /** Encerrado pela finalização automática (30 min após a última série). */ autoFinished: boolean }>>;
+
 export interface WorkoutApi {
   getWorkout: GetWorkout;
   getExerciseLibrary: GetExerciseLibrary;
@@ -172,6 +180,7 @@ export interface WorkoutApi {
   resumeWorkout: ResumeWorkout;
   finishWorkout: FinishWorkout;
   discardWorkout: DiscardWorkout;
+  getWorkoutStatus: GetWorkoutStatus;
 }
 
 /* =====================================================================
@@ -498,8 +507,20 @@ export const discardWorkout: DiscardWorkout = async (client, { sessionId }) => {
   }
 };
 
+export const getWorkoutStatus: GetWorkoutStatus = async (client, { sessionId }) => {
+  try {
+    const { data, error } = await client.from("workout_sessions").select("status, auto_finished").eq("id", sessionId).maybeSingle();
+    if (error) return { data: null, error: toApiError(error) };
+    const status: WorkoutStatus = !data ? "missing" : data.status === "in_progress" ? "in_progress" : "completed";
+    return { data: { status, autoFinished: data?.auto_finished ?? false }, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 /** Garante em tempo de compilação que a implementação segue o contrato. */
 export const workoutApi = {
+  getWorkoutStatus,
   getWorkout,
   getExerciseLibrary,
   getExerciseContext,

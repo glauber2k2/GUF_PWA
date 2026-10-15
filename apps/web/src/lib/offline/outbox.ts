@@ -5,6 +5,7 @@ import {
   deleteSet,
   discardWorkout,
   finishWorkout,
+  getWorkoutStatus,
   isNetworkError,
   pauseWorkout,
   removeWorkoutExercise,
@@ -25,7 +26,20 @@ import { offlineDb, type OutboxEntry, type OutboxOp } from "./db";
  *   (voltar a conexão, reabrir a aba ou a cada 20s enquanto houver pendências).
  * - As operações são idempotentes (ids gerados no aparelho), então reenviar não duplica.
  * - Erro que não é de rede: tenta até MAX_ATTEMPTS e descarta, avisando a tela.
+ * - Antes de enviar a 1ª gravação de um treino em cada envio, confirma no servidor que ele ainda
+ *   está em andamento. Encerrado (finalização automática ou outro aparelho): NADA dele é enviado
+ *   (alterações feitas depois do encerramento não entram) e a tela é avisada.
  */
+
+/** Treino encerrado no servidor cujas gravações pendentes foram descartadas no aparelho. */
+export interface ServerClosedWorkout {
+  sessionId: string;
+  status: "completed" | "missing";
+  /** Encerrado pela finalização automática (30 min após a última série). */
+  autoFinished: boolean;
+  /** Alterações descartadas (séries, exercícios, notas, pausas; sem contar finalizar/descartar). */
+  droppedChanges: number;
+}
 
 const MAX_ATTEMPTS = 5;
 const RETRY_INTERVAL_MS = 20_000;
@@ -40,6 +54,7 @@ export interface OutboxStatus {
 let status: OutboxStatus = { pending: 0, syncing: false, lastFailure: null };
 const listeners = new Set<() => void>();
 const closedListeners = new Set<(sessionId: string) => void>();
+const serverClosedListeners = new Set<(info: ServerClosedWorkout) => void>();
 let flushing: Promise<void> | null = null;
 let started = false;
 
@@ -85,13 +100,35 @@ async function execute(op: OutboxOp): Promise<{ error: ApiError | null }> {
   }
 }
 
+/**
+ * O treino ainda está em andamento no servidor? Encerrado → descarta tudo dele no aparelho e avisa.
+ * "retry" = sem internet/sessão (tenta depois).
+ */
+async function ensureOpen(sessionId: string): Promise<"open" | "closed" | "retry"> {
+  const res = await getWorkoutStatus(getSupabaseClient(), { sessionId });
+  if (res.error) return isNetworkError(res.error) || res.error.code === "not_authenticated" ? "retry" : "open";
+  if (res.data.status === "in_progress") return "open";
+  const droppedChanges = await dropWorkoutLocally(sessionId);
+  const info: ServerClosedWorkout = { sessionId, status: res.data.status, autoFinished: res.data.autoFinished, droppedChanges };
+  serverClosedListeners.forEach((l) => l(info));
+  return "closed";
+}
+
 async function runFlush() {
   const db = offlineDb();
   setStatus({ syncing: true });
+  // Treinos confirmados em andamento neste envio (uma consulta por treino).
+  const verified = new Set<string>();
   try {
     for (;;) {
       const entry = await db.outbox.orderBy("seq").first();
       if (!entry?.seq) break;
+      if (entry.sessionId && !verified.has(entry.sessionId)) {
+        const state = await ensureOpen(entry.sessionId);
+        if (state === "retry") break;
+        if (state === "closed") continue;
+        verified.add(entry.sessionId);
+      }
       const { error } = await execute(entry.op);
       if (!error) {
         await db.outbox.delete(entry.seq);
@@ -102,6 +139,12 @@ async function runFlush() {
           closedListeners.forEach((l) => l(closedId));
         }
         continue;
+      }
+      // Encerrado durante o envio (ex.: a finalização automática rodou agora): confere de novo.
+      if (error.code === "workout_not_found" && entry.sessionId) {
+        const state = await ensureOpen(entry.sessionId);
+        if (state === "retry") break;
+        if (state === "closed") continue;
       }
       if (isNetworkError(error) || error.code === "not_authenticated") break; // tenta depois
       const attempts = entry.attempts + 1;
@@ -162,6 +205,25 @@ export function startOutboxSync() {
     if (status.pending > 0 && navigator.onLine) void flushOutbox();
   }, RETRY_INTERVAL_MS);
   void refreshPending().then(() => flushOutbox());
+}
+
+/**
+ * Remove do aparelho as gravações pendentes e o retrato de um treino que o servidor já encerrou.
+ * Devolve quantas alterações foram descartadas (sem contar finalizar/descartar).
+ */
+export async function dropWorkoutLocally(sessionId: string): Promise<number> {
+  const db = offlineDb();
+  const pending = await db.outbox.where("sessionId").equals(sessionId).toArray();
+  await db.outbox.where("sessionId").equals(sessionId).delete();
+  await db.workouts.delete(sessionId);
+  await refreshPending();
+  return pending.filter((e) => e.op.kind !== "finish" && e.op.kind !== "discard").length;
+}
+
+/** Avisa quando a fila descarta um treino porque o servidor já o encerrou. Retorna o cancelamento. */
+export function onWorkoutClosedOnServer(listener: (info: ServerClosedWorkout) => void): () => void {
+  serverClosedListeners.add(listener);
+  return () => serverClosedListeners.delete(listener);
 }
 
 /** Avisa quando um treino finalizado/descartado no aparelho chega ao servidor. Retorna o cancelamento. */
