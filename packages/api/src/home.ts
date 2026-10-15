@@ -39,6 +39,8 @@ export interface RoutineSummary {
   weekdays: number[];
   /** Exercícios na ordem planejada. */
   exercises: PlannedExercise[];
+  /** Média (s) dos últimos 5 treinos concluídos com a rotina (average_duration_seconds no banco); null = nunca treinada. */
+  averageDurationSeconds: number | null;
 }
 
 /** Treino concluído (resumo para o card de hoje e para a folha do dia). */
@@ -164,7 +166,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       const routinesRes = await client
         .from("routines")
         .select(
-          "id, name, position, weekdays, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group))",
+          "id, name, position, weekdays, average_duration_seconds, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group))",
         )
         .eq("project_id", projectRes.data.id)
         .is("archived_at", null)
@@ -187,6 +189,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
             targetReps: re.target_reps,
             restSeconds: re.rest_seconds,
           })),
+          averageDurationSeconds: r.average_duration_seconds ?? null,
         })),
       };
     }

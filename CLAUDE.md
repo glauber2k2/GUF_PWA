@@ -160,6 +160,7 @@ Funções RPC:
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |
 | `is_premium()` | Planos pagos (futuro) |
+| `average_duration_seconds` (campo calculado de `routines`) | Tempo médio da rotina (últimos 5 treinos concluídos); usar no select: `routines(id, average_duration_seconds)` |
 | `export_my_data()` | Exportar meus dados (JSON) |
 
 Edge Function: `delete-account` → `supabase.functions.invoke('delete-account', { method: 'POST' })` e depois `signOut()`.
@@ -184,6 +185,7 @@ Edge Function: `delete-account` → `supabase.functions.invoke('delete-account',
 - **Textos do card de sequência** (constantes `STREAK_MESSAGES`, `streakWords` e `weeklyGoalLabel` em packages/core/src/home.ts, usadas na Início e no Histórico): número + "semanas" com "seguidas treinando" abaixo (lê-se "semanas seguidas treinando"); `week_secured` → "Semana garantida ✓" (o ✓ é o ícone Check do lucide) + "X de Y treinos da sua meta" quando houver meta; `streak_at_risk` → "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até domingo e comece sua sequência."; destaque dourado de recorde quando `current_streak` = `best_streak` e > 0.
 - **Série concluída:** só conta o que foi marcado como concluído. Ao finalizar, `finish_workout` APAGA as séries não concluídas (e exercícios que ficaram sem séries) antes de calcular resumo e recordes; histórico, calendário, "anterior" e recordes leem só séries concluídas. O recorde só aparece ao concluir a série (`markLoadRecords` ignora não concluídas e aquecimento).
 - **Resumo de um treino:** volume = Σ carga × reps das séries concluídas sem aquecimento (mesma regra de `get_training_days`); "Séries" = séries concluídas sem aquecimento. Duração estimada da rotina = Σ séries × (40s + descanso), com padrão de 3 séries e 90s.
+- **Tempo médio da rotina (calculado no banco):** campo calculado `average_duration_seconds` de `routines` (função SQL com parâmetro SEM nome, para o gen types incluí-lo no Row): média da duração efetiva (`active_seconds` ou fim − início) dos últimos treinos concluídos com a rotina, no máximo 5 (com 3, média dos 3); null se nunca treinada. Pedido no select das rotinas em `getHomeSummary` e `getProjectsOverview` (`averageDurationSeconds`). Exibição por `routineDurationLabel`/`routineMeta` (packages/core): "média de 52 min"; null → estimativa "~55 min". A tela de edição da rotina continua com a estimativa.
 - **1RM estimado:** Epley — carga × (1 + reps / 30). Aquecimentos não contam.
 - **Primeira vez de um exercício não gera PR.**
 - **Senha do cadastro:** mínimo de 8 caracteres.

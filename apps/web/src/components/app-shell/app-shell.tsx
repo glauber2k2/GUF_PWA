@@ -308,7 +308,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={r.id}
                 letter={routineLetter(r.name)}
                 title={r.name}
-                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r.exercises)}` : routineMeta(r.exercises)}
+                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r.exercises, r.averageDurationSeconds)}` : routineMeta(r.exercises, r.averageDurationSeconds)}
                 highlighted={r.id === suggested?.id}
                 onClick={() => startWorkoutFor(r)}
               />

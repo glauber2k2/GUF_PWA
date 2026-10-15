@@ -15,7 +15,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
-  estimateRoutineMinutes,
   formatClock,
   formatNumber,
   formatPlannedSets,
@@ -23,6 +22,7 @@ import {
   nextTrainingDayLabel,
   plural,
   routineLetter,
+  routineDurationLabel,
   routineMeta,
   routineMuscleGroups,
   startedAgoLabel,
@@ -126,7 +126,7 @@ function RestCard({ state, actions }: { state: Extract<TodayCardState, { kind: "
           <span className="flex min-w-0 flex-1 flex-col">
             <span className={cn(OVERLINE, "text-accent-text")}>Próximo treino · {nextTrainingDayLabel(next.date, state.today)}</span>
             <span className="truncate text-sm leading-5 font-medium">{next.routine.name}</span>
-            <span className="text-xs leading-4 text-fg-muted tabular-nums">{routineMeta(next.routine.exercises)}</span>
+            <span className="text-xs leading-4 text-fg-muted tabular-nums">{routineMeta(next.routine.exercises, next.routine.averageDurationSeconds)}</span>
           </span>
         </div>
       )}
@@ -194,11 +194,10 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
   }
 
   const { routine, projectName } = state;
-  const minutes = estimateRoutineMinutes(routine.exercises);
   const meta = [
     plural(routine.exercises.length, "exercício", "exercícios"),
     routine.exercises.length > 0 ? plural(plannedSetCount(routine.exercises), "série", "séries") : null,
-    minutes ? `~${minutes} min` : null,
+    routineDurationLabel(routine.exercises, routine.averageDurationSeconds),
   ]
     .filter(Boolean)
     .join(" · ");

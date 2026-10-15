@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { plural } from "./format";
-import { estimateRoutineMinutes } from "./workout";
+import { estimateRoutineMinutes, routineDurationLabel } from "./workout";
 
 /** Regras da aba Projetos (puras, sem React). */
 
@@ -20,11 +20,18 @@ export function routineLetter(name: string): string {
   return (match?.[1] ?? name.trim().charAt(0)).toUpperCase();
 }
 
-/** "6 exercícios · ~55 min"; sem exercícios → "Nenhum exercício ainda". */
-export function routineMeta(exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>): string {
+/**
+ * "6 exercícios · média de 52 min" (já treinada) ou "6 exercícios · ~55 min" (estimativa);
+ * sem exercícios → "Nenhum exercício ainda".
+ */
+export function routineMeta(
+  exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>,
+  averageSeconds: number | null = null,
+): string {
   if (exercises.length === 0) return "Nenhum exercício ainda";
-  const minutes = estimateRoutineMinutes(exercises);
-  return [plural(exercises.length, "exercício", "exercícios"), minutes ? `~${minutes} min` : null].filter(Boolean).join(" · ");
+  return [plural(exercises.length, "exercício", "exercícios"), routineDurationLabel(exercises, averageSeconds)]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 /* ---------------------------------------------------------------------
