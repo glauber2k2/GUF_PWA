@@ -152,7 +152,7 @@ function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet
         <EmptyState
           icon={Dumbbell}
           title="Treino encerrado"
-          message="Este treino já foi finalizado ou não está mais disponível."
+          message="Este treino já foi finalizado (por você, em outro aparelho ou automaticamente) e está no seu histórico."
           actionLabel="Voltar ao início"
           onAction={() => {
             if (active?.sessionId === sessionId) clear();
@@ -536,6 +536,17 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           await removeWorkoutSnapshot(workout.id);
           closeOut();
           return setSummary({ data, pending: false });
+        }
+        // Já encerrado no servidor (finalização automática ou outro aparelho): o shell avisa quem
+        // encerrou e leva ao resumo oficial (o treino já está no histórico).
+        if (error.code === "workout_not_found") {
+          const closed = await shell.resolveClosedWorkout(workout.id);
+          closeOut();
+          if (!closed) {
+            await removeWorkoutSnapshot(workout.id);
+            router.replace("/");
+          }
+          return;
         }
         if (!isNetworkError(error)) return showToast(error.message, { tone: "error" });
       }

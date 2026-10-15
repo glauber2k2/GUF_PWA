@@ -197,7 +197,7 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
   const meta = [
     plural(routine.exercises.length, "exercício", "exercícios"),
     routine.exercises.length > 0 ? plural(plannedSetCount(routine.exercises), "série", "séries") : null,
-    routineDurationLabel(routine.exercises, routine.averageDurationSeconds),
+    routineDurationLabel(routine.averageDurationSeconds),
   ]
     .filter(Boolean)
     .join(" · ");
