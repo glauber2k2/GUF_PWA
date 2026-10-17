@@ -18,7 +18,7 @@
 - [x] F5 — DSAR (canal + exportação completa) — aplicada e testada em 2026-10-17
 - [x] F6 — Audit logging — aplicada e testada em 2026-10-17
 - [x] F7 — Encryption/keys — itens sem custo feitos (2026-10-17); conferências nos painéis com o desenvolvedor
-- [ ] F8 — Retention/erasure
+- [x] F8 — Retention/erasure — tabela de prazos e limpeza da foto na exclusão (2026-10-17); backups a conferir no painel
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [ ] F10 — ROPA — ⏸ CHECKPOINT
 - [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
@@ -129,5 +129,12 @@ Ver `.lgpd/gaps.md`.
 - Decisão: sem criptografia campo a campo nas medidas por enquanto (site estático, sem servidor); reavaliar no RIPD (F12)
 - Checklist dos painéis (MFA, Auth, chaves, Security Advisor) em `.lgpd/security-checklist.md`
 
+## F8 — Retention/erasure ✓ (2026-10-17, sem custo)
+- Tabela de prazos e passo a passo da exclusão em `.lgpd/retention.md`
+- Conferido no banco: todas as tabelas com `user_id` (e as `auth.*`) apagam em cascata com a conta; nenhum bucket no Storage ainda
+- G18: Edge Function `delete-account` apaga a pasta `avatars/<user_id>/` antes de excluir a conta (publicada; aborta se a remoção falhar)
+- G15: backups do plano Free a conferir no painel (seção 4 do `retention.md`)
+- Decisão: sem exclusão por inatividade no beta
+
 ## Próximo passo
-F8 — `lgpd-retention-erasure`: prazos e eliminação (backups do plano Free, foto no Storage na exclusão — G15, G18), sem custo.
+F10 — `lgpd-ropa`: Registro das Operações de Tratamento (rascunho a partir do mapa de dados, sem custo; revisão jurídica no futuro).
