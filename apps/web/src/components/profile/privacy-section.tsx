@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CircleCheck, Download, FileCheck, FileDown, FileText, HeartPulse, Trash2 } from "lucide-react";
-import { acceptedLabel, LEGAL_DOC_TITLES, legalReaderTarget } from "@guf/core";
+import { CircleCheck, Download, FileCheck, FileDown, FileText, HeartPulse, Mail, Trash2 } from "lucide-react";
+import { acceptedLabel, DSAR_RESPONSE_DAYS, LEGAL_DOC_TITLES, legalReaderTarget, PRIVACY_CONTACT_EMAIL, privacyRequestMailto } from "@guf/core";
 import type { Consents } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
 import { BottomSheet, Button, ConfirmDialog, GufLoader, Icon } from "@/components/ds";
@@ -54,6 +54,16 @@ export function PrivacySection({ consents, canEdit }: { consents: Consents | und
 
       <RowGroup>
         <RowButton icon={FileCheck} title="Documentos aceitos" onClick={() => setOverlay("docs")} />
+      </RowGroup>
+
+      <RowGroup>
+        {/* Canal para os demais pedidos do titular (art. 18): funciona sem internet (abre o app de e-mail). */}
+        <RowButton
+          icon={Mail}
+          title="Outros pedidos sobre seus dados"
+          subtitle={<><span className="wrap-anywhere">{PRIVACY_CONTACT_EMAIL}</span> · resposta em até {DSAR_RESPONSE_DAYS} dias</>}
+          onClick={() => window.location.assign(privacyRequestMailto())}
+        />
       </RowGroup>
 
       <RowGroup padded className="flex flex-col gap-2.5">
