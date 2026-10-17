@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
-  Check,
   CloudOff,
   Dumbbell,
   Flag,
@@ -671,12 +670,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           )
         )}
 
-        {reorder.active && (
-          <Banner tone="info" title="Reordenar">
-            arraste os exercícios para mudar a ordem.
-          </Banner>
-        )}
-
         {/* Cards deslizam para a nova posição (reordenar, remover, desfazer) e somem suavemente.
             relative: referência do card que sai da lista (popLayout); sem transform: topo do arraste. */}
         <div
@@ -708,7 +701,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
                           total: list.length,
                           dragging: reorder.draggingId === ex.id,
                           dragOffset: reorder.dragOffset,
-                          dragProps: reorder.dragProps(ex.id),
                         }
                       : undefined
                   }
@@ -757,11 +749,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
 
       <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
         <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
-          {reorder.active ? (
-            <Button size="lg" icon={Check} fullWidth onClick={reorder.exit}>
-              Concluir
-            </Button>
-          ) : paused ? (
+          {paused ? (
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <Button size="lg" icon={Play} fullWidth onClick={togglePause}>
                 Retomar
