@@ -17,3 +17,4 @@ export * from "./avatar";
 export * from "./coalesce";
 export * from "./evolution";
 export * from "./legal-content";
+export * from "./share";

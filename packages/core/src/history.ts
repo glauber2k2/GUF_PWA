@@ -265,6 +265,22 @@ export function sessionLoadRecord(
   return current.maxWeightKg > previousBest ? current.maxWeightKg : null;
 }
 
+/** Melhor carga ANTES do treino (mesma janela do sessionLoadRecord) e o dia em que foi feita; null = primeira vez. */
+export function previousLoadBest(
+  history: readonly ExerciseSessionBest[],
+  sessionId: string,
+  performedOn: string,
+  earlierSameDay: ReadonlySet<string>,
+): { weightKg: number; performedOn: string } | null {
+  let best: ExerciseSessionBest | null = null;
+  for (const h of history) {
+    if (h.sessionId === sessionId) continue;
+    if (!(h.performedOn < performedOn || (h.performedOn === performedOn && earlierSameDay.has(h.sessionId)))) continue;
+    if (!best || h.maxWeightKg > best.maxWeightKg || (h.maxWeightKg === best.maxWeightKg && h.performedOn > best.performedOn)) best = h;
+  }
+  return best ? { weightKg: best.maxWeightKg, performedOn: best.performedOn } : null;
+}
+
 /* ---------------------------------------------------------------------
  * Derivados usados pela tela
  * --------------------------------------------------------------------- */
