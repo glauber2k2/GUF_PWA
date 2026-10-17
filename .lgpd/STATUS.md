@@ -65,7 +65,8 @@
 - Projeto novo `GUF DEV` (`yscoujsisrytytqsxkya`, `sa-east-1`): 15 migrations aplicadas, dados importados (contagens iguais em todas as 14 tabelas + `auth.users`/`auth.identities`), job pg_cron ativo, Edge Function `delete-account` publicada, tipos idênticos
 - Não copiados por minimização: sessões, refresh tokens e log de auditoria de login (IPs)
 - Arquivo exportado apagado da pasta temporária após a importação
-- Pendente: configurar Auth no painel, Google Cloud, variáveis da Vercel, testar, pausar e depois excluir o projeto antigo (`us-west-2`)
+- 2026-10-17: login (Auth no painel e Google Cloud) ajustado para o projeto novo, segundo o desenvolvedor
+- Pendente: confirmar variáveis da Vercel, testar o deploy, pausar e depois excluir o projeto antigo (`us-west-2`)
 
 ## F3 — Consent schema ✓ (2026-10-17)
 - Migration `20261017132154_consent_ledger_hardening.sql` (branch `feat/lgpd-consent-ledger`)
