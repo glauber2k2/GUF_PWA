@@ -170,7 +170,9 @@
   --shadow-focus: var(--focus-ring);
   --shadow-pr-glow: var(--shadow-pr-glow);
   /* Brilho dourado do troféu nas telas cheias dos stories */
-  --shadow-story-pr-glow: 0 0 96px color-mix(in oklab, var(--pr) 55%, transparent);
+  /* Brilho dourado do cartão do recorde (story 12 · Selo dourado) */
+  --shadow-story-pr: 0 0 64px color-mix(in oklab, var(--pr) 28%, transparent);
+  --shadow-story-pr-glow:0 0 96px color-mix(in oklab, var(--pr) 55%, transparent);
   /* Stickers de recorde (brilho dourado da forma e do troféu) */
   --shadow-sticker-pr: 0 0 48px color-mix(in oklab, var(--pr) 35%, transparent);
   --shadow-sticker-trophy: 0 0 32px color-mix(in oklab, var(--pr) 45%, transparent);
