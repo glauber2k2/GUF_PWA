@@ -39,6 +39,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_type: string
+          details: Json
+          id: number
+          occurred_at: string
+          payload_hash: string
+          prev_hash: string | null
+          self_hash: string
+          subject_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_type: string
+          details?: Json
+          id?: never
+          occurred_at?: string
+          payload_hash: string
+          prev_hash?: string | null
+          self_hash: string
+          subject_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_type?: string
+          details?: Json
+          id?: never
+          occurred_at?: string
+          payload_hash?: string
+          prev_hash?: string | null
+          self_hash?: string
+          subject_id?: string | null
+        }
+        Relationships: []
+      }
       body_measurements: {
         Row: {
           body_fat_pct: number | null
@@ -682,6 +721,21 @@ export type Database = {
         Returns: undefined
       }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      audit_log_append: {
+        Args: { p_action: string; p_details?: Json; p_subject_id: string }
+        Returns: undefined
+      }
+      audit_log_hash: {
+        Args: {
+          p_action: string
+          p_actor_id: string
+          p_occurred_at: string
+          p_payload_hash: string
+          p_prev_hash: string
+          p_subject_id: string
+        }
+        Returns: string
+      }
       auto_finish_idle_workouts: { Args: { p_idle?: string }; Returns: number }
       average_duration_seconds: {
         Args: { "": Database["public"]["Tables"]["routines"]["Row"] }
@@ -781,6 +835,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_consent_proofs: { Args: never; Returns: number }
       resume_workout: {
         Args: { p_at?: string; p_session_id: string }
@@ -799,6 +854,13 @@ export type Database = {
           p_weekdays: number[]
         }
         Returns: string
+      }
+      verify_audit_log: {
+        Args: never
+        Returns: {
+          checked: number
+          first_broken_id: number
+        }[]
       }
     }
     Enums: {
