@@ -19,9 +19,9 @@
 - [ ] F6 — Audit logging
 - [ ] F7 — Encryption/keys
 - [ ] F8 — Retention/erasure
-- [ ] F9 — Incident response
+- [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [ ] F10 — ROPA — ⏸ CHECKPOINT
-- [ ] F11 — Encarregado
+- [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
 - [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT
 - [ ] F13 — ECA Digital
 - [ ] F14 — Vendors + DPA + transferência internacional
@@ -90,5 +90,16 @@ Ver `.lgpd/gaps.md`.
 - **Aguardando revisão jurídica.** Só depois: mover para `privacy-policy-v1.md`, levar a `legal-content.ts`, nova versão em `legal_documents` com hash
 - `legal-content.ts` NÃO foi alterado
 
+## F9 — Incident response ✓ (2026-10-17)
+- Runbook em `.lgpd/incidents/runbook.md` (cartão de bolso, severidade S1–S4, teste do Art. 5º aplicado ao guf, contenção por componente: Supabase, Vercel, Google, GitHub, app)
+- Modelos em `.lgpd/incidents/templates/` (ANPD: 12 itens; titular: 7 itens)
+- Registro iniciado em `.lgpd/incidents/log.md` — nenhum incidente até 2026-10-17; guarda de 5 anos
+- Pendentes: e-mail de contato do controlador, advogado de referência, MFA dos painéis, primeiro exercício simulado (sugestão: antes de abrir o beta para pessoas de fora)
+
+## Nota — Encarregado adiado (2026-10-17)
+- Decisão do desenvolvedor: designar o Encarregado só antes do lançamento; hoje é beta gratuito com testadores convidados
+- Fundamento provisório ⚖: Res. CD/ANPD nº 2/2022 (ATPP), Art. 11 — dispensa a indicação do encarregado, mas **exige canal de comunicação com o titular**. A dispensa não vale para tratamento de alto risco (ex.: dados sensíveis em escala); reavaliar ao lançar o módulo de medidas
+- Condições para manter o adiamento: (1) beta só com convidados cientes do teste; (2) um e-mail de contato funcionando para pedidos de titulares (G10); (3) designar antes do lançamento ou da abertura para pessoas de fora
+
 ## Próximo passo
-Enquanto a F4 aguarda o jurídico, seguir com etapas que não dependem dela: F11 — Encarregado (G2) e F9 — runbook de incidente (G4), que estavam nas ações imediatas com prazo em 2026-10-23.
+F5 — DSAR: exportação completa (`export_my_data()` sem `workout_active_periods`, e-mail e identidades — G12, nova migration) e canal de pedidos com controle do prazo de 15 dias (G10). Não depende do jurídico.
