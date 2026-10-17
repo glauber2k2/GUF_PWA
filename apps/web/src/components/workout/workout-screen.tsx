@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
+  ArrowUpDown,
   CloudOff,
   Dumbbell,
   Flag,
@@ -37,11 +38,14 @@ import {
 } from "@guf/core";
 import { useAppShell, useRaisedToast, type ToastOptions } from "@/components/app-shell/app-shell";
 import {
+  AnimatePresence,
   Banner,
   BottomSheet,
   Button,
   ConfirmDialog,
   EmptyState,
+  LAYOUT_ITEM_PROPS,
+  LayoutItem,
   RestTimer,
   RestTimerBar,
   SavingOverlay,
@@ -59,6 +63,7 @@ import { invalidateTrainingData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { mockWorkoutApi } from "@/mocks/workout";
+import { ReorderExercisesSheet } from "./reorder-exercises-sheet";
 import { SetEditSheet } from "./set-edit-sheet";
 import { buildWorkoutExercise, localSummary, toNewWorkoutExercise, workoutSnapshot } from "./workout-builders";
 import { useActiveWorkout, useWorkoutClock, type ActiveWorkoutState } from "./workout-provider";
@@ -201,6 +206,7 @@ type Sheet =
   | { kind: "workout-menu" }
   | { kind: "note"; target: string | "workout" }
   | { kind: "timer" }
+  | { kind: "reorder" }
   | null;
 
 interface WorkoutViewProps {
@@ -487,6 +493,12 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     showToast(created.length === 1 ? `${created[0]?.name} adicionado` : `${created.length} exercícios adicionados`, { tone: "success", icon: Plus });
   };
 
+  /** Nova ordem dos exercícios: muda na tela e vai pela fila (position = índice). */
+  const reorderExercises = (exerciseIds: string[]) => {
+    dispatch({ type: "reorderExercises", exerciseIds });
+    queue({ kind: "reorderExercises", sessionId: workout.id, sessionExerciseIds: exerciseIds });
+  };
+
   /* ---------- Observações ---------- */
 
   const openNote = (target: string | "workout") => {
@@ -603,7 +615,8 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     <>
       <main
         className={cn(
-          "flex min-h-dvh flex-col gap-3 px-4",
+          // relative: referência do card que sai da lista (AnimatePresence popLayout).
+          "relative flex min-h-dvh flex-col gap-3 px-4",
           resting ? "pb-[calc(200px+env(safe-area-inset-bottom))]" : "pb-[calc(124px+env(safe-area-inset-bottom))]",
         )}
       >
@@ -631,24 +644,28 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           )
         )}
 
-        {state.exercises.map((ex, i) => (
-          <WorkoutExerciseCard
-            key={ex.id}
-            exercise={ex}
-            unit={unit}
-            enterDelayMs={i * 40}
-            poppedKey={popped}
-            editing={edit?.exerciseId === ex.id ? { setIndex: edit.setIndex, field: edit.field } : null}
-            onToggleOpen={() => dispatch({ type: "toggleOpen", exerciseId: ex.id })}
-            onOpenMenu={() => setSheet({ kind: "exercise-menu", exerciseId: ex.id })}
-            onOpenNote={() => openNote(ex.id)}
-            onAddSet={() => addSet(ex)}
-            onToggleSet={(si) => toggleSet(i, si)}
-            onCycleType={(si) => cycleType(ex, si)}
-            onEditField={(si, field) => setEdit({ exerciseId: ex.id, setIndex: si, field })}
-            onRemoveSet={(si) => removeSet(ex, si)}
-          />
-        ))}
+        {/* Cards deslizam para a nova posição (reordenar, remover, desfazer) e somem suavemente. */}
+        <AnimatePresence initial={false} mode="popLayout">
+          {state.exercises.map((ex, i) => (
+            <LayoutItem key={ex.id} {...LAYOUT_ITEM_PROPS} className="flex flex-none flex-col">
+              <WorkoutExerciseCard
+                exercise={ex}
+                unit={unit}
+                enterDelayMs={i * 40}
+                poppedKey={popped}
+                editing={edit?.exerciseId === ex.id ? { setIndex: edit.setIndex, field: edit.field } : null}
+                onToggleOpen={() => dispatch({ type: "toggleOpen", exerciseId: ex.id })}
+                onOpenMenu={() => setSheet({ kind: "exercise-menu", exerciseId: ex.id })}
+                onOpenNote={() => openNote(ex.id)}
+                onAddSet={() => addSet(ex)}
+                onToggleSet={(si) => toggleSet(i, si)}
+                onCycleType={(si) => cycleType(ex, si)}
+                onEditField={(si, field) => setEdit({ exerciseId: ex.id, setIndex: si, field })}
+                onRemoveSet={(si) => removeSet(ex, si)}
+              />
+            </LayoutItem>
+          ))}
+        </AnimatePresence>
 
         <button
           type="button"
@@ -742,6 +759,14 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
 
       <BottomSheet placement="screen" open={sheet?.kind === "workout-menu"} onClose={() => setSheet(null)} title="Treino" subtitle={workout.name}>
         <SheetOption icon={NotepadText} title="Observação do treino" subtitle={state.note || "Sem observação"} onClick={() => openNote("workout")} />
+        {state.exercises.length > 1 && (
+          <SheetOption
+            icon={ArrowUpDown}
+            title="Reordenar exercícios"
+            subtitle="Muda a ordem só deste treino"
+            onClick={() => setSheet({ kind: "reorder" })}
+          />
+        )}
         <SheetOption
           icon={Trash2}
           title="Descartar treino"
@@ -770,6 +795,14 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
             setPicker({ mode: "troca", exerciseId: menuExercise.id });
           }}
         />
+        {state.exercises.length > 1 && (
+          <SheetOption
+            icon={ArrowUpDown}
+            title="Mudar a ordem"
+            subtitle="Arraste os exercícios na lista"
+            onClick={() => setSheet({ kind: "reorder" })}
+          />
+        )}
         <SheetOption
           icon={Trash2}
           title="Remover exercício"
@@ -777,6 +810,13 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           onClick={() => menuExercise && removeExercise(menuExercise.id)}
         />
       </BottomSheet>
+
+      <ReorderExercisesSheet
+        open={sheet?.kind === "reorder"}
+        exercises={state.exercises}
+        onClose={() => setSheet(null)}
+        onReorder={reorderExercises}
+      />
 
       <BottomSheet placement="screen" open={sheet?.kind === "note"} onClose={() => setSheet(null)} title="Observação" subtitle={noteTitle}>
         <TextField

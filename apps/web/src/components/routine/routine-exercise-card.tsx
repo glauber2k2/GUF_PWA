@@ -54,7 +54,7 @@ export function RoutineExerciseCard({
       role="listitem"
       ref={itemRef}
       className={cn(
-        "flex-none overflow-hidden rounded-lg bg-surface-elevated transition-[transform,box-shadow] duration-150 ease-standard",
+        "flex-none overflow-hidden rounded-lg bg-surface-elevated transition-[scale,box-shadow] duration-150 ease-standard",
         dragging ? "scale-[1.02] border-[1.5px] border-accent-text shadow-e3" : repsError ? "border-[1.5px] border-danger" : "border border-border",
       )}
     >
