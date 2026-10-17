@@ -93,7 +93,17 @@ export const mockProfileApi = {
     ignoreClient(client);
     await wait(1600);
     return {
-      data: { exportado_em: new Date().toISOString(), perfil: { name: profile.name, weight_unit: profile.weightUnit }, treinos: [], observacao: "Dados fictícios (modo de desenvolvimento)." },
+      data: {
+        formato: "guf-export/2",
+        exportado_em: new Date().toISOString(),
+        conta: { email: profile.email },
+        contas_vinculadas: [],
+        perfil: { name: profile.name, weight_unit: profile.weightUnit },
+        treinos: [],
+        periodos_ativos: [],
+        consentimentos: [],
+        observacao: "Dados fictícios (modo de desenvolvimento).",
+      },
       error: null,
     };
   },

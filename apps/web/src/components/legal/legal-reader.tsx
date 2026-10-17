@@ -301,7 +301,7 @@ export function LegalReader({ doc, anchor, backLabel, onBack, onOpenDoc, onActio
               })}
             </div>
             <div className="flex flex-col gap-1.5 text-sm leading-5 text-fg-secondary">
-              <h2 className="m-0 text-[15px] leading-[22px] font-semibold text-fg">Encarregado de dados (DPO)</h2>
+              <h2 className="m-0 text-[15px] leading-[22px] font-semibold text-fg">Contato sobre seus dados</h2>
               <span>
                 <LegalText text={LEGAL_DPO_LINE} small />
               </span>
