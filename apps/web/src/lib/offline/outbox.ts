@@ -9,6 +9,7 @@ import {
   isNetworkError,
   pauseWorkout,
   removeWorkoutExercise,
+  reorderWorkoutExercises,
   replaceWorkoutExercise,
   resumeWorkout,
   saveExerciseNote,
@@ -80,6 +81,8 @@ async function execute(op: OutboxOp): Promise<{ error: ApiError | null }> {
       return replaceWorkoutExercise(client, op);
     case "removeExercise":
       return removeWorkoutExercise(client, { sessionExerciseId: op.sessionExerciseId });
+    case "reorderExercises":
+      return reorderWorkoutExercises(client, { sessionExerciseIds: op.sessionExerciseIds });
     case "exerciseNote":
       return saveExerciseNote(client, { sessionExerciseId: op.sessionExerciseId, note: op.note });
     case "workoutNote":

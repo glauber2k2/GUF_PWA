@@ -273,6 +273,17 @@ export const removeWorkoutExercise: WorkoutApi["removeWorkoutExercise"] = async 
   return ok;
 };
 
+export const reorderWorkoutExercises: WorkoutApi["reorderWorkoutExercises"] = async (client, { sessionExerciseIds }) => {
+  ignoreClient(client);
+  await wait();
+  const found = sessionExerciseIds[0] ? findExercise(sessionExerciseIds[0]) : null;
+  if (found) {
+    const rank = new Map(sessionExerciseIds.map((id, i) => [id, i]));
+    found.workout.exercises = [...found.workout.exercises].sort((a, b) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0));
+  }
+  return ok;
+};
+
 export const saveSet: WorkoutApi["saveSet"] = async (client) => {
   ignoreClient(client);
   await wait();
@@ -355,6 +366,7 @@ export const mockWorkoutApi = {
   addWorkoutExercises,
   replaceWorkoutExercise,
   removeWorkoutExercise,
+  reorderWorkoutExercises,
   saveSet,
   deleteSet,
   saveExerciseNote,

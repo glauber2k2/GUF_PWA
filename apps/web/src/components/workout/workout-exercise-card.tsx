@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Dumbbell, Ellipsis, Plus, NotepadText, Timer } from "lucide-react";
+import { ChevronDown, Dumbbell, Ellipsis, Plus, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
   formatClock,
@@ -11,7 +11,18 @@ import {
   toDisplayWeight,
   type WeightUnit,
 } from "@guf/core";
-import { Button, Icon, IconButton, SetRow, SetRowHeader, SwipeToDelete, Tag } from "@/components/ds";
+import {
+  AnimatePresence,
+  Button,
+  Collapse,
+  Icon,
+  IconButton,
+  PresenceRow,
+  SetRow,
+  SetRowHeader,
+  SwipeToDelete,
+  Tag,
+} from "@/components/ds";
 import { cn } from "@/lib/utils";
 import type { EditableField, ExerciseView } from "./workout-state";
 
@@ -65,36 +76,52 @@ export function WorkoutExerciseCard({
       )}
       style={e.flash ? undefined : { animationDelay: `${enterDelayMs}ms` }}
     >
-      <div className="flex items-start gap-3 pt-3.5 pr-2 pb-3 pl-4">
-        <span className="grid size-11 flex-none place-items-center rounded-md bg-surface-3 text-fg-secondary">
-          <Icon icon={Dumbbell} size={20} />
-        </span>
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
-          <span className="truncate text-[17px] leading-[22px] font-semibold">{e.name}</span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Tag size="sm">{muscleGroupLabel(e.muscleGroup)}</Tag>
-            <Tag size="sm" tone="muted">
-              {equipmentLabel(e.equipment)}
-            </Tag>
-            <span className="flex items-center gap-1 text-xs font-medium text-fg-muted tabular-nums">
-              <Icon icon={Timer} size={13} />
-              {formatClock(e.restSeconds)}
-            </span>
-            {!e.open && (
-              <span className={cn("text-xs font-semibold tabular-nums", allDone ? "text-accent-text" : "text-fg-muted")}>
-                · {setsProgressLabel(done, e.sets.length)}
-              </span>
-            )}
-          </div>
-        </div>
-        <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${e.name}`} onClick={onOpenMenu} />
-        <IconButton
-          icon={e.open ? ChevronUp : ChevronDown}
-          variant="ghost"
-          label={`${e.open ? "Recolher" : "Expandir"} ${e.name}`}
+      <div className="flex items-start gap-1 pr-2">
+        {/* Toque em qualquer parte do cabeçalho abre/recolhe (não só na seta). */}
+        <button
+          type="button"
           aria-expanded={e.open}
+          aria-label={`${e.open ? "Recolher" : "Expandir"} ${e.name}`}
           onClick={onToggleOpen}
-        />
+          className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-lg bg-transparent pt-3.5 pb-3 pl-4 text-left text-fg"
+        >
+          <span className="grid size-11 flex-none place-items-center rounded-md bg-surface-3 text-fg-secondary">
+            <Icon icon={Dumbbell} size={20} />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
+            <span className="truncate text-[17px] leading-[22px] font-semibold">{e.name}</span>
+            <span className="flex flex-wrap items-center gap-1.5">
+              <Tag size="sm">{muscleGroupLabel(e.muscleGroup)}</Tag>
+              <Tag size="sm" tone="muted">
+                {equipmentLabel(e.equipment)}
+              </Tag>
+              <span className="flex items-center gap-1 text-xs font-medium text-fg-muted tabular-nums">
+                <Icon icon={Timer} size={13} />
+                {formatClock(e.restSeconds)}
+              </span>
+              {!e.open && (
+                <span className={cn("text-xs font-semibold tabular-nums", allDone ? "text-accent-text" : "text-fg-muted")}>
+                  · {setsProgressLabel(done, e.sets.length)}
+                </span>
+              )}
+            </span>
+          </span>
+        </button>
+        <div className="flex flex-none items-center gap-0.5 pt-3.5">
+          <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${e.name}`} onClick={onOpenMenu} />
+          {/* Seta só indica o estado: o cabeçalho inteiro já é o botão (fora da ordem do Tab). */}
+          <span
+            aria-hidden="true"
+            onClick={onToggleOpen}
+            className="grid size-11 cursor-pointer place-items-center text-fg-secondary"
+          >
+            <Icon
+              icon={ChevronDown}
+              size={20}
+              className={cn("transition-transform duration-200 ease-standard motion-reduce:transition-none", e.open && "rotate-180")}
+            />
+          </span>
+        </div>
       </div>
 
       {e.note && (
@@ -104,13 +131,14 @@ export function WorkoutExerciseCard({
         </span>
       )}
 
-      {e.open && (
-        <>
-          <SetRowHeader unit={unit} />
+      <Collapse open={e.open}>
+        <SetRowHeader unit={unit} />
+        <AnimatePresence initial={false}>
           {e.sets.map((s, i) => {
             if (s.setType === "normal") normalCount++;
             return (
-              <SwipeToDelete key={s.id} label="Remover série" onDelete={() => onRemoveSet(i)}>
+              <PresenceRow key={s.id}>
+                <SwipeToDelete label="Remover série" onDelete={() => onRemoveSet(i)}>
                 <SetRow
                   type={s.setType}
                   number={normalCount}
@@ -127,17 +155,18 @@ export function WorkoutExerciseCard({
                   onCycleType={() => onCycleType(i)}
                   onEditField={(key) => onEditField(i, key === "kg" ? "weightKg" : "reps")}
                 />
-              </SwipeToDelete>
+                </SwipeToDelete>
+              </PresenceRow>
             );
           })}
-          <div className="flex gap-2 px-3 pt-2.5 pb-3.5">
-            <Button variant="secondary" icon={Plus} fullWidth onClick={onAddSet}>
-              Adicionar série
-            </Button>
-            <IconButton icon={NotepadText} label={`Observação de ${e.name}`} onClick={onOpenNote} />
-          </div>
-        </>
-      )}
+        </AnimatePresence>
+        <div className="flex gap-2 px-3 pt-2.5 pb-3.5">
+          <Button variant="secondary" icon={Plus} fullWidth onClick={onAddSet}>
+            Adicionar série
+          </Button>
+          <IconButton icon={NotepadText} label={`Observação de ${e.name}`} onClick={onOpenNote} />
+        </div>
+      </Collapse>
     </article>
   );
 }
