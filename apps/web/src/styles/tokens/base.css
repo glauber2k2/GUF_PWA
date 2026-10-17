@@ -565,3 +565,52 @@
   35%, 70% { transform: scale(0); }
   100% { transform: scale(1); }
 }
+
+/* ---------------------------------------------------------------------
+ * Mascote GufRat (Claude Design · "Guf Rat Forte v2", tokens/mascot.css): animações em loop
+ * por ocasião. Origem e duração de cada parte vêm do componente (dados da pose).
+ * --------------------------------------------------------------------- */
+@keyframes guf-rat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes guf-rat-jump {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(2px) scale(1.06, .94); }
+  45% { transform: translateY(-14px) scale(.97, 1.04); }
+  70% { transform: translateY(0) scale(1.04, .96); }
+  85% { transform: translateY(0) scale(1, 1); }
+}
+@keyframes guf-rat-shake {
+  0%, 60%, 100% { transform: translateX(0); }
+  10%, 30%, 50% { transform: translateX(-4px); }
+  20%, 40% { transform: translateX(4px); }
+}
+@keyframes guf-rat-tilt { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-6deg); } 70% { transform: rotate(4deg); } }
+@keyframes guf-rat-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 1.02); } }
+@keyframes guf-rat-squat { 0%, 100% { transform: translateY(0) scaleY(1); } 50% { transform: translateY(5px) scaleY(.93); } }
+@keyframes guf-rat-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes guf-rat-wave { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-16deg); } 75% { transform: rotate(12deg); } }
+@keyframes guf-rat-pump { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+@keyframes guf-rat-lift { 0%, 100% { transform: translateY(8px); } 50% { transform: translateY(-3px); } }
+@keyframes guf-rat-tail { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-12deg); } }
+@keyframes guf-rat-zzz { 0% { opacity: 0; transform: translate(0, 6px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -10px); } }
+@keyframes guf-rat-drop { 0% { opacity: 0; transform: translateY(-4px); } 20%, 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(10px); } }
+@keyframes guf-rat-dot { 0%, 60%, 100% { opacity: .25; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-4px); } }
+@keyframes guf-rat-pulse { 0%, 100% { opacity: .18; transform: scale(.92); } 50% { opacity: .4; transform: scale(1.04); } }
+@keyframes guf-rat-confetti {
+  0% { opacity: 0; transform: translateY(8px) scale(.4); }
+  25% { opacity: 1; transform: translateY(-4px) scale(1); }
+  100% { opacity: 0; transform: translateY(-16px) rotate(90deg); }
+}
+@keyframes guf-rat-ring {
+  0%, 50%, 100% { transform: rotate(0); }
+  5%, 15%, 25%, 35% { transform: rotate(-5deg); }
+  10%, 20%, 30%, 40% { transform: rotate(5deg); }
+}
+@keyframes guf-rat-marks { 0%, 100% { opacity: .15; } 50% { opacity: 1; } }
+@keyframes guf-rat-pop { 0% { transform: scale(0); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+/* Contorno no tema claro e braço de trás (cor/espessura por tema: tokens --rat-* em colors.css). */
+.guf-rat-svg { filter: var(--rat-outline); }
+.guf-rat-edge { stroke: var(--rat-edge); stroke-width: var(--rat-edge-width); }
+.guf-rat-edge-dot { fill: var(--rat-edge); r: var(--rat-edge-dot); }
+@media (prefers-reduced-motion: reduce) {
+  .guf-rat, .guf-rat * { animation: none !important; }
+}
