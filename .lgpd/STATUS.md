@@ -20,7 +20,7 @@
 - [x] F7 — Encryption/keys — itens sem custo feitos (2026-10-17); conferências nos painéis com o desenvolvedor
 - [x] F8 — Retention/erasure — tabela de prazos e limpeza da foto na exclusão (2026-10-17); backups a conferir no painel
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
-- [ ] F10 — ROPA — ⏸ CHECKPOINT
+- [~] F10 — ROPA — ⏸ CHECKPOINT: rascunho 0.1 (2026-10-17); revisão jurídica no futuro
 - [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
 - [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT
 - [ ] F13 — ECA Digital
@@ -136,5 +136,11 @@ Ver `.lgpd/gaps.md`.
 - G15: backups do plano Free a conferir no painel (seção 4 do `retention.md`)
 - Decisão: sem exclusão por inatividade no beta
 
+## F10 — ROPA ⏸ (2026-10-17)
+- Rascunho 0.1 em `.lgpd/ROPA.md` (modelo simplificado da ANPD + campos extras)
+- 16 operações como controlador, 0 como operador; 1 com dado sensível (A010), 1 com legítimo interesse (A012)
+- Atualizei no `data-map.md` as fichas A013/A014 com o que mudou nas F3–F8
+- Revisão jurídica adiada (sem orçamento); revisão semestral: 2027-04-17
+
 ## Próximo passo
-F10 — `lgpd-ropa`: Registro das Operações de Tratamento (rascunho a partir do mapa de dados, sem custo; revisão jurídica no futuro).
+F13 — `lgpd-eca-digital-minors`: análise do ECA Digital (autodeclaração 18+ basta?) em rascunho, sem custo. Depois: F15 relatório final.
