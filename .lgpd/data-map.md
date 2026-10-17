@@ -282,7 +282,7 @@
 | Base legal | Art. 7º, II (cumprimento de obrigação legal — Art. 18) |
 | Categorias de titulares | Usuários |
 | Sensíveis? | Sim, se houver medidas |
-| Dados | Todo o conteúdo de `export_my_data()` — **faltam** `workout_active_periods`, e-mail e identidades (G12) |
+| Dados | Todo o conteúdo de `export_my_data()` (`guf-export/2`: conta, contas vinculadas, períodos ativos, consentimentos — G12 resolvido na F5) |
 | Fonte | Banco |
 | Sistemas | RPC `export_my_data`; arquivo JSON gerado no aparelho (`guf-meus-dados-AAAA-MM-DD.json`) |
 | Operadores | Supabase |
@@ -307,8 +307,8 @@
 | Sistemas | Edge Function `delete-account` → `auth.admin.deleteUser`; cascata em todas as tabelas |
 | Operadores | Supabase |
 | Transferência intl. | Provável (G8) |
-| Retenção | Imediata no banco; **backups e arquivos do Storage não cobertos** (G15, G18); prova de consentimento perdida (G6) |
-| Segurança | Token validado no servidor; `service_role` só na função; CORS `*` (G20) |
+| Retenção | Imediata no banco (cascata); foto do Storage apagada pela função (G18, F8); prova dos aceites em `consent_proofs` (G6, F3); backups conforme o plano (G15) |
+| Segurança | Token validado no servidor; `service_role` só na função; CORS por lista (`ALLOWED_ORIGINS`, F7) |
 | Alto risco? | Não |
 | RIPD | N/A |
 | Owner | Pendente |
