@@ -24,6 +24,7 @@ import {
   bestLoadSet,
   estimate1RM,
   recordSetIndex,
+  previousLoadBest,
   sessionLoadRecord,
   sessionTotals,
   toLocalISODate,
@@ -230,9 +231,20 @@ function toSummary(s: MockSession): WorkoutSummaryDetail {
   const free = s.key === "L";
   const records: WorkoutSummaryRecord[] = [];
   const exercises = s.exercises.map<SummaryExercise>(({ exercise, sets }, i) => {
-    const recordKg = sessionLoadRecord(historyOf(exercise.id), s.id, s.performedOn, earlierSameDay);
+    const history = historyOf(exercise.id);
+    const recordKg = sessionLoadRecord(history, s.id, s.performedOn, earlierSameDay);
     const recordIndex = recordSetIndex(sets, recordKg);
-    if (recordKg !== null) records.push({ exerciseId: exercise.id, exerciseName: exercise.name, weightKg: recordKg, reps: sets[recordIndex ?? -1]?.reps ?? null });
+    if (recordKg !== null) {
+      const previous = previousLoadBest(history, s.id, s.performedOn, earlierSameDay);
+      records.push({
+        exerciseId: exercise.id,
+        exerciseName: exercise.name,
+        weightKg: recordKg,
+        reps: sets[recordIndex ?? -1]?.reps ?? null,
+        previousWeightKg: previous?.weightKg ?? null,
+        previousOn: previous?.performedOn ?? null,
+      });
+    }
     const totals = sessionTotals(sets.map((x) => ({ ...x, isCompleted: true })));
     return {
       id: `${s.id}-${i}`,

@@ -26,7 +26,13 @@ export function ReorderExercisesSheet({ open, exercises, onClose, onReorder }: R
   });
 
   return (
-    <BottomSheet placement="screen" open={open} onClose={onClose} title="Reordenar exercícios" subtitle="Arraste pela alça para mudar a ordem">
+    <BottomSheet
+      placement="screen"
+      open={open}
+      onClose={onClose}
+      title="Reordenar exercícios"
+      subtitle="Arraste pela alça para mudar a ordem"
+    >
       <div role="list" aria-label="Ordem dos exercícios" className="flex flex-col gap-2">
         {reorder.order.map((e, i) => {
           const dragging = reorder.draggingId === e.id;

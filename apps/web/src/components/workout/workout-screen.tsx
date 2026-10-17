@@ -54,6 +54,7 @@ import {
   TextField,
 } from "@/components/ds";
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
+import { ShareStorySheet, STORY_SAVED_TOAST } from "@/components/share/share-story-sheet";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/hooks/use-dev-workout-state";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import type { OutboxOp } from "@/lib/offline/db";
@@ -237,6 +238,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const [popped, setPopped] = useState<string | null>(null);
   const [summary, setSummary] = useState<{ data: FinishedWorkoutSummary; pending: boolean } | null>(null);
   const [finishing, setFinishing] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const pendingExerciseRemovals = useRef(new Set<string>());
 
   // Relógio: o do provider (compartilhado com o mini card) ou, até registrar, o do próprio treino.
@@ -585,31 +587,46 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
 
   if (summary) {
     return (
-      <WorkoutSummary
-        name={workout.name}
-        projectName={workout.projectName}
-        performedOn={workout.performedOn}
-        summary={summary.data}
-        unit={unit}
-        pending={summary.pending}
-        onDone={() => {
-          if (summary.pending) shell.showToast(...PENDING_TOAST);
-          else shell.showToast("Treino salvo", { tone: "success", message: "Já está no seu histórico." });
-          router.replace("/");
-        }}
-        onOpenHistory={() => {
-          // Finalizado sem internet: o treino entra no histórico quando a fila sincronizar.
-          if (summary.pending) shell.showToast(...PENDING_TOAST);
-          router.replace("/historico");
-        }}
-      />
+      <>
+        <WorkoutSummary
+          name={workout.name}
+          projectName={workout.projectName}
+          performedOn={workout.performedOn}
+          summary={summary.data}
+          unit={unit}
+          pending={summary.pending}
+          onDone={() => {
+            if (summary.pending) shell.showToast(...PENDING_TOAST);
+            else shell.showToast("Treino salvo", { tone: "success", message: "Já está no seu histórico." });
+            router.replace("/");
+          }}
+          onOpenHistory={() => {
+            // Finalizado sem internet: o treino entra no histórico quando a fila sincronizar.
+            if (summary.pending) shell.showToast(...PENDING_TOAST);
+            router.replace("/historico");
+          }}
+          onShare={() => setSharing(true)}
+        />
+        {/* Demonstração (sem gravar): os stories usam o mock. */}
+        <ShareStorySheet
+          open={sharing}
+          sessionId={workout.id}
+          mockScenario={persist ? null : "padrao"}
+          onClose={() => setSharing(false)}
+          onSaved={() => shell.showToast(...STORY_SAVED_TOAST)}
+        />
+      </>
     );
   }
 
   const resting = Boolean(current.rest);
   const menuExercise = sheet?.kind === "exercise-menu" ? state.exercises.find((e) => e.id === sheet.exerciseId) : undefined;
   const noteTitle =
-    sheet?.kind === "note" ? (sheet.target === "workout" ? "Treino de hoje" : state.exercises.find((e) => e.id === sheet.target)?.name) : undefined;
+    sheet?.kind === "note"
+      ? sheet.target === "workout"
+        ? "Treino de hoje"
+        : state.exercises.find((e) => e.id === sheet.target)?.name
+      : undefined;
 
   return (
     <>
@@ -757,8 +774,19 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         </div>
       </BottomSheet>
 
-      <BottomSheet placement="screen" open={sheet?.kind === "workout-menu"} onClose={() => setSheet(null)} title="Treino" subtitle={workout.name}>
-        <SheetOption icon={NotepadText} title="Observação do treino" subtitle={state.note || "Sem observação"} onClick={() => openNote("workout")} />
+      <BottomSheet
+        placement="screen"
+        open={sheet?.kind === "workout-menu"}
+        onClose={() => setSheet(null)}
+        title="Treino"
+        subtitle={workout.name}
+      >
+        <SheetOption
+          icon={NotepadText}
+          title="Observação do treino"
+          subtitle={state.note || "Sem observação"}
+          onClick={() => openNote("workout")}
+        />
         {state.exercises.length > 1 && (
           <SheetOption
             icon={ArrowUpDown}
