@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent, type RefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type PointerEvent, type RefObject } from "react";
 import { moveItem } from "@guf/core";
 
 /*
  * Segurar para reordenar (lista do treino em andamento):
  * - segurar um item por HOLD_MS (sem mexer o dedo) liga o modo de reordenar e já começa a arrastar
  *   esse item no mesmo gesto; mexer antes disso é rolagem normal da página;
- * - no modo, qualquer item arrasta direto (sem segurar de novo); setas ↑/↓ movem pelo teclado;
+ * - soltar grava a nova ordem (se mudou) e já sai do modo; Esc ou gesto cancelado pelo sistema
+ *   sai sem mudar a ordem;
  * - o item arrastado acompanha o dedo; os outros abrem espaço (a tela anima as posições);
  * - o destino é calculado por SLOT fixo (altura do item compacto + espaço) a partir do topo da
  *   lista (que não anima), nunca medindo os itens durante a animação — medir no meio da animação
@@ -101,7 +102,8 @@ export function useHoldReorder<T extends { id: string }>({
     [itemPx, gapPx, listRef, setDrag],
   );
 
-  const finish = useCallback(() => {
+  /** Fim do gesto: `save` grava a nova ordem (se mudou); sempre sai do modo. */
+  const finish = useCallback((save: boolean) => {
     const l = live.current;
     if (l) cancelAnimationFrame(l.raf);
     live.current = null;
@@ -109,7 +111,9 @@ export function useHoldReorder<T extends { id: string }>({
     window.setTimeout(() => (swallowClick.current = false), 80);
     const d = dragRef.current;
     setDrag(null);
-    if (d && d.index !== d.startIndex) commitRef.current(moveItem(itemsRef.current, d.startIndex, d.index));
+    if (save && d && d.index !== d.startIndex) commitRef.current(moveItem(itemsRef.current, d.startIndex, d.index));
+    // Soltar já grava e encerra o modo (os cards voltam ao normal).
+    setActive(false);
   }, [setDrag]);
 
   const startDrag = useCallback(
@@ -140,37 +144,41 @@ export function useHoldReorder<T extends { id: string }>({
     [update, setDrag],
   );
 
-  // Durante o arraste: segue o dedo pela janela (o card troca de elemento ao entrar no modo,
-  // então não dá para depender de pointer capture) e bloqueia a rolagem do toque.
+  // Durante o arraste: segue o dedo pela janela (o gesto começou no "segurar", antes do modo)
+  // e bloqueia a rolagem do toque.
   const dragging = drag !== null;
   useEffect(() => {
     if (!dragging) return;
     const move = (e: globalThis.PointerEvent) => update(e.clientY);
-    const up = () => finish();
+    const up = (e: globalThis.PointerEvent) => {
+      update(e.clientY);
+      finish(true);
+    };
+    const cancel = () => finish(false);
     const block = (e: TouchEvent) => {
       if (e.cancelable) e.preventDefault();
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
-    window.addEventListener("pointercancel", up);
+    window.addEventListener("pointercancel", cancel);
     window.addEventListener("touchmove", block, { passive: false });
     return () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
-      window.removeEventListener("pointercancel", up);
+      window.removeEventListener("pointercancel", cancel);
       window.removeEventListener("touchmove", block);
     };
   }, [dragging, update, finish]);
 
   useEffect(() => () => cancelHold(), []);
 
+  /** Sai do modo sem mudar a ordem. */
   const exit = useCallback(() => {
     cancelHold();
-    finish();
-    setActive(false);
+    finish(false);
   }, [finish]);
 
-  // Esc sai do modo.
+  // Esc cancela.
   useEffect(() => {
     if (!active) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -224,24 +232,6 @@ export function useHoldReorder<T extends { id: string }>({
       },
       // Segurar no celular não abre menu de contexto/seleção de texto.
       onContextMenu: (e: MouseEvent<HTMLElement>) => e.preventDefault(),
-    }),
-
-    /** No modo: arrastar direto e mover pelo teclado. */
-    dragProps: (id: string) => ({
-      onPointerDown: (e: PointerEvent<HTMLElement>) => {
-        if (disabled || e.button !== 0) return;
-        e.preventDefault();
-        swallowClick.current = false;
-        startDrag(id, e.clientY);
-      },
-      onContextMenu: (e: MouseEvent<HTMLElement>) => e.preventDefault(),
-      onKeyDown: (e: KeyboardEvent<HTMLElement>) => {
-        if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-        e.preventDefault();
-        const from = items.findIndex((i) => i.id === id);
-        const to = from + (e.key === "ArrowUp" ? -1 : 1);
-        if (to >= 0 && to < items.length) onCommit(moveItem(items, from, to));
-      },
     }),
   };
 }

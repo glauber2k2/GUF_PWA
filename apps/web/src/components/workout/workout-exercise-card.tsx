@@ -58,7 +58,6 @@ export interface WorkoutExerciseCardProps {
     dragging: boolean;
     /** Deslocamento do card arrastado acompanhando o dedo (px). */
     dragOffset: number;
-    dragProps: HTMLAttributes<HTMLElement>;
   };
 }
 
@@ -87,10 +86,7 @@ export function WorkoutExerciseCard({
 
   return (
     <article
-      aria-label={
-        reorder ? `${e.name}, posição ${reorder.index + 1} de ${reorder.total}. Arraste ou use as setas para mudar a ordem.` : e.name
-      }
-      {...(reorder && { ...reorder.dragProps, role: "listitem", tabIndex: 0 })}
+      aria-label={reorder ? `${e.name}, posição ${reorder.index + 1} de ${reorder.total}` : e.name}
       className={cn(
         "flex-none overflow-hidden rounded-lg border bg-surface-elevated",
         !reorder && "border-border",
