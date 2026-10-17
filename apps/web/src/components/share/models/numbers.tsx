@@ -7,7 +7,7 @@ export function Story04({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <span className="mt-[240px] text-[30px] font-semibold tracking-[.08em] text-fg">VOLUME TOTAL</span>
@@ -40,7 +40,10 @@ export function Story05({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
-        <span className="text-[26px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO</span>
+        <div className="flex items-center justify-between gap-[24px]">
+          <span className="text-[26px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO</span>
+          <Logo className="h-[88px]" />
+        </div>
         <div className="mt-[120px] flex flex-col gap-[56px]">
           <div className="flex flex-col gap-0">
             <span className="text-[26px] font-semibold tracking-[.08em] text-fg">TEMPO</span>
@@ -112,7 +115,7 @@ export function Story06({ d }: StoryModelProps) {
           </div>
         </div>
         <div className="mt-[32px] flex items-center gap-[16px]">
-          <Logo className="h-[32px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>

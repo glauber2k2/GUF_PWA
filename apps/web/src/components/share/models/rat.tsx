@@ -7,7 +7,7 @@ export function Story08({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] top-[220px] flex items-center gap-[16px] py-[16px] px-[28px] rounded-full bg-surface border border-border">
-        <Logo className="h-[32px]" />
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute left-[400px] right-[96px] top-[640px] p-[48px] rounded-[48px] bg-surface border border-border flex flex-col gap-[12px]">
         <span className="text-[30px] text-fg">Hoje foram</span>
