@@ -5,20 +5,38 @@
 // =====================================================================
 import { createClient } from "npm:@supabase/supabase-js@2";
 
-// Em produção, troque "*" pelo domínio do app (ex.: https://app.guf.com.br)
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Sites autorizados a chamar a função (secret ALLOWED_ORIGINS, separados por vírgula):
+//   npx supabase secrets set ALLOWED_ORIGINS="https://<app>.vercel.app,http://localhost:3000"
+// Sem o secret, aceita qualquer origem (comportamento anterior), para não quebrar o app.
+// O CORS é uma camada extra: quem protege a exclusão é a validação do token abaixo.
+const allowedOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+function corsHeadersFor(origin: string | null): Record<string, string> {
+  const allow = allowedOrigins.length === 0 ? "*" : origin && allowedOrigins.includes(origin) ? origin : null;
+  return {
+    ...(allow ? { "Access-Control-Allow-Origin": allow } : {}),
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin",
+  };
+}
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get("Origin");
+  const corsHeaders = corsHeadersFor(origin);
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+
+  // Navegador em site não autorizado: recusa antes de qualquer outra coisa
+  if (origin && allowedOrigins.length > 0 && !allowedOrigins.includes(origin)) {
+    return json({ error: "Origem não autorizada" }, 403);
+  }
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Método não permitido" }, 405);
 
@@ -39,6 +57,7 @@ Deno.serve(async (req) => {
   // A prova mínima dos consentimentos (art. 16 da LGPD) é guardada pelo gatilho
   // on_auth_user_deleted_preserve_consents em consent_proofs antes da cascata
   // (migration consent_ledger_hardening; prazo de 5 anos a validar com o jurídico).
+  // O registro de auditoria (account_deleted) é gravado pelo gatilho on_auth_user_deleted_audit.
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
   if (deleteError) {

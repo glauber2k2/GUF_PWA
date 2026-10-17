@@ -185,6 +185,8 @@ Funções RPC:
 | `export_my_data()` | Exportar meus dados (JSON, formato `guf-export/2`) |
 
 Edge Function: `delete-account` → `supabase.functions.invoke('delete-account', { method: 'POST' })` e depois `signOut()`.
+- CORS da `delete-account` por lista no secret `ALLOWED_ORIGINS` (`npx supabase secrets set ALLOWED_ORIGINS="https://<app>,http://localhost:3000"`); sem o secret, aceita qualquer origem. Publicar com `npx supabase functions deploy delete-account --use-api`.
+- Cabeçalhos de segurança da hospedagem (HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy) em `vercel.json` (raiz e `apps/web`, até confirmar o Root Directory da Vercel; na Cloudflare, recriar em `_headers`). Checklist em `.lgpd/security-checklist.md`.
 
 ## Regras de negócio
 - **Peso sempre em kg no banco**; conversão para lb só na exibição (`profiles.weight_unit`).
