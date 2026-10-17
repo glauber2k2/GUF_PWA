@@ -18,7 +18,7 @@ export function Story23({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <span className="mt-[120px] text-[26px] font-semibold tracking-[.08em] text-fg">VOLUME SEMANAL</span>
         <div className="mt-[8px] flex items-baseline gap-[12px]">
           <span className="font-display font-bold text-[200px] leading-[180px] text-accent-text">{d.week.volume}</span>
@@ -61,7 +61,7 @@ export function Story24({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col items-center">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg">META DA SEMANA</span>
         <div className="mt-[48px] relative w-[720px] h-[720px]">
           <svg width="720" height="720" viewBox="0 0 720 720" className="block">
@@ -93,7 +93,7 @@ export function Story24({ d }: StoryModelProps) {
           {remaining(d) > 0 ? "para fechar a meta desta semana" : "meta da semana cumprida"}
         </span>
         <div className="mt-[32px] flex items-center gap-[16px]">
-          <Logo className="h-[28px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>

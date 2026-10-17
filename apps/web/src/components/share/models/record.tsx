@@ -8,7 +8,7 @@ export function Story10({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="relative mt-[24px] h-[420px] flex justify-center items-center">
@@ -56,7 +56,7 @@ export function Story11({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <div className="mt-[160px] flex items-center gap-[12px] text-pr-text text-[28px] font-semibold tracking-[.08em]">
           <Trophy size={32} aria-hidden="true" />
           <span>RECORDE PESSOAL</span>
@@ -109,7 +109,7 @@ export function Story12({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute right-[96px] top-[220px]">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute left-[64px] right-[64px] bottom-[260px] p-[40px] rounded-[48px] bg-surface border-[2px] border-pr-text/40 shadow-story-pr flex items-center gap-[36px]">
         <div className="flex-none w-[160px] h-[160px] rounded-full bg-pr/18 text-pr-text flex items-center justify-center">

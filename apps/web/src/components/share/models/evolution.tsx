@@ -11,7 +11,7 @@ export function Story25({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] flex justify-between items-center h-[48px]">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <span className="text-[28px] text-fg">{d.date}</span>
       </div>
       <div className="absolute left-[96px] right-[96px] top-[320px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">
@@ -46,7 +46,7 @@ export function Story26({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <span className="mt-[80px] text-[26px] font-semibold tracking-[.08em] text-fg">EVOLUÇÃO DO MÊS</span>
         <span className="mt-[12px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">
           {d.month.previous.name} x {d.month.current.name.toLowerCase()}
@@ -89,7 +89,7 @@ export function Story27({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.month.current.name}</span>
         </div>
         <span className="mt-[64px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">Músculos do mês</span>

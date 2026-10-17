@@ -208,6 +208,7 @@
 | Carregamento com a animação da logo (`GufLoader`): **08 (Cometa)** nos botões com `loading`; **09 (Sonar)** na abertura do app (verificação da sessão e carregamento da Início depois do login); **07 (Ponto saltitante)** no "Salvando". Botão carregando não aceita toques (evita gravar duas vezes). | Web (`ds/actions.tsx`, `ds/loading.tsx`) |
 | Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
 | Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
+| A logo completa do guf aparece em todos os 34 modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
 
 ## 10. Pontos em aberto (decisões de produto)
 

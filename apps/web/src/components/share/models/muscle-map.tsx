@@ -50,7 +50,7 @@ export function Story01({ d }: StoryModelProps) {
           </div>
         </div>
         <div className="mt-[32px] flex items-center gap-[16px]">
-          <Logo className="h-[32px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
@@ -65,7 +65,7 @@ export function Story02({ d }: StoryModelProps) {
         <StoryFigure view="front" height={1000} levels={d.muscles} />
       </div>
       <div className="absolute left-[96px] top-[220px] bottom-[260px] w-[460px] flex flex-col">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <div className="mt-[72px] text-[60px] leading-[68px] font-bold tracking-[-.02em]">{d.focus}</div>
         <span className="mt-[12px] text-[28px] text-fg">{[d.routine, d.date].filter(Boolean).join(" · ")}</span>
         <div className="mt-[88px] flex flex-col gap-[56px]">
@@ -124,7 +124,7 @@ export function Story03({ d }: StoryModelProps) {
           </div>
         </div>
         <div className="self-center flex items-center gap-[16px] py-[16px] px-[28px] rounded-full bg-surface border border-border">
-          <Logo className="h-[32px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
