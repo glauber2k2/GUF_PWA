@@ -1,5 +1,5 @@
 import type { Database } from "@guf/types";
-import type { ConsentSource, LegalReaderDocType } from "@guf/core";
+import type { ConsentSource, LegalHashDocType, LegalReaderDocType } from "@guf/core";
 import { authError, type AuthResult, type Platform } from "./auth";
 import type { GufClient } from "./client";
 import { toApiError, type ApiResult } from "./result";
@@ -144,6 +144,33 @@ export async function getLegalOverview(client: GufClient): Promise<ApiResult<Leg
       }
     }
     return { data: { current, accepted }, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+}
+
+/* =====================================================================
+ * Hash das versões vigentes (conferência do texto exibido × banco; só desenvolvimento)
+ * ===================================================================== */
+
+export type CurrentLegalHashes = Partial<Record<LegalHashDocType, { contentHash: string; summaryHash: string | null }>>;
+
+const HASH_TYPES: LegalHashDocType[] = ["terms", "privacy", "age_declaration", "health_consent"];
+
+export async function getCurrentLegalHashes(client: GufClient): Promise<ApiResult<CurrentLegalHashes>> {
+  try {
+    const { data, error } = await client
+      .from("legal_documents")
+      .select("doc_type, content_hash, summary_hash, published_at")
+      .in("doc_type", HASH_TYPES)
+      .order("published_at", { ascending: false });
+    if (error) return { data: null, error: toApiError(error) };
+
+    const current: CurrentLegalHashes = {};
+    for (const doc of data) {
+      current[doc.doc_type as LegalHashDocType] ??= { contentHash: doc.content_hash, summaryHash: doc.summary_hash };
+    }
+    return { data: current, error: null };
   } catch (e) {
     return { data: null, error: toApiError(e) };
   }
