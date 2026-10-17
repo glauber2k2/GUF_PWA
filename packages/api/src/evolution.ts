@@ -4,6 +4,7 @@ import {
   durationSeconds,
   pauseStats,
   recordSetIndex,
+  previousLoadBest,
   sessionLoadRecord,
   sessionTotals,
   withRecords,
@@ -50,6 +51,9 @@ export interface WorkoutSummaryRecord {
   exerciseName: string;
   weightKg: number;
   reps: number | null;
+  /** Melhor carga antes deste treino (o recorde batido) e o dia em que foi feita. */
+  previousWeightKg: number | null;
+  previousOn: string | null;
 }
 
 /** Treino concluído com tudo o que a tela de resumo mostra. */
@@ -163,9 +167,20 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
     const exercises = exerciseRows.map<SummaryExercise>(({ se, sets }) => {
       const name = se.exercises?.name ?? "Exercício";
       const performed = sets.map(toPerformed);
-      const recordKg = sessionLoadRecord(histories.data.get(se.exercise_id) ?? [], s.id, s.performed_on, earlierSameDay);
+      const history = histories.data.get(se.exercise_id) ?? [];
+      const recordKg = sessionLoadRecord(history, s.id, s.performed_on, earlierSameDay);
       const recordIndex = recordSetIndex(performed, recordKg);
-      if (recordKg !== null) records.push({ exerciseId: se.exercise_id, exerciseName: name, weightKg: recordKg, reps: performed[recordIndex ?? -1]?.reps ?? null });
+      if (recordKg !== null) {
+        const previous = previousLoadBest(history, s.id, s.performed_on, earlierSameDay);
+        records.push({
+          exerciseId: se.exercise_id,
+          exerciseName: name,
+          weightKg: recordKg,
+          reps: performed[recordIndex ?? -1]?.reps ?? null,
+          previousWeightKg: previous?.weightKg ?? null,
+          previousOn: previous?.performedOn ?? null,
+        });
+      }
       const totals = sessionTotals(sets.map(toCompleted));
       return {
         id: se.id,

@@ -154,3 +154,9 @@
   --rat-outline: drop-shadow(1.2px 0 0 var(--ink-700)) drop-shadow(-1.2px 0 0 var(--ink-700)) drop-shadow(0 1.2px 0 var(--ink-700)) drop-shadow(0 -1.2px 0 var(--ink-700));
 }
 
+/* Fundo quadriculado da prévia dos stories (mostra a transparência do PNG). */
+:root,
+[data-theme],
+.light {
+  --story-checker: repeating-conic-gradient(var(--surface-3) 0% 25%, var(--surface-elevated) 0% 50%);
+}

@@ -273,27 +273,27 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
         <div role="list" aria-label="Exercícios da rotina" className="relative flex flex-col gap-2">
           {/* Os outros exercícios deslizam para o lugar ao reordenar, remover ou desfazer. */}
           <AnimatePresence initial={false} mode="popLayout">
-          {reorder.order.map((exercise) => (
-            <LayoutItem
-              key={exercise.id}
-              role="presentation"
-              {...LAYOUT_ITEM_PROPS}
-              className={cn("flex flex-col", reorder.draggingId === exercise.id && "relative z-10")}
-            >
-            <RoutineExerciseCard
-              exercise={exercise}
-              open={openId === exercise.id}
-              dragging={reorder.draggingId === exercise.id}
-              disabled={disabled}
-              showErrors={showErrors}
-              itemRef={reorder.itemRef(exercise.id)}
-              handleProps={reorder.handleProps(exercise.id)}
-              onToggle={() => setOpenId(openId === exercise.id ? null : exercise.id)}
-              onMenu={() => setSheet({ kind: "menu", exerciseId: exercise.id })}
-              dispatch={dispatch}
-            />
-            </LayoutItem>
-          ))}
+            {reorder.order.map((exercise) => (
+              <LayoutItem
+                key={exercise.id}
+                role="presentation"
+                {...LAYOUT_ITEM_PROPS}
+                className={cn("flex flex-col", reorder.draggingId === exercise.id && "relative z-10")}
+              >
+                <RoutineExerciseCard
+                  exercise={exercise}
+                  open={openId === exercise.id}
+                  dragging={reorder.draggingId === exercise.id}
+                  disabled={disabled}
+                  showErrors={showErrors}
+                  itemRef={reorder.itemRef(exercise.id)}
+                  handleProps={reorder.handleProps(exercise.id)}
+                  onToggle={() => setOpenId(openId === exercise.id ? null : exercise.id)}
+                  onMenu={() => setSheet({ kind: "menu", exerciseId: exercise.id })}
+                  dispatch={dispatch}
+                />
+              </LayoutItem>
+            ))}
           </AnimatePresence>
         </div>
       )}

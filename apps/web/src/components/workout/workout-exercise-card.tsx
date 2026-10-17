@@ -110,11 +110,7 @@ export function WorkoutExerciseCard({
         <div className="flex flex-none items-center gap-0.5 pt-3.5">
           <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${e.name}`} onClick={onOpenMenu} />
           {/* Seta só indica o estado: o cabeçalho inteiro já é o botão (fora da ordem do Tab). */}
-          <span
-            aria-hidden="true"
-            onClick={onToggleOpen}
-            className="grid size-11 cursor-pointer place-items-center text-fg-secondary"
-          >
+          <span aria-hidden="true" onClick={onToggleOpen} className="grid size-11 cursor-pointer place-items-center text-fg-secondary">
             <Icon
               icon={ChevronDown}
               size={20}
@@ -139,22 +135,20 @@ export function WorkoutExerciseCard({
             return (
               <PresenceRow key={s.id}>
                 <SwipeToDelete label="Remover série" onDelete={() => onRemoveSet(i)}>
-                <SetRow
-                  type={s.setType}
-                  number={normalCount}
-                  previous={previousLabel(
-                    s.previous && { weightKg: toDisplayWeight(s.previous.weightKg, unit), reps: s.previous.reps },
-                  )}
-                  weightKg={toDisplayWeight(s.weightKg, unit)}
-                  reps={s.reps}
-                  done={s.isCompleted}
-                  pr={records[i]}
-                  pop={poppedKey === `${e.id}:${i}`}
-                  field={editing?.setIndex === i ? { key: editing.field === "weightKg" ? "kg" : "reps", state: "editing" } : undefined}
-                  onToggle={() => onToggleSet(i)}
-                  onCycleType={() => onCycleType(i)}
-                  onEditField={(key) => onEditField(i, key === "kg" ? "weightKg" : "reps")}
-                />
+                  <SetRow
+                    type={s.setType}
+                    number={normalCount}
+                    previous={previousLabel(s.previous && { weightKg: toDisplayWeight(s.previous.weightKg, unit), reps: s.previous.reps })}
+                    weightKg={toDisplayWeight(s.weightKg, unit)}
+                    reps={s.reps}
+                    done={s.isCompleted}
+                    pr={records[i]}
+                    pop={poppedKey === `${e.id}:${i}`}
+                    field={editing?.setIndex === i ? { key: editing.field === "weightKg" ? "kg" : "reps", state: "editing" } : undefined}
+                    onToggle={() => onToggleSet(i)}
+                    onCycleType={() => onCycleType(i)}
+                    onEditField={(key) => onEditField(i, key === "kg" ? "weightKg" : "reps")}
+                  />
                 </SwipeToDelete>
               </PresenceRow>
             );

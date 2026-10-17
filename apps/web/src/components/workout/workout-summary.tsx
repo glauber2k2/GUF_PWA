@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Check } from "lucide-react";
+import { CalendarDays, Check, Share2 } from "lucide-react";
 import type { FinishedWorkoutSummary } from "@guf/api";
 import {
   formatElapsed,
@@ -24,6 +24,8 @@ export interface WorkoutSummaryProps {
   pending?: boolean;
   onDone: () => void;
   onOpenHistory: () => void;
+  /** Abre a folha de stories (só quando o treino já está no servidor). */
+  onShare?: () => void;
 }
 
 /** Resumo do treino concluído: números contando e recordes do dia em dourado. */
@@ -36,6 +38,7 @@ export function WorkoutSummary({
   pending = false,
   onDone,
   onOpenHistory,
+  onShare,
 }: WorkoutSummaryProps) {
   const volume = useCountUp(Math.round(toDisplayWeight(summary.volumeKg, unit) ?? 0), { delayMs: 250 });
   const sets = useCountUp(summary.setCount, { delayMs: 250 });
@@ -81,18 +84,24 @@ export function WorkoutSummary({
 
       {prs.length > 0 && (
         <>
-          <span className="mt-2 text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">
-            Recordes pessoais
-          </span>
+          <span className="mt-2 text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">Recordes pessoais</span>
           {prs.map((pr, i) => (
             <div key={`${pr.exerciseName}-${i}`} className="animate-guf-rise" style={{ animationDelay: `${300 + i * 120}ms` }}>
-              <PRHighlight label={`Maior carga · ${pr.exerciseName}`} value={`${formatNumber(toDisplayWeight(pr.weightKg, unit) ?? 0)} ${unit} ${TIMES_SIGN} ${pr.reps}`} />
+              <PRHighlight
+                label={`Maior carga · ${pr.exerciseName}`}
+                value={`${formatNumber(toDisplayWeight(pr.weightKg, unit) ?? 0)} ${unit} ${TIMES_SIGN} ${pr.reps}`}
+              />
             </div>
           ))}
         </>
       )}
 
       <div className="mt-auto flex flex-col gap-1 pt-6">
+        {onShare && !pending && (
+          <Button variant="secondary" size="lg" icon={Share2} fullWidth onClick={onShare} className="mb-1">
+            Compartilhar nos Stories
+          </Button>
+        )}
         <Button size="lg" fullWidth onClick={onDone}>
           Concluir
         </Button>
