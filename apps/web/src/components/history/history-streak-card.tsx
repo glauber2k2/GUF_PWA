@@ -23,7 +23,7 @@ const CARD_TONES: Record<StreakStatus | "record", { card: string; tile: string }
 
 /**
  * Sequência de semanas do Histórico. Números SEMPRE do get_streak() (regra: 1 treino concluído
- * na semana seg–dom mantém a sequência; a semana atual sem treino fica "em risco" até domingo).
+ * na semana dom–sáb mantém a sequência; a semana atual sem treino fica "em risco" até sábado).
  */
 export function HistoryStreakCard({ streak, goal, weeks }: { streak: StreakSummary; goal: number | null; weeks: StripWeek[] }) {
   const status = streakStatus(streak);

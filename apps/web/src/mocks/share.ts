@@ -18,11 +18,20 @@ export function setShareMockScenario(value: string | null | undefined) {
   scenario = value === "sem-recordes" || value === "erro" || value === "novo" ? value : "padrao";
 }
 
-const set = (weightKg: number | null, reps: number, setType: "normal" | "warmup" = "normal") => ({ setType, weightKg, reps });
+const set = (weightKg: number | null, reps: number, setType: "normal" | "warmup" = "normal") => ({
+  setType,
+  weightKg,
+  reps,
+  completedAt: null as string | null,
+});
 
 function sampleInput(today: Date): StoryInput {
   const performedOn = toLocalISODate(today);
-  const ex = (name: string, muscleGroup: string, sets: Array<ReturnType<typeof set>>) => {
+  // Séries concluídas a cada ~1:32 (descanso médio do exemplo).
+  let clock = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 40).getTime();
+  const ex = (name: string, muscleGroup: string, raw: Array<ReturnType<typeof set>>) => {
+    const sets = raw.map((s) => ({ ...s, completedAt: new Date((clock += 92_000)).toISOString() }));
+    clock += 4 * 60_000;
     const working = sets.filter((s) => s.setType !== "warmup");
     return { name, muscleGroup, sets, setCount: working.length, volumeKg: working.reduce((n, s) => n + (s.weightKg ?? 0) * s.reps, 0) };
   };
@@ -40,8 +49,8 @@ function sampleInput(today: Date): StoryInput {
     scenario === "sem-recordes" || scenario === "novo"
       ? []
       : [
-          { exerciseName: "Supino reto com barra", weightKg: 80, previousWeightKg: 75, previousOn: lastMonth },
-          { exerciseName: "Tríceps na polia", weightKg: 30, previousWeightKg: 27.5, previousOn: lastMonth },
+          { exerciseName: "Supino reto com barra", weightKg: 80, reps: 8, previousWeightKg: 75, previousOn: lastMonth },
+          { exerciseName: "Tríceps na polia", weightKg: 30, reps: 12, previousWeightKg: 27.5, previousOn: lastMonth },
         ];
   // 16 semanas: 12 seguidas com treino (as 4 mais antigas sem).
   const trainingDays = Array.from({ length: 16 * 7 }, (_, i) => addLocalDays(today, -i))
@@ -70,6 +79,20 @@ function sampleInput(today: Date): StoryInput {
     weeklyGoal: 4,
     trainingDays,
     monthSets,
+    history: { totalWorkouts: scenario === "novo" ? 1 : 150, firstWorkoutOn: toLocalISODate(addLocalDays(today, scenario === "novo" ? 0 : -220)) },
+    featured:
+      scenario === "novo"
+        ? null
+        : {
+            exerciseName: "Supino reto com barra",
+            points: [70, 72.5, 72.5, 75, 77.5, 80].map((kg, i) => ({
+              performedOn: toLocalISODate(addLocalDays(today, -7 * (5 - i) - (i === 5 ? 0 : 1))),
+              maxWeightKg: kg,
+              e1rmKg: Math.round(kg * (1 + 8 / 30) * 10) / 10,
+            })),
+          },
+    monthActiveSeconds: trainingDays.filter((d) => d.performedOn.slice(0, 7) === performedOn.slice(0, 7)).length * 66 * 60,
+    project: scenario === "novo" ? null : { name: "Hipertrofia 2026 – ABC", workouts: 58, volumeKg: 612_400, firstOn: toLocalISODate(addLocalDays(today, -12 * 7 + 3)) },
   };
 }
 

@@ -9,6 +9,25 @@ import { ptBR } from "date-fns/locale";
 const WEEKDAY_LONG = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"] as const;
 const WEEKDAY_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"] as const;
 
+/** A semana do app vai de domingo a sábado (calendários, sequência, meta semanal e stories). */
+export const WEEK_STARTS_ON = 0;
+
+/** Iniciais dos dias na ordem da semana do app: D S T Q Q S S. */
+export const WEEKDAY_INITIALS = ["D", "S", "T", "Q", "Q", "S", "S"] as const;
+
+/** Nomes curtos na ordem da semana do app: Dom, Seg … Sáb. */
+export const WEEKDAY_SHORT_NAMES = WEEKDAY_SHORT;
+
+/** Domingo da semana (dom–sáb) que contém a data. */
+export function startOfLocalWeek(date: Date): Date {
+  return startOfWeek(date, { weekStartsOn: WEEK_STARTS_ON });
+}
+
+/** Posição do dia na semana do app: 0 = domingo … 6 = sábado. */
+export function weekdayPosition(date: Date): number {
+  return date.getDay();
+}
+
 /** Data local no formato do banco (performed_on): "2026-10-09". */
 export function toLocalISODate(date: Date): string {
   return format(date, "yyyy-MM-dd");
@@ -49,11 +68,11 @@ export interface WeekDay {
   relation: WeekDayRelation;
 }
 
-/** Semana de segunda a domingo que contém `today` (regra da sequência: seg–dom). */
+/** Semana de domingo a sábado que contém `today` (regra da sequência: dom–sáb). */
 export function currentWeek(today: Date): WeekDay[] {
-  const monday = startOfWeek(today, { weekStartsOn: 1 });
+  const sunday = startOfLocalWeek(today);
   return Array.from({ length: 7 }, (_, i) => {
-    const date = addDays(monday, i);
+    const date = addDays(sunday, i);
     const shortName = WEEKDAY_SHORT[date.getDay()] ?? "";
     const relation: WeekDayRelation = isSameDay(date, today) ? "today" : date < today ? "past" : "future";
     return {

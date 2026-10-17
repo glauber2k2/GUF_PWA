@@ -4,7 +4,7 @@ import { WEEKDAYS, weekdaysLabel, type IsoWeekday } from "@guf/core";
 import { cn } from "@/lib/utils";
 
 export interface WeekdayPickerProps {
-  /** Dias da rotina (ISO: 1 = segunda … 7 = domingo). */
+  /** Dias da rotina (ISO do banco: 1 = segunda … 7 = domingo; exibidos de domingo a sábado). */
   value: readonly number[];
   /** Outras rotinas do projeto por dia (bolinha e aviso: o dia já tem treino). */
   otherRoutines: ReadonlyMap<number, string[]>;

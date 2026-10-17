@@ -1,12 +1,13 @@
 import { forwardRef, type CSSProperties } from "react";
 import type { StoryData } from "@guf/core";
+import { cn } from "@/lib/utils";
 import type { StoryModel } from "./story-catalog";
-import type { StoryTheme } from "./story-types";
+import type { StoryFormat, StoryTheme } from "./story-types";
 
 export interface StoryArtProps {
   model: StoryModel;
   data: StoryData;
-  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). */
+  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). Stickers são sempre sem fundo. */
   backgroundOpacity: number;
   /** Tema da imagem (escolhido na folha; independe do tema do app). */
   theme: StoryTheme;
@@ -36,20 +37,23 @@ export function storyArtColors(opacity: number, theme: StoryTheme): CSSPropertie
   } as CSSProperties;
 }
 
+/** Caixa de cada formato (o sticker se ajusta ao conteúdo, com folga para a sombra). */
+const FORMAT_BOX: Record<StoryFormat, string> = {
+  story: "relative h-[1920px] w-[1080px] overflow-hidden",
+  feed: "relative h-[1350px] w-[1080px] overflow-hidden",
+  sticker: "inline-block p-[32px]",
+};
+
 /**
- * Arte do story em tamanho real (1080 × 1920). A folha mostra em escala e a exportação para PNG
- * captura este mesmo elemento.
+ * Arte em tamanho real. A folha mostra em escala e a exportação para PNG captura este mesmo elemento.
  */
 export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function StoryArt({ model, data, backgroundOpacity, theme }, ref) {
   const { Component } = model;
+  const format = model.format ?? "story";
+  // Sticker: forma sólida sobre fundo transparente; os outros seguem a opacidade escolhida (valores dinâmicos).
+  const colors = format === "sticker" ? { ...storyArtColors(100, theme), background: "transparent" } : storyArtColors(backgroundOpacity, theme);
   return (
-    <div
-      ref={ref}
-      data-theme={theme}
-      className="relative h-[1920px] w-[1080px] overflow-hidden font-sans text-fg tabular-nums"
-      // Fundo e superfícies pela opacidade escolhida (valores dinâmicos).
-      style={storyArtColors(backgroundOpacity, theme)}
-    >
+    <div ref={ref} data-theme={theme} className={cn(FORMAT_BOX[format], "font-sans text-fg tabular-nums")} style={colors}>
       <Component d={data} />
     </div>
   );

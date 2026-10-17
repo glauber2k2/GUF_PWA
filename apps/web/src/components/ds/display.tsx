@@ -368,7 +368,7 @@ const WEEK_CIRCLE: Record<WeekDayState, string> = {
   future: "border border-dashed border-border-strong opacity-70",
 };
 
-/** Semana de segunda a domingo: treinou (volt), hoje (contorno), passado e futuro. */
+/** Semana de domingo a sábado: treinou (volt), hoje (contorno), passado e futuro. */
 export function WeekStrip({
   days,
   onSelectDay,
