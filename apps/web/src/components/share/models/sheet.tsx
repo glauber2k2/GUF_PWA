@@ -1,7 +1,8 @@
 // Stories · Ficha (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import { Trophy } from "lucide-react";
-import { Logo } from "@/components/ds";
+import { GufRat, Logo } from "@/components/ds";
 import { StoryFigure } from "../story-figure";
+import { StoryCenterCard, StoryExerciseRows } from "./center-card";
 import { plural } from "@guf/core";
 import { cn } from "@/lib/utils";
 import { STORY_SIGNATURE, type StoryModelProps } from "../story-types";
@@ -302,5 +303,47 @@ export function Story21({ d }: StoryModelProps) {
         </div>
       </div>
     </>
+  );
+}
+
+/** Linhas do "Treino de hoje" (modelos 37 e 38). */
+const TODAY_ROWS = 6;
+const todayMeta = (d: StoryModelProps["d"]) =>
+  `${plural(d.exerciseCount, "exercício", "exercícios")} · ${plural(d.sets, "série", "séries")} · ${d.duration}`;
+
+export function Story37({ d }: StoryModelProps) {
+  return (
+    <StoryCenterCard label={d.date}>
+      <div className="flex items-center gap-[24px]">
+        <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
+          <span className="text-[30px] font-bold tracking-[.08em] text-accent-text">TREINO DE HOJE</span>
+          <span className="text-[52px] leading-[58px] font-bold tracking-[-.02em]">{d.title}</span>
+          <span className="text-[32px] text-fg">{todayMeta(d)}</span>
+        </div>
+        <div className="flex flex-none gap-[8px]">
+          <StoryFigure view="front" height={220} levels={d.muscles} />
+          <StoryFigure view="back" height={220} levels={d.muscles} />
+        </div>
+      </div>
+      <StoryExerciseRows rows={d.exercises.slice(0, TODAY_ROWS)} />
+    </StoryCenterCard>
+  );
+}
+
+export function Story38({ d }: StoryModelProps) {
+  return (
+    <StoryCenterCard label={d.date}>
+      <div className="flex items-center gap-[20px]">
+        <div className="flex-none">
+          <GufRat occasion="loadUp" size={230} animated={false} label={null} />
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-[8px]">
+          <span className="text-[30px] font-bold tracking-[.08em] text-accent-text">TREINO DE HOJE</span>
+          <span className="text-[48px] leading-[54px] font-bold tracking-[-.02em]">{d.title}</span>
+          <span className="text-[32px] text-fg">{todayMeta(d)}</span>
+        </div>
+      </div>
+      <StoryExerciseRows rows={d.exercises.slice(0, TODAY_ROWS)} />
+    </StoryCenterCard>
   );
 }
