@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CalendarDays, CalendarX, Pause, Trash2 } from "lucide-react";
+import { CalendarDays, CalendarX, Pause, Share2, Trash2 } from "lucide-react";
 import { formatElapsed, formatNumber, pauseSummaryLabel, plural, toDisplayWeight, workoutDateTimeLabel } from "@guf/core";
 import type { WorkoutSummaryDetail } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
-import { Banner, BottomSheet, ConfirmDialog, EmptyState, Icon, SavingOverlay } from "@/components/ds";
+import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, Icon, SavingOverlay } from "@/components/ds";
 import { DetailHeader } from "@/components/evolution/detail-header";
 import { summaryPath } from "@/components/evolution/paths";
 import { useGoBack } from "@/components/evolution/use-go-back";
+import { ShareStorySheet, STORY_SAVED_TOAST } from "@/components/share/share-story-sheet";
 import { useCountUp } from "@/hooks/use-count-up";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/hooks/use-evolution";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -60,7 +61,15 @@ export function SummaryScreen() {
         </>
       ) : (
         // key: ao trocar para outro treino do dia (após excluir), a tela recomeça do zero.
-        <SummaryContent key={data.id} summary={data} source={summary.data?.source ?? "network"} offline={offline} openDelete={dev.openDelete} onBack={goBack} />
+        <SummaryContent
+          key={data.id}
+          summary={data}
+          source={summary.data?.source ?? "network"}
+          offline={offline}
+          openDelete={dev.openDelete}
+          mockScenario={dev.scenario}
+          onBack={goBack}
+        />
       )}
     </main>
   );
@@ -79,18 +88,21 @@ function SummaryContent({
   source,
   offline,
   openDelete,
+  mockScenario,
   onBack,
 }: {
   summary: WorkoutSummaryDetail;
   source: SummarySource;
   offline: boolean;
   openDelete: boolean;
+  /** Só desenvolvimento (?estado=): os stories também usam o mock. */
+  mockScenario?: string | null;
   onBack: () => void;
 }) {
   const shell = useAppShell();
   const router = useRouter();
   const remove = useDeleteWorkout();
-  const [overlay, setOverlay] = useState<"menu" | "confirm" | null>(openDelete ? "confirm" : null);
+  const [overlay, setOverlay] = useState<"menu" | "confirm" | "share" | null>(openDelete ? "confirm" : null);
   const unit = summary.weightUnit;
   const pending = source === "pending";
   // Finalizado offline e ainda não enviado: o servidor ainda não tem o treino para excluir.
@@ -118,7 +130,10 @@ function SummaryContent({
         overline={overline}
         title={summary.name}
         position={{ index: summary.daySessionIds.indexOf(summary.id) + 1, total: summary.daySessionIds.length }}
-        onBack={onBack} menuLabel="Mais opções do treino" onMenu={() => setOverlay("menu")} />
+        onBack={onBack}
+        menuLabel="Mais opções do treino"
+        onMenu={() => setOverlay("menu")}
+      />
       <div className="flex flex-col gap-4 pt-2">
         {offline && <OfflineBanner />}
         {pending && (
@@ -133,6 +148,17 @@ function SummaryContent({
         </span>
 
         <SummaryStats summary={summary} pauseText={pauseText} />
+        {/* Stories: o treino precisa estar no servidor (finalizado sem internet: espera o envio). */}
+        <Button
+          variant="secondary"
+          icon={Share2}
+          fullWidth
+          disabled={pending}
+          onClick={() => setOverlay("share")}
+          className="animate-guf-rise"
+        >
+          {pending ? "Compartilhar quando o treino for enviado" : "Compartilhar nos Stories"}
+        </Button>
         {summary.records.length > 0 && <SummaryRecords records={summary.records} unit={unit} />}
 
         <section aria-labelledby="summary-exercises" className="flex flex-col gap-2.5">
@@ -147,6 +173,14 @@ function SummaryContent({
           ))}
         </section>
       </div>
+
+      <ShareStorySheet
+        open={overlay === "share"}
+        sessionId={summary.id}
+        mockScenario={mockScenario}
+        onClose={() => setOverlay(null)}
+        onSaved={() => shell.showToast(STORY_SAVED_TOAST[0], STORY_SAVED_TOAST[1])}
+      />
 
       <BottomSheet placement="screen" open={overlay === "menu"} onClose={() => setOverlay(null)} title={summary.name}>
         <button

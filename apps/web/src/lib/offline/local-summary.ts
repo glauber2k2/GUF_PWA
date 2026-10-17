@@ -23,7 +23,16 @@ export function summaryFromWorkout(w: ActiveWorkout, finishedAt: Date): WorkoutS
     const flags = markLoadRecords(done, e.bestKg);
     const recordKg = done.reduce<number | null>((best, s, i) => (flags[i] && (best === null || (s.weightKg ?? 0) > best) ? (s.weightKg ?? null) : best), null);
     const recordIndex = recordSetIndex(done, recordKg);
-    if (recordKg !== null) records.push({ exerciseId: e.exerciseId, exerciseName: e.name, weightKg: recordKg, reps: done[recordIndex ?? -1]?.reps ?? null });
+    // No aparelho só se conhece o recorde anterior (bestKg), não o dia em que foi feito.
+    if (recordKg !== null)
+      records.push({
+        exerciseId: e.exerciseId,
+        exerciseName: e.name,
+        weightKg: recordKg,
+        reps: done[recordIndex ?? -1]?.reps ?? null,
+        previousWeightKg: e.bestKg,
+        previousOn: null,
+      });
     const totals = sessionTotals(done);
     return [
       {
