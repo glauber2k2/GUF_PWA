@@ -8,7 +8,7 @@ export function Story13({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col items-center">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <StreakFlame size={420} className="mt-[96px] text-accent-text" />
         <span className="mt-[24px] font-display font-bold text-[280px] leading-[240px]">{d.streak.current}</span>
         <span className="mt-[8px] text-[34px] font-semibold tracking-[.08em] text-accent-text">
@@ -31,7 +31,7 @@ export function Story14({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col items-center">
         <div className="self-stretch flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">Semana {d.streak.weekNumber}</span>
         </div>
         <div className="mt-[96px] w-[620px] h-[620px] rounded-full bg-surface border border-border flex items-center justify-center">
@@ -78,7 +78,7 @@ export function Story15({ d }: StoryModelProps) {
           </div>
         </div>
         <div className="flex items-center gap-[12px] py-[12px] px-[24px] rounded-full bg-surface border border-border">
-          <Logo className="h-[28px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>

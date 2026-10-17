@@ -14,7 +14,7 @@ export function Story19({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] p-[56px] rounded-[32px] bg-surface border border-border flex flex-col">
         <div className="flex flex-col items-center gap-[12px]">
-          <Logo className="h-[44px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[24px] text-fg">Evolução Fitness</span>
           <span className="text-[26px] text-fg">{d.dateTime}</span>
         </div>
@@ -67,7 +67,7 @@ export function Story20({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="mt-[56px] flex items-center gap-[40px]">
@@ -118,7 +118,7 @@ export function Story20B({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="mt-[40px] flex justify-center gap-[56px]">
@@ -165,7 +165,7 @@ export function Story20C({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-start gap-[24px]">
           <div className="flex flex-col gap-[16px]">
-            <Logo className="h-[40px]" />
+            <Logo className="h-[88px]" />
             <span className="mt-[40px] text-[24px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO</span>
             <span className="text-[60px] leading-[68px] font-bold tracking-[-.02em]">{d.focus}</span>
             <span className="text-[28px] text-fg">{[d.routine, d.date].filter(Boolean).join(" · ")}</span>
@@ -220,7 +220,7 @@ export function Story20D({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
-          <Logo className="h-[40px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <span className="mt-[64px] text-[56px] leading-[64px] font-bold tracking-[-.02em]">{d.title}</span>
@@ -277,7 +277,7 @@ export function Story21({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
-        <Logo className="h-[40px]" />
+        <Logo className="h-[88px]" />
         <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg">VOLUME POR EXERCÍCIO</span>
         <span className="mt-[12px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">{d.focus}</span>
         <div className="mt-[72px] flex flex-col gap-[44px]">
