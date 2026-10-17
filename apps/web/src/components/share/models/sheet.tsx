@@ -15,8 +15,8 @@ export function Story19({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] p-[56px] rounded-[32px] bg-surface border border-border flex flex-col">
         <div className="flex flex-col items-center gap-[12px]">
           <Logo className="h-[44px]" />
-          <span className="text-[24px] text-fg-muted">Evolução Fitness</span>
-          <span className="text-[26px] text-fg-secondary">{d.dateTime}</span>
+          <span className="text-[24px] text-fg">Evolução Fitness</span>
+          <span className="text-[26px] text-fg">{d.dateTime}</span>
         </div>
         <div className="mt-[40px] border-t-[3px] border-dashed border-border-strong"></div>
         <span className="mt-[32px] text-[40px] font-bold tracking-[-.01em]">{d.title}</span>
@@ -24,9 +24,9 @@ export function Story19({ d }: StoryModelProps) {
           {d.exercises.slice(0, MAX_ROWS).map((e) => (
             <div key={e.name} className="flex gap-[16px]">
               <span className="flex-1 min-w-0 truncate">{e.name}</span>
-              <span className="w-[110px] text-right font-display font-semibold text-[32px] text-fg-secondary">{e.scheme}</span>
+              <span className="w-[110px] text-right font-display font-semibold text-[32px] text-fg">{e.scheme}</span>
               {e.loadShort === "corporal" ? (
-                <span className="w-[130px] text-right text-[22px] text-fg-secondary">corporal</span>
+                <span className="w-[130px] text-right text-[22px] text-fg">corporal</span>
               ) : (
                 <span className="w-[130px] text-right font-display font-semibold text-[32px]">{e.loadShort}</span>
               )}
@@ -34,7 +34,7 @@ export function Story19({ d }: StoryModelProps) {
           ))}
         </div>
         <div className="mt-[40px] border-t-[3px] border-dashed border-border-strong"></div>
-        <div className="mt-[32px] flex flex-col gap-[16px] text-[28px] text-fg-secondary">
+        <div className="mt-[32px] flex flex-col gap-[16px] text-[28px] text-fg">
           <div className="flex justify-between">
             <span>Tempo</span>
             <span className="font-display font-semibold text-[34px] text-fg">{d.duration}</span>
@@ -54,7 +54,7 @@ export function Story19({ d }: StoryModelProps) {
             {d.volume} {d.unit}
           </span>
         </div>
-        <div className="mt-auto border-t-[3px] border-dashed border-border-strong pt-[28px] text-center text-[22px] text-fg-muted">
+        <div className="mt-[32px] border-t-[3px] border-dashed border-border-strong pt-[28px] text-center text-[22px] text-fg">
           {STORY_SIGNATURE}
         </div>
       </div>
@@ -68,7 +68,7 @@ export function Story20({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
           <Logo className="h-[40px]" />
-          <span className="text-[28px] text-fg-secondary">{d.date}</span>
+          <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="mt-[56px] flex items-center gap-[40px]">
           <div className="flex gap-[12px] flex-none">
@@ -80,16 +80,16 @@ export function Story20({ d }: StoryModelProps) {
             <div className="grid grid-cols-2 gap-[20px]">
               <div className="flex flex-col gap-[4px]">
                 <span className="font-display font-semibold text-[56px] leading-[56px]">{d.duration}</span>
-                <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">TEMPO</span>
+                <span className="text-[20px] font-semibold tracking-[.08em] text-fg">TEMPO</span>
               </div>
               <div className="flex flex-col gap-[4px]">
                 <span className="font-display font-semibold text-[56px] leading-[56px] text-accent-text">{d.volume}</span>
-                <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">{d.unit.toUpperCase()}</span>
+                <span className="text-[20px] font-semibold tracking-[.08em] text-fg">{d.unit.toUpperCase()}</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="mt-[64px] flex items-center gap-[24px] h-[48px] border-b-[2px] border-border-strong text-[22px] font-semibold tracking-[.08em] text-fg-muted">
+        <div className="mt-[64px] flex items-center gap-[24px] h-[48px] border-b-[2px] border-border-strong text-[22px] font-semibold tracking-[.08em] text-fg">
           <span className="flex-1">EXERCÍCIO</span>
           <span className="w-[96px] text-right">SÉRIES</span>
           <span className="w-[96px] text-right">REPS</span>
@@ -98,16 +98,16 @@ export function Story20({ d }: StoryModelProps) {
         {d.exercises.slice(0, MAX_ROWS).map((e) => (
           <div key={e.name} className="flex items-center gap-[24px] h-[72px] border-b border-border text-[30px]">
             <span className="flex-1 min-w-0 whitespace-nowrap overflow-hidden text-ellipsis">{e.name}</span>
-            <span className="w-[96px] text-right font-display font-semibold text-[36px] text-fg-secondary">{e.setCount}</span>
-            <span className="w-[96px] text-right font-display font-semibold text-[36px] text-fg-secondary">{e.reps ?? "—"}</span>
+            <span className="w-[96px] text-right font-display font-semibold text-[36px] text-fg">{e.setCount}</span>
+            <span className="w-[96px] text-right font-display font-semibold text-[36px] text-fg">{e.reps ?? "—"}</span>
             {e.loadShort === "corporal" ? (
-              <span className="w-[150px] text-right text-[22px] text-fg-secondary">corporal</span>
+              <span className="w-[150px] text-right text-[22px] text-fg">corporal</span>
             ) : (
               <span className="w-[150px] text-right font-display font-semibold text-[36px]">{e.loadShort}</span>
             )}
           </div>
         ))}
-        <span className="mt-auto text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <span className="mt-[32px] text-[24px] text-fg">{STORY_SIGNATURE}</span>
       </div>
     </>
   );
@@ -119,7 +119,7 @@ export function Story20B({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
           <Logo className="h-[40px]" />
-          <span className="text-[28px] text-fg-secondary">{d.date}</span>
+          <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="mt-[40px] flex justify-center gap-[56px]">
           <StoryFigure view="front" height={420} levels={d.muscles} />
@@ -133,10 +133,10 @@ export function Story20B({ d }: StoryModelProps) {
               className={cn("flex items-center gap-[24px] h-[76px] text-[30px]", i < list.length - 1 && "border-b border-border")}
             >
               <span className="flex-1 min-w-0 whitespace-nowrap overflow-hidden text-ellipsis">{e.name}</span>
-              <span className="w-[120px] text-right font-display font-semibold text-[34px] text-fg-secondary">{e.scheme}</span>
+              <span className="w-[120px] text-right font-display font-semibold text-[34px] text-fg">{e.scheme}</span>
               <span className="w-[170px] text-right">
                 {e.loadShort === "corporal" ? (
-                  <span className="text-[22px] text-fg-secondary">{e.load}</span>
+                  <span className="text-[22px] text-fg">{e.load}</span>
                 ) : (
                   <span className="font-display font-semibold text-[36px]">{e.load}</span>
                 )}
@@ -144,15 +144,15 @@ export function Story20B({ d }: StoryModelProps) {
             </div>
           ))}
         </div>
-        <div className="mt-auto flex justify-between items-center">
-          <span className="text-[28px] text-fg-secondary">
+        <div className="mt-[32px] flex justify-between items-center">
+          <span className="text-[28px] text-fg">
             {d.duration} ·{" "}
             <span className="text-accent-text">
               {d.volume} {d.unit}
             </span>{" "}
             · {plural(d.sets, "série", "séries")}
           </span>
-          <span className="text-[22px] text-fg-muted">{STORY_SIGNATURE}</span>
+          <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>
@@ -168,7 +168,7 @@ export function Story20C({ d }: StoryModelProps) {
             <Logo className="h-[40px]" />
             <span className="mt-[40px] text-[24px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO</span>
             <span className="text-[60px] leading-[68px] font-bold tracking-[-.02em]">{d.focus}</span>
-            <span className="text-[28px] text-fg-secondary">{[d.routine, d.date].filter(Boolean).join(" · ")}</span>
+            <span className="text-[28px] text-fg">{[d.routine, d.date].filter(Boolean).join(" · ")}</span>
           </div>
           <div className="flex gap-[8px]">
             <StoryFigure view="front" height={360} levels={d.muscles} />
@@ -185,7 +185,7 @@ export function Story20C({ d }: StoryModelProps) {
               )}
             >
               <div className="flex justify-between gap-[8px]">
-                <span className="text-[26px] font-semibold text-fg-secondary whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className="text-[26px] font-semibold text-fg whitespace-nowrap overflow-hidden text-ellipsis">
                   {e.name}
                 </span>
                 {e.isRecord && <Trophy size={28} aria-hidden="true" className="flex-none text-pr-text" />}
@@ -196,19 +196,19 @@ export function Story20C({ d }: StoryModelProps) {
                 ) : (
                   <span className={cn("font-display font-bold text-[72px] leading-[64px]", e.isRecord && "text-pr-text")}>{e.load}</span>
                 )}
-                <span className="font-display font-semibold text-[34px] text-fg-muted">{e.scheme}</span>
+                <span className="font-display font-semibold text-[34px] text-fg">{e.scheme}</span>
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-auto flex justify-between items-center">
-          <span className="text-[28px] text-fg-secondary">
+        <div className="mt-[32px] flex justify-between items-center">
+          <span className="text-[28px] text-fg">
             {d.duration} ·{" "}
             <span className="text-accent-text">
               {d.volume} {d.unit}
             </span>
           </span>
-          <span className="text-[22px] text-fg-muted">{STORY_SIGNATURE}</span>
+          <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>
@@ -221,10 +221,10 @@ export function Story20D({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
           <Logo className="h-[40px]" />
-          <span className="text-[28px] text-fg-secondary">{d.date}</span>
+          <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <span className="mt-[64px] text-[56px] leading-[64px] font-bold tracking-[-.02em]">{d.title}</span>
-        <div className="mt-[40px] flex items-center gap-[24px] h-[48px] border-b-[2px] border-border-strong text-[22px] font-semibold tracking-[.08em] text-fg-muted">
+        <div className="mt-[40px] flex items-center gap-[24px] h-[48px] border-b-[2px] border-border-strong text-[22px] font-semibold tracking-[.08em] text-fg">
           <span className="flex-1">EXERCÍCIO</span>
           <span className="w-[120px] text-right">SÉRIES</span>
           <span className="w-[170px] text-right">VOLUME</span>
@@ -233,11 +233,11 @@ export function Story20D({ d }: StoryModelProps) {
           <div key={e.name} className="flex items-center gap-[24px] h-[80px] border-b border-border">
             <div className="flex-1 min-w-0 flex flex-col gap-[2px]">
               <span className="text-[30px] whitespace-nowrap overflow-hidden text-ellipsis">{e.name}</span>
-              <span className={cn("text-[22px]", e.isRecord ? "text-pr-text" : "text-fg-muted")}>
+              <span className={cn("text-[22px]", e.isRecord ? "text-pr-text" : "text-fg")}>
                 {e.isRecord ? `Recorde · ${e.load}` : e.load}
               </span>
             </div>
-            <span className="w-[120px] text-right font-display font-semibold text-[36px] text-fg-secondary">{e.scheme}</span>
+            <span className="w-[120px] text-right font-display font-semibold text-[36px] text-fg">{e.scheme}</span>
             <span className="w-[170px] text-right font-display font-semibold text-[36px]">{e.volume}</span>
           </div>
         ))}
@@ -249,24 +249,24 @@ export function Story20D({ d }: StoryModelProps) {
           <div className="flex-1 grid grid-cols-2 gap-y-[28px] gap-x-[16px]">
             <div className="flex flex-col gap-[4px]">
               <span className="font-display font-semibold text-[56px] leading-[56px] text-accent-text">{d.volume}</span>
-              <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">{d.unit.toUpperCase()}</span>
+              <span className="text-[20px] font-semibold tracking-[.08em] text-fg">{d.unit.toUpperCase()}</span>
             </div>
             <div className="flex flex-col gap-[4px]">
               <span className="font-display font-semibold text-[56px] leading-[56px]">{d.duration}</span>
-              <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">TEMPO</span>
+              <span className="text-[20px] font-semibold tracking-[.08em] text-fg">TEMPO</span>
             </div>
             <div className="flex flex-col gap-[4px]">
               <span className="font-display font-semibold text-[56px] leading-[56px]">{d.sets}</span>
-              <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">SÉRIES</span>
+              <span className="text-[20px] font-semibold tracking-[.08em] text-fg">SÉRIES</span>
             </div>
             <div className="flex flex-col gap-[4px]">
               <span className="font-display font-semibold text-[56px] leading-[56px]">{d.reps}</span>
-              <span className="text-[20px] font-semibold tracking-[.08em] text-fg-muted">REPS</span>
+              <span className="text-[20px] font-semibold tracking-[.08em] text-fg">REPS</span>
             </div>
           </div>
         </div>
-        <div className="mt-auto text-center">
-          <span className="text-[22px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <div className="mt-[32px] text-center">
+          <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>
@@ -278,7 +278,7 @@ export function Story21({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <Logo className="h-[40px]" />
-        <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg-muted">VOLUME POR EXERCÍCIO</span>
+        <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg">VOLUME POR EXERCÍCIO</span>
         <span className="mt-[12px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">{d.focus}</span>
         <div className="mt-[72px] flex flex-col gap-[44px]">
           {d.volumeRanking.map((e, i) => (
@@ -294,11 +294,11 @@ export function Story21({ d }: StoryModelProps) {
             </div>
           ))}
         </div>
-        <div className="mt-auto flex justify-between items-center">
-          <span className="text-[28px] text-fg-secondary">
+        <div className="mt-[32px] flex justify-between items-center">
+          <span className="text-[28px] text-fg">
             {d.duration} · {plural(d.sets, "série", "séries")} · {d.date}
           </span>
-          <span className="text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+          <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>

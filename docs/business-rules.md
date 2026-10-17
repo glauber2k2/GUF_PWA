@@ -73,6 +73,7 @@
 | Exercício adicionado durante o treino: séries do último desempenho, recorde atual e descanso da rotina (padrão 90 s). Sem internet: 3 séries vazias. | Web (`workout-builders.ts`) |
 | Trocar exercício = apagar o exercício do treino e criar outro, mantendo número e tipo das séries. | API + Web |
 | Remover exercício pode ser desfeito por 4 s; só depois a remoção é gravada. | Web |
+| Segurar o cabeçalho de um exercício permite reordenar; soltar salva a ordem e encerra o gesto, Esc/cancelamento sai sem gravar. Cards abertos ou fechados impedem seleção e menu de copiar texto; durante o arraste essas ações também ficam bloqueadas fora do card. | Web (`use-hold-reorder.ts` + `workout-exercise-card.tsx`) |
 | Iniciar treino exige internet. | Limitação atual |
 
 ### 4.2 Séries
@@ -206,6 +207,7 @@
 | Folhas que sobem de baixo (`BottomSheet`) fecham de três formas: toque fora, tecla Esc ou arrastar para baixo pela alça/título. Ao soltar, fecham se desceram mais de 30% da altura ou se o gesto foi rápido; senão, voltam ao lugar. O conteúdo da folha não arrasta (para não atrapalhar campos e rolagem). | Web (`ds/overlays.tsx` + `hooks/use-sheet-drag.ts`) |
 | Carregamento com a animação da logo (`GufLoader`): **08 (Cometa)** nos botões com `loading`; **09 (Sonar)** na abertura do app (verificação da sessão e carregamento da Início depois do login); **07 (Ponto saltitante)** no "Salvando". Botão carregando não aceita toques (evita gravar duas vezes). | Web (`ds/actions.tsx`, `ds/loading.tsx`) |
 | Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
+| Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
 
 ## 10. Pontos em aberto (decisões de produto)
 
