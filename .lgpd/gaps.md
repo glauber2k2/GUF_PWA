@@ -14,9 +14,9 @@
 | # | Item | Status | Evidência | Severidade | Esforço | Norma |
 |---|---|---|---|---|---|---|
 | G1 | Controlador identificado (razão social, CNPJ, contato) | RED | marcadores em `legal-content.ts` | crítica | baixo | Art. 9º, III ⚖ |
-| G2 | Encarregado designado e divulgado | RED | `[NOME DO ENCARREGADO]` | crítica | baixo | Art. 41, § 1º; Res. 18/2024; Res. 2/2022 Art. 11 (ATPP: canal obrigatório) |
+| G2 | Encarregado designado e divulgado | RED | `[NOME DO ENCARREGADO]`. **2026-10-17**: designação adiada para antes do lançamento (ATPP, Res. 2/2022 Art. 11 ⚖); exige canal de contato ativo (G10) | crítica | baixo | Art. 41, § 1º; Res. 18/2024; Res. 2/2022 Art. 11 (ATPP: canal obrigatório) |
 | G3 | Política de privacidade final | RED | rascunho, 8 marcadores, sem revisão jurídica | crítica | médio | Art. 9º ⚖ |
-| G4 | Runbook de incidente + registro de 5 anos | RED | inexistente | crítica | baixo | Art. 48; Res. 15/2024 Arts. 5º, 6º, 9º, 10 |
+| G4 | Runbook de incidente + registro de 5 anos | YELLOW | **2026-10-17 (F9)**: runbook, modelos e registro criados. Faltam contatos (e-mail do controlador, advogado) e o primeiro exercício simulado | crítica | baixo | Art. 48; Res. 15/2024 Arts. 5º, 6º, 9º, 10 |
 | G5 | ROPA | RED | inexistente | alta | médio | Art. 37 |
 | G6 | Prova do consentimento após exclusão da conta | YELLOW | **2026-10-17 (F3)**: `consent_proofs` + gatilho antes da exclusão, e-mail em SHA-256, 5 anos com eliminação diária (migration `consent_ledger_hardening`, aplicada e testada). Falta validar prazo e base ⚖ | alta | médio | Art. 8º, § 2º (ônus da prova); Art. 16 ⚖ |
 | G7 | Contratos/DPA com operadores (Supabase, Vercel/Cloudflare, Google) | RED | nada arquivado | alta | baixo | Art. 39 |
