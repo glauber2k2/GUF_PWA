@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown, Dumbbell, Ellipsis, Plus, NotepadText, Timer } from "lucide-react";
+import type { HTMLAttributes } from "react";
+import { ChevronDown, Dumbbell, Ellipsis, GripVertical, Plus, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
   formatClock,
@@ -44,6 +45,21 @@ export interface WorkoutExerciseCardProps {
   onCycleType: (setIndex: number) => void;
   onEditField: (setIndex: number, field: EditableField) => void;
   onRemoveSet: (setIndex: number) => void;
+  /** Segurar o cabeçalho liga o modo de reordenar (useHoldReorder). */
+  holdProps?: HTMLAttributes<HTMLElement>;
+  /**
+   * Modo de reordenar: o MESMO card fica compacto (só o cabeçalho, altura fixa) e balança. Não troca
+   * de componente: no toque, o gesto que ligou o modo continua no elemento tocado — se ele saísse da
+   * página, o navegador entregaria o resto do arraste a um elemento removido.
+   */
+  reorder?: {
+    index: number;
+    total: number;
+    dragging: boolean;
+    /** Deslocamento do card arrastado acompanhando o dedo (px). */
+    dragOffset: number;
+    dragProps: HTMLAttributes<HTMLElement>;
+  };
 }
 
 /** Card do exercício no treino: cabeçalho, observação e séries (arrastar para remover). */
@@ -61,6 +77,8 @@ export function WorkoutExerciseCard({
   onCycleType,
   onEditField,
   onRemoveSet,
+  holdProps,
+  reorder,
 }: WorkoutExerciseCardProps) {
   const records = markLoadRecords(e.sets, e.bestKg);
   const done = e.sets.filter((s) => s.isCompleted).length;
@@ -69,20 +87,41 @@ export function WorkoutExerciseCard({
 
   return (
     <article
-      aria-label={e.name}
+      aria-label={
+        reorder ? `${e.name}, posição ${reorder.index + 1} de ${reorder.total}. Arraste ou use as setas para mudar a ordem.` : e.name
+      }
+      {...(reorder && { ...reorder.dragProps, role: "listitem", tabIndex: 0 })}
       className={cn(
-        "flex-none overflow-hidden rounded-lg border border-border bg-surface-elevated",
-        e.flash ? "animate-guf-flash" : "animate-guf-rise-fast",
+        "flex-none overflow-hidden rounded-lg border bg-surface-elevated",
+        !reorder && "border-border",
+        !reorder && (e.flash ? "animate-guf-flash" : "animate-guf-rise-fast"),
+        reorder && "relative h-[80px] cursor-grab touch-none select-none [-webkit-touch-callout:none]",
+        reorder && "transition-[scale,box-shadow,border-color] duration-150 ease-standard",
+        reorder &&
+          (reorder.dragging
+            ? "z-20 scale-[1.03] cursor-grabbing border-accent-text shadow-e3"
+            : "animate-guf-wiggle border-border motion-reduce:animate-none"),
       )}
-      style={e.flash ? undefined : { animationDelay: `${enterDelayMs}ms` }}
+      // Entrada escalonada; no modo de reordenar, balanço desencontrado e posição do card arrastado (valores dinâmicos).
+      style={
+        reorder
+          ? reorder.dragging
+            ? { translate: `0 ${reorder.dragOffset}px` }
+            : { animationDelay: `${-((reorder.index * 97) % 300)}ms` }
+          : e.flash
+            ? undefined
+            : { animationDelay: `${enterDelayMs}ms` }
+      }
     >
-      <div className="flex items-start gap-1 pr-2">
+      {/* Segurar o cabeçalho: reordenar. Sem menu de contexto nem seleção de texto ao segurar. */}
+      <div {...holdProps} className="flex items-start gap-1 pr-2 select-none [-webkit-touch-callout:none]">
         {/* Toque em qualquer parte do cabeçalho abre/recolhe (não só na seta). */}
         <button
           type="button"
-          aria-expanded={e.open}
+          aria-expanded={reorder ? undefined : e.open}
           aria-label={`${e.open ? "Recolher" : "Expandir"} ${e.name}`}
-          onClick={onToggleOpen}
+          tabIndex={reorder ? -1 : undefined}
+          onClick={reorder ? undefined : onToggleOpen}
           className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-lg bg-transparent pt-3.5 pb-3 pl-4 text-left text-fg"
         >
           <span className="grid size-11 flex-none place-items-center rounded-md bg-surface-3 text-fg-secondary">
@@ -90,24 +129,33 @@ export function WorkoutExerciseCard({
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
             <span className="truncate text-[17px] leading-[22px] font-semibold">{e.name}</span>
-            <span className="flex flex-wrap items-center gap-1.5">
+            <span className={cn("flex items-center gap-1.5", reorder ? "flex-nowrap overflow-hidden" : "flex-wrap")}>
               <Tag size="sm">{muscleGroupLabel(e.muscleGroup)}</Tag>
-              <Tag size="sm" tone="muted">
+              {/* No modo de reordenar, só grupo e progresso (ocultos, não removidos: ver `reorder`). */}
+              <Tag size="sm" tone="muted" className={cn(reorder && "hidden")}>
                 {equipmentLabel(e.equipment)}
               </Tag>
-              <span className="flex items-center gap-1 text-xs font-medium text-fg-muted tabular-nums">
+              <span className={cn("flex items-center gap-1 text-xs font-medium text-fg-muted tabular-nums", reorder && "hidden")}>
                 <Icon icon={Timer} size={13} />
                 {formatClock(e.restSeconds)}
               </span>
-              {!e.open && (
-                <span className={cn("text-xs font-semibold tabular-nums", allDone ? "text-accent-text" : "text-fg-muted")}>
+              {(!e.open || reorder) && (
+                <span
+                  className={cn("text-xs font-semibold whitespace-nowrap tabular-nums", allDone ? "text-accent-text" : "text-fg-muted")}
+                >
                   · {setsProgressLabel(done, e.sets.length)}
                 </span>
               )}
             </span>
           </span>
         </button>
-        <div className="flex flex-none items-center gap-0.5 pt-3.5">
+        {/* No modo de reordenar: alça no lugar dos botões (eles ficam ocultos, não saem da página). */}
+        {reorder && (
+          <span aria-hidden="true" className="grid size-11 flex-none place-items-center self-center text-fg-muted">
+            <Icon icon={GripVertical} size={20} />
+          </span>
+        )}
+        <div className={cn("flex flex-none items-center gap-0.5 pt-3.5", reorder && "hidden")}>
           <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${e.name}`} onClick={onOpenMenu} />
           {/* Seta só indica o estado: o cabeçalho inteiro já é o botão (fora da ordem do Tab). */}
           <span aria-hidden="true" onClick={onToggleOpen} className="grid size-11 cursor-pointer place-items-center text-fg-secondary">
@@ -121,13 +169,18 @@ export function WorkoutExerciseCard({
       </div>
 
       {e.note && (
-        <span className="-mt-1 flex items-start gap-1.5 pr-4 pb-2.5 pl-[72px] text-[13px] leading-[18px] text-fg-secondary">
+        <span
+          className={cn(
+            "-mt-1 flex items-start gap-1.5 pr-4 pb-2.5 pl-[72px] text-[13px] leading-[18px] text-fg-secondary",
+            reorder && "hidden",
+          )}
+        >
           <Icon icon={NotepadText} size={14} className="mt-0.5 text-fg-muted" />
           {e.note}
         </span>
       )}
 
-      <Collapse open={e.open}>
+      <Collapse open={e.open && !reorder}>
         <SetRowHeader unit={unit} />
         <AnimatePresence initial={false}>
           {e.sets.map((s, i) => {
@@ -164,3 +217,8 @@ export function WorkoutExerciseCard({
     </article>
   );
 }
+
+/** Altura fixa do card no modo de reordenar (cabeçalho só): o arraste calcula o destino por "slot". */
+export const REORDER_CARD_PX = 80;
+/** Espaço entre os cards na lista do treino (gap-3). */
+export const WORKOUT_LIST_GAP_PX = 12;

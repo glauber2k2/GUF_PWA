@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeftRight,
-  ArrowUpDown,
+  Check,
   CloudOff,
   Dumbbell,
   Flag,
@@ -56,6 +56,7 @@ import {
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { ShareStorySheet, STORY_SAVED_TOAST } from "@/components/share/share-story-sheet";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/hooks/use-dev-workout-state";
+import { useHoldReorder } from "@/hooks/use-hold-reorder";
 import { useOnlineStatus } from "@/hooks/use-online-status";
 import type { OutboxOp } from "@/lib/offline/db";
 import { dismissOutboxFailure, enqueue, flushOutbox, hasPendingFor, useOutboxStatus } from "@/lib/offline/outbox";
@@ -64,11 +65,10 @@ import { invalidateTrainingData } from "@/lib/query-keys";
 import { getSupabaseClient } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { mockWorkoutApi } from "@/mocks/workout";
-import { ReorderExercisesSheet } from "./reorder-exercises-sheet";
 import { SetEditSheet } from "./set-edit-sheet";
 import { buildWorkoutExercise, localSummary, toNewWorkoutExercise, workoutSnapshot } from "./workout-builders";
 import { useActiveWorkout, useWorkoutClock, type ActiveWorkoutState } from "./workout-provider";
-import { WorkoutExerciseCard } from "./workout-exercise-card";
+import { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX, WorkoutExerciseCard } from "./workout-exercise-card";
 import { WorkoutHeader } from "./workout-header";
 import { WorkoutSummary } from "./workout-summary";
 import { initWorkoutView, newSetFrom, workoutReducer, type EditableField, type ExerciseView } from "./workout-state";
@@ -207,7 +207,6 @@ type Sheet =
   | { kind: "workout-menu" }
   | { kind: "note"; target: string | "workout" }
   | { kind: "timer" }
-  | { kind: "reorder" }
   | null;
 
 interface WorkoutViewProps {
@@ -501,6 +500,17 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     queue({ kind: "reorderExercises", sessionId: workout.id, sessionExerciseIds: exerciseIds });
   };
 
+  // Segurar um card: modo de reordenar (cards compactos balançando; arrastar muda a ordem).
+  const listRef = useRef<HTMLDivElement>(null);
+  const reorder = useHoldReorder({
+    items: state.exercises,
+    itemPx: REORDER_CARD_PX,
+    gapPx: WORKOUT_LIST_GAP_PX,
+    listRef,
+    disabled: state.exercises.length < 2,
+    onCommit: (ordered) => reorderExercises(ordered.map((e) => e.id)),
+  });
+
   /* ---------- Observações ---------- */
 
   const openNote = (target: string | "workout") => {
@@ -661,41 +671,75 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           )
         )}
 
-        {/* Cards deslizam para a nova posição (reordenar, remover, desfazer) e somem suavemente. */}
-        <AnimatePresence initial={false} mode="popLayout">
-          {state.exercises.map((ex, i) => (
-            <LayoutItem key={ex.id} {...LAYOUT_ITEM_PROPS} className="flex flex-none flex-col">
-              <WorkoutExerciseCard
-                exercise={ex}
-                unit={unit}
-                enterDelayMs={i * 40}
-                poppedKey={popped}
-                editing={edit?.exerciseId === ex.id ? { setIndex: edit.setIndex, field: edit.field } : null}
-                onToggleOpen={() => dispatch({ type: "toggleOpen", exerciseId: ex.id })}
-                onOpenMenu={() => setSheet({ kind: "exercise-menu", exerciseId: ex.id })}
-                onOpenNote={() => openNote(ex.id)}
-                onAddSet={() => addSet(ex)}
-                onToggleSet={(si) => toggleSet(i, si)}
-                onCycleType={(si) => cycleType(ex, si)}
-                onEditField={(si, field) => setEdit({ exerciseId: ex.id, setIndex: si, field })}
-                onRemoveSet={(si) => removeSet(ex, si)}
-              />
-            </LayoutItem>
-          ))}
-        </AnimatePresence>
+        {reorder.active && (
+          <Banner tone="info" title="Reordenar">
+            arraste os exercícios para mudar a ordem.
+          </Banner>
+        )}
 
-        <button
-          type="button"
-          onClick={() => setPicker({ mode: "treino" })}
-          className={cn(
-            "flex h-14 flex-none cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong",
-            "bg-transparent text-[15px] font-semibold text-fg hover:bg-surface-3",
-            "transition-[transform,background-color] duration-150 ease-standard active:scale-[.97] motion-reduce:active:scale-100",
-          )}
+        {/* Cards deslizam para a nova posição (reordenar, remover, desfazer) e somem suavemente.
+            relative: referência do card que sai da lista (popLayout); sem transform: topo do arraste. */}
+        <div
+          ref={listRef}
+          role={reorder.active ? "list" : undefined}
+          aria-label={reorder.active ? "Ordem dos exercícios" : undefined}
+          className="relative flex flex-col gap-3"
         >
-          <Plus size={18} aria-hidden="true" />
-          Adicionar exercício
-        </button>
+          <AnimatePresence initial={false} mode="popLayout">
+            {(reorder.active ? reorder.order : state.exercises).map((ex, i, list) => (
+              <LayoutItem
+                key={ex.id}
+                {...LAYOUT_ITEM_PROPS}
+                // O card arrastado acompanha o dedo sozinho; os outros deslizam.
+                layout={reorder.draggingId === ex.id ? false : "position"}
+                className="flex flex-none flex-col"
+              >
+                <WorkoutExerciseCard
+                  exercise={ex}
+                  unit={unit}
+                  enterDelayMs={i * 40}
+                  poppedKey={popped}
+                  editing={edit?.exerciseId === ex.id ? { setIndex: edit.setIndex, field: edit.field } : null}
+                  holdProps={reorder.holdProps(ex.id)}
+                  reorder={
+                    reorder.active
+                      ? {
+                          index: i,
+                          total: list.length,
+                          dragging: reorder.draggingId === ex.id,
+                          dragOffset: reorder.dragOffset,
+                          dragProps: reorder.dragProps(ex.id),
+                        }
+                      : undefined
+                  }
+                  onToggleOpen={() => dispatch({ type: "toggleOpen", exerciseId: ex.id })}
+                  onOpenMenu={() => setSheet({ kind: "exercise-menu", exerciseId: ex.id })}
+                  onOpenNote={() => openNote(ex.id)}
+                  onAddSet={() => addSet(ex)}
+                  onToggleSet={(si) => toggleSet(i, si)}
+                  onCycleType={(si) => cycleType(ex, si)}
+                  onEditField={(si, field) => setEdit({ exerciseId: ex.id, setIndex: si, field })}
+                  onRemoveSet={(si) => removeSet(ex, si)}
+                />
+              </LayoutItem>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {!reorder.active && (
+          <button
+            type="button"
+            onClick={() => setPicker({ mode: "treino" })}
+            className={cn(
+              "flex h-14 flex-none cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong",
+              "bg-transparent text-[15px] font-semibold text-fg hover:bg-surface-3",
+              "transition-[transform,background-color] duration-150 ease-standard active:scale-[.97] motion-reduce:active:scale-100",
+            )}
+          >
+            <Plus size={18} aria-hidden="true" />
+            Adicionar exercício
+          </button>
+        )}
       </main>
 
       {current.rest && (
@@ -713,7 +757,11 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
 
       <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
         <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
-          {paused ? (
+          {reorder.active ? (
+            <Button size="lg" icon={Check} fullWidth onClick={reorder.exit}>
+              Concluir
+            </Button>
+          ) : paused ? (
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
               <Button size="lg" icon={Play} fullWidth onClick={togglePause}>
                 Retomar
@@ -787,14 +835,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           subtitle={state.note || "Sem observação"}
           onClick={() => openNote("workout")}
         />
-        {state.exercises.length > 1 && (
-          <SheetOption
-            icon={ArrowUpDown}
-            title="Reordenar exercícios"
-            subtitle="Muda a ordem só deste treino"
-            onClick={() => setSheet({ kind: "reorder" })}
-          />
-        )}
         <SheetOption
           icon={Trash2}
           title="Descartar treino"
@@ -823,14 +863,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
             setPicker({ mode: "troca", exerciseId: menuExercise.id });
           }}
         />
-        {state.exercises.length > 1 && (
-          <SheetOption
-            icon={ArrowUpDown}
-            title="Mudar a ordem"
-            subtitle="Arraste os exercícios na lista"
-            onClick={() => setSheet({ kind: "reorder" })}
-          />
-        )}
         <SheetOption
           icon={Trash2}
           title="Remover exercício"
@@ -838,13 +870,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           onClick={() => menuExercise && removeExercise(menuExercise.id)}
         />
       </BottomSheet>
-
-      <ReorderExercisesSheet
-        open={sheet?.kind === "reorder"}
-        exercises={state.exercises}
-        onClose={() => setSheet(null)}
-        onReorder={reorderExercises}
-      />
 
       <BottomSheet placement="screen" open={sheet?.kind === "note"} onClose={() => setSheet(null)} title="Observação" subtitle={noteTitle}>
         <TextField
