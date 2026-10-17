@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "legal:hashes": "node --no-warnings scripts/legal-hashes.mjs"
   },
   "dependencies": {
     "date-fns": "^4.4.0"

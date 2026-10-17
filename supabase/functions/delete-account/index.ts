@@ -36,9 +36,9 @@ Deno.serve(async (req) => {
   const { data: { user }, error: userError } = await admin.auth.getUser(token);
   if (userError || !user) return json({ error: "Sessão inválida" }, 401);
 
-  // PONTO A VALIDAR COM O ADVOGADO:
-  // se for definido um registro mínimo de prova dos consentimentos após a exclusão
-  // (art. 16 da LGPD), grave-o aqui, em tabela separada, ANTES de excluir o usuário.
+  // A prova mínima dos consentimentos (art. 16 da LGPD) é guardada pelo gatilho
+  // on_auth_user_deleted_preserve_consents em consent_proofs antes da cascata
+  // (migration consent_ledger_hardening; prazo de 5 anos a validar com o jurídico).
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
   if (deleteError) {
