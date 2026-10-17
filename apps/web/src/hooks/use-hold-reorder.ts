@@ -120,6 +120,8 @@ export function useHoldReorder<T extends { id: string }>({
     (id: string, clientY: number) => {
       const startIndex = itemsRef.current.findIndex((i) => i.id === id);
       if (startIndex < 0) return;
+      // Remove seleção anterior antes de compactar o card: o navegador não deve arrastar texto.
+      window.getSelection()?.removeAllRanges();
       live.current = { clientY, raf: 0, anchor: null };
       setDrag({ id, startIndex, index: startIndex, offset: 0 });
       // Primeira posição depois que a lista compacta aparecer.
@@ -158,15 +160,23 @@ export function useHoldReorder<T extends { id: string }>({
     const block = (e: TouchEvent) => {
       if (e.cancelable) e.preventDefault();
     };
+    // O card aberto encolhe durante o gesto; o ponteiro pode ficar sobre outro texto da tela.
+    const blockText = (e: Event) => e.preventDefault();
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
     window.addEventListener("pointercancel", cancel);
     window.addEventListener("touchmove", block, { passive: false });
+    window.addEventListener("selectstart", blockText);
+    window.addEventListener("dragstart", blockText);
+    window.addEventListener("contextmenu", blockText);
     return () => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointercancel", cancel);
       window.removeEventListener("touchmove", block);
+      window.removeEventListener("selectstart", blockText);
+      window.removeEventListener("dragstart", blockText);
+      window.removeEventListener("contextmenu", blockText);
     };
   }, [dragging, update, finish]);
 
@@ -203,6 +213,8 @@ export function useHoldReorder<T extends { id: string }>({
     holdProps: (id: string) => ({
       onPointerDown: (e: PointerEvent<HTMLElement>) => {
         if (disabled || active || e.button !== 0) return;
+        // No mouse, evita que segurar inicie seleção/arraste nativo. Toque continua podendo rolar.
+        if (e.pointerType === "mouse") e.preventDefault();
         cancelHold();
         const { clientX: x, clientY: y } = e;
         hold.current = {

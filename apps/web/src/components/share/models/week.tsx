@@ -19,16 +19,16 @@ export function Story23({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <Logo className="h-[40px]" />
-        <span className="mt-[120px] text-[26px] font-semibold tracking-[.08em] text-fg-muted">VOLUME SEMANAL</span>
+        <span className="mt-[120px] text-[26px] font-semibold tracking-[.08em] text-fg">VOLUME SEMANAL</span>
         <div className="mt-[8px] flex items-baseline gap-[12px]">
           <span className="font-display font-bold text-[200px] leading-[180px] text-accent-text">{d.week.volume}</span>
-          <span className="font-display font-semibold text-[64px] text-fg-secondary">{d.unit}</span>
+          <span className="font-display font-semibold text-[64px] text-fg">{d.unit}</span>
         </div>
         {d.week.changePct && (
           <div
             className={cn(
               "mt-[16px] flex items-center gap-[10px] text-[32px] font-semibold",
-              d.week.changeUp ? "text-success" : "text-fg-secondary",
+              d.week.changeUp ? "text-success" : "text-fg",
             )}
           >
             {d.week.changeUp ? <TrendingUp size={36} aria-hidden="true" /> : <TrendingDown size={36} aria-hidden="true" />}
@@ -47,11 +47,11 @@ export function Story23({ d }: StoryModelProps) {
                 )}
                 style={{ height: `${Math.max(w.pct, 2)}%` }}
               ></div>
-              <span className={cn("text-[22px]", w.current ? "font-semibold text-fg" : "text-fg-muted")}>{w.label}</span>
+              <span className={cn("text-[22px]", w.current ? "font-semibold text-fg" : "text-fg")}>{w.label}</span>
             </div>
           ))}
         </div>
-        <span className="mt-auto text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <span className="mt-[32px] text-[24px] text-fg">{STORY_SIGNATURE}</span>
       </div>
     </>
   );
@@ -62,7 +62,7 @@ export function Story24({ d }: StoryModelProps) {
     <>
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col items-center">
         <Logo className="h-[40px]" />
-        <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg-muted">META DA SEMANA</span>
+        <span className="mt-[96px] text-[26px] font-semibold tracking-[.08em] text-fg">META DA SEMANA</span>
         <div className="mt-[48px] relative w-[720px] h-[720px]">
           <svg width="720" height="720" viewBox="0 0 720 720" className="block">
             <circle cx="360" cy="360" r="300" fill="none" className="stroke-surface-3" strokeWidth="56" />
@@ -81,20 +81,20 @@ export function Story24({ d }: StoryModelProps) {
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="flex items-baseline">
               <span className="font-display font-bold text-[240px] leading-[210px]">{d.week.count}</span>
-              <span className="font-display font-semibold text-[120px] text-fg-muted">/{d.week.goal ?? d.week.count}</span>
+              <span className="font-display font-semibold text-[120px] text-fg">/{d.week.goal ?? d.week.count}</span>
             </div>
-            <span className="text-[28px] font-semibold tracking-[.08em] text-fg-secondary">
+            <span className="text-[28px] font-semibold tracking-[.08em] text-fg">
               {d.week.count === 1 ? "TREINO" : "TREINOS"}
             </span>
           </div>
         </div>
         <span className="mt-[72px] text-[56px] leading-[64px] font-bold tracking-[-.02em] text-center">{remainingTitle(d)}</span>
-        <span className="mt-[16px] text-[32px] text-fg-secondary text-center">
+        <span className="mt-[16px] text-[32px] text-fg text-center">
           {remaining(d) > 0 ? "para fechar a meta desta semana" : "meta da semana cumprida"}
         </span>
-        <div className="mt-auto flex items-center gap-[16px]">
+        <div className="mt-[32px] flex items-center gap-[16px]">
           <Logo className="h-[28px]" />
-          <span className="text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+          <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>
