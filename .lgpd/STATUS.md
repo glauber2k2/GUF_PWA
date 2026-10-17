@@ -17,7 +17,7 @@
 - [~] F4 — Privacy policy v1 — ⏸ CHECKPOINT: rascunho pronto (2026-10-17), aguardando revisão jurídica
 - [x] F5 — DSAR (canal + exportação completa) — aplicada e testada em 2026-10-17
 - [x] F6 — Audit logging — aplicada e testada em 2026-10-17
-- [ ] F7 — Encryption/keys
+- [x] F7 — Encryption/keys — itens sem custo feitos (2026-10-17); conferências nos painéis com o desenvolvedor
 - [ ] F8 — Retention/erasure
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [ ] F10 — ROPA — ⏸ CHECKPOINT
@@ -122,5 +122,12 @@ Ver `.lgpd/gaps.md`.
 - Nova atividade A016 no mapa de dados e nas bases legais; detalhes em `.lgpd/audit-log.md`
 - Custo: zero
 
+## F7 — Encryption/keys ✓ (2026-10-17, só sem custo)
+- Edge Function `delete-account` com CORS por lista (`ALLOWED_ORIGINS`), publicada; ativa quando o secret for definido (G20)
+- Cabeçalhos de segurança em `vercel.json` (raiz e `apps/web`; manter só o do Root Directory da Vercel)
+- Senha mínima 8 no `config.toml` local; no painel, conferir (G16)
+- Decisão: sem criptografia campo a campo nas medidas por enquanto (site estático, sem servidor); reavaliar no RIPD (F12)
+- Checklist dos painéis (MFA, Auth, chaves, Security Advisor) em `.lgpd/security-checklist.md`
+
 ## Próximo passo
-F7 — `lgpd-encryption-keys`: checklist de segurança sem custo (MFA nos painéis, chaves, CORS da Edge Function — G20, senha mínima no Auth — G16).
+F8 — `lgpd-retention-erasure`: prazos e eliminação (backups do plano Free, foto no Storage na exclusão — G15, G18), sem custo.
