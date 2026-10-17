@@ -87,11 +87,13 @@ export function WorkoutExerciseCard({
   return (
     <article
       aria-label={reorder ? `${e.name}, posição ${reorder.index + 1} de ${reorder.total}` : e.name}
+      onContextMenu={(event) => event.preventDefault()}
+      onDragStart={(event) => event.preventDefault()}
       className={cn(
-        "flex-none overflow-hidden rounded-lg border bg-surface-elevated",
+        "flex-none overflow-hidden rounded-lg border bg-surface-elevated select-none [-webkit-touch-callout:none]",
         !reorder && "border-border",
         !reorder && (e.flash ? "animate-guf-flash" : "animate-guf-rise-fast"),
-        reorder && "relative h-[80px] cursor-grab touch-none select-none [-webkit-touch-callout:none]",
+        reorder && "relative h-[80px] cursor-grab touch-none",
         reorder && "transition-[scale,box-shadow,border-color] duration-150 ease-standard",
         reorder &&
           (reorder.dragging
