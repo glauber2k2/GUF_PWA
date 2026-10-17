@@ -209,6 +209,7 @@
 | Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
 | Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
 | A logo completa do guf aparece em todos os 34 modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
+| Na escolha do Story, Compartilhar mostra só o ícone em um botão de 56 px, com rótulo acessível. Baixar imagem ocupa o restante da linha, ou toda a largura sem compartilhamento nativo; os botões ficam bloqueados enquanto a imagem é gerada. | Web (`components/share/share-story-sheet.tsx`) |
 
 ## 10. Pontos em aberto (decisões de produto)
 
