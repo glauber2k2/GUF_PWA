@@ -7,6 +7,7 @@ padrões obrigatórios e comandos) ficam no [`CLAUDE.md`](../CLAUDE.md), na raiz
 |---|---|
 | [`implementation-plan.md`](./implementation-plan.md) | O que já foi entregue, as próximas etapas (ordem, escopo, critérios de aceite) e pendências para o lançamento |
 | [`business-rules.md`](./business-rules.md) | Regras de negócio em vigor, por área do app, com onde cada regra está implementada |
+| [`../.lgpd/STATUS.md`](../.lgpd/STATUS.md) | Auditoria LGPD: etapas, lacunas (`gaps.md`), mapa de dados, bases legais, fornecedores e registro de consentimentos |
 
 ## Como manter
 
