@@ -22,10 +22,10 @@
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [~] F10 — ROPA — ⏸ CHECKPOINT: rascunho 0.1 (2026-10-17); revisão jurídica no futuro
 - [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
-- [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT
-- [ ] F13 — ECA Digital
-- [ ] F14 — Vendors + DPA + transferência internacional
-- [ ] F15 — Relatório final
+- [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT — futuro, quando o módulo existir
+- [~] F13 — ECA Digital — avaliação em rascunho (2026-10-17); decisão sobre verificação de idade antes do lançamento ⚖
+- [ ] F14 — Vendors + DPA + transferência internacional — futuro (controlador formal); verificar DPAs gratuitos
+- [x] F15 — Relatório final — `.lgpd/REPORT.md` (2026-10-17)
 
 ## Artefatos gerados
 - `.lgpd/discovery.md` — v1, 2026-10-16
@@ -142,5 +142,15 @@ Ver `.lgpd/gaps.md`.
 - Atualizei no `data-map.md` as fichas A013/A014 com o que mudou nas F3–F8
 - Revisão jurídica adiada (sem orçamento); revisão semestral: 2027-04-17
 
+## F13 — ECA Digital ⏸ (2026-10-17)
+- Rascunho em `.lgpd/eca-digital.md`: não direcionado a menores; acesso provável possível quando aberto ao público
+- Sem publicidade, perfilamento, loot boxes, chat, geolocalização: riscos baixos nesses temas
+- Principal lacuna: só autodeclaração 18+; decidir com advogado antes do lançamento
+- Compromisso de produto registrado no `CLAUDE.md`; procedimento para conta de menor identificada
+
+## F15 — Relatório final ✓ (2026-10-17)
+- `.lgpd/REPORT.md`: 6 lacunas resolvidas, 11 encaminhadas, 6 abertas (todas dependem de empresa, advogado ou dinheiro)
+- 10 ações gratuitas para o desenvolvedor e lista do que fica para o futuro
+
 ## Próximo passo
-F13 — `lgpd-eca-digital-minors`: análise do ECA Digital (autodeclaração 18+ basta?) em rascunho, sem custo. Depois: F15 relatório final.
+Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do `REPORT.md`. Próxima rodada de auditoria: quando houver orçamento/empresa (F4 final, F11, F12, F14) ou na revisão semestral (2027-04-17).
