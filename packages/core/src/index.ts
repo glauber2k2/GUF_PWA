@@ -18,3 +18,4 @@ export * from "./coalesce";
 export * from "./evolution";
 export * from "./legal-content";
 export * from "./share";
+export * from "./legal-hash";

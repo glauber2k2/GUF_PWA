@@ -34,6 +34,8 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Documentos legais no app: leitor único (`/termos`, `/privacidade`, `/termo-de-saude`), central `/documentos`, leitura por cima da tela no cadastro, `/aceite` ("O que mudou") e Perfil | `feat/documentos-legais` | — |
 | Menu inferior: indicador da aba ativa desliza (e estica) até a aba tocada, já no toque | `feat/indicador-aba-animado` | — |
 
+**Auditoria LGPD (em andamento, `.lgpd/STATUS.md`):** análise de lacunas, mapa de dados, bases legais e fornecedores concluídos (L0–L4); banco migrado para São Paulo (`sa-east-1`, projeto `yscoujsisrytytqsxkya`) em 2026-10-16, com login ajustado em 2026-10-17. **F3 em `feat/lgpd-consent-ledger`:** registro de consentimentos fechado (gravação só pelas funções do banco), prova mínima dos aceites guardada por 5 anos após a exclusão da conta (`consent_proofs`, e-mail em SHA-256) e hash real dos textos legais (`legal-hash.ts`, `pnpm --filter @guf/core legal:hashes`). Próximo: F4, política de privacidade v1 para revisão jurídica.
+
 **Ajuste implementado em `fix/stories-e-reordenacao`:** os 34 modelos de Stories usam branco nos textos neutros, incluindo legendas e assinatura; o CTA do site acompanha as informações com espaçamento curto, tanto na prévia quanto no PNG.
 
 **Correção de reordenação na mesma branch:** segurar o cabeçalho de um card aberto não inicia seleção, menu de copiar ou arraste nativo de texto. Soltar continua salvando a ordem e Esc cancela.
@@ -47,7 +49,10 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Lacuna | Onde | Impacto |
 |---|---|---|
 | Textos dos documentos legais são rascunho do protótipo (marcadores [RAZÃO SOCIAL], [CNPJ]…), sem validação jurídica | `packages/core/src/legal-content.ts` | **Bloqueia o lançamento** (LGPD) |
-| Documentos legais do banco são provisórios (`0.1-dev`, hash `DEV-PLACEHOLDER`) | `supabase/seed.sql` | **Bloqueia o lançamento** |
+| Documentos legais do banco são provisórios (`0.1-dev`; desde a F3 com o hash real do rascunho atual) | `legal_documents` | **Bloqueia o lançamento** |
+| Pendências da auditoria LGPD: controlador e Encarregado definidos, política final, DPAs/transferência internacional, runbook de incidente, canal do titular (G1–G4, G7, G8, G10, G22, G23) | `.lgpd/gaps.md` | **Bloqueia abrir para pessoas de fora** |
+| Prazo de 5 anos da prova de consentimento após exclusão sem validação jurídica | `consent_proofs` | Médio (validar antes do lançamento) |
+| Migração do banco: confirmar variáveis da Vercel, testar o deploy, pausar e excluir o projeto antigo (`us-west-2`) | Painéis Vercel/Supabase | Médio |
 | Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `components/legal/legal-reader-provider.tsx` | Baixo |
 | Tela de consentimento de saúde ainda não existe (chega com o módulo de medidas); o `LegalSummary` já está pronto para ela | Etapa 4 | Médio |
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |

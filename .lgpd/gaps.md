@@ -1,0 +1,84 @@
+# Gap Analysis e Plano de Remediação — 2026-10-16
+
+> Diagnóstico técnico baseado no código. **Não é parecer jurídico**: os itens marcados com ⚖ precisam de validação de advogado especializado em proteção de dados antes de entrar em produção com usuários reais.
+
+## Resumo
+- **5** gaps críticos (G22 incluído no L4)
+- **8** gaps altos (G23 incluído no L4)
+- **8** gaps médios
+- **2** gaps baixos
+- **10** pontos já conformes (verde)
+
+## Tabela de diagnóstico
+
+| # | Item | Status | Evidência | Severidade | Esforço | Norma |
+|---|---|---|---|---|---|---|
+| G1 | Controlador identificado (razão social, CNPJ, contato) | RED | marcadores em `legal-content.ts` | crítica | baixo | Art. 9º, III ⚖ |
+| G2 | Encarregado designado e divulgado | RED | `[NOME DO ENCARREGADO]` | crítica | baixo | Art. 41, § 1º; Res. 18/2024; Res. 2/2022 Art. 11 (ATPP: canal obrigatório) |
+| G3 | Política de privacidade final | RED | rascunho, 8 marcadores, sem revisão jurídica | crítica | médio | Art. 9º ⚖ |
+| G4 | Runbook de incidente + registro de 5 anos | RED | inexistente | crítica | baixo | Art. 48; Res. 15/2024 Arts. 5º, 6º, 9º, 10 |
+| G5 | ROPA | RED | inexistente | alta | médio | Art. 37 |
+| G6 | Prova do consentimento após exclusão da conta | YELLOW | **2026-10-17 (F3)**: `consent_proofs` + gatilho antes da exclusão, e-mail em SHA-256, 5 anos com eliminação diária (migration `consent_ledger_hardening`, aplicada e testada). Falta validar prazo e base ⚖ | alta | médio | Art. 8º, § 2º (ônus da prova); Art. 16 ⚖ |
+| G7 | Contratos/DPA com operadores (Supabase, Vercel/Cloudflare, Google) | RED | nada arquivado | alta | baixo | Art. 39 |
+| G8 | Transferência internacional mapeada | YELLOW | **2026-10-16: banco migrado de `us-west-2` (EUA) para `sa-east-1` (São Paulo)**, projeto `yscoujsisrytytqsxkya`. Ainda restam: Supabase Inc. (EUA) e seus sub-operadores, Vercel e Google nos EUA; política diz "[PAÍS DOS SERVIDORES]" | média | baixo | Arts. 33–36; Res. 19/2024 ⚖ |
+| G9 | Registros de acesso por 6 meses (prometido na política) | YELLOW | retenção de logs do Supabase depende do plano; não verificado | alta | médio | Marco Civil (Lei 12.965/2014) art. 15 ⚖ |
+| G10 | Canal e processo para pedidos do titular fora do app (prazo 15 dias) | YELLOW | exportar/excluir/revogar no app OK; demais pedidos só por e-mail placeholder, sem controle de prazo | alta | baixo | Art. 18; Art. 19, II (ATPP: Res. 2/2022 Art. 14) |
+| G11 | ECA Digital (acesso provável por adolescentes) | YELLOW | público 18+ só por autodeclaração | alta | alto (se aplicável) | Lei 15.211/2025 Art. 9º, § 1º; Res. 30/2025 (tema prioritário) ⚖ |
+| G12 | Exportação completa | YELLOW | `export_my_data()` sem `workout_active_periods` e sem e-mail/identidades | média | baixo | Art. 18, II e V |
+| G13 | Integridade do ledger de consentimento | GREEN | **2026-10-17 (F3)**: insert direto removido; só funções do banco, com origem e plataforma validadas. Aplicada e testada em 2026-10-17 | média | médio | Art. 8º, § 2º; Art. 6º, X |
+| G14 | Hash do texto aceito confere com o texto exibido | GREEN | **2026-10-17 (F3)**: `legal-hash.ts` + script `legal:hashes` + aviso em dev; rascunhos com hash real. Aplicada em 2026-10-17; cada mudança de texto exige nova versão | média | baixo | Art. 8º, § 2º; Art. 9º |
+| G15 | Prazo de eliminação pós-exclusão e backups | YELLOW | `[PRAZO]` na política; backups do Supabase não mapeados | média | baixo | Arts. 15–16 ⚖ |
+| G16 | Segurança da autenticação em produção | YELLOW | `config.toml` local: senha mínima 6 (app exige 8), sem CAPTCHA/MFA; painel de produção não verificado | média | baixo | Art. 46 |
+| G17 | RIPD do módulo de medidas (dados de saúde) | YELLOW | dado sensível = critério específico; larga escala ainda não | média | médio | Art. 38; Res. 2/2022 Art. 4º |
+| G18 | Foto enviada (futuro) apagada na exclusão da conta | YELLOW | cascata do banco não apaga arquivos do Storage | média | baixo | Art. 16; Art. 18, VI |
+| G19 | Log de auditoria de ações sensíveis (exclusão, revogação, exportação) | YELLOW | só `consent_records` | média | médio | Art. 6º, X |
+| G20 | CORS `*` na Edge Function `delete-account` | YELLOW | comentário no código pede restringir | baixa | baixo | Art. 46 |
+| G21 | Treinamento e governança | RED | inexistente | baixa | médio | Art. 50 |
+| G22 | Controlador não constituído | RED | sem empresa; app desenvolvido por uma pessoa (Glauber), em beta. Enquanto houver usuários externos, quem decide o tratamento é o controlador, inclusive pessoa natural com fins econômicos (Art. 5º, VI; Res. 2/2022 — ATPP) | crítica | médio | Art. 5º, VI; Art. 9º, III ⚖ |
+| G23 | Infra de desenvolvimento usada com dados reais | YELLOW | Supabase **Free** (logs curtos, backups limitados), **SMTP padrão** (só para testes), Vercel **Hobby** (uso não comercial) | alta | baixo | Art. 46 |
+
+> **Atualização L4 (2026-10-16)**: Supabase confirmado em `us-west-2` (EUA), plano Free, SMTP padrão; hospedagem só na Vercel (Hobby); nenhum DPA aceito ou arquivado. Fichas em `.lgpd/vendors/`.
+
+## Regra prática para o beta
+Enquanto o app tiver **só o desenvolvedor e testadores convidados que sabem que é um teste**, com dados fictícios ou sem medidas corporais, o risco é baixo. **Antes de abrir para pessoas de fora** (beta público, divulgação, lojas), resolver G1, G2, G3, G7, G8, G22 e G23.
+
+### Já conforme (GREEN)
+- RLS em todas as tabelas, só dados do próprio usuário (Art. 46).
+- Sem analytics, pixels, rastreadores ou fontes/CDNs externos (Art. 6º, III — necessidade).
+- Cadastro com caixas desmarcadas e botão bloqueado; portão `/aceite` para versões novas (Art. 8º).
+- Consentimento de saúde em camadas, específico, com botões de mesmo peso (Art. 11, I).
+- Revogar o consentimento de saúde apaga as medidas na mesma operação (Art. 18, IX; Art. 16).
+- Exportar dados e excluir conta pelo próprio app (Art. 18, II, V e VI).
+- Consentimentos versionados com hash do documento e origem (Art. 8º, § 2º).
+- Minimização: sem localização, contatos ou telefone (Art. 6º, III).
+- Ao sair, dados locais (IndexedDB, cache) são limpos; service worker não guarda dados do usuário (Art. 46).
+- Chave `service_role` só na Edge Function, nunca no front (Art. 46).
+
+## Ações imediatas (próxima semana) — Crítica + baixo esforço
+1. **Definir controlador e designar o Encarregado** (G1, G2) — responsável: sócios/AAHBRANT · prazo: 2026-10-23
+   - Skill: `lgpd-dpo-encarregado`
+2. **Publicar runbook de incidente e criar `.lgpd/incidents/log.md`** (G4) — responsável: técnico · prazo: 2026-10-23
+   - Skill: `lgpd-incident-response`
+3. **Canal de pedidos do titular** (e-mail dedicado + controle de prazo de 15 dias) (G10) — prazo: 2026-10-23
+   - Skill: `lgpd-dsar`
+4. **Arquivar os DPAs padrão** de Supabase, Vercel/Cloudflare e Google e confirmar a região do projeto Supabase (G7, G8) — prazo: 2026-10-23
+   - Skills: `lgpd-vendor-audit`, `lgpd-dpa`, `lgpd-international-transfer`
+
+## Próximas 2–4 semanas
+5. Inventário de dados e ROPA (G5) — `lgpd-data-mapping` + `lgpd-ropa`
+6. Base legal por atividade, revisando a tabela da política (G3) — `lgpd-legal-basis`
+7. Prova mínima de consentimento após exclusão (G6) — nova migration com tabela separada, sem dados de treino ⚖ — `lgpd-consent-schema` + `lgpd-retention-erasure`
+8. Fechar o ledger: remover `insert` direto em `consent_records`, gravar só via RPC (G13) e conferir o hash dos textos (G14) — `lgpd-consent-schema`
+9. Completar `export_my_data()` (G12) — nova migration — `lgpd-dsar`
+10. Política de privacidade v1 com os dados reais, para revisão jurídica (G3, G9, G15) — `lgpd-privacy-policy` ⏸ CHECKPOINT
+
+## Próximo trimestre
+11. Avaliação ECA Digital (G11) — `lgpd-eca-digital-minors` ⚖
+12. RIPD do módulo de medidas antes de lançá-lo (G17) — `lgpd-ripd` ⏸ CHECKPOINT
+13. Retenção, backups e eliminação de arquivos do Storage (G15, G18) — `lgpd-retention-erasure`
+14. Log de auditoria de ações sensíveis (G19) — `lgpd-audit-logging`
+15. Endurecer autenticação em produção e CORS (G16, G20) — `lgpd-encryption-keys` / checklist do painel
+
+## Backlog
+16. Treinamento anual e programa de governança (G21) — Art. 50
+17. Revisão de segurança / pentest antes de monetizar
