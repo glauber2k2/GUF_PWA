@@ -9,7 +9,7 @@ export function Story10({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col">
         <div className="flex justify-between items-center h-[48px]">
           <Logo className="h-[40px]" />
-          <span className="text-[28px] text-fg-secondary">{d.date}</span>
+          <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="relative mt-[24px] h-[420px] flex justify-center items-center">
           <div className="absolute left-1/2 top-1/2 w-[680px] h-[680px] mt-[-340px] mr-0 mb-0 ml-[-340px] rounded-full bg-radial from-pr/26 to-transparent to-62%"></div>
@@ -32,7 +32,7 @@ export function Story10({ d }: StoryModelProps) {
               className="py-[32px] px-[40px] rounded-[32px] bg-surface border-[2px] border-pr-text/36 flex items-center justify-between gap-[24px]"
             >
               <div className="flex min-w-0 flex-col gap-[4px]">
-                <span className="truncate text-[28px] font-semibold text-fg-secondary">{r.exerciseName}</span>
+                <span className="truncate text-[28px] font-semibold text-fg">{r.exerciseName}</span>
                 <div className="flex items-baseline gap-[8px] text-pr-text">
                   <span className="font-display font-bold text-[104px] leading-[92px]">{r.load}</span>
                   <span className="font-display font-semibold text-[40px]">{d.unit}</span>
@@ -44,7 +44,7 @@ export function Story10({ d }: StoryModelProps) {
             </div>
           ))}
         </div>
-        <span className="mt-auto text-center text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <span className="mt-[32px] text-center text-[24px] text-fg">{STORY_SIGNATURE}</span>
       </div>
     </>
   );
@@ -66,8 +66,8 @@ export function Story11({ d }: StoryModelProps) {
           {r.previousLoad && (
             <div className="flex flex-col gap-[16px]">
               <div className="flex justify-between items-baseline">
-                <span className="text-[26px] font-semibold tracking-[.08em] text-fg-muted">{r.previousLabel}</span>
-                <div className="flex items-baseline gap-[8px] text-fg-secondary">
+                <span className="text-[26px] font-semibold tracking-[.08em] text-fg">{r.previousLabel}</span>
+                <div className="flex items-baseline gap-[8px] text-fg">
                   <span className="font-display font-semibold text-[120px] leading-[104px]">{r.previousLoad}</span>
                   <span className="font-display font-semibold text-[44px]">{d.unit}</span>
                 </div>
@@ -94,9 +94,9 @@ export function Story11({ d }: StoryModelProps) {
         <span className="mt-[56px] self-start h-[72px] py-0 px-[32px] rounded-full bg-pr text-pr-foreground flex items-center font-display font-bold text-[48px]">
           {[r.delta, r.deltaPct].filter(Boolean).join(" · ")}
         </span>
-        <div className="mt-auto flex justify-between">
-          <span className="text-[28px] text-fg-secondary">{[r.scheme, d.date].filter(Boolean).join(" · ")}</span>
-          <span className="text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <div className="mt-[32px] flex justify-between">
+          <span className="text-[28px] text-fg">{[r.scheme, d.date].filter(Boolean).join(" · ")}</span>
+          <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>
@@ -129,7 +129,7 @@ export function Story12({ d }: StoryModelProps) {
           </div>
         </div>
       </div>
-      <span className="absolute left-0 right-0 bottom-[204px] text-center text-[22px] text-fg-muted">{STORY_SIGNATURE}</span>
+      <span className="absolute left-0 right-0 bottom-[204px] text-center text-[22px] text-fg">{STORY_SIGNATURE}</span>
     </>
   );
 }

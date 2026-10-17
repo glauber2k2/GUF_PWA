@@ -19,8 +19,8 @@ export function Story13({ d }: StoryModelProps) {
             <span key={i} className={cn("h-[96px] rounded-[20px]", trained ? "bg-accent" : "border-[3px] border-border-strong")}></span>
           ))}
         </div>
-        <span className="mt-[32px] text-[28px] text-fg-secondary">Pelo menos 1 treino em cada semana</span>
-        <span className="mt-auto text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <span className="mt-[32px] text-[28px] text-fg">Pelo menos 1 treino em cada semana</span>
+        <span className="mt-[32px] text-[24px] text-fg">{STORY_SIGNATURE}</span>
       </div>
     </>
   );
@@ -32,7 +32,7 @@ export function Story14({ d }: StoryModelProps) {
       <div className="absolute left-[96px] right-[96px] top-[220px] bottom-[260px] flex flex-col items-center">
         <div className="self-stretch flex justify-between items-center h-[48px]">
           <Logo className="h-[40px]" />
-          <span className="text-[28px] text-fg-secondary">Semana {d.streak.weekNumber}</span>
+          <span className="text-[28px] text-fg">Semana {d.streak.weekNumber}</span>
         </div>
         <div className="mt-[96px] w-[620px] h-[620px] rounded-full bg-surface border border-border flex items-center justify-center">
           <GufRat occasion="streak" size={460} animated={false} label={null} />
@@ -41,7 +41,7 @@ export function Story14({ d }: StoryModelProps) {
           <StreakFlame size={88} className="text-accent-text" />
           <span className="text-[80px] leading-[88px] font-bold tracking-[-.02em]">{plural(d.streak.current, "semana", "semanas")}</span>
         </div>
-        <span className="mt-[12px] text-[32px] text-fg-secondary">seguidas sem faltar</span>
+        <span className="mt-[12px] text-[32px] text-fg">seguidas sem faltar</span>
         <div className="mt-[72px] self-stretch flex justify-between">
           {d.streak.last16.map((trained, i) => (
             <span
@@ -54,12 +54,12 @@ export function Story14({ d }: StoryModelProps) {
             ></span>
           ))}
         </div>
-        <div className="mt-[16px] self-stretch flex justify-between text-[22px] text-fg-muted">
+        <div className="mt-[16px] self-stretch flex justify-between text-[22px] text-fg">
           {d.streak.monthLabels.map((label, i) => (
             <span key={i}>{label}</span>
           ))}
         </div>
-        <span className="mt-auto text-[24px] text-fg-muted">{STORY_SIGNATURE}</span>
+        <span className="mt-[32px] text-[24px] text-fg">{STORY_SIGNATURE}</span>
       </div>
     </>
   );
@@ -79,7 +79,7 @@ export function Story15({ d }: StoryModelProps) {
         </div>
         <div className="flex items-center gap-[12px] py-[12px] px-[24px] rounded-full bg-surface border border-border">
           <Logo className="h-[28px]" />
-          <span className="text-[22px] text-fg-secondary">{STORY_SIGNATURE}</span>
+          <span className="text-[22px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
     </>

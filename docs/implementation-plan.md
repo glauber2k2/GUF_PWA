@@ -34,6 +34,10 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Documentos legais no app: leitor único (`/termos`, `/privacidade`, `/termo-de-saude`), central `/documentos`, leitura por cima da tela no cadastro, `/aceite` ("O que mudou") e Perfil | `feat/documentos-legais` | — |
 | Menu inferior: indicador da aba ativa desliza (e estica) até a aba tocada, já no toque | `feat/indicador-aba-animado` | — |
 
+**Ajuste implementado em `fix/stories-e-reordenacao`:** os 34 modelos de Stories usam branco nos textos neutros, incluindo legendas e assinatura; o CTA do site acompanha as informações com espaçamento curto, tanto na prévia quanto no PNG.
+
+**Correção de reordenação na mesma branch:** segurar o cabeçalho de um card aberto não inicia seleção, menu de copiar ou arraste nativo de texto. Soltar continua salvando a ordem e Esc cancela.
+
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
