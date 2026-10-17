@@ -59,6 +59,19 @@ Deno.serve(async (req) => {
   // (migration consent_ledger_hardening; prazo de 5 anos a validar com o jurídico).
   // O registro de auditoria (account_deleted) é gravado pelo gatilho on_auth_user_deleted_audit.
 
+  // Foto enviada (bucket "avatars", pasta <user_id>/): o Storage não apaga em cascata com a conta.
+  // Bucket ainda inexistente (upload não implementado) = nada a apagar. Falha ao remover = não exclui
+  // a conta, para não deixar arquivos órfãos (o usuário tenta de novo).
+  const avatars = admin.storage.from("avatars");
+  const { data: files } = await avatars.list(user.id, { limit: 1000 });
+  if (files && files.length > 0) {
+    const { error: removeError } = await avatars.remove(files.map((file) => `${user.id}/${file.name}`));
+    if (removeError) {
+      console.error("Falha ao apagar a foto na exclusão da conta", { userId: user.id, message: removeError.message });
+      return json({ error: "Não foi possível excluir a conta. Tente novamente." }, 500);
+    }
+  }
+
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);
   if (deleteError) {
     console.error("Falha ao excluir conta", { userId: user.id, message: deleteError.message });
