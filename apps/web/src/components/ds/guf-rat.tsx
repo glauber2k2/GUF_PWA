@@ -35,7 +35,7 @@ import { StreakFlame } from "./streak-flame";
 /*
  * GufRat — mascote "Guf Rat Forte v2" (Claude Design). Rato sempre branco, regata volt;
  * no tema claro ganha contorno escuro (tokens --rat-* por tema, então funciona dentro de
- * seções com outro data-theme, como os stories). 30 ocasiões, cada uma com pose, olhos,
+ * seções com outro data-theme, como os stories). 34 ocasiões, cada uma com pose, olhos,
  * boca, acessórios e animação em loop (keyframes guf-rat-* em base.css).
  * Movimento reduzido: tudo parado (regra .guf-rat em base.css). `animated={false}` = versão estática.
  * Origem, duração e atraso de cada parte animada vêm dos dados da pose (estilo inline por isso).
@@ -144,7 +144,7 @@ interface RatSpec {
   curl?: boolean;
 }
 
-/** As 30 ocasiões do design (ids 3a–3ad no Claude Design), agrupadas como lá. */
+/** As 30 ocasiões do design (ids 3a–3ad no Claude Design) + 4 poses das comparações de peso, agrupadas como lá. */
 export const GUF_RAT_SPECS = {
   // Sucesso e conquistas
   saved: {
@@ -483,6 +483,54 @@ export const GUF_RAT_SPECS = {
     arms: "down",
     props: ["tear"],
   },
+  // Comparações de peso (o rato "levanta" o objeto equivalente ao volume)
+  liftLight: {
+    name: "Levantando leve",
+    use: "Comparação de peso até 200 kg",
+    badge: Dumbbell,
+    tone: "accent",
+    anim: "bob",
+    eyes: "happy",
+    mouth: "big",
+    arms: "up",
+    blush: true,
+  },
+  lift: {
+    name: "Levantando",
+    use: "Comparação de peso até 2 t",
+    badge: Dumbbell,
+    tone: "accent",
+    anim: "shake",
+    eyes: "open",
+    brows: "angry",
+    mouth: "grit",
+    arms: "up",
+    props: ["drop"],
+  },
+  liftHeavy: {
+    name: "Levantando pesado",
+    use: "Comparação de peso até 20 t",
+    badge: Dumbbell,
+    tone: "accent",
+    anim: "shake",
+    eyes: "squeeze",
+    brows: "angry",
+    mouth: "grit",
+    arms: "up",
+    props: ["drop", "drop2"],
+  },
+  liftImpossible: {
+    name: "Levantando o impossível",
+    use: "Comparação de peso acima de 20 t",
+    badge: Dumbbell,
+    tone: "accent",
+    anim: "shake",
+    eyes: "squeeze",
+    brows: "angry",
+    mouth: "grit",
+    arms: "up",
+    props: ["drop", "drop2", "marks"],
+  },
 } as const satisfies Record<string, RatSpec>;
 
 export type GufRatOccasion = keyof typeof GUF_RAT_SPECS;
@@ -499,6 +547,7 @@ export const GUF_RAT_GROUPS: ReadonlyArray<{ title: string; occasions: readonly 
   },
   { title: "Informativos", occasions: ["info", "tip", "thinking", "hydration", "postWorkout", "welcome", "news"] },
   { title: "Treino e estados", occasions: ["rest", "restOver", "warmup", "dropSet", "legDay", "empty", "missYou"] },
+  { title: "Comparações de peso", occasions: ["liftLight", "lift", "liftHeavy", "liftImpossible"] },
 ];
 
 const BADGE_TONE: Record<GufRatTone, string> = {

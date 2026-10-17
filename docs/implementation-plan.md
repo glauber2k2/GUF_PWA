@@ -42,6 +42,8 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 **Ajuste implementado em `fix/logo-stories`:** logo completa com 88 px de altura nos 34 modelos de Stories, incluindo o modelo Empilhado, que antes não tinha logo; proporção e espaçamento ajustados para a prévia e o PNG.
 
+**Implementado em `feat/compartilhamento-novos-modelos`:** carrossel com os 37 modelos do design (novos: 36 Calendário do mês, 37 Treino de hoje com boneco, 38 Treino de hoje com Guf Rat) + 39 Comparação de peso (25 objetos, 4 poses novas do Guf Rat); "Tema da imagem" escuro/claro na folha. Fora do escopo por enquanto: cartões de resumo C01–C12, telas cheias F01–F10 e stickers S01–S22 do canvas PNGs (exceto S21, que virou o modelo 39).
+
 **Ajuste implementado em `fix/botoes-compartilhamento`:** a linha de ações da escolha do Story usa Compartilhar só com ícone e largura fixa de 56 px; Baixar imagem ocupa o espaço restante sem ultrapassar a tela, ou toda a largura quando não há compartilhamento nativo.
 
 ### Lacunas conhecidas no que já existe

@@ -3,6 +3,7 @@ import { TrendingDown, TrendingUp } from "lucide-react";
 import { Logo } from "@/components/ds";
 import { cn } from "@/lib/utils";
 import { STORY_SIGNATURE, type StoryModelProps } from "../story-types";
+import { StoryCenterCard } from "./center-card";
 
 /** Circunferência do anel da meta (r = 300). */
 const RING = 1885;
@@ -98,5 +99,43 @@ export function Story24({ d }: StoryModelProps) {
         </div>
       </div>
     </>
+  );
+}
+
+/** Semana de segunda a domingo (regra do app). */
+const WEEKDAYS = ["S", "T", "Q", "Q", "S", "S", "D"];
+
+export function Story36({ d }: StoryModelProps) {
+  const month = d.month.current;
+  return (
+    <StoryCenterCard label={month.name}>
+      <div className="flex items-baseline gap-[12px]">
+        <span className="font-display text-[96px] leading-[88px] font-bold text-accent-text">{month.workouts}</span>
+        <span className="text-[36px] font-bold">{month.workouts === 1 ? "treino no mês" : "treinos no mês"}</span>
+      </div>
+      <div className="grid grid-cols-7 gap-[8px]">
+        {WEEKDAYS.map((w, i) => (
+          <span key={i} className="text-center text-[26px] font-bold text-fg">
+            {w}
+          </span>
+        ))}
+        {d.month.calendar.map((c, i) =>
+          c ? (
+            <div
+              key={i}
+              className={cn(
+                "flex h-[80px] items-center justify-center rounded-[16px] font-display text-[34px] font-semibold",
+                c.trained ? "bg-accent text-accent-foreground" : "bg-surface-3 text-fg-secondary",
+                c.future && "opacity-40",
+              )}
+            >
+              {c.day}
+            </div>
+          ) : (
+            <div key={i} />
+          ),
+        )}
+      </div>
+    </StoryCenterCard>
   );
 }

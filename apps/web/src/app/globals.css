@@ -51,6 +51,29 @@
   --color-rat-ink: var(--ink-950);
   --color-rat-pink: var(--rat-pink);
   --color-rat-bottle: var(--rat-bottle);
+  /* Objetos das comparações de peso (ilustrações; cores fixas, iguais nos dois temas) */
+  --color-art-ink: var(--ink-950);
+  --color-art-metal-1: var(--ink-300);
+  --color-art-metal-2: var(--ink-500);
+  --color-art-metal-3: var(--ink-700);
+  --color-art-volt: var(--volt-400);
+  --color-art-blue: var(--blue-400);
+  --color-art-blue-deep: var(--blue-600);
+  --color-art-blue-light: color-mix(in oklab, var(--blue-400) 40%, var(--paper-0));
+  --color-art-gold: var(--gold-400);
+  --color-art-white: var(--paper-0);
+  --color-art-white-2: var(--paper-200);
+  --color-art-red: var(--danger);
+  --color-art-orange: var(--warning);
+  --color-art-green: var(--success);
+  --color-art-green-light: color-mix(in oklab, var(--success) 50%, var(--paper-0));
+  --color-art-brown: color-mix(in oklab, var(--warning) 50%, var(--ink-800));
+  --color-art-brown-dark: color-mix(in oklab, var(--warning) 30%, var(--ink-950));
+  --color-art-teal: color-mix(in oklab, var(--success) 45%, var(--ink-300));
+  --color-art-teal-dark: color-mix(in oklab, var(--success) 35%, var(--ink-500));
+  --color-art-pink: color-mix(in oklab, var(--danger) 40%, var(--paper-0));
+  /* Halo atrás do objeto e do Guf Rat no cartão de comparação */
+  --color-comparison-halo: color-mix(in oklab, var(--accent) 9%, var(--surface));
 
   /* Tints sobre superfície (misturas nomeadas do design) */
   --color-pr-highlight: color-mix(in oklab, var(--pr) 14%, var(--surface));

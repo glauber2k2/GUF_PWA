@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
-import { ChevronLeft, ChevronRight, Download, Share2, SquareDashed } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Moon, Share2, SquareDashed, Sun } from "lucide-react";
 import { m } from "motion/react";
 import { storyFileName, type StoryData } from "@guf/core";
 import type { ToastOptions } from "@/components/app-shell/app-shell";
-import { Banner, BottomSheet, Button, Chip, GufLoader, IconButton, MOTION_EASE, ScreenPortal, Skeleton } from "@/components/ds";
+import { Banner, BottomSheet, Button, Chip, GufLoader, IconButton, MOTION_EASE, ScreenPortal, SegmentedControl, Skeleton } from "@/components/ds";
 import { useShareStory } from "@/hooks/use-share-story";
 import { canShareImages, downloadImage, shareImage, storyToPng, StoryExportError } from "@/lib/share/story-export";
 import { cn } from "@/lib/utils";
 import { StoryArt } from "./story-art";
 import { availableStoryModels, STORY_STYLES } from "./story-catalog";
-import { STORY_HEIGHT, STORY_WIDTH } from "./story-types";
+import { STORY_HEIGHT, STORY_WIDTH, type StoryTheme } from "./story-types";
 
 /*
  * Folha "Compartilhar nos Stories" (Claude Design · ShareSheetScreen): estilos em chips, carrossel com
- * as prévias (só os vizinhos são desenhados), opacidade do fundo (0 = PNG transparente para colar
+ * as prévias (só os vizinhos são desenhados), tema da imagem (escuro/claro), opacidade do fundo (0 = PNG transparente para colar
  * sobre a foto) e Compartilhar (folha do sistema) / Baixar imagem. A imagem é gerada no aparelho.
  */
 
@@ -79,6 +79,11 @@ const PREVIEW_HEIGHT = 288;
 const PREVIEW_HEIGHT_ERROR = 220;
 const GAP = 12;
 
+const THEME_OPTIONS = [
+  { value: "dark", label: "Escuro", icon: Moon },
+  { value: "light", label: "Claro", icon: Sun },
+];
+
 function vibrate() {
   try {
     navigator.vibrate?.(8);
@@ -97,6 +102,7 @@ interface ShareStoryBodyProps {
 }
 
 function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyProps) {
+  const [theme, setTheme] = useState<StoryTheme>("dark");
   const [opacity, setOpacity] = useState(100);
   const [lastOpacity, setLastOpacity] = useState(100);
   const [status, setStatus] = useState<Status>("idle");
@@ -253,7 +259,7 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
                     style={{ transform: `scale(${previewHeight / STORY_HEIGHT})` }}
                     aria-hidden="true"
                   >
-                    <StoryArt model={model} data={data} backgroundOpacity={opacity} />
+                    <StoryArt model={model} data={data} backgroundOpacity={opacity} theme={theme} />
                   </div>
                 )}
                 {busy && selected && (
@@ -291,8 +297,20 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         />
       </m.div>
 
+      {/* Tema da imagem */}
+      <m.div {...enter(3)} className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold">Tema da imagem</span>
+        <SegmentedControl
+          options={THEME_OPTIONS}
+          value={theme}
+          onChange={(v) => setTheme(v === "light" ? "light" : "dark")}
+          size="sm"
+          label="Tema da imagem"
+        />
+      </m.div>
+
       {/* Opacidade do fundo */}
-      <m.div {...enter(3)} className="flex flex-col gap-1">
+      <m.div {...enter(4)} className="flex flex-col gap-1">
         <div className="flex items-center justify-between gap-3">
           <label htmlFor="story-opacity" className="text-sm font-semibold">
             Opacidade do fundo
@@ -326,7 +344,7 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         </Banner>
       )}
 
-      <m.div {...enter(4)} className="flex w-full min-w-0 gap-2">
+      <m.div {...enter(5)} className="flex w-full min-w-0 gap-2">
         {canShare && (
           <IconButton icon={Share2} label="Compartilhar imagem" size="lg" disabled={busy} onClick={() => void run("share")} />
         )}
@@ -344,7 +362,7 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
       {/* Arte em tamanho real fora da tela: é ela que vira PNG. */}
       <ScreenPortal>
         <div aria-hidden="true" inert className="pointer-events-none fixed top-0 left-[-12000px]">
-          <StoryArt ref={exportRef} model={current} data={data} backgroundOpacity={opacity} />
+          <StoryArt ref={exportRef} model={current} data={data} backgroundOpacity={opacity} theme={theme} />
         </div>
       </ScreenPortal>
     </div>
