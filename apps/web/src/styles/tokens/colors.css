@@ -135,3 +135,22 @@
   /* Volt pressionado: 86% volt + preto */
   --accent-pressed: color-mix(in oklab, var(--accent) 86%, var(--ink-950));
 }
+
+/* Mascote GufRat: misturas e contorno por tema (o rato é sempre branco; no claro ganha contorno escuro). */
+:root,
+[data-theme="dark"] {
+  --rat-pink: color-mix(in oklab, var(--danger) 45%, var(--paper-0));
+  --rat-bottle: color-mix(in oklab, var(--data) 70%, var(--paper-0));
+  --rat-edge: var(--ink-950);
+  --rat-edge-width: 6px;
+  --rat-edge-dot: 10.5px;
+  --rat-outline: none;
+}
+[data-theme="light"],
+.light {
+  --rat-edge: var(--ink-700);
+  --rat-edge-width: 2.4px;
+  --rat-edge-dot: 8.7px;
+  --rat-outline: drop-shadow(1.2px 0 0 var(--ink-700)) drop-shadow(-1.2px 0 0 var(--ink-700)) drop-shadow(0 1.2px 0 var(--ink-700)) drop-shadow(0 -1.2px 0 var(--ink-700));
+}
+
