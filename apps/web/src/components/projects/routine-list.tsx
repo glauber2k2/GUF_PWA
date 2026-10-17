@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Ellipsis, GripVertical } from "lucide-react";
 import { routineLetter, routineMeta, weekdaysLabel } from "@guf/core";
 import type { ProjectRoutine } from "@guf/api";
-import { Icon, IconButton } from "@/components/ds";
+import { AnimatePresence, Icon, IconButton, LAYOUT_ITEM_PROPS, LayoutItem } from "@/components/ds";
 import { usePointerReorder } from "@/hooks/use-pointer-reorder";
 import { cn } from "@/lib/utils";
 
@@ -37,19 +37,21 @@ export function RoutineList({ routines, nextRoutineId, nextLabel, disabled, onOp
   });
 
   return (
-    <div role="list" aria-label="Rotinas do projeto, em ordem" className="flex flex-col gap-2">
+    <div role="list" aria-label="Rotinas do projeto, em ordem" className="relative flex flex-col gap-2">
+      {/* As outras rotinas deslizam para o lugar ao reordenar ou arquivar (Motion, no invólucro). */}
+      <AnimatePresence initial={false} mode="popLayout">
       {reorder.order.map((r, i) => {
         const dragging = reorder.draggingId === r.id;
         const isNext = r.id === nextRoutineId;
         return (
+          <LayoutItem key={r.id} role="presentation" {...LAYOUT_ITEM_PROPS} className={cn("flex flex-col", dragging && "relative z-10")}>
           <div
-            key={r.id}
             role="listitem"
             ref={reorder.itemRef(r.id)}
             style={{ animationDelay: `${i * 50}ms` }}
             className={cn(
               "flex min-h-[72px] flex-none animate-guf-rise items-center gap-0.5 rounded-lg bg-surface-elevated py-1 pr-1",
-              "transition-[transform,box-shadow] duration-150 ease-standard",
+              "transition-[scale,box-shadow] duration-150 ease-standard",
               dragging ? "scale-[1.02] border-[1.5px] border-accent-text shadow-e3" : "border border-border",
             )}
           >
@@ -96,8 +98,10 @@ export function RoutineList({ routines, nextRoutineId, nextLabel, disabled, onOp
             </button>
             <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${r.name}`} disabled={disabled} onClick={() => onMenu(r)} />
           </div>
+          </LayoutItem>
         );
       })}
+      </AnimatePresence>
     </div>
   );
 }

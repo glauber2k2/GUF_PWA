@@ -25,6 +25,7 @@ export type WorkoutAction =
   | { type: "toggleOpen"; exerciseId: string }
   | { type: "removeExercise"; exerciseId: string }
   | { type: "restoreExercise"; index: number; exercise: ExerciseView }
+  | { type: "reorderExercises"; exerciseIds: string[] }
   | { type: "addExercises"; exercises: WorkoutExercise[] }
   | { type: "replaceExercise"; exerciseId: string; exercise: WorkoutExercise }
   | { type: "setExerciseNote"; exerciseId: string; note: string }
@@ -91,6 +92,12 @@ export function workoutReducer(state: WorkoutViewState, action: WorkoutAction): 
       const exercises = [...state.exercises];
       exercises.splice(action.index, 0, { ...action.exercise, flash: true });
       return { ...state, exercises };
+    }
+    case "reorderExercises": {
+      const rank = new Map(action.exerciseIds.map((id, i) => [id, i]));
+      // Quem não veio na lista (não deveria acontecer) fica no fim, na ordem atual.
+      const at = (e: ExerciseView) => rank.get(e.id) ?? Number.MAX_SAFE_INTEGER;
+      return { ...state, exercises: [...state.exercises].sort((a, b) => at(a) - at(b)) };
     }
     case "addExercises":
       return {

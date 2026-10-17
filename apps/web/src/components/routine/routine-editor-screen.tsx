@@ -8,7 +8,22 @@ import { routineDraftSummary, routineLetter, routineShortName, type IsoWeekday }
 import { routineDraftSchema } from "@guf/schemas";
 import { apiError, type ApiError, type LibraryExercise, type Project, type RoutineDraft } from "@guf/api";
 import { useAppShell } from "@/components/app-shell/app-shell";
-import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, Icon, IconButton, SavingOverlay, SheetOption, Skeleton, TextField } from "@/components/ds";
+import {
+  AnimatePresence,
+  Banner,
+  BottomSheet,
+  Button,
+  ConfirmDialog,
+  EmptyState,
+  Icon,
+  IconButton,
+  LAYOUT_ITEM_PROPS,
+  LayoutItem,
+  SavingOverlay,
+  SheetOption,
+  Skeleton,
+  TextField,
+} from "@/components/ds";
 import { ExercisePicker } from "@/components/exercise-picker/exercise-picker";
 import { OfflineEditBanner } from "@/components/projects/offline-edit-banner";
 import { PROJECTS_PATH, projectDetailPath } from "@/components/projects/paths";
@@ -255,10 +270,17 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
           />
         </div>
       ) : (
-        <div role="list" aria-label="Exercícios da rotina" className="flex flex-col gap-2">
+        <div role="list" aria-label="Exercícios da rotina" className="relative flex flex-col gap-2">
+          {/* Os outros exercícios deslizam para o lugar ao reordenar, remover ou desfazer. */}
+          <AnimatePresence initial={false} mode="popLayout">
           {reorder.order.map((exercise) => (
-            <RoutineExerciseCard
+            <LayoutItem
               key={exercise.id}
+              role="presentation"
+              {...LAYOUT_ITEM_PROPS}
+              className={cn("flex flex-col", reorder.draggingId === exercise.id && "relative z-10")}
+            >
+            <RoutineExerciseCard
               exercise={exercise}
               open={openId === exercise.id}
               dragging={reorder.draggingId === exercise.id}
@@ -270,7 +292,9 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
               onMenu={() => setSheet({ kind: "menu", exerciseId: exercise.id })}
               dispatch={dispatch}
             />
+            </LayoutItem>
           ))}
+          </AnimatePresence>
         </div>
       )}
 

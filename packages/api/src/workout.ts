@@ -144,6 +144,8 @@ export type ReplaceWorkoutExercise = (
   input: { sessionId: string; sessionExerciseId: string; exercise: NewWorkoutExercise },
 ) => Promise<ApiResult<null>>;
 export type RemoveWorkoutExercise = (client: GufClient, input: { sessionExerciseId: string }) => Promise<ApiResult<null>>;
+/** Nova ordem dos exercícios do treino (ids na ordem da tela; position = índice). Reenviar não muda nada. */
+export type ReorderWorkoutExercises = (client: GufClient, input: { sessionExerciseIds: string[] }) => Promise<ApiResult<null>>;
 /** Cria ou atualiza uma série (upsert pelo id gerado no aparelho). */
 export type SaveSet = (client: GufClient, input: { sessionExerciseId: string; set: SetInput }) => Promise<ApiResult<null>>;
 export type DeleteSet = (client: GufClient, input: { setId: string }) => Promise<ApiResult<null>>;
@@ -172,6 +174,7 @@ export interface WorkoutApi {
   addWorkoutExercises: AddWorkoutExercises;
   replaceWorkoutExercise: ReplaceWorkoutExercise;
   removeWorkoutExercise: RemoveWorkoutExercise;
+  reorderWorkoutExercises: ReorderWorkoutExercises;
   saveSet: SaveSet;
   deleteSet: DeleteSet;
   saveExerciseNote: SaveExerciseNote;
@@ -394,6 +397,19 @@ export const removeWorkoutExercise: RemoveWorkoutExercise = async (client, { ses
   }
 };
 
+export const reorderWorkoutExercises: ReorderWorkoutExercises = async (client, { sessionExerciseIds }) => {
+  try {
+    // Ids que não existem mais (exercício removido depois) simplesmente não atualizam nada.
+    const results = await Promise.all(
+      sessionExerciseIds.map((id, position) => client.from("session_exercises").update({ position }).eq("id", id)),
+    );
+    const failed = results.find((r) => r.error);
+    return failed?.error ? { data: null, error: toApiError(failed.error) } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const saveSet: SaveSet = async (client, { sessionExerciseId, set }) => {
   try {
     const { error } = await client.from("set_logs").upsert(setRow(sessionExerciseId, set), { onConflict: "id" });
@@ -528,6 +544,7 @@ export const workoutApi = {
   addWorkoutExercises,
   replaceWorkoutExercise,
   removeWorkoutExercise,
+  reorderWorkoutExercises,
   saveSet,
   deleteSet,
   saveExerciseNote,

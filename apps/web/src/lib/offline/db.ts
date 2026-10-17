@@ -22,6 +22,7 @@ export type OutboxOp =
   | { kind: "addExercises"; sessionId: string; exercises: NewWorkoutExercise[] }
   | { kind: "replaceExercise"; sessionId: string; sessionExerciseId: string; exercise: NewWorkoutExercise }
   | { kind: "removeExercise"; sessionId: string; sessionExerciseId: string }
+  | { kind: "reorderExercises"; sessionId: string; sessionExerciseIds: string[] }
   | { kind: "exerciseNote"; sessionId: string; sessionExerciseId: string; note: string }
   | { kind: "workoutNote"; sessionId: string; note: string }
   | { kind: "pause"; sessionId: string; at: string }
