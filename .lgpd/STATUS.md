@@ -14,7 +14,7 @@
 - [x] L3 — Legal basis (`lgpd-legal-basis`)
 - [x] L4 — Vendor audit (`lgpd-vendor-audit`)
 - [x] F3 — Consent schema (prova pós-exclusão, ledger fechado) — aplicada e testada em 2026-10-17
-- [ ] F4 — Privacy policy v1 — ⏸ CHECKPOINT
+- [~] F4 — Privacy policy v1 — ⏸ CHECKPOINT: rascunho pronto (2026-10-17), aguardando revisão jurídica
 - [ ] F5 — DSAR (canal + exportação completa)
 - [ ] F6 — Audit logging
 - [ ] F7 — Encryption/keys
@@ -34,6 +34,7 @@
 - `.lgpd/legal-basis.md` — v1 (proposta), 2026-10-16
 - `.lgpd/lia/a012-seguranca.md` — v1, 2026-10-16
 - `.lgpd/consent-ledger.md` — v1, 2026-10-17
+- `.lgpd/policies/privacy-policy-v1-draft.md` — v1 rascunho, 2026-10-17 (não publicar)
 
 ## L1 — Legacy retrofit ✓
 - Discovery completo (código; painel e contratos não verificados)
@@ -80,5 +81,14 @@
 ## Gaps abertos
 Ver `.lgpd/gaps.md`.
 
+## F4 — Privacy policy ⏸ CHECKPOINT (2026-10-17)
+- Rascunho v1 em `.lgpd/policies/privacy-policy-v1-draft.md` (branch `feat/lgpd-privacy-policy`)
+- 15 seções; 7 elementos do Art. 9º: 5 completos, 2 dependem de marcadores (controlador G1/G22, encarregado G2)
+- Novo em relação ao texto do app: prova pós-exclusão com hash do e-mail, decisão automatizada (finalização automática, Art. 20), armazenamento no aparelho, responsabilidades, operadores nomeados, banco no Brasil, 9 direitos do Art. 18
+- Promessa de "6 meses" dos registros de acesso retirada até a decisão jurídica (G9)
+- 8 marcadores e 6 decisões jurídicas listados no fim do rascunho
+- **Aguardando revisão jurídica.** Só depois: mover para `privacy-policy-v1.md`, levar a `legal-content.ts`, nova versão em `legal_documents` com hash
+- `legal-content.ts` NÃO foi alterado
+
 ## Próximo passo
-F4 — `lgpd-privacy-policy` (⏸ CHECKPOINT; incluir `consent_proofs` e o hash do e-mail na política).
+Enquanto a F4 aguarda o jurídico, seguir com etapas que não dependem dela: F11 — Encarregado (G2) e F9 — runbook de incidente (G4), que estavam nas ações imediatas com prazo em 2026-10-23.
