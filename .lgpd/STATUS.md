@@ -152,5 +152,11 @@ Ver `.lgpd/gaps.md`.
 - `.lgpd/REPORT.md`: 6 lacunas resolvidas, 11 encaminhadas, 6 abertas (todas dependem de empresa, advogado ou dinheiro)
 - 10 ações gratuitas para o desenvolvedor e lista do que fica para o futuro
 
+## Textos do app e documentação (2026-10-17)
+- Política de Privacidade **0.2-dev** no app (`legal-content.ts`) e no banco (migration `20261017150314_privacy_policy_0_2_dev.sql`, `requires_reaccept`): banco no Brasil, Supabase/Vercel/Google, e-mail do canal, eliminação na hora, prova dos aceites por 5 anos, linha de comprovação de aceites; promessa de "6 meses" dos registros de acesso trocada por marcador
+- Testadores passam pelo `/aceite` com "O que mudou"; Termos, idade e saúde seguem em 0.1-dev (dependem dos dados da empresa)
+- Continua rascunho (sem revisão jurídica); a versão completa para o advogado segue em `policies/privacy-policy-v1-draft.md`
+- Resumo para o time: `docs/lgpd.md` (implementado × falta × motivo)
+
 ## Próximo passo
-Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do `REPORT.md`. Próxima rodada de auditoria: quando houver orçamento/empresa (F4 final, F11, F12, F14) ou na revisão semestral (2027-04-17).
+Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do `REPORT.md`. Próxima rodada: quando houver orçamento/empresa (F4 final, F11, F12, F14) ou na revisão semestral (2027-04-17).
