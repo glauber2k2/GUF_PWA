@@ -614,3 +614,9 @@
 @media (prefers-reduced-motion: reduce) {
   .guf-rat, .guf-rat * { animation: none !important; }
 }
+
+/* Modo de reordenar do treino: cards balançam (como ícones da tela inicial do celular). */
+@keyframes guf-wiggle {
+  0%, 100% { transform: rotate(-0.6deg); }
+  50% { transform: rotate(0.6deg); }
+}
