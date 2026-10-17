@@ -456,10 +456,23 @@ export const LEGAL_DOCUMENTS: Record<LegalReaderDoc, LegalDocumentContent> = {
 /** Ordem na central "Documentos legais" e em "Outros documentos". */
 export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude"];
 
+/**
+ * Canal de comunicação com o titular para pedidos sobre dados (LGPD art. 18; Res. CD/ANPD nº 2/2022, art. 11).
+ * Provisório do beta: o Encarregado será designado antes do lançamento (.lgpd/STATUS.md).
+ */
+export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
+/** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
+export const DSAR_RESPONSE_DAYS = 15;
+
+/** Link "mailto:" já com o assunto do pedido. */
+export function privacyRequestMailto(): string {
+  return `mailto:${PRIVACY_CONTACT_EMAIL}?subject=${encodeURIComponent("Pedido sobre meus dados (LGPD)")}`;
+}
+
 /** Contato do encarregado e da empresa (rodapé do leitor). Marcadores até o texto final. */
-export const LEGAL_DPO_LINE = "[NOME DO ENCARREGADO] · [E-MAIL DO ENCARREGADO]";
+export const LEGAL_DPO_LINE = `${PRIVACY_CONTACT_EMAIL} · Encarregado: [A DESIGNAR]`;
 export const LEGAL_COMPANY_LINE = "[RAZÃO SOCIAL] · CNPJ [CNPJ] · [ENDEREÇO]";
-export const LEGAL_DPO_EMAIL = "[E-MAIL DO ENCARREGADO]";
+export const LEGAL_DPO_EMAIL = PRIVACY_CONTACT_EMAIL;
 
 export interface LegalTextPart {
   text: string;

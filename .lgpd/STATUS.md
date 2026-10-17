@@ -15,7 +15,7 @@
 - [x] L4 — Vendor audit (`lgpd-vendor-audit`)
 - [x] F3 — Consent schema (prova pós-exclusão, ledger fechado) — aplicada e testada em 2026-10-17
 - [~] F4 — Privacy policy v1 — ⏸ CHECKPOINT: rascunho pronto (2026-10-17), aguardando revisão jurídica
-- [ ] F5 — DSAR (canal + exportação completa)
+- [x] F5 — DSAR (canal + exportação completa) — aplicada e testada em 2026-10-17
 - [ ] F6 — Audit logging
 - [ ] F7 — Encryption/keys
 - [ ] F8 — Retention/erasure
@@ -101,5 +101,12 @@ Ver `.lgpd/gaps.md`.
 - Fundamento provisório ⚖: Res. CD/ANPD nº 2/2022 (ATPP), Art. 11 — dispensa a indicação do encarregado, mas **exige canal de comunicação com o titular**. A dispensa não vale para tratamento de alto risco (ex.: dados sensíveis em escala); reavaliar ao lançar o módulo de medidas
 - Condições para manter o adiamento: (1) beta só com convidados cientes do teste; (2) um e-mail de contato funcionando para pedidos de titulares (G10); (3) designar antes do lançamento ou da abertura para pessoas de fora
 
+## F5 — DSAR ✓ (2026-10-17)
+- Migration `20261017141954_export_my_data_complete.sql` (branch `feat/lgpd-dsar`): `export_my_data()` agora inclui conta (e-mail, datas, provedores, dados do cadastro), contas vinculadas, períodos ativos e consentimentos com documento/versão/hash; formato `guf-export/2`; sem senha, tokens nem sessões
+- Testada com usuário fictício (transação desfeita): sem login recusado (28000), só dados do próprio usuário, 2 identidades, 1 período ativo, nada de senha/token
+- Canal: `PRIVACY_CONTACT_EMAIL` = devglaubermonteiro@gmail.com (provisório do beta) em Perfil › Privacidade › "Outros pedidos sobre seus dados" (mailto com assunto), rodapé do leitor e `/documentos`
+- Fluxo, verificação de identidade, modelos de resposta e controle de prazo (15 dias, lembretes no 10º e 13º dia) em `.lgpd/dsar/workflow.md`; controle com dados pessoais fica FORA do repositório
+- Pendente: e-mail dedicado e Encarregado antes do lançamento; texto dos documentos com o e-mail na publicação da política v1
+
 ## Próximo passo
-F5 — DSAR: exportação completa (`export_my_data()` sem `workout_active_periods`, e-mail e identidades — G12, nova migration) e canal de pedidos com controle do prazo de 15 dias (G10). Não depende do jurídico.
+F6 — `lgpd-audit-logging`: log de auditoria das ações sensíveis (exportar, excluir conta, revogar consentimento) — G19. Depois: F8 retenção/backups (G15, G18) e F13 ECA Digital (G11).
