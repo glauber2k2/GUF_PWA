@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 import { useLegalBack } from "./legal-document-page";
 import { PRIVACY_SETTINGS_PATH, useLegalReader } from "./legal-reader-provider";
+import { LegalHashCheck } from "./legal-hash-check";
 import { LEGAL_ICONS, LegalText } from "./legal-ui";
 
 const FEMININE: Partial<Record<LegalReaderDocType, true>> = { privacy: true };
@@ -54,6 +55,8 @@ export function LegalCentral() {
             As regras de uso do guf e de como seus dados são tratados. Toque para ler a versão em vigor.
           </p>
         </div>
+
+        {process.env.NODE_ENV === "development" && <LegalHashCheck />}
 
         {!online && (
           <Banner tone="warning" title="Sem conexão">

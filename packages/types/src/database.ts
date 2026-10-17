@@ -69,6 +69,68 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_proofs: {
+        Row: {
+          account_deleted_at: string
+          action: string
+          consented_at: string
+          content_hash: string
+          doc_type: string
+          doc_version: string
+          document_id: string
+          email_sha256: string | null
+          former_user_id: string
+          id: string
+          original_record_id: string
+          platform: string | null
+          purge_after: string
+          source: string
+          summary_hash: string | null
+        }
+        Insert: {
+          account_deleted_at?: string
+          action: string
+          consented_at: string
+          content_hash: string
+          doc_type: string
+          doc_version: string
+          document_id: string
+          email_sha256?: string | null
+          former_user_id: string
+          id?: string
+          original_record_id: string
+          platform?: string | null
+          purge_after?: string
+          source: string
+          summary_hash?: string | null
+        }
+        Update: {
+          account_deleted_at?: string
+          action?: string
+          consented_at?: string
+          content_hash?: string
+          doc_type?: string
+          doc_version?: string
+          document_id?: string
+          email_sha256?: string | null
+          former_user_id?: string
+          id?: string
+          original_record_id?: string
+          platform?: string | null
+          purge_after?: string
+          source?: string
+          summary_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_proofs_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "legal_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consent_records: {
         Row: {
           action: string
@@ -719,6 +781,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      purge_expired_consent_proofs: { Args: never; Returns: number }
       resume_workout: {
         Args: { p_at?: string; p_session_id: string }
         Returns: undefined

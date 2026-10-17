@@ -1,0 +1,83 @@
+# LGPD Audit Status
+
+**Projeto**: Guf App (PWA de evolução fitness)
+**Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
+**Início**: 2026-10-16
+**Última atualização**: 2026-10-17
+**Encarregado**: pendente designação
+**Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
+
+## Pipeline atual
+- [x] L0 — Setup `.lgpd/`
+- [x] L1 — Legacy retrofit (gap analysis) — aprovado em 2026-10-16
+- [x] L2 — Data mapping (`lgpd-data-mapping`)
+- [x] L3 — Legal basis (`lgpd-legal-basis`)
+- [x] L4 — Vendor audit (`lgpd-vendor-audit`)
+- [x] F3 — Consent schema (prova pós-exclusão, ledger fechado) — aplicada e testada em 2026-10-17
+- [ ] F4 — Privacy policy v1 — ⏸ CHECKPOINT
+- [ ] F5 — DSAR (canal + exportação completa)
+- [ ] F6 — Audit logging
+- [ ] F7 — Encryption/keys
+- [ ] F8 — Retention/erasure
+- [ ] F9 — Incident response
+- [ ] F10 — ROPA — ⏸ CHECKPOINT
+- [ ] F11 — Encarregado
+- [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT
+- [ ] F13 — ECA Digital
+- [ ] F14 — Vendors + DPA + transferência internacional
+- [ ] F15 — Relatório final
+
+## Artefatos gerados
+- `.lgpd/discovery.md` — v1, 2026-10-16
+- `.lgpd/gaps.md` — v1, 2026-10-16
+- `.lgpd/data-map.md` — v1, 2026-10-16
+- `.lgpd/legal-basis.md` — v1 (proposta), 2026-10-16
+- `.lgpd/lia/a012-seguranca.md` — v1, 2026-10-16
+- `.lgpd/consent-ledger.md` — v1, 2026-10-17
+
+## L1 — Legacy retrofit ✓
+- Discovery completo (código; painel e contratos não verificados)
+- 21 gaps identificados (4 críticos, 7 altos, 8 médios, 2 baixos)
+- Plano em `.lgpd/gaps.md`
+
+## L2 — Data mapping ✓
+- 15 atividades inventariadas (A001–A015)
+- 1 envolve dado sensível (A010 medidas; A013/A014 quando houver medidas)
+- 0 direcionadas a menores; todas com acesso "possível" até a avaliação ECA Digital (G11)
+- 1 a avaliar como alto risco → RIPD recomendado: `ripd-medidas-corporais` (A010)
+- 3 novos achados (N1–N3) no fim do `data-map.md`
+
+## L3 — Legal basis ✓
+- 15 atividades com base legal proposta
+- 1 usa consentimento (A010, Art. 11, I)
+- 1 usa legítimo interesse (A012-b; LIA em rascunho, decisão pendente)
+- 10 usam execução de contrato (Art. 7º, V)
+- 4 decisões pendentes para o jurídico (fim do `legal-basis.md`)
+
+## L4 — Vendor audit ✓
+- 2 operadores (Supabase — crítico; Vercel — baixo/médio) + Google como terceiro controlador
+- 0 com DPA + base de transferência adequada (eliminatórios pendentes nos dois operadores)
+- Supabase confirmado em `us-west-2` (EUA), plano Free, SMTP padrão
+- Novos gaps: G22 (controlador não constituído), G23 (infra de desenvolvimento)
+- Fichas em `.lgpd/vendors/`
+
+## Migração do banco para o Brasil ✓ (2026-10-16)
+- Projeto novo `GUF DEV` (`yscoujsisrytytqsxkya`, `sa-east-1`): 15 migrations aplicadas, dados importados (contagens iguais em todas as 14 tabelas + `auth.users`/`auth.identities`), job pg_cron ativo, Edge Function `delete-account` publicada, tipos idênticos
+- Não copiados por minimização: sessões, refresh tokens e log de auditoria de login (IPs)
+- Arquivo exportado apagado da pasta temporária após a importação
+- Pendente: configurar Auth no painel, Google Cloud, variáveis da Vercel, testar, pausar e depois excluir o projeto antigo (`us-west-2`)
+
+## F3 — Consent schema ✓ (2026-10-17)
+- Migration `20261017132154_consent_ledger_hardening.sql` (branch `feat/lgpd-consent-ledger`)
+- G13: política de insert direto removida; gravação só por `accept_documents`, `grant_health_consent`, `revoke_health_consent` (SECURITY DEFINER, origem e plataforma validadas) e `handle_new_user`
+- G6: tabela `consent_proofs` (sem acesso pelo app) preenchida pelo gatilho `before delete on auth.users`; e-mail só em SHA-256; 5 anos (⚖); job diário `purge-expired-consent-proofs`
+- G14: `legalContentHashes` em `packages/core/src/legal-hash.ts`, script `pnpm --filter @guf/core legal:hashes`, aviso em `/documentos` só em dev; rascunhos 0.1-dev com hash real
+- Propagação a operadores: não se aplica (nenhum operador recebe dados por consentimento)
+- Detalhes em `.lgpd/consent-ledger.md`
+- Aplicada no projeto `yscoujsisrytytqsxkya` em 2026-10-17 e testada com usuário fictício (transação desfeita): aceite no cadastro, insert direto bloqueado (42501), origem/plataforma inválidas recusadas (22023), consent_proofs inacessível pelo app, exclusão gerou 6 provas de 6 registros com hash do e-mail e prazo de 5 anos, job ativo, nenhum placeholder restante
+
+## Gaps abertos
+Ver `.lgpd/gaps.md`.
+
+## Próximo passo
+F4 — `lgpd-privacy-policy` (⏸ CHECKPOINT; incluir `consent_proofs` e o hash do e-mail na política).
