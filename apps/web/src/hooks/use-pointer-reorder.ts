@@ -7,6 +7,8 @@ import { moveItem } from "@guf/core";
  * Reordenar lista por toque/mouse (pointer events — funciona no celular, ao contrário do arrastar
  * nativo do HTML5) e por teclado (setas na alça). A ordem muda na tela durante o arraste e
  * `onCommit` recebe a ordem final só ao soltar, se mudou.
+ * O destino usa as posições medidas NO INÍCIO do arraste: medir a cada movimento pegava os itens
+ * no meio da animação de reposicionamento e o destino ficava "pulando".
  */
 export function usePointerReorder<T extends { id: string }>({
   items,
@@ -20,14 +22,15 @@ export function usePointerReorder<T extends { id: string }>({
   const [draft, setDraft] = useState<T[] | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const nodes = useRef(new Map<string, HTMLElement>());
+  /** Meio de cada posição da lista no início do arraste (coordenada da página). */
+  const slots = useRef<number[]>([]);
   const order = draft ?? items;
 
-  const indexAtY = (y: number, current: readonly T[]) => {
-    for (let i = 0; i < current.length; i++) {
-      const rect = nodes.current.get(current[i]!.id)?.getBoundingClientRect();
-      if (rect && y < rect.top + rect.height / 2) return i;
-    }
-    return current.length - 1;
+  const indexAtY = (clientY: number) => {
+    const y = clientY + window.scrollY;
+    const mids = slots.current;
+    for (let i = 0; i < mids.length; i++) if (y < mids[i]!) return i;
+    return Math.max(0, mids.length - 1);
   };
 
   const finish = (current: readonly T[]) => {
@@ -50,13 +53,17 @@ export function usePointerReorder<T extends { id: string }>({
         if (disabled) return;
         e.preventDefault();
         e.currentTarget.setPointerCapture(e.pointerId);
+        slots.current = order.map((item) => {
+          const rect = nodes.current.get(item.id)?.getBoundingClientRect();
+          return rect ? rect.top + window.scrollY + rect.height / 2 : Number.POSITIVE_INFINITY;
+        });
         setDraft([...order]);
         setDraggingId(id);
       },
       onPointerMove: (e: PointerEvent<HTMLElement>) => {
         if (draggingId !== id || !draft) return;
         const from = draft.findIndex((item) => item.id === id);
-        const to = indexAtY(e.clientY, draft);
+        const to = indexAtY(e.clientY);
         if (from !== to) setDraft(moveItem(draft, from, to));
       },
       onPointerUp: () => {

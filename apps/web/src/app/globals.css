@@ -180,6 +180,7 @@
   --animate-guf-toast-timer: guf-toast-timer 5s linear both;
   /* StreakFlame (ver base.css) */
   --animate-guf-rat-pop: guf-rat-pop 450ms var(--ease-overshoot) both;
+  --animate-guf-wiggle: guf-wiggle 300ms ease-in-out infinite;
   --animate-guf-streak-ignite: guf-streak-ignite 600ms var(--ease-overshoot) both;
   --animate-guf-streak-core-pop: guf-streak-core-pop 480ms var(--ease-overshoot) 120ms both;
   --animate-guf-streak-flicker: guf-streak-flicker 1600ms ease-in-out infinite;
