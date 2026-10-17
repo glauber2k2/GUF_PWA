@@ -7,8 +7,8 @@ export function Story28({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute left-[64px] right-[64px] top-[220px] bottom-[260px] border-[6px] border-accent rounded-[56px]"></div>
-      <div className="absolute left-[120px] top-[190px] py-[12px] px-[28px] rounded-full bg-surface border border-border flex items-center gap-[12px]">
-        <Logo className="h-[36px]" />
+      <div className="absolute left-[120px] top-[164px] py-[12px] px-[28px] rounded-full bg-surface border border-border flex items-center gap-[12px]">
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute right-[120px] top-[198px] py-[12px] px-[28px] rounded-full bg-accent text-accent-foreground text-[26px] font-bold">
         Treino concluído
@@ -65,7 +65,7 @@ export function Story29({ d }: StoryModelProps) {
               <StreakFlame size={40} className="text-accent-text" />
               <span className="text-[26px] font-semibold">{plural(d.streak.current, "semana", "semanas")}</span>
             </div>
-            <Logo className="h-[28px]" />
+            <Logo className="h-[88px]" />
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@ export function Story30({ d }: StoryModelProps) {
           <span>{plural(d.sets, "série", "séries")}</span>
         </div>
         <div className="mt-[8px] flex items-center gap-[16px]">
-          <Logo className="h-[32px]" />
+          <Logo className="h-[88px]" />
           <span className="text-[24px] text-fg">{STORY_SIGNATURE}</span>
         </div>
       </div>
@@ -104,7 +104,7 @@ export function Story31({ d }: StoryModelProps) {
       <div className="absolute right-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-180"></div>
       <div className="absolute left-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-270"></div>
       <div className="absolute left-[120px] top-[276px]">
-        <Logo className="h-[36px]" />
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute left-[120px] right-[120px] bottom-[316px] flex flex-col gap-[16px]">
         <span className="text-[24px] font-semibold tracking-[.08em] text-accent-text">{d.title.toUpperCase()}</span>
@@ -130,7 +130,7 @@ export function Story32({ d }: StoryModelProps) {
       <div className="absolute left-[104px] right-[104px] top-[1392px] bottom-[300px] flex flex-col justify-center gap-[16px]">
         <div className="flex justify-between items-center">
           <span className="text-[52px] font-bold tracking-[-.02em]">Treino pago.</span>
-          <Logo className="h-[36px]" />
+          <Logo className="h-[88px]" />
         </div>
         <div className="flex items-center gap-[16px] font-display font-semibold text-[44px]">
           <span>{d.duration}</span>
@@ -156,7 +156,7 @@ export function Story33({ d }: StoryModelProps) {
         <span className="text-[200px] leading-[180px] font-bold tracking-[-.04em]">Treino pago.</span>
       </div>
       <div className="absolute right-[96px] top-[220px]">
-        <Logo className="h-[36px]" />
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute right-[96px] bottom-[260px] flex flex-col items-end gap-[28px] text-right">
         <div className="flex flex-col items-end gap-[4px]">
@@ -199,7 +199,7 @@ export function Story35({ d }: StoryModelProps) {
         </svg>
       </div>
       <div className="absolute left-[96px] right-[96px] top-[220px] flex justify-center">
-        <Logo className="h-[36px]" />
+        <Logo className="h-[88px]" />
       </div>
       <div className="absolute left-[96px] right-[96px] bottom-[260px] flex flex-col items-center gap-[24px]">
         <span className="text-[80px] leading-[88px] font-bold tracking-[-.03em]">Treino pago.</span>

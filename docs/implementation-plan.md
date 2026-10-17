@@ -38,6 +38,8 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 **Correção de reordenação na mesma branch:** segurar o cabeçalho de um card aberto não inicia seleção, menu de copiar ou arraste nativo de texto. Soltar continua salvando a ordem e Esc cancela.
 
+**Ajuste implementado em `fix/logo-stories`:** logo completa com 88 px de altura nos 34 modelos de Stories, incluindo o modelo Empilhado, que antes não tinha logo; proporção e espaçamento ajustados para a prévia e o PNG.
+
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
