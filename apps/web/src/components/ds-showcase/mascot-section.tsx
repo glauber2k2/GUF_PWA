@@ -5,7 +5,7 @@ import { Chip, GUF_RAT_GROUPS, GUF_RAT_SPECS, GufRat } from "@/components/ds";
 import { cn } from "@/lib/utils";
 import { Group, PANEL, Section, SectionHeader } from "./layout";
 
-/** Vitrine do mascote (Claude Design · "Guf Rat Forte v2"): 30 ocasiões, estático ou animado. */
+/** Vitrine do mascote (Claude Design · "Guf Rat Forte v2"): 34 ocasiões, estático ou animado. */
 export function MascotSection({ id }: { id?: string }) {
   const [animated, setAnimated] = useState(true);
 

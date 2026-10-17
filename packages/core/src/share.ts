@@ -4,11 +4,12 @@ import { addLocalDays, formatShortDate, fromLocalISODate, toLocalISODate } from 
 import { formatNumber, formatSigned, TIMES_SIGN } from "./format";
 import type { SetType } from "./training";
 import { toDisplayWeight, type WeightUnit } from "./units";
+import { liftEffort, pickWeightComparison, type LiftEffort, type WeightComparison } from "./weight-comparison";
 
 /*
  * Imagens de compartilhamento (stories 1080 × 1920, Claude Design "StoryArt"/"ShareSheetScreen").
  * Regras puras: recebe o resumo do treino e o contexto (sequência, dias treinados, séries do mês)
- * e devolve os textos e números prontos para os 34 modelos. Pesos convertidos para a unidade do usuário.
+ * e devolve os textos e números prontos para os modelos. Pesos convertidos para a unidade do usuário.
  */
 
 /* ---------------------------------------------------------------------
@@ -195,6 +196,20 @@ export interface StoryMonth {
   muscles: StoryMuscleLevels;
 }
 
+/** Dia do calendário do mês (semana de segunda a domingo). */
+export interface StoryCalendarDay {
+  day: number;
+  trained: boolean;
+  /** Depois do dia do treino (aparece apagado). */
+  future: boolean;
+}
+
+/** Objeto equivalente ao volume do treino (Comparações de peso). */
+export interface StoryComparison extends WeightComparison {
+  /** Pose do Guf Rat pelo volume levantado. */
+  effort: LiftEffort;
+}
+
 export interface StoryData {
   unit: WeightUnit;
   /** Data local do treino ("2026-10-12"), para o nome do arquivo. */
@@ -249,7 +264,11 @@ export interface StoryData {
     current: StoryMonth;
     /** Participação dos grupos no mês do treino (5 maiores; braços somados). */
     shares: Array<{ label: string; pct: number }>;
+    /** Calendário do mês do treino: null = espaço antes do dia 1 (até a segunda-feira). */
+    calendar: Array<StoryCalendarDay | null>;
   };
+  /** Comparação de peso do volume (null abaixo de 20 kg). */
+  comparison: StoryComparison | null;
 }
 
 /* ---------------------------------------------------------------------
@@ -385,6 +404,8 @@ export function buildStoryData(input: StoryInput): StoryData {
     .slice(0, 5)
     .map(([label, sets]) => ({ label, pct: Math.round((sets / shareSum) * 100) }));
 
+  const comparison = pickWeightComparison(summary.volumeKg);
+
   return {
     unit,
     performedOn: summary.performedOn,
@@ -423,8 +444,31 @@ export function buildStoryData(input: StoryInput): StoryData {
       changeUp: thisWeek >= lastWeek,
       bars,
     },
-    month: { previous: monthOf(previousStart), current: monthOf(currentStart), shares },
+    month: {
+      previous: monthOf(previousStart),
+      current: monthOf(currentStart),
+      shares,
+      calendar: storyMonthCalendar(day, trainingDays),
+    },
+    comparison: comparison ? { ...comparison, effort: liftEffort(summary.volumeKg) } : null,
   };
+}
+
+/** Calendário do mês do treino (seg–dom): dias treinados e os que ainda não chegaram. */
+export function storyMonthCalendar(
+  day: Date,
+  trainingDays: ReadonlyArray<{ performedOn: string; sessions: number }>,
+): Array<StoryCalendarDay | null> {
+  const first = startOfMonth(day);
+  const trained = new Set(trainingDays.filter((d) => d.sessions > 0).map((d) => d.performedOn));
+  const blanks = (first.getDay() + 6) % 7;
+  const total = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  const cells: Array<StoryCalendarDay | null> = Array.from({ length: blanks }, () => null);
+  for (let n = 1; n <= total; n++) {
+    const date = new Date(first.getFullYear(), first.getMonth(), n);
+    cells.push({ day: n, trained: trained.has(toLocalISODate(date)), future: n > day.getDate() });
+  }
+  return cells;
 }
 
 /** Período que a API precisa buscar para montar os stories (16 semanas e 2 meses até o treino). */

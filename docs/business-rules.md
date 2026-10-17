@@ -213,7 +213,9 @@
 | Carregamento com a animação da logo (`GufLoader`): **08 (Cometa)** nos botões com `loading`; **09 (Sonar)** na abertura do app (verificação da sessão e carregamento da Início depois do login); **07 (Ponto saltitante)** no "Salvando". Botão carregando não aceita toques (evita gravar duas vezes). | Web (`ds/actions.tsx`, `ds/loading.tsx`) |
 | Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
 | Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
-| A logo completa do guf aparece em todos os 34 modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
+| A logo completa do guf aparece em todos os modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
+| Na escolha do Story, o tema da imagem (escuro ou claro) é escolhido na folha e vale para a prévia e o PNG; com fundo transparente, os cartões ficam translúcidos (20–100%). | Web (`components/share/story-art.tsx`) |
+| Comparação de peso: o volume do treino vira o objeto mais pesado do catálogo que ele alcança (de 20 kg a 200 t); abaixo de 20 kg o modelo não aparece. O valor exibido é o volume na unidade do usuário. | Core (`weight-comparison.ts`) + Web (`WeightComparisonCard`) |
 | Na escolha do Story, Compartilhar mostra só o ícone em um botão de 56 px, com rótulo acessível. Baixar imagem ocupa o restante da linha, ou toda a largura sem compartilhamento nativo; os botões ficam bloqueados enquanto a imagem é gerada. | Web (`components/share/share-story-sheet.tsx`) |
 
 ## 10. Pontos em aberto (decisões de produto)

@@ -5,6 +5,9 @@ export interface StoryModelProps {
   d: StoryData;
 }
 
+/** Tema da imagem (escolhido na folha; padrão escuro). */
+export type StoryTheme = "dark" | "light";
+
 /** Assinatura no rodapé das imagens (endereço público do app). */
 export const STORY_DOMAIN = "gufapp.vercel.app";
 export const STORY_SIGNATURE_LEAD = "Registrado com";
