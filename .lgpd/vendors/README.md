@@ -5,7 +5,7 @@
 
 | Fornecedor | Papel na LGPD | Tier | País | Plano | DPA | Base Art. 33 | Veredito |
 |---|---|---|---|---|---|---|---|
-| [Supabase](./supabase.md) | Operador (Art. 5º, VII; Art. 39) | **Crítico** | EUA (`us-west-2`) | Free | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — **bloqueado para usuários reais** até DPA + base do Art. 33 |
+| [Supabase](./supabase.md) | Operador (Art. 5º, VII; Art. 39) | **Crítico** | Brasil (`sa-east-1`) desde 2026-10-16; empresa e sub-operadores nos EUA | Free | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — **bloqueado para usuários reais** até DPA + base do Art. 33 |
 | [Vercel](./vercel.md) | Operador | Baixo/Médio | EUA (rede global) | Hobby | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — só para testes; trocar antes de monetizar |
 | [Google (login)](./google.md) | **Controlador independente** (não é operador) | — | EUA | — | Não se aplica | Não se aplica (dados enviados pelo titular por escolha dele) | Aprovado — informar na política |
 
