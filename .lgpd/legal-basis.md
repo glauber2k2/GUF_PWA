@@ -23,6 +23,7 @@
 | A013 | Exportação de dados | Art. 7º, II (Art. 18, II e V) | — |
 | A014 | Exclusão de conta | Art. 7º, II (Art. 18, VI) | — |
 | A015 | Planos e pagamentos (futuro) | Art. 7º, V; dados fiscais Art. 7º, II | Não |
+| A016 | Registro de auditoria | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Não |
 
 **Totais**: 1 atividade com consentimento (A010) · 1 com legítimo interesse (A012, LIA em `.lgpd/lia/a012-seguranca.md`) · 10 com execução de contrato · 4 com obrigação legal (A003, A012, A013, A014; A015 parcial) · 1 com exercício regular de direitos (A003 após a exclusão).
 
@@ -187,6 +188,16 @@
 - **Sensíveis?**: Não. Dados de cartão ficam no gateway, nunca no banco do guf.
 - **Retenção**: definir antes de monetizar, com o contador e o jurídico ⚖.
 - **Última revisão**: 2026-10-16
+
+## A016 — Registro de auditoria <a id="a016"></a>
+
+- **Finalidade**: comprovar o atendimento dos direitos e o histórico de consentimentos (responsabilização) e apoiar a apuração de incidentes.
+- **Dados tratados**: id interno da conta, evento, data/hora, documento/versão e contagens. Sem e-mail, nome, IP ou conteúdo.
+- **Sensíveis?**: Não.
+- **Base legal**: Art. 7º, II — demonstrar a adoção de medidas eficazes (Art. 6º, X) e registrar incidentes (Res. 15/2024, Art. 10). Após a exclusão da conta, Art. 7º, VI (exercício regular de direitos) ⚖.
+- **Retenção**: 5 anos, eliminação automática mensal ⚖.
+- **Revogação possível?**: Não (o registro existe para provar o que o titular fez, inclusive a revogação).
+- **Última revisão**: 2026-10-17
 
 ---
 

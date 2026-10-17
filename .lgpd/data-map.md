@@ -26,6 +26,7 @@
 | A013 | Exportação de dados (direito do titular) | Sim, se houver medidas | Possível | Não | Em produção (testes) |
 | A014 | Exclusão de conta | Sim, se houver medidas | Possível | Não | Em produção (testes) |
 | A015 | Planos e pagamentos | Não | Possível | Não | Futuro |
+| A016 | Registro de auditoria | Não | Possível | Não | Em produção (testes) |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.
@@ -331,6 +332,26 @@
 | Alto risco? | Não |
 | RIPD | N/A |
 | Owner | Pendente |
+
+### A016 — Registro de auditoria (prestação de contas)
+
+| Campo | Valor |
+|---|---|
+| Slug | a016-auditoria |
+| Finalidade | Comprovar que consentimentos, revogações, exportações e exclusões foram registrados e atendidos; apoiar a apuração de incidentes |
+| Base legal | Proposta: Art. 7º, II (Art. 6º, X — responsabilização; Res. 15/2024 Art. 10) e Art. 7º, VI após a exclusão da conta ⚖ |
+| Categorias de titulares | Usuários e ex-usuários |
+| Sensíveis? | Não (registra só a contagem de medidas apagadas, nunca os valores) |
+| Dados | id interno da conta (sem FK), tipo do evento, data/hora, tipo de ator, documento/versão, contagens, hashes da cadeia |
+| Fonte | Gerado pelo banco (gatilhos) |
+| Sistemas | `audit_log` |
+| Operadores | Supabase |
+| Transferência intl. | Não (banco em `sa-east-1`) |
+| Retenção | 5 anos, eliminação mensal automática (`purge-expired-audit-log`) ⚖ |
+| Segurança | Sem acesso pelo app; só inclusão; cadeia de hash (`verify_audit_log()`) |
+| Alto risco? | Não |
+| RIPD | N/A |
+| Owner | Pendente (controlador) |
 
 ---
 

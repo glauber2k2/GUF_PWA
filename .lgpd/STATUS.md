@@ -16,7 +16,7 @@
 - [x] F3 — Consent schema (prova pós-exclusão, ledger fechado) — aplicada e testada em 2026-10-17
 - [~] F4 — Privacy policy v1 — ⏸ CHECKPOINT: rascunho pronto (2026-10-17), aguardando revisão jurídica
 - [x] F5 — DSAR (canal + exportação completa) — aplicada e testada em 2026-10-17
-- [ ] F6 — Audit logging
+- [x] F6 — Audit logging — aplicada e testada em 2026-10-17
 - [ ] F7 — Encryption/keys
 - [ ] F8 — Retention/erasure
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
@@ -108,5 +108,19 @@ Ver `.lgpd/gaps.md`.
 - Fluxo, verificação de identidade, modelos de resposta e controle de prazo (15 dias, lembretes no 10º e 13º dia) em `.lgpd/dsar/workflow.md`; controle com dados pessoais fica FORA do repositório
 - Pendente: e-mail dedicado e Encarregado antes do lançamento; texto dos documentos com o e-mail na publicação da política v1
 
+## Decisão — sem orçamento (2026-10-17)
+- O app segue em beta gratuito, sem empresa aberta e sem orçamento. A auditoria continua **só com o que é gratuito e não exige pessoa jurídica**
+- **Agora (custo zero):** F6 auditoria, F7 checklist de segurança/MFA, F8 retenção e eliminação, F10 ROPA (rascunho), F13 análise ECA Digital (rascunho), F15 relatório; aceitar DPAs que os fornecedores oferecem sem custo, se o controlador pessoa natural puder aceitar (F14, conferir)
+- **Futuro (exige dinheiro ou empresa):** revisão jurídica (F4, F10, F12, F13), empresa e CNPJ (G1/G22), Encarregado formal (F11), e-mail em domínio próprio, plano pago do Supabase com backups e logs longos (G23), hospedagem de produção, RIPD do módulo de medidas (F12, quando o módulo existir)
+- Enquanto isso, o beta fica restrito a convidados cientes de que é um teste (regra prática do `gaps.md`)
+
+## F6 — Audit logging ✓ (2026-10-17)
+- Migration `20261017143503_audit_log.sql` (branch `feat/lgpd-audit-log`): tabela `audit_log` só inclusão, encadeada por hash, sem acesso pelo app
+- Eventos por gatilho: aceites e revogações, medidas apagadas, exportação, exclusão de conta, eliminações por prazo
+- `verify_audit_log()` confere a cadeia; retenção de 5 anos com job mensal `purge-expired-audit-log`
+- Testes (usuário fictício, desfeito): 8 eventos na ordem certa, cadeia íntegra, edição/remoção bloqueadas, adulteração detectada, sem e-mail no registro
+- Nova atividade A016 no mapa de dados e nas bases legais; detalhes em `.lgpd/audit-log.md`
+- Custo: zero
+
 ## Próximo passo
-F6 — `lgpd-audit-logging`: log de auditoria das ações sensíveis (exportar, excluir conta, revogar consentimento) — G19. Depois: F8 retenção/backups (G15, G18) e F13 ECA Digital (G11).
+F7 — `lgpd-encryption-keys`: checklist de segurança sem custo (MFA nos painéis, chaves, CORS da Edge Function — G20, senha mínima no Auth — G16).

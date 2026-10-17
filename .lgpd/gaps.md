@@ -31,7 +31,7 @@
 | G16 | Segurança da autenticação em produção | YELLOW | `config.toml` local: senha mínima 6 (app exige 8), sem CAPTCHA/MFA; painel de produção não verificado | média | baixo | Art. 46 |
 | G17 | RIPD do módulo de medidas (dados de saúde) | YELLOW | dado sensível = critério específico; larga escala ainda não | média | médio | Art. 38; Res. 2/2022 Art. 4º |
 | G18 | Foto enviada (futuro) apagada na exclusão da conta | YELLOW | cascata do banco não apaga arquivos do Storage | média | baixo | Art. 16; Art. 18, VI |
-| G19 | Log de auditoria de ações sensíveis (exclusão, revogação, exportação) | YELLOW | só `consent_records` | média | médio | Art. 6º, X |
+| G19 | Log de auditoria de ações sensíveis (exclusão, revogação, exportação) | GREEN | **2026-10-17 (F6)**: `audit_log` encadeado por hash, aplicado e testado (`.lgpd/audit-log.md`). Antes: só `consent_records` | média | médio | Art. 6º, X |
 | G20 | CORS `*` na Edge Function `delete-account` | YELLOW | comentário no código pede restringir | baixa | baixo | Art. 46 |
 | G21 | Treinamento e governança | RED | inexistente | baixa | médio | Art. 50 |
 | G22 | Controlador não constituído | RED | sem empresa; app desenvolvido por uma pessoa (Glauber), em beta. Enquanto houver usuários externos, quem decide o tratamento é o controlador, inclusive pessoa natural com fins econômicos (Art. 5º, VI; Res. 2/2022 — ATPP) | crítica | médio | Art. 5º, VI; Art. 9º, III ⚖ |
