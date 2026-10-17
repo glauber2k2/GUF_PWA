@@ -138,6 +138,9 @@ guf-app/
 - **Estados de desenvolvimento:** `?estado=` padrao · sem-recordes · livre · pausas · excluir · nao-encontrado · primeira-vez · um-treino · erro · carregando · offline (combináveis; sem `id`, o mock escolhe um exemplo).
 - **Mocks:** nada pode rodar no carregamento do módulo (ex.: gerar dados numa constante); senão o build de produção não descarta o mock. Gerar sob demanda.
 
+## Mascote (GufRat)
+- `components/ds/guf-rat.tsx` (Claude Design "Guf Rat Forte v2"): `<GufRat occasion="workoutDone" animated badge size />`, 30 ocasiões (`GUF_RAT_SPECS`, grupos em `GUF_RAT_GROUPS`). Animações = keyframes `guf-rat-*` (base.css); origem/duração por parte vêm dos dados da pose (estilo inline). Rato sempre branco; contorno no tema claro e braço da frente por tokens `--rat-*` (colors.css), então funciona dentro de seções com outro `data-theme`. Movimento reduzido: parado. Vitrine: `/design-system#mascote`.
+
 ## Página 404
 - `src/app/not-found.tsx` → `NotFoundScreen` (`components/not-found/`), exportada como `out/404.html`. Logado → "Voltar ao início" (/); sem sessão → "Ir para o login". Redireciona sozinha em 10 s (conta só depois de saber se há sessão); "Ficar aqui" pausa. Animação do anel com keyframes `guf-404-*` (base.css), parada em movimento reduzido.
 

@@ -18,3 +18,4 @@ export * from "./muscle-icon";
 export * from "./avatar";
 export * from "./streak-flame";
 export * from "./motion";
+export * from "./guf-rat";

@@ -46,6 +46,11 @@
   /* Marca fixa (não muda com o tema): ícone do app */
   --color-brand-ink: var(--ink-950);
   --color-brand-volt: var(--volt-400);
+  /* Mascote GufRat (pelo sempre branco, traços escuros, regata volt) */
+  --color-rat-fur: var(--ink-50);
+  --color-rat-ink: var(--ink-950);
+  --color-rat-pink: var(--rat-pink);
+  --color-rat-bottle: var(--rat-bottle);
 
   /* Tints sobre superfície (misturas nomeadas do design) */
   --color-pr-highlight: color-mix(in oklab, var(--pr) 14%, var(--surface));
@@ -174,6 +179,7 @@
   /* Duração real vem do style (tempo do aviso); pausa com [animation-play-state:paused]. */
   --animate-guf-toast-timer: guf-toast-timer 5s linear both;
   /* StreakFlame (ver base.css) */
+  --animate-guf-rat-pop: guf-rat-pop 450ms var(--ease-overshoot) both;
   --animate-guf-streak-ignite: guf-streak-ignite 600ms var(--ease-overshoot) both;
   --animate-guf-streak-core-pop: guf-streak-core-pop 480ms var(--ease-overshoot) 120ms both;
   --animate-guf-streak-flicker: guf-streak-flicker 1600ms ease-in-out infinite;
