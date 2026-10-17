@@ -1,7 +1,7 @@
 import { domToBlob } from "modern-screenshot";
 
 /*
- * Exportação dos stories: o elemento da arte (1080 × 1920) vira PNG no próprio aparelho
+ * Exportação dos stories: o elemento da arte (1080 × 1920, feed 1080 × 1350 ou o tamanho do sticker) vira PNG no próprio aparelho
  * (modern-screenshot embute fontes e estilos; nada vai para servidor). Fundo transparente
  * quando a opacidade é 0.
  */
@@ -15,12 +15,12 @@ export class StoryExportError extends Error {
   }
 }
 
-/** PNG da arte em tamanho real. */
+/** PNG da arte em tamanho real (o tamanho do próprio elemento). */
 export async function storyToPng(node: HTMLElement): Promise<Blob> {
   try {
     // Espera as fontes (Inter e Barlow) para o texto não sair na fonte padrão.
     await document.fonts.ready;
-    const blob = await domToBlob(node, { width: 1080, height: 1920, scale: 1, type: "image/png" });
+    const blob = await domToBlob(node, { width: node.offsetWidth, height: node.offsetHeight, scale: 1, type: "image/png" });
     if (!blob) throw new Error("vazio");
     return blob;
   } catch {

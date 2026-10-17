@@ -61,7 +61,7 @@ export function HomeScreen() {
 
   const now = new Date();
   const today = toLocalISODate(now);
-  // A saudação usa o relógio atual; a semana (seg–dom) usa a data local de hoje.
+  // A saudação usa o relógio atual; a semana (dom–sáb) usa a data local de hoje.
   const week = useMemo(() => currentWeek(fromLocalISODate(today)), [today]);
 
   const offline = dev.forceOffline || !online;

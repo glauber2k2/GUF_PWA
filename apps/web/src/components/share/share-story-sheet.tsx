@@ -9,6 +9,7 @@ import { Banner, BottomSheet, Button, Chip, GufLoader, IconButton, MOTION_EASE, 
 import { useShareStory } from "@/hooks/use-share-story";
 import { canShareImages, downloadImage, shareImage, storyToPng, StoryExportError } from "@/lib/share/story-export";
 import { cn } from "@/lib/utils";
+import { FitPreview } from "./fit-preview";
 import { StoryArt } from "./story-art";
 import { availableStoryModels, STORY_STYLES } from "./story-catalog";
 import { STORY_HEIGHT, STORY_WIDTH, type StoryTheme } from "./story-types";
@@ -253,14 +254,10 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
                 style={{ width: previewWidth, height: previewHeight }}
               >
                 {near <= 2 && (
-                  // Arte em tamanho real reduzida para a prévia (escala dinâmica).
-                  <div
-                    className="pointer-events-none origin-top-left"
-                    style={{ transform: `scale(${previewHeight / STORY_HEIGHT})` }}
-                    aria-hidden="true"
-                  >
+                  // Arte em tamanho real reduzida para caber na prévia (story, feed ou sticker).
+                  <FitPreview width={previewWidth} height={previewHeight}>
                     <StoryArt model={model} data={data} backgroundOpacity={opacity} theme={theme} />
-                  </div>
+                  </FitPreview>
                 )}
                 {busy && selected && (
                   <div className="absolute inset-0 grid place-items-center bg-background/78">
@@ -309,8 +306,8 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         />
       </m.div>
 
-      {/* Opacidade do fundo */}
-      <m.div {...enter(4)} className="flex flex-col gap-1">
+      {/* Opacidade do fundo (sticker já sai sem fundo) */}
+      <m.div {...enter(4)} className={cn("flex flex-col gap-1", current.format === "sticker" && "hidden")}>
         <div className="flex items-center justify-between gap-3">
           <label htmlFor="story-opacity" className="text-sm font-semibold">
             Opacidade do fundo

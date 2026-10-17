@@ -1,9 +1,9 @@
-import { addDays, addMonths, differenceInCalendarDays, format, getDaysInMonth, startOfMonth, startOfWeek } from "date-fns";
+import { addDays, addMonths, differenceInCalendarDays, format, getDaysInMonth, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { fromLocalISODate, toLocalISODate } from "./dates";
+import { fromLocalISODate, startOfLocalWeek, toLocalISODate, weekdayPosition } from "./dates";
 
 /**
- * Regras da tela Histórico (puras, sem React). Datas no fuso LOCAL; semana de segunda a domingo.
+ * Regras da tela Histórico (puras, sem React). Datas no fuso LOCAL; semana de domingo a sábado.
  * A sequência (streak) NÃO é recalculada aqui: os números vêm sempre de get_streak().
  */
 
@@ -14,11 +14,9 @@ export interface TrainingDayLike {
   volumeKg: number;
 }
 
-const WEEK_OPTIONS = { weekStartsOn: 1 } as const;
-
-/** Segunda-feira da semana (seg–dom) que contém `date`. */
+/** Domingo da semana (dom–sáb) que contém `date`. */
 export function weekStart(date: Date): Date {
-  return startOfWeek(date, WEEK_OPTIONS);
+  return startOfLocalWeek(date);
 }
 
 /* ---------------------------------------------------------------------
@@ -69,17 +67,17 @@ export function monthsBack(month: Date, today: Date): number {
 export interface MonthDayCell {
   iso: string;
   day: number;
-  /** Dia da semana 0 = segunda … 6 = domingo. */
+  /** Dia da semana 0 = domingo … 6 = sábado. */
   weekdayIndex: number;
 }
 
 /**
- * Grade do mês com a semana começando na segunda: espaços vazios (null) antes do dia 1
+ * Grade do mês com a semana começando no domingo: espaços vazios (null) antes do dia 1
  * e um item por dia do mês.
  */
 export function monthGrid(month: Date): Array<MonthDayCell | null> {
   const first = startOfMonth(month);
-  const leading = (first.getDay() + 6) % 7;
+  const leading = weekdayPosition(first);
   const days = Array.from({ length: getDaysInMonth(first) }, (_, i) => {
     const date = addDays(first, i);
     return { iso: toLocalISODate(date), day: i + 1, weekdayIndex: (leading + i) % 7 };

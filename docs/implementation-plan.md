@@ -42,7 +42,9 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 **Ajuste implementado em `fix/logo-stories`:** logo completa com 88 px de altura nos 34 modelos de Stories, incluindo o modelo Empilhado, que antes não tinha logo; proporção e espaçamento ajustados para a prévia e o PNG.
 
-**Implementado em `feat/compartilhamento-novos-modelos`:** carrossel com os 37 modelos do design (novos: 36 Calendário do mês, 37 Treino de hoje com boneco, 38 Treino de hoje com Guf Rat) + 39 Comparação de peso (25 objetos, 4 poses novas do Guf Rat); "Tema da imagem" escuro/claro na folha. Fora do escopo por enquanto: cartões de resumo C01–C12, telas cheias F01–F10 e stickers S01–S22 do canvas PNGs (exceto S21, que virou o modelo 39).
+**Implementado em `feat/compartilhamento-novos-modelos` (2ª etapa):** todos os PNGs do canvas "Compartilhamento – PNGs" entraram na folha — cartões de resumo (C01–C05 e C09–C12 em feed), telas cheias F01–F10 e stickers S01–S22 — com formatos `story`/`feed`/`sticker` e prévia que encaixa qualquer tamanho. Novos dados em `StoryData` (semana dom–sáb, 35 dias, descanso médio, músculo do dia, exercício em destaque, marco de treinos, projeto, tempo do mês). **Semana de domingo a sábado** em todo o app (core `dates.ts`, histórico, Início, rotina, imagens) e no banco (`get_streak`, migration `20261017184353_week_starts_sunday`, aplicada em 2026-10-17).
+
+**Implementado em `feat/compartilhamento-novos-modelos`:** carrossel com os 37 modelos do design (novos: 36 Calendário do mês, 37 Treino de hoje com boneco, 38 Treino de hoje com Guf Rat) + 39 Comparação de peso (25 objetos, 4 poses novas do Guf Rat); "Tema da imagem" escuro/claro na folha. Os cartões, telas cheias e stickers do canvas PNGs vieram na etapa seguinte (acima).
 
 **Ajuste implementado em `fix/botoes-compartilhamento`:** a linha de ações da escolha do Story usa Compartilhar só com ícone e largura fixa de 56 px; Baixar imagem ocupa o espaço restante sem ultrapassar a tela, ou toda a largura quando não há compartilhamento nativo.
 
