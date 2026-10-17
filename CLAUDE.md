@@ -109,7 +109,8 @@ guf-app/
 - **Fim do descanso:** `src/lib/rest-alert/rest-alert.ts` — preferência no aparelho (`localStorage` "guf.rest-alert": sound · silent; padrão sound). Som = efeito `power-up-7`. Sem opção de vibrar (removida: não funcionava de forma confiável no Android e o iPhone não tem a API); valor antigo "vibrate" salvo no aparelho volta para o padrão. O `WorkoutProvider` chama `primeRestAlert()` no toque que inicia o descanso (libera o áudio no iPhone) e `playRestAlert()` quando ele termina sozinho; escolher no Perfil toca uma prévia. Só toca com o app aberto.
 - **Tela ligada no treino:** `useScreenWakeLock` (apps/web/src/hooks/use-screen-wake-lock.ts, Screen Wake Lock API) no `WorkoutProvider` enquanto houver treino em andamento; pede de novo ao voltar para o app. Opção "Manter tela ligada no treino" no Perfil (`localStorage` "guf.keep-screen-on": on · off; padrão on). Sem suporte, segue normal. Preferências do aparelho (exceto o tema) usam `createDevicePreference` (src/lib/device-preference.ts).
 - **Tema:** `src/lib/theme/theme.ts` — preferência no aparelho (`localStorage` "guf.theme": dark · light · system), aplicada antes da pintura por `THEME_BOOT_SCRIPT` no `<head>` (`<html suppressHydrationWarning>`), inclusive a meta theme-color.
-- **Exportar:** JSON gerado no aparelho (Blob) com nome `guf-meus-dados-AAAA-MM-DD.json` e "Baixar"; o conteúdo nunca vai para logs.
+- **Exportar:** JSON gerado no aparelho (Blob) com nome `guf-meus-dados-AAAA-MM-DD.json` e "Baixar"; o conteúdo nunca vai para logs. Formato `guf-export/2` (`export_my_data`, SECURITY DEFINER filtrando pelo usuário logado): conta (e-mail, datas, provedores), contas vinculadas, perfil, treinos, períodos ativos, séries, rotinas, medidas e consentimentos com documento/versão/hash; nunca senha, tokens ou sessões.
+- **Outros pedidos do titular:** "Outros pedidos sobre seus dados" (Perfil › Privacidade) abre `privacyRequestMailto()` para `PRIVACY_CONTACT_EMAIL` (`packages/core/src/legal-content.ts`; e-mail provisório do beta, também no rodapé do leitor e em `/documentos`). Prazo de resposta: `DSAR_RESPONSE_DAYS` (15 dias). Fluxo em `.lgpd/dsar/workflow.md`.
 - **Excluir conta:** digitar EXCLUIR → `deleteAccount` → `signOut` (sem enviar a fila offline) → `/login/?conta-excluida=1` ("Sua conta foi excluída."). O mock só simula.
 - **Confirmações LGPD** (revogar consentimento; sair com gravações pendentes): `ConfirmDialog` com `balanced` (os dois botões com o mesmo peso).
 - **Versão:** `NEXT_PUBLIC_APP_VERSION` = `version` do `apps/web/package.json` (definida no `next.config.ts`).
@@ -179,7 +180,7 @@ Funções RPC:
 | `is_premium()` | Planos pagos (futuro) |
 | `auto_finish_idle_workouts(p_idle)` | Só servidor (pg_cron, a cada 5 min): finaliza treinos ociosos de quem ligou `auto_finish_workout` |
 | `average_duration_seconds` (campo calculado de `routines`) | Tempo médio da rotina (últimos 5 treinos concluídos); usar no select: `routines(id, average_duration_seconds)` |
-| `export_my_data()` | Exportar meus dados (JSON) |
+| `export_my_data()` | Exportar meus dados (JSON, formato `guf-export/2`) |
 
 Edge Function: `delete-account` → `supabase.functions.invoke('delete-account', { method: 'POST' })` e depois `signOut()`.
 

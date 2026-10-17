@@ -11,7 +11,7 @@
 - Seus dados **não são vendidos** nem usados para publicidade. O app não tem anúncios, cookies de publicidade nem rastreadores de terceiros.
 - Medidas corporais são **dados de saúde**: opcionais e só tratadas com o seu consentimento específico, que você pode revogar a qualquer momento (as medidas são apagadas na hora).
 - O banco de dados fica no Brasil (São Paulo). Alguns prestadores ficam nos Estados Unidos, e a transferência segue as regras da LGPD.
-- Você pode exportar seus dados, corrigir o perfil, revogar o consentimento e excluir a conta pelo próprio app, em **Perfil › Privacidade**. Outros pedidos: [E-MAIL DO ENCARREGADO].
+- Você pode exportar seus dados, corrigir o perfil, revogar o consentimento e excluir a conta pelo próprio app, em **Perfil › Privacidade**. Outros pedidos: devglaubermonteiro@gmail.com.
 
 ---
 
@@ -22,7 +22,7 @@ O guf é oferecido por **[RAZÃO SOCIAL]**, CNPJ **[CNPJ]**, com sede em **[ENDE
 ## 2. Encarregado pela proteção de dados (DPO)
 
 - **Nome**: [NOME DO ENCARREGADO]
-- **E-mail**: [E-MAIL DO ENCARREGADO]
+- **E-mail**: devglaubermonteiro@gmail.com
 
 O encarregado recebe suas dúvidas, pedidos e reclamações sobre dados pessoais e é o contato com a Autoridade Nacional de Proteção de Dados (ANPD).
 
@@ -117,7 +117,7 @@ Você também pode se opor a um tratamento feito sem consentimento, se ele descu
 | Revogar consentimento de saúde | "Revogar consentimento" (as medidas são apagadas na hora) |
 | Eliminação | "Excluir conta" apaga a conta e os dados (ver seção 6) |
 
-**Outros pedidos**: escreva para [E-MAIL DO ENCARREGADO]. Respondemos em até **15 dias** (art. 19, II). Podemos pedir uma confirmação para ter certeza de que o pedido é seu. Se não ficar satisfeito, você pode reclamar à **ANPD** (www.gov.br/anpd).
+**Outros pedidos**: escreva para devglaubermonteiro@gmail.com. Respondemos em até **15 dias** (art. 19, II). Podemos pedir uma confirmação para ter certeza de que o pedido é seu. Se não ficar satisfeito, você pode reclamar à **ANPD** (www.gov.br/anpd).
 
 ## 10. Cookies e armazenamento no aparelho
 
@@ -132,7 +132,7 @@ O guf **não usa cookies de publicidade, de análise nem rastreadores de terceir
 
 ## 11. Menores de idade
 
-O guf é destinado a pessoas com **18 anos ou mais**, o que é confirmado no cadastro. Se identificarmos uma conta de menor de idade, ela será encerrada e os dados apagados. Se você é responsável por um menor que criou uma conta, escreva para [E-MAIL DO ENCARREGADO].
+O guf é destinado a pessoas com **18 anos ou mais**, o que é confirmado no cadastro. Se identificarmos uma conta de menor de idade, ela será encerrada e os dados apagados. Se você é responsável por um menor que criou uma conta, escreva para devglaubermonteiro@gmail.com.
 
 ## 12. Segurança
 
@@ -155,7 +155,7 @@ Quando esta política mudar de forma relevante (finalidades, bases legais, compa
 
 ## 15. Contato
 
-- **Encarregado**: [NOME DO ENCARREGADO] — [E-MAIL DO ENCARREGADO]
+- **Encarregado**: [NOME DO ENCARREGADO] — devglaubermonteiro@gmail.com
 - **ANPD**: www.gov.br/anpd
 
 ---
@@ -172,7 +172,7 @@ Quando esta política mudar de forma relevante (finalidades, bases legais, compa
 | Marcador | Depende de |
 |---|---|
 | [RAZÃO SOCIAL], [CNPJ], [ENDEREÇO], [SITE] | G1, G22 — hoje não há empresa constituída; o app é desenvolvido por pessoa natural em beta |
-| [NOME/E-MAIL DO ENCARREGADO] | G2 — próxima etapa F11 (`lgpd-dpo-encarregado`) |
+| [NOME DO ENCARREGADO] | G2 — designação adiada para antes do lançamento (ATPP ⚖). O e-mail de contato provisório (devglaubermonteiro@gmail.com) já está preenchido |
 | [PRAZO DOS REGISTROS DE ACESSO] | G9 — decisão 3 abaixo; retenção de logs dos planos Free/Hobby não confirmada |
 | [PRAZO DOS BACKUPS] | G15 — depende do plano do Supabase (Free hoje; Pro recomendado antes do lançamento) |
 | [MECANISMO DE TRANSFERÊNCIA] | G7, G8 — nenhum DPA aceito ainda; Res. 19/2024 exige cláusulas-padrão brasileiras |
