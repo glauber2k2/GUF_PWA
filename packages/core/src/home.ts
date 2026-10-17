@@ -59,8 +59,8 @@ export function isStreakRecord({ currentStreak, bestStreak }: Pick<StreakInput, 
 
 /** Textos da sequência (CLAUDE.md) — os mesmos na Início e no Histórico. */
 export const STREAK_MESSAGES = {
-  risk: "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência.",
-  zero: "Treine 1 vez até domingo e comece sua sequência.",
+  risk: "Nenhum treino nesta semana ainda. Treine até sábado para manter sua sequência.",
+  zero: "Treine 1 vez até sábado e comece sua sequência.",
   secured: "Semana garantida",
 } as const;
 

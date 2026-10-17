@@ -16,3 +16,9 @@ export const STORY_SIGNATURE = `${STORY_SIGNATURE_LEAD} ${STORY_DOMAIN}`;
 /** Tamanho da arte exportada (stories do Instagram). */
 export const STORY_WIDTH = 1080;
 export const STORY_HEIGHT = 1920;
+
+/**
+ * Formato da imagem: "story" 1080 × 1920 · "feed" 1080 × 1350 · "sticker" (só a forma, fundo
+ * transparente; o tamanho é o do próprio adesivo).
+ */
+export type StoryFormat = "story" | "feed" | "sticker";

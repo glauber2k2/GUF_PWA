@@ -23,7 +23,7 @@ function GoalSegments({ goal, count }: { goal: number; count: number }) {
 
 /**
  * Card de sequência de semanas.
- * Regra (CLAUDE.md): 1 treino concluído na semana (seg–dom) mantém a sequência;
+ * Regra (CLAUDE.md): 1 treino concluído na semana (dom–sáb) mantém a sequência;
  * weekly_goal é só exibição.
  */
 export function StreakCard({ streak, goal }: { streak: StreakSummary; goal: number | null }) {

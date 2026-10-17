@@ -1,5 +1,6 @@
 // Stories · Semana (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { WEEKDAY_INITIALS } from "@guf/core";
 import { Logo } from "@/components/ds";
 import { cn } from "@/lib/utils";
 import { STORY_SIGNATURE, type StoryModelProps } from "../story-types";
@@ -102,8 +103,6 @@ export function Story24({ d }: StoryModelProps) {
   );
 }
 
-/** Semana de segunda a domingo (regra do app). */
-const WEEKDAYS = ["S", "T", "Q", "Q", "S", "S", "D"];
 
 export function Story36({ d }: StoryModelProps) {
   const month = d.month.current;
@@ -114,7 +113,7 @@ export function Story36({ d }: StoryModelProps) {
         <span className="text-[36px] font-bold">{month.workouts === 1 ? "treino no mês" : "treinos no mês"}</span>
       </div>
       <div className="grid grid-cols-7 gap-[8px]">
-        {WEEKDAYS.map((w, i) => (
+        {WEEKDAY_INITIALS.map((w, i) => (
           <span key={i} className="text-center text-[26px] font-bold text-fg">
             {w}
           </span>

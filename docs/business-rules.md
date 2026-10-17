@@ -36,7 +36,7 @@
 | Peso **sempre em kg no banco**; a conversão para lb (1 lb = 0,45359237 kg) é só na exibição, conforme `profiles.weight_unit`. Exibição com até 1 casa; gravação em kg com 2 casas. | Core (`units.ts`) |
 | Edição de carga: passo de 2 em kg e de 5 em lb; atalhos −1 / +1 / +5 / +10 na unidade exibida. | Web (`set-edit-sheet.tsx`, DS `QuickLoad`) |
 | Datas de calendário (`performed_on`) são a **data local** do aparelho ("yyyy-MM-dd"), nunca a data UTC do banco. | Core (`dates.ts`) |
-| Semana vai de **segunda a domingo**. | Core |
+| Semana vai de **domingo a sábado** (calendários, sequência, meta semanal, dias da rotina e imagens de compartilhamento). | Core (`dates.ts`) + Banco (`get_streak`) |
 | Números em pt-BR (vírgula decimal, ponto de milhar); sinal de menos tipográfico (−) e "×" em carga × repetições. | Core (`format.ts`) |
 
 ## 3. Projetos e rotinas
@@ -45,7 +45,7 @@
 |---|---|
 | Projeto = grupo de rotinas; rotina = lista ordenada de exercícios planejados (séries, repetições alvo em texto livre como "10", "8-12" ou "falha", e descanso). | Banco |
 | **No máximo um projeto ativo por usuário** (índice único). A troca é feita pela função `activate_project`, que desativa o atual e ativa o novo na mesma transação (nunca fica com dois ou nenhum por erro). Projeto arquivado ou de outro usuário não pode ser ativado (erro `GP001`). | Banco (`activate_project`) |
-| **Treino de hoje (projeto ativo):** pelos dias da semana das rotinas (`routines.weekdays`, ISO 1 = segunda … 7 = domingo). Rotina marcada para hoje → é o treino de hoje (várias no mesmo dia: a primeira pela ordem; as demais em "Trocar rotina"). O projeto usa dias e nenhuma rotina é de hoje → **dia de descanso** + o próximo treino da semana ("Amanhã" ou "Qua, 14 out"). Nenhuma rotina com dia marcado → a próxima pela ordem (`position`) depois da última concluída, voltando para a primeira; sem histórico, a primeira. | Core (`schedule.ts`: `todayPlan`) |
+| **Treino de hoje (projeto ativo):** pelos dias da semana das rotinas (`routines.weekdays`, ISO 1 = segunda … 7 = domingo no banco; exibidos de domingo a sábado). Rotina marcada para hoje → é o treino de hoje (várias no mesmo dia: a primeira pela ordem; as demais em "Trocar rotina"). O projeto usa dias e nenhuma rotina é de hoje → **dia de descanso** + o próximo treino da semana ("Amanhã" ou "Qua, 14 out"). Nenhuma rotina com dia marcado → a próxima pela ordem (`position`) depois da última concluída, voltando para a primeira; sem histórico, a primeira. | Core (`schedule.ts`: `todayPlan`) |
 | Rotina tem dias da semana opcionais; a tela avisa quando outra rotina do mesmo projeto já usa o dia (é permitido). | Banco (`routines.weekdays`) + Web |
 | **Favoritos:** todo usuário tem um projeto padrão "Favoritos", criado no cadastro (ativo para usuário novo; para quem já existia, ativo só se não houvesse outro). Não existe rotina avulsa — rotinas sem outro projeto ficam nele. Não pode ser renomeado, arquivado nem excluído (pode ser ativado/desativado). | Banco (`is_favorites`, `handle_new_user`, `protect_favorites_project`) |
 | Montar/editar rotina: nome obrigatório (até 100), projeto, dias, e pelo menos 1 exercício; cada exercício com séries 1–20, repetições alvo (texto livre até 20, ex.: "10", "8-12", "falha"), descanso 45 s a 3 min e observação opcional (até 500). Exercício novo entra com 3 × 10 e 90 s. | Schemas (`routines.ts`) + Core |
@@ -134,12 +134,12 @@
 
 | Regra | Onde |
 |---|---|
-| Uma semana (seg–dom) conta quando tem **pelo menos 1 treino concluído**; treinar mais vezes não aumenta a sequência. | Banco (`get_streak`) |
+| Uma semana (dom–sáb) conta quando tem **pelo menos 1 treino concluído**; treinar mais vezes não aumenta a sequência. | Banco (`get_streak`) |
 | Uma semana inteira sem treino **zera** a sequência. | Banco |
-| A semana atual ainda sem treino **não zera**: fica "em risco" até domingo. | Banco |
+| A semana atual ainda sem treino **não zera**: fica "em risco" até sábado. | Banco |
 | A meta semanal (`weekly_goal`, 1 a 7) é **só exibição** ("X de Y treinos da sua meta") e não afeta a sequência. | Banco + Core |
 | Os números da sequência vêm **sempre** do `get_streak()`; o app não recalcula. | Web |
-| Textos: número + "semanas" / "seguidas treinando"; semana garantida → "Semana garantida" + ícone de check + meta; em risco → "Nenhum treino nesta semana ainda. Treine até domingo para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até domingo e comece sua sequência."; destaque dourado quando a atual é o recorde (e maior que zero). | Core (`home.ts`: `STREAK_MESSAGES`, `streakWords`, `weeklyGoalLabel`) |
+| Textos: número + "semanas" / "seguidas treinando"; semana garantida → "Semana garantida" + ícone de check + meta; em risco → "Nenhum treino nesta semana ainda. Treine até sábado para manter sua sequência."; zerada ou usuário novo → "Treine 1 vez até sábado e comece sua sequência."; destaque dourado quando a atual é o recorde (e maior que zero). | Core (`home.ts`: `STREAK_MESSAGES`, `streakWords`, `weeklyGoalLabel`) |
 
 ## 7. Tela Início
 
@@ -147,14 +147,14 @@
 |---|---|
 | Saudação pela hora local: 5h–11h "Bom dia", 12h–17h "Boa tarde", demais "Boa noite", com o primeiro nome. | Core (`home.ts`) |
 | Card "Treino de hoje", em ordem de prioridade: em andamento > concluído hoje > treino de hoje do projeto ativo (pelos dias) **ou** dia de descanso com o próximo treino da semana > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina). | Web (`home-screen.tsx`, `today-card.tsx`) |
-| Card "Esta semana": dias treinados de segunda a domingo e contagem vs. meta. | Web + Banco (`get_training_days`) |
+| Card "Esta semana": dias treinados de domingo a sábado e contagem vs. meta. | Web + Banco (`get_training_days`) |
 
 ## 8. Histórico
 
 | Regra | Onde |
 |---|---|
 | Faixa das últimas 12 semanas: semana preenchida quando teve ≥ 1 treino concluído; a atual é destacada. | Core (`history.ts`) |
-| Calendário: semana seg–dom, do mês do primeiro treino até o mês atual; só dias treinados abrem detalhes. | Web + Core |
+| Calendário: semana dom–sáb, do mês do primeiro treino até o mês atual; só dias treinados abrem detalhes. | Web + Core |
 | Realce do dia em 3 níveis, pelos tercis de volume dos dias treinados das últimas 12 semanas (menos de 3 dias com volume → nível mais claro para todos). | Core |
 | Resumo do mês: treinos, dias treinados e volume. | Core |
 | Gráfico "Volume médio por dia treinado", por semana, nos períodos 4 semanas, 3 meses, 6 meses e 1 ano. | Core + Web |
@@ -215,6 +215,8 @@
 | Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
 | A logo completa do guf aparece em todos os modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
 | Na escolha do Story, o tema da imagem (escuro ou claro) é escolhido na folha e vale para a prévia e o PNG; com fundo transparente, os cartões ficam translúcidos (20–100%). | Web (`components/share/story-art.tsx`) |
+| Imagens de compartilhamento em três formatos: Stories (1080 × 1920), Feed (1080 × 1350) e Stickers (só a forma, fundo transparente). Cada imagem só aparece quando o dado que ela mostra existe (recorde, sequência, meta, exercício com histórico, projeto, descanso médio). | Web (`story-catalog.ts`) + Core (`share.ts`) |
+| Descanso médio do treino: média dos intervalos entre séries concluídas seguidas do mesmo exercício (intervalos acima de 10 min não contam). | Core (`storyRestAverage`) |
 | Comparação de peso: o volume do treino vira o objeto mais pesado do catálogo que ele alcança (de 20 kg a 200 t); abaixo de 20 kg o modelo não aparece. O valor exibido é o volume na unidade do usuário. | Core (`weight-comparison.ts`) + Web (`WeightComparisonCard`) |
 | Na escolha do Story, Compartilhar mostra só o ícone em um botão de 56 px, com rótulo acessível. Baixar imagem ocupa o restante da linha, ou toda a largura sem compartilhamento nativo; os botões ficam bloqueados enquanto a imagem é gerada. | Web (`components/share/share-story-sheet.tsx`) |
 

@@ -19,13 +19,13 @@ import { Icon, IconButton, Skeleton } from "@/components/ds";
 import { cn } from "@/lib/utils";
 
 const WEEKDAYS = [
+  { initial: "D", name: "domingo" },
   { initial: "S", name: "segunda" },
   { initial: "T", name: "terça" },
   { initial: "Q", name: "quarta" },
   { initial: "Q", name: "quinta" },
   { initial: "S", name: "sexta" },
   { initial: "S", name: "sábado" },
-  { initial: "D", name: "domingo" },
 ];
 
 /** Realce do dia treinado por volume (tokens do design system, como no MonthCalendar). */
@@ -55,7 +55,7 @@ export interface TrainingCalendarProps {
   onSelectDay: (iso: string) => void;
 }
 
-/** Calendário mensal de dias treinados (semana de segunda a domingo), com troca por setas ou deslize. */
+/** Calendário mensal de dias treinados (semana de domingo a sábado), com troca por setas ou deslize. */
 export function TrainingCalendar({
   month,
   today,

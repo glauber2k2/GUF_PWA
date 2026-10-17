@@ -88,6 +88,9 @@
   --color-active-surface: color-mix(in oklab, var(--accent) 6%, var(--surface-elevated));
   --color-risk-surface: color-mix(in oklab, var(--warning) 8%, var(--surface));
   --color-record-surface: color-mix(in oklab, var(--pr) 8%, var(--surface));
+  /* Stories · telas cheias: bloco do troféu e selo da variação do recorde */
+  --color-story-pr-tile: color-mix(in oklab, var(--pr) 28%, var(--surface));
+  --color-story-pr-pill: color-mix(in oklab, var(--pr) 22%, var(--surface));
   /* Leitor de documentos legais */
   --color-accent-tile: color-mix(in oklab, var(--accent) 12%, var(--surface-3));
   --color-danger-tile: color-mix(in oklab, var(--danger) 14%, var(--surface-3));
@@ -166,6 +169,13 @@
   --shadow-thumb: var(--shadow-thumb);
   --shadow-focus: var(--focus-ring);
   --shadow-pr-glow: var(--shadow-pr-glow);
+  /* Brilho dourado do troféu nas telas cheias dos stories */
+  /* Brilho dourado do cartão do recorde (story 12 · Selo dourado) */
+  --shadow-story-pr: 0 0 64px color-mix(in oklab, var(--pr) 28%, transparent);
+  --shadow-story-pr-glow:0 0 96px color-mix(in oklab, var(--pr) 55%, transparent);
+  /* Stickers de recorde (brilho dourado da forma e do troféu) */
+  --shadow-sticker-pr: 0 0 48px color-mix(in oklab, var(--pr) 35%, transparent);
+  --shadow-sticker-trophy: 0 0 32px color-mix(in oklab, var(--pr) 45%, transparent);
 
   /* Movimento */
   --ease-standard: var(--ease-standard);

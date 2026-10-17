@@ -4,20 +4,25 @@ import { suggestNextRoutine, type RoutineOrder } from "./home";
 
 /**
  * Dias da semana das rotinas e "treino de hoje" (puras, sem React).
- * Dias no padrão ISO do banco (routines.weekdays): 1 = segunda … 7 = domingo.
+ * Dias no padrão ISO do banco (routines.weekdays): 1 = segunda … 7 = domingo. Na tela, a semana
+ * começa no domingo (WEEKDAYS e as listas seguem essa ordem).
  */
 
 export type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
+/** Dias na ordem da semana do app (domingo primeiro). */
 export const WEEKDAYS: ReadonlyArray<{ iso: IsoWeekday; initial: string; short: string; long: string }> = [
+  { iso: 7, initial: "D", short: "Dom", long: "domingo" },
   { iso: 1, initial: "S", short: "Seg", long: "segunda" },
   { iso: 2, initial: "T", short: "Ter", long: "terça" },
   { iso: 3, initial: "Q", short: "Qua", long: "quarta" },
   { iso: 4, initial: "Q", short: "Qui", long: "quinta" },
   { iso: 5, initial: "S", short: "Sex", long: "sexta" },
   { iso: 6, initial: "S", short: "Sáb", long: "sábado" },
-  { iso: 7, initial: "D", short: "Dom", long: "domingo" },
 ];
+
+/** Ordem do dia ISO na semana do app (domingo = 0 … sábado = 6). */
+const weekOrder = (d: number) => d % 7;
 
 /** Dia da semana ISO da data local (segunda = 1 … domingo = 7). */
 export function isoWeekday(date: Date): IsoWeekday {
@@ -27,16 +32,16 @@ export function isoWeekday(date: Date): IsoWeekday {
 /** Dias marcados/desmarcados, sempre em ordem e sem repetição. */
 export function toggleWeekday(days: readonly number[], day: IsoWeekday): IsoWeekday[] {
   const next = days.includes(day) ? days.filter((d) => d !== day) : [...days, day];
-  return [...new Set(next)].sort((a, b) => a - b) as IsoWeekday[];
+  return [...new Set(next)].sort((a, b) => weekOrder(a) - weekOrder(b)) as IsoWeekday[];
 }
 
 /** "Nenhum dia" · "Todos os dias" · "Seg a Sex" · "Seg e Qui" · "Seg, Qua e Sex". */
 export function weekdaysLabel(days: readonly number[]): string {
-  const sorted = [...new Set(days)].sort((a, b) => a - b);
+  const sorted = [...new Set(days)].sort((a, b) => weekOrder(a) - weekOrder(b));
   if (sorted.length === 0) return "Nenhum dia";
   if (sorted.length === 7) return "Todos os dias";
   if (sorted.join() === "1,2,3,4,5") return "Seg a Sex";
-  const names = sorted.map((d) => WEEKDAYS[d - 1]?.short ?? "");
+  const names = sorted.map((d) => WEEKDAYS.find((w) => w.iso === d)?.short ?? "");
   return names.length === 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} e ${names[names.length - 1]}`;
 }
 

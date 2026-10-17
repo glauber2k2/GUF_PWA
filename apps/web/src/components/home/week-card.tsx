@@ -7,7 +7,7 @@ import { Icon, WeekStrip, type WeekStripDay } from "@/components/ds";
 const POP_START_MS = 520;
 const POP_STEP_MS = 90;
 
-/** Card "Esta semana": contagem vs. meta e os 7 dias (seg–dom). */
+/** Card "Esta semana": contagem vs. meta e os 7 dias (dom–sáb). */
 export function WeekCard({
   week,
   trainedDays,
