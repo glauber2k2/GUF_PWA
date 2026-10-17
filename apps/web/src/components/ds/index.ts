@@ -17,3 +17,4 @@ export * from "./loading";
 export * from "./muscle-icon";
 export * from "./avatar";
 export * from "./streak-flame";
+export * from "./motion";
