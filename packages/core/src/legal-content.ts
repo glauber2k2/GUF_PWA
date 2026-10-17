@@ -10,6 +10,15 @@
 
 export const LEGAL_CONTENT_IS_DRAFT = true;
 
+/**
+ * Canal de comunicação com o titular para pedidos sobre dados (LGPD art. 18; Res. CD/ANPD nº 2/2022, art. 11).
+ * Provisório do beta: o Encarregado será designado antes do lançamento (.lgpd/STATUS.md).
+ * Fica no topo porque os textos abaixo o usam (mudar o e-mail muda o hash da Política: nova versão).
+ */
+export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
+/** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
+export const DSAR_RESPONSE_DAYS = 15;
+
 /** Documento do leitor (rota do app) ↔ doc_type do banco. */
 export type LegalReaderDoc = "termos" | "privacidade" | "saude";
 export type LegalReaderDocType = "terms" | "privacy" | "health_consent";
@@ -213,7 +222,7 @@ const PRIVACY: LegalDocumentContent = {
     { icon: "ban", text: "Seus dados não são vendidos nem usados para publicidade." },
     { icon: "heart-pulse", text: "Medidas corporais são opcionais e só são coletadas com o seu consentimento." },
     { icon: "download", text: "Você pode exportar ou apagar seus dados pelo app, em Perfil › Privacidade." },
-    { icon: "globe", text: "Alguns provedores ficam fora do Brasil, e a transferência segue as regras da LGPD." },
+    { icon: "globe", text: "Seus dados ficam guardados no Brasil. Alguns prestadores ficam nos EUA, e a transferência segue as regras da LGPD." },
   ],
   sections: [
     {
@@ -223,7 +232,9 @@ const PRIVACY: LegalDocumentContent = {
         p(
           "O guf é oferecido por [RAZÃO SOCIAL], CNPJ [CNPJ], com sede em [ENDEREÇO]. Para a LGPD, ela é a controladora dos seus dados pessoais: decide como e para que eles são tratados.",
         ),
-        p("O encarregado pelo tratamento de dados (DPO) é [NOME DO ENCARREGADO], pelo e-mail [E-MAIL DO ENCARREGADO]."),
+        p(
+          `O encarregado pelo tratamento de dados (DPO) é [NOME DO ENCARREGADO]. Até a designação, dúvidas e pedidos sobre seus dados vão para ${PRIVACY_CONTACT_EMAIL}.`,
+        ),
       ],
     },
     {
@@ -257,6 +268,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Criar e manter sua conta", "Conta", "Execução de contrato (art. 7º, V)"],
             ["Registrar treinos e mostrar evolução", "Treinos e preferências", "Execução de contrato (art. 7º, V)"],
             ["Acompanhar medidas corporais", "Medidas", "Consentimento (art. 11, I)"],
+            ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
             ["Cumprir obrigações legais", "Registros de acesso", "Obrigação legal (art. 7º, II)"],
           ],
@@ -281,7 +293,8 @@ const PRIVACY: LegalDocumentContent = {
           "Seus dados não são vendidos. São compartilhados só com prestadores necessários para o app funcionar, que agem em nome da controladora e sob contrato:",
         ),
         ul(
-          "Provedor de infraestrutura e banco de dados: [PROVEDOR DE INFRAESTRUTURA].",
+          "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
+          "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
         ),
@@ -292,7 +305,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "Alguns prestadores guardam dados fora do Brasil, em [PAÍS DOS SERVIDORES]. Essas transferências seguem o art. 33 da LGPD, com cláusulas contratuais padrão.",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (só se você entrar com Google) e empresas contratadas pelo Supabase. Essas transferências seguem o art. 33 da LGPD, com [MECANISMO DE TRANSFERÊNCIA].",
         ),
       ],
     },
@@ -307,8 +320,12 @@ const PRIVACY: LegalDocumentContent = {
           rows: [
             ["Conta, treinos e preferências", "Enquanto a conta existir"],
             ["Medidas corporais", "Até você revogar o consentimento ou excluir a conta"],
-            ["Registros de acesso", "6 meses, pelo Marco Civil da Internet (art. 15)"],
-            ["Depois de excluir a conta", "Apagados em até [PRAZO] dias, exceto o que a lei obriga guardar"],
+            ["Registros de acesso", "[PRAZO DOS REGISTROS DE ACESSO]"],
+            ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança do provedor somem em até [PRAZO DOS BACKUPS]"],
+            [
+              "Prova dos seus aceites, depois de excluir a conta",
+              "5 anos, só com o documento, a versão, a data e o seu e-mail transformado em código irreversível (hash)",
+            ],
           ],
         },
       ],
@@ -329,7 +346,7 @@ const PRIVACY: LegalDocumentContent = {
         action("export"),
         action("delete"),
         p(
-          "Para outros pedidos, escreva para [E-MAIL DO ENCARREGADO]. A resposta sai em até 15 dias. Você também pode reclamar à ANPD (Autoridade Nacional de Proteção de Dados).",
+          `Para outros pedidos, escreva para ${PRIVACY_CONTACT_EMAIL} (ou use Perfil › Privacidade › Outros pedidos sobre seus dados). A resposta sai em até ${DSAR_RESPONSE_DAYS} dias. Você também pode reclamar à ANPD (Autoridade Nacional de Proteção de Dados).`,
         ),
       ],
     },
@@ -370,7 +387,14 @@ const PRIVACY: LegalDocumentContent = {
       ],
     },
   ],
-  changes: {},
+  changes: {
+    "0.2-dev": [
+      "Seus dados ficam guardados no Brasil (São Paulo); a política agora diz quais prestadores usamos (Supabase e Vercel) e quais ficam nos EUA.",
+      `Novo contato para pedidos sobre seus dados: ${PRIVACY_CONTACT_EMAIL}, também em Perfil › Privacidade.`,
+      "Ao excluir a conta, os dados são apagados na hora; só a prova dos seus aceites fica guardada por 5 anos, com o e-mail em código irreversível.",
+      "O prazo dos registros de acesso será definido na versão final (antes dizia 6 meses).",
+    ],
+  },
 };
 
 const HEALTH: LegalDocumentContent = {
@@ -455,14 +479,6 @@ export const LEGAL_DOCUMENTS: Record<LegalReaderDoc, LegalDocumentContent> = {
 
 /** Ordem na central "Documentos legais" e em "Outros documentos". */
 export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude"];
-
-/**
- * Canal de comunicação com o titular para pedidos sobre dados (LGPD art. 18; Res. CD/ANPD nº 2/2022, art. 11).
- * Provisório do beta: o Encarregado será designado antes do lançamento (.lgpd/STATUS.md).
- */
-export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
-/** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
-export const DSAR_RESPONSE_DAYS = 15;
 
 /** Link "mailto:" já com o assunto do pedido. */
 export function privacyRequestMailto(): string {
