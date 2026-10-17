@@ -1,0 +1,90 @@
+# Registro das Operações de Tratamento (ROPA) — Guf App
+
+**Versão**: 0.1 (rascunho) · **Data**: 2026-10-17 · **Base**: LGPD Art. 37 · modelo simplificado da ANPD para agentes de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022)
+**Fontes**: `data-map.md` (A001–A016), `legal-basis.md`, `vendors/`, `retention.md`, `audit-log.md`, `consent-ledger.md`
+**Situação**: ⏸ rascunho técnico, **sem revisão jurídica** (adiada por falta de orçamento — decisão de 2026-10-17). Não é parecer.
+
+**Histórico**
+- 0.1 (2026-10-17): primeira versão, a partir do mapa de dados v1 e das etapas F3–F8.
+
+---
+
+## 1. Informações de contato
+
+| Papel | Quem | Contato |
+|---|---|---|
+| **Controlador** | [NOME COMPLETO DO DESENVOLVEDOR], pessoa natural, responsável pelo beta do guf (sem empresa constituída — G22) | devglaubermonteiro@gmail.com |
+| **Encarregado** | Não designado — dispensa de agente de pequeno porte (Res. 2/2022, Art. 11) a confirmar ⚖; designação prevista para antes do lançamento | Canal de comunicação com o titular: devglaubermonteiro@gmail.com |
+| **Operador** | Supabase, Inc. — banco de dados, autenticação, e-mails de autenticação, funções e jobs | Projeto `yscoujsisrytytqsxkya`, região São Paulo (`sa-east-1`) |
+| **Operador** | Vercel Inc. — hospedagem do site estático (testes) | EUA / rede global |
+| **Terceiro (controlador independente)** | Google LLC — login com Google, por escolha do titular | EUA |
+
+**O guf atua apenas como controlador**; não trata dados em nome de terceiros (nenhuma atividade como operador).
+
+## 2. Visão geral das operações
+
+| ID | Operação | Finalidade | Hipótese legal | Titulares | Dados | Sensível? | Compartilhamento | Retenção |
+|---|---|---|---|---|---|---|---|---|
+| A001 | Cadastro e autenticação por e-mail | Criar a conta e dar acesso | Art. 7º, V | Usuários | E-mail, senha (hash), nome opcional, plataforma, declaração de idade | Não | Supabase | Enquanto a conta existir |
+| A002 | Login com Google | Entrar com a conta Google | Art. 7º, V | Usuários | Nome, e-mail, foto (URL), id Google | Não | Google (origem), Supabase | Enquanto a conta existir |
+| A003 | Aceites e consentimentos | Comprovar aceites e o consentimento de saúde | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Usuários e ex-usuários | Documento/versão/hash, ação, origem, plataforma, data; após a exclusão, e-mail em SHA-256 | Não* | Supabase | Conta + 5 anos da prova após a exclusão ⚖ |
+| A004 | Perfil e preferências | Personalizar o app | Art. 7º, V | Usuários | Nome, unidade, meta, fuso, finalização automática | Não | Supabase | Enquanto a conta existir |
+| A005 | Foto do perfil | Exibir a foto | Art. 7º, V | Usuários | URL do Google; arquivo enviado (futuro) | Não | Google, Supabase Storage (futuro) | Enquanto a conta existir; arquivo apagado na exclusão |
+| A006 | Planejamento de treinos | Projetos, rotinas e exercícios | Art. 7º, V | Usuários | Nomes, observações, dias, séries/reps/descanso | Não | Supabase | Enquanto a conta existir ou até apagar |
+| A007 | Registro de treinos | Registrar treinos feitos | Art. 7º, V ⚖ (N1) | Usuários | Datas, horários, pausas, cargas, reps, RPE, observações | Não ⚖ | Supabase | Enquanto a conta existir ou até apagar |
+| A008 | Finalização automática | Encerrar treino esquecido (opcional) | Art. 7º, V | Usuários que ligaram a opção | Horários das séries, status | Não | Supabase (pg_cron) | Igual a A007 |
+| A009 | Histórico e evolução | Calendário, sequência, volume, 1RM, recordes | Art. 7º, V | Usuários | Derivados de A007 | Não ⚖ | Supabase | Calculado sob demanda |
+| **A010** | **Medidas corporais** | Acompanhar medidas (opcional) | **Art. 11, I — consentimento específico** | Usuários que consentiram | Peso, % de gordura, circunferências | **Sim (saúde)** | Supabase | Até revogar (apaga na hora) ou excluir a conta |
+| A011 | Dados no aparelho | Treinar sem internet | Art. 7º, V | Usuários | Sessão, treino em andamento, fila, cópias, preferências | Não | Nenhum (aparelho) | Até sair da conta |
+| **A012** | **Registros de acesso e segurança** | Segurança e prevenção a fraude; guarda legal se aplicável | **Art. 7º, IX — legítimo interesse** (LIA) + Art. 7º, II ⚖ | Usuários e visitantes | IP, data/hora, user-agent, eventos de login | Não | Supabase, Vercel | Retenção do plano dos operadores (G9) |
+| A013 | Exportação de dados | Atender acesso e portabilidade | Art. 7º, II (Art. 18, II e V) | Usuários | Todo o conteúdo da conta (`guf-export/2`) | Sim, se houver medidas | Nenhum (arquivo no aparelho) | Não guardado no servidor |
+| A014 | Exclusão de conta | Atender eliminação | Art. 7º, II (Art. 18, VI) | Usuários | Id da conta | Sim, se houver medidas | Supabase | Eliminação imediata; exceções A003 e A016 |
+| A015 | Planos e pagamentos | Recursos pagos | Art. 7º, V; fiscal Art. 7º, II | Assinantes | Plano, validade | Não | Gateway (futuro) | **Futuro** — definir antes de monetizar |
+| A016 | Registro de auditoria | Prestação de contas e apuração de incidentes | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Usuários e ex-usuários | Id interno, evento, data, contagens | Não | Supabase | 5 anos, eliminação mensal ⚖ |
+
+\* O registro do consentimento de saúde indica que o titular usa o módulo de medidas, sem conter a medida.
+
+**Legítimo interesse (Art. 37, destaque)**: só a A012 (segurança), com teste de proporcionalidade em `lia/a012-seguranca.md` (rascunho).
+
+## 3. Categorias de titulares
+
+- **Usuários** do app, declarados maiores de 18 anos (autodeclaração; adolescentes podem acessar — análise ECA Digital pendente, F13).
+- **Ex-usuários** (só A003-prova e A016, pseudonimizados).
+- **Visitantes** do site sem conta (só registros de acesso da hospedagem, A012).
+
+## 4. Compartilhamento e transferência internacional
+
+| Destinatário | Papel | Atividades | País | Contrato (DPA) | Base do Art. 33 |
+|---|---|---|---|---|---|
+| Supabase, Inc. | Operador | A001–A016 | Dados no Brasil (`sa-east-1`); empresa e sub-operadores nos EUA | Não arquivado (G7) | A definir (G8) ⚖ |
+| Vercel Inc. | Operador | A012 (logs de acesso) | EUA / global | Não arquivado (G7) | A definir (G8) ⚖ |
+| Google LLC | Controlador independente | A002, A005 | EUA | Não se aplica ⚖ | Dados enviados pelo titular por escolha dele |
+| Autoridades | Por obrigação legal/ordem judicial | Qualquer | Brasil | — | — |
+
+**Não há venda de dados, publicidade, analytics ou rastreadores.**
+
+## 5. Medidas de segurança (resumo — detalhes em `security-checklist.md`)
+
+- RLS em todas as tabelas (cada conta só acessa os próprios dados); front só com a chave pública.
+- Login com PKCE; senhas com hash; HTTPS; cabeçalhos de segurança na hospedagem.
+- Registro de consentimentos fechado (só funções do banco); prova pós-exclusão com e-mail em hash.
+- Registro de auditoria só inclusão, encadeado por hash (`audit_log`, `verify_audit_log()`).
+- Medidas: consentimento obrigatório para gravar, revogação que apaga na hora, nunca em logs.
+- Dados locais apagados ao sair; service worker não guarda dados do usuário.
+- Runbook de incidente e registro de 5 anos (`incidents/`).
+- **Lacunas declaradas**: planos gratuitos (logs curtos, backups a conferir — G23, G15), MFA dos painéis a confirmar, sem DPAs arquivados.
+
+## 6. Períodos de armazenamento
+
+Ver `retention.md` (tabela completa). Resumo: tudo enquanto a conta existir, eliminado em cascata na exclusão; exceções mínimas por 5 anos: prova dos aceites (`consent_proofs`) e registro de auditoria (`audit_log`) ⚖.
+
+## 7. Decisões automatizadas
+
+- **A008 — finalização automática do treino**: regra fixa (todas as séries concluídas e última há ≥ 30 min), só para quem ligou a opção; pode desligar e pedir revisão (Art. 20). Explicada na política (rascunho v1, seção 5).
+- Nenhuma outra decisão automatizada ou perfilamento.
+
+## 8. Observações
+
+- **Avaliação de risco**: A010 (dados de saúde) exige RIPD antes do lançamento do módulo de medidas (F12; módulo ainda sem tela).
+- **Pendências jurídicas** ⚖ (futuro, sem orçamento agora): N1 (dados de treino como dado de saúde?), prazos de 5 anos, enquadramento como agente de pequeno porte, Marco Civil art. 15, ECA Digital.
+- **Revisão deste ROPA**: a cada nova atividade, operador ou mudança de finalidade, e no mínimo **a cada 6 meses** — próxima: **2027-04-17**.
