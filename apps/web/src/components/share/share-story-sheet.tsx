@@ -326,18 +326,16 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         </Banner>
       )}
 
-      <m.div {...enter(4)} className="flex justify-end gap-2">
+      <m.div {...enter(4)} className="flex w-full min-w-0 gap-2">
         {canShare && (
-          <Button variant="secondary" size="lg" icon={Share2} disabled={busy} onClick={() => void run("share")} className="flex-1">
-            Compartilhar
-          </Button>
+          <IconButton icon={Share2} label="Compartilhar imagem" size="lg" disabled={busy} onClick={() => void run("share")} />
         )}
         <Button
           size="lg"
           icon={Download}
           loading={busy}
           onClick={() => void run("download")}
-          className={canShare ? "flex-[1.4]" : "flex-1"}
+          className="min-w-0 flex-1"
         >
           {busy ? "Gerando" : "Baixar imagem"}
         </Button>

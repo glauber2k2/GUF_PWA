@@ -40,6 +40,8 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 **Ajuste implementado em `fix/logo-stories`:** logo completa com 88 px de altura nos 34 modelos de Stories, incluindo o modelo Empilhado, que antes não tinha logo; proporção e espaçamento ajustados para a prévia e o PNG.
 
+**Ajuste implementado em `fix/botoes-compartilhamento`:** a linha de ações da escolha do Story usa Compartilhar só com ícone e largura fixa de 56 px; Baixar imagem ocupa o espaço restante sem ultrapassar a tela, ou toda a largura quando não há compartilhamento nativo.
+
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
