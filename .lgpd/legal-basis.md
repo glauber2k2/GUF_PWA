@@ -195,7 +195,7 @@
 - [x] Sem "concordo com tudo": Termos/Política, idade e saúde são confirmações separadas.
 - [x] Nenhum legítimo interesse para dado sensível.
 - [x] O consentimento de saúde não é condição para usar o app.
-- [ ] **Diferença na política (rascunho)**: a tabela "Para que usamos e base legal" não cita os registros de consentimento (A003), a finalização automática (A008) nem os dados no aparelho (A011). Ajustar no L9/F4 (`lgpd-privacy-policy`).
+- [x] **Diferença na política (rascunho)** — tratada no rascunho v1 da F4 (`.lgpd/policies/privacy-policy-v1-draft.md`, 2026-10-17): a tabela "Para que usamos e base legal" não cita os registros de consentimento (A003), a finalização automática (A008) nem os dados no aparelho (A011). Ajustar no L9/F4 (`lgpd-privacy-policy`).
 
 ## Decisões pendentes para o jurídico ⚖
 1. Dados de treino (A007/A009) são dados de saúde? (N1) — define se precisam do Art. 11.
