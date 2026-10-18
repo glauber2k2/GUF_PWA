@@ -8,7 +8,7 @@ import { useAuth } from "@/features/auth";
 import { LegalReader } from "@/features/legal/components/legal-reader";
 
 /** Perfil › Privacidade (exportar, excluir conta, revogar consentimento). */
-export const PRIVACY_SETTINGS_PATH = "/perfil#pf-privacy";
+export const PRIVACY_SETTINGS_PATH = "/configuracoes#pf-privacy";
 
 interface OpenReader {
   key: number;

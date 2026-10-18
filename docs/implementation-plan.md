@@ -227,12 +227,29 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 ---
 
+### Etapa 7 — Perfil social, seguidores e competição (em andamento, `feat/seguidores-competicao`)
+
+**Objetivo**: perfil social com seguidores, competição entre quem se segue mutuamente e privacidade por padrão (protótipos `Perfil Social`, `Competicao` e `Configuracoes` do Claude Design).
+
+| Parte | Situação |
+|---|---|
+| Avaliação LGPD/ECA (A017–A019, RIPD, ROPA, retenção, auditoria) | Feito (rascunho, sem revisão jurídica ⚖) |
+| Migration `20261018171956_social_competition` + correção `20261018202202_get_streak_definer_fix` | Aplicadas em 2026-10-18; 32 testes de permissão no banco passaram (transação desfeita no fim) |
+| Termo `social_sharing` 0.1-dev e Política 0.3-dev (`20261018202908_legal_docs_social_sharing`) | Escrita; **aplicar junto com o deploy do app** (senão todos caem no `/aceite` com o texto antigo) |
+| `packages/core`, `packages/schemas`, `packages/api` (`SocialApi`, `CompetitionApi`), mocks | Feito |
+| Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
+| Busca de pessoas e lista de seguidores/pedidos/bloqueados | Feito (provisório, sem protótipo) |
+| RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
+| Conferir as telas logado, com dados reais | Pendente |
+
+**Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; revogar remove os seguidores; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.
 - Login com Apple (junto com o app iOS).
 - Planos pagos (`entitlements`, `is_premium()` já existem no banco).
-- Esforço percebido (RPE): a coluna `set_logs.rpe` já existe, mas não é usada pelo app.
+- Esforço percebido por série (RPE): a coluna `set_logs.rpe` já existe, mas não é usada pelo app (o RPE da sessão, usado na competição, fica em `workout_sessions.session_rpe`).
 - Animações com Anime.js, Motion e React Bits (previstas na stack, ainda não instaladas).
 - Iniciar treino sem internet (exigiria criar a sessão no aparelho e sincronizar depois).
 

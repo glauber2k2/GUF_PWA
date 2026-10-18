@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-17
+**Última atualização**: 2026-10-18
 **Encarregado**: pendente designação
 **Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
 
@@ -22,7 +22,7 @@
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [~] F10 — ROPA — ⏸ CHECKPOINT: rascunho 0.1 (2026-10-17); revisão jurídica no futuro
 - [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
-- [ ] F12 — RIPD (módulo de medidas) — ⏸ CHECKPOINT — futuro, quando o módulo existir
+- [~] F12 — RIPD: módulo social (`RIPD/ripd-social.md`, rascunho 2026-10-18, ⏸ CHECKPOINT aguardando aprovação); módulo de medidas — futuro, quando o módulo existir
 - [~] F13 — ECA Digital — avaliação em rascunho (2026-10-17); decisão sobre verificação de idade antes do lançamento ⚖
 - [ ] F14 — Vendors + DPA + transferência internacional — futuro (controlador formal); verificar DPAs gratuitos
 - [x] F15 — Relatório final — `.lgpd/REPORT.md` (2026-10-17)
@@ -35,6 +35,7 @@
 - `.lgpd/lia/a012-seguranca.md` — v1, 2026-10-16
 - `.lgpd/consent-ledger.md` — v1, 2026-10-17
 - `.lgpd/policies/privacy-policy-v1-draft.md` — v1 rascunho, 2026-10-17 (não publicar)
+- `.lgpd/RIPD/ripd-social.md` + `RIPD/INDEX.md` — v0.1 rascunho, 2026-10-18 (A017–A019)
 
 ## L1 — Legacy retrofit ✓
 - Discovery completo (código; painel e contratos não verificados)

@@ -25,6 +25,11 @@ Provar que as ações do titular foram registradas e atendidas — consentimento
 | `consent_revoked` | Revogação do consentimento de saúde | `user` | idem |
 | `health_data_deleted` | Medidas apagadas (revogação ou exclusão da conta) | `user` ou `service` | quantidade de medidas |
 | `data_exported` | `export_my_data()` | `user` | formato, nº de treinos e de medidas |
+| `social_data_deleted` | `revoke_social_consent()` (revogar o compartilhamento) | `user` | nº de seguidores removidos |
+| `social_visibility_changed` | `update_social_settings()` | `user` | visibilidade, histórico oculto, pedidos aceitos ao abrir a conta |
+| `follow_accepted` | Pedido aceito ou seguir conta aberta (`subject` = quem é seguido) | `user` | id interno de quem segue, modo (`request`/`open`) |
+| `follow_ended` | Deixar de seguir ou remover seguidor (`subject` = quem era seguido) | `user` | id interno de quem seguia, quem encerrou |
+| `user_blocked` | `block_user()` | `user` | id interno da pessoa bloqueada |
 | `account_deleted` | Antes de apagar `auth.users` (Edge Function, painel ou SQL) | `service` | provedores de login, idade da conta em dias, nº de registros de consentimento |
 | `consent_proofs_purged` | Job diário apagou provas vencidas | `system` | quantidade |
 | `audit_log_purged` | Job mensal apagou registros com mais de 5 anos | `system` | quantidade |

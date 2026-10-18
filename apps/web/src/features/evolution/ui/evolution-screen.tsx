@@ -32,7 +32,7 @@ import { DetailHeader } from "@/features/evolution/components/detail-header";
 import { EvolutionChart } from "@/features/evolution/components/evolution-chart";
 import { EvolutionSkeleton } from "@/features/evolution/components/evolution-skeleton";
 import { exerciseSearchPath, summaryPath } from "@/features/evolution/helpers/paths";
-import { useGoBack } from "@/features/evolution/hooks/use-go-back";
+import { useGoBack } from "@/shared/hooks/use-go-back";
 
 const RECENT_LIMIT = 8;
 

@@ -1,0 +1,159 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronLeft, Ellipsis, Lock, Shield } from "lucide-react";
+import { monthYearLabel, trainingTenure } from "@guf/core";
+import { Avatar, Banner, BottomSheet, Icon, IconButton, Skeleton } from "@/shared/components/ds";
+import { useProfile } from "@/features/profile";
+import { summaryPath } from "@/features/evolution";
+import { useGoBack } from "@/shared/hooks/use-go-back";
+import {
+  useCanUseSocial,
+  useMemberEvolution,
+  useMemberProfile,
+  useMemberWorkouts,
+  useMySocial,
+  useSocialSource,
+} from "@/features/social/api/use-social";
+import {
+  EVOLUTION_WEEKS,
+  LockedProfile,
+  ProfileCounts,
+  ProfileEvolution,
+  ProfileHistory,
+  ProfileStreak,
+  type EvolutionPeriod,
+} from "@/features/social/components/profile-sections";
+import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
+import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
+import { SocialPrivacySettings } from "@/features/social/components/social-privacy-settings";
+
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col gap-5 pt-1">
+      <div className="flex items-center gap-4">
+        <Skeleton className="size-[74px] rounded-pill" />
+        <Skeleton className="h-14 flex-1 rounded-md" />
+      </div>
+      <Skeleton className="h-8 w-48 rounded-md" />
+      <Skeleton className="h-12 w-full rounded-md" />
+      <Skeleton className="h-[88px] w-full rounded-lg" />
+      <Skeleton className="h-[300px] w-full rounded-lg" />
+    </div>
+  );
+}
+
+/**
+ * Perfil social (protótipo "Perfil Social"): o seu (aba Perfil; null) ou o de outra pessoa (/pessoa).
+ * Cartão para qualquer conta; números, sequência e evolução só com o perfil desbloqueado;
+ * histórico só se a pessoa não ocultou.
+ */
+export function SocialProfileScreen({ userId }: { userId: string | null }) {
+  const router = useRouter();
+  const goBack = useGoBack("/competicao");
+  const { dev } = useSocialSource();
+  const profile = useMemberProfile(userId);
+  const mySocial = useMySocial();
+  const own = useProfile();
+  const canUse = useCanUseSocial();
+  const unit = own.data?.weightUnit ?? "kg";
+  const [period, setPeriod] = useState<EvolutionPeriod>("3M");
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
+
+  const data = profile.data;
+  const unlocked = Boolean(data?.unlocked);
+  const evolution = useMemberEvolution(userId, EVOLUTION_WEEKS[period], unlocked);
+  const workouts = useMemberWorkouts(userId, unlocked && Boolean(data?.historyVisible));
+  const isSelf = userId === null || data?.isSelf;
+  const loading = dev.forceLoading || profile.isPending;
+
+  return (
+    <main className="flex flex-col gap-5 px-4">
+      <div className="sticky top-0 z-[5] -mx-4 flex h-[52px] items-center gap-2 bg-background/90 px-2 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
+        {!isSelf && <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />}
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 pl-2 text-base leading-[22px] font-semibold">
+          <span className="truncate">{data ? `@${data.handle}` : ""}</span>
+          {data?.visibility === "private" && <Icon icon={Lock} size={14} label="Perfil privado" className="flex-none text-fg-muted" />}
+        </span>
+        {isSelf && <IconButton icon={Shield} label="Privacidade" variant="ghost" onClick={() => setPrivacyOpen(true)} />}
+        <IconButton
+          icon={Ellipsis}
+          label={isSelf ? "Configurações" : "Mais opções"}
+          variant="ghost"
+          onClick={() => (isSelf ? router.push("/configuracoes") : setOptionsOpen(true))}
+          disabled={!data}
+        />
+      </div>
+
+      {!canUse && (
+        <Banner tone="warning" title="Sem conexão">
+          para seguir pessoas ou mudar a privacidade, conecte-se à internet.
+        </Banner>
+      )}
+
+      {loading ? (
+        <ProfileSkeleton />
+      ) : profile.isError || !data ? (
+        <Banner tone="danger" actionLabel="Tentar" onAction={() => void profile.refetch()}>
+          {profile.error?.message ?? "Não foi possível carregar o perfil. Verifique a internet e tente de novo."}
+        </Banner>
+      ) : (
+        <>
+          <section aria-label="Perfil" className="flex flex-col gap-[18px] pt-1">
+            <div className="flex items-center gap-4">
+              <span className="grid flex-none rounded-pill border-2 border-accent p-[3px]">
+                <Avatar src={data.avatarUrl} name={data.name ?? data.handle} size="lg" tone="accent" />
+              </span>
+              <ProfileCounts profile={data} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <h1 className="m-0 text-2xl leading-[30px] font-bold tracking-[-0.02em]">{data.name ?? `@${data.handle}`}</h1>
+              {data.firstWorkoutOn && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm leading-5 text-fg-secondary">
+                  <span className="whitespace-nowrap">Treina no guf há {trainingTenure(data.firstWorkoutOn, new Date())}</span>
+                  <span className="whitespace-nowrap text-fg-muted">desde {monthYearLabel(data.firstWorkoutOn)}</span>
+                </div>
+              )}
+            </div>
+            {isSelf ? <SelfActions handle={data.handle} onEdit={() => setEditOpen(true)} /> : <VisitorActions profile={data} />}
+          </section>
+
+          {!data.unlocked ? (
+            <LockedProfile profile={data} />
+          ) : (
+            <>
+              <ProfileStreak profile={data} />
+              <ProfileEvolution weeks={evolution.data} loading={evolution.isPending} period={period} onPeriod={setPeriod} unit={unit} />
+              <ProfileHistory
+                profile={data}
+                workouts={workouts.data?.pages.flat() ?? []}
+                loading={workouts.isPending}
+                hasMore={Boolean(workouts.hasNextPage)}
+                loadingMore={workouts.isFetchingNextPage}
+                onMore={() => void workouts.fetchNextPage()}
+                onOpenPrivacy={() => setPrivacyOpen(true)}
+                onOpenWorkout={isSelf ? (id) => router.push(summaryPath(id)) : undefined}
+                unit={unit}
+              />
+            </>
+          )}
+
+          {isSelf ? (
+            <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} name={data.name} handle={data.handle} />
+          ) : (
+            <VisitorOptionsSheet profile={data} open={optionsOpen} onClose={() => setOptionsOpen(false)} />
+          )}
+        </>
+      )}
+
+      {isSelf && (
+        <BottomSheet placement="screen" open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Privacidade">
+          {mySocial.data ? <SocialPrivacySettings social={mySocial.data} disabled={!canUse} /> : <Skeleton className="h-40 w-full rounded-md" />}
+        </BottomSheet>
+      )}
+    </main>
+  );
+}

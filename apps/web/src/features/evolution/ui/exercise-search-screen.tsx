@@ -9,7 +9,7 @@ import { useEvolutionSource, useTrainedExercises } from "@/features/evolution/ap
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { DetailHeader } from "@/features/evolution/components/detail-header";
 import { exercisePath } from "@/features/evolution/helpers/paths";
-import { useGoBack } from "@/features/evolution/hooks/use-go-back";
+import { useGoBack } from "@/shared/hooks/use-go-back";
 
 /** "Ver evolução de um exercício": só exercícios já feitos, com busca e filtro por grupo muscular. */
 export function ExerciseSearchScreen() {

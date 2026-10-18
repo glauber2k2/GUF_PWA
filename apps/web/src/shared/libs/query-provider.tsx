@@ -22,8 +22,8 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* Só no `next dev`: o pacote não entra no build de produção. No alto, para não cobrir o menu inferior. */}
-      {process.env.NODE_ENV === "development" && <ReactQueryDevtools buttonPosition="top-right" />}
+      {/* Só no `next dev`: o pacote não entra no build de produção. No canto de baixo à direita: no alto cobria os botões do cabeçalho. */}
+      {process.env.NODE_ENV === "development" && <ReactQueryDevtools buttonPosition="bottom-right" />}
     </QueryClientProvider>
   );
 }

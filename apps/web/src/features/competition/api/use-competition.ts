@@ -1,0 +1,59 @@
+"use client";
+
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { CompetitionRange } from "@guf/core";
+import { competitionApi, type ApiError, type CompetitionApi } from "@guf/api";
+import { COMPETITION_KEY } from "@/shared/libs/query-keys";
+import { getSupabaseClient } from "@/shared/libs/supabase";
+import { mockCompetitionApi, setCompetitionMockScenario } from "@/mocks/competition";
+import { useAuth } from "@/features/auth";
+import { useDevSocialState, type DevSocialState } from "@/features/social";
+
+/** Dados reais por padrão; em DESENVOLVIMENTO com ?estado=, o mock (mesmo contrato). */
+export function useCompetitionSource(): { api: CompetitionApi; dev: DevSocialState } {
+  const dev = useDevSocialState();
+  if (process.env.NODE_ENV === "development" && dev.competitionScenario) {
+    setCompetitionMockScenario(dev.competitionScenario);
+    return { api: mockCompetitionApi, dev };
+  }
+  return { api: competitionApi, dev };
+}
+
+function unwrap<T>(result: { data: T; error: null } | { data: null; error: ApiError }): T {
+  if (result.error) throw result.error;
+  return result.data as T;
+}
+
+export function useCompetitionBoard(range: CompetitionRange) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return useQuery({
+    queryKey: [COMPETITION_KEY, "board", user?.id, range.from, range.to, dev.competitionScenario],
+    enabled: Boolean(user) || dev.competitionScenario !== null,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.getCompetitionBoard(getSupabaseClient(), range)),
+  });
+}
+
+/** Suas sessões no período, com o ajuste de RPE explicado (só ao abrir "Como funciona"). */
+export function useMyCompetitionSessions(range: CompetitionRange, enabled: boolean) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return useQuery({
+    queryKey: [COMPETITION_KEY, "my-sessions", user?.id, range.from, range.to, dev.competitionScenario],
+    enabled: (Boolean(user) || dev.competitionScenario !== null) && enabled,
+    queryFn: async () => unwrap(await api.getMyCompetitionSessions(getSupabaseClient(), range)),
+  });
+}
+
+/** Regras públicas da pontuação vigentes na temporada. */
+export function useCompetitionParameters(season: string) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return useQuery({
+    queryKey: [COMPETITION_KEY, "parameters", season, dev.competitionScenario],
+    enabled: Boolean(user) || dev.competitionScenario !== null,
+    staleTime: Infinity,
+    queryFn: async () => unwrap(await api.getCompetitionParameters(getSupabaseClient(), season)),
+  });
+}

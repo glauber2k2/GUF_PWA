@@ -1,7 +1,7 @@
 # Registro das Operações de Tratamento (ROPA) — Guf App
 
 **Versão**: 0.1 (rascunho) · **Data**: 2026-10-17 · **Base**: LGPD Art. 37 · modelo simplificado da ANPD para agentes de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022)
-**Fontes**: `data-map.md` (A001–A016), `legal-basis.md`, `vendors/`, `retention.md`, `audit-log.md`, `consent-ledger.md`
+**Fontes**: `data-map.md` (A001–A019), `legal-basis.md`, `vendors/`, `retention.md`, `audit-log.md`, `consent-ledger.md`
 **Situação**: ⏸ rascunho técnico, **sem revisão jurídica** (adiada por falta de orçamento — decisão de 2026-10-17). Não é parecer.
 
 **Histórico**
@@ -37,10 +37,13 @@
 | **A010** | **Medidas corporais** | Acompanhar medidas (opcional) | **Art. 11, I — consentimento específico** | Usuários que consentiram | Peso, % de gordura, circunferências | **Sim (saúde)** | Supabase | Até revogar (apaga na hora) ou excluir a conta |
 | A011 | Dados no aparelho | Treinar sem internet | Art. 7º, V | Usuários | Sessão, treino em andamento, fila, cópias, preferências | Não | Nenhum (aparelho) | Até sair da conta |
 | **A012** | **Registros de acesso e segurança** | Segurança e prevenção a fraude; guarda legal se aplicável | **Art. 7º, IX — legítimo interesse** (LIA) + Art. 7º, II ⚖ | Usuários e visitantes | IP, data/hora, user-agent, eventos de login | Não | Supabase, Vercel | Retenção do plano dos operadores (G9) |
-| A013 | Exportação de dados | Atender acesso e portabilidade | Art. 7º, II (Art. 18, II e V) | Usuários | Todo o conteúdo da conta (`guf-export/2`) | Sim, se houver medidas | Nenhum (arquivo no aparelho) | Não guardado no servidor |
+| A013 | Exportação de dados | Atender acesso e portabilidade | Art. 7º, II (Art. 18, II e V) | Usuários | Todo o conteúdo da conta (`guf-export/3`, com perfil social, vínculos e bloqueios) | Sim, se houver medidas | Nenhum (arquivo no aparelho) | Não guardado no servidor |
 | A014 | Exclusão de conta | Atender eliminação | Art. 7º, II (Art. 18, VI) | Usuários | Id da conta | Sim, se houver medidas | Supabase | Eliminação imediata; exceções A003 e A016 |
 | A015 | Planos e pagamentos | Recursos pagos | Art. 7º, V; fiscal Art. 7º, II | Assinantes | Plano, validade | Não | Gateway (futuro) | **Futuro** — definir antes de monetizar |
 | A016 | Registro de auditoria | Prestação de contas e apuração de incidentes | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Usuários e ex-usuários | Id interno, evento, data, contagens | Não | Supabase | 5 anos, eliminação mensal ⚖ |
+| A017 | Perfil social e seguidores | Perfil encontrável e escolher quem acompanha o progresso | Art. 7º, V ⚖ | Todos os usuários | @usuário, nome, foto, visibilidade, vínculos, bloqueios | Não | Supabase | Enquanto a conta existir |
+| A018 | Compartilhamento de treinos | Mostrar estatísticas e treinos a seguidores aceitos ou, com o perfil aberto, a qualquer conta | Art. 7º, I (Art. 11, I se N1) ⚖ | Usuários que autorizaram | Nome, foto, pontos, treinos (sem medidas, observações nem RPE) | Não ⚖ | Supabase | Sob demanda |
+| A019 | Competição e pontuação | Ranking por período entre seguidores mútuos | Art. 7º, I ⚖ | Seguidores mútuos | RPE da sessão, tempo efetivo, pontos | Não ⚖ | Supabase | RPE igual a A007; pontos não guardados |
 
 \* O registro do consentimento de saúde indica que o titular usa o módulo de medidas, sem conter a medida.
 
@@ -81,6 +84,7 @@ Ver `retention.md` (tabela completa). Resumo: tudo enquanto a conta existir, eli
 ## 7. Decisões automatizadas
 
 - **A008 — finalização automática do treino**: regra fixa (todas as séries concluídas e última há ≥ 30 min), só para quem ligou a opção; pode desligar e pedir revisão (Art. 20). Explicada na política (rascunho v1, seção 5).
+- Nenhuma outra decisão automatizada ou perfilamento.- **A019 — controle de RPE suspeito na pontuação**: regra fixa e pública (RPE ≥ 3 acima da média pessoal das últimas 4 semanas → usa a média; RPE 9–10 em mais de 80% das sessões → limita a 7). Só entre seguidores mútuos (ambos autorizaram o compartilhamento); o titular vê o motivo de cada ajuste e pode pedir revisão (Art. 20). Avaliado em `RIPD/ripd-social.md`.
 - Nenhuma outra decisão automatizada ou perfilamento.
 
 ## 8. Observações

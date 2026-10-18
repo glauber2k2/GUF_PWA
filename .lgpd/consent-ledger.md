@@ -12,7 +12,7 @@
 
 | Tabela | Conteúdo | Quem grava | Quem lê |
 |---|---|---|---|
-| `legal_documents` | Versão de cada documento (terms, privacy, age_declaration, health_consent), `content_hash` e `summary_hash` | Só migration (administrador) | Público |
+| `legal_documents` | Versão de cada documento (terms, privacy, age_declaration, health_consent, social_sharing), `content_hash` e `summary_hash` | Só migration (administrador) | Público |
 | `consent_records` | Um registro por ação (`granted` / `revoked`), com documento/versão, origem, plataforma e data | Só funções do banco (abaixo) | O próprio titular (RLS) |
 | `consent_proofs` | Cópia mínima dos registros de quem excluiu a conta, com e-mail em SHA-256 | Só o gatilho de exclusão | Ninguém pelo app (RLS sem políticas); controlador via SQL |
 
@@ -36,6 +36,8 @@
 | `accept_documents(ids, source, platform)` | `signup_email` · `signup_google` · `reaccept` | Logado; origem e plataforma da lista; ids sem repetição; só versões vigentes (senão 22023) |
 | `grant_health_consent(platform)` | `health_module` | Logado; termo de saúde publicado; plataforma da lista |
 | `revoke_health_consent(platform)` | `settings` | Logado; plataforma da lista; apaga `body_measurements` |
+| `grant_social_consent(platform)` | `social_module` | Logado; termo `social_sharing` publicado (senão GS003); plataforma da lista. Pedido ao aceitar o 1º seguidor ou abrir o perfil |
+| `revoke_social_consent(platform)` | `settings` | Logado; plataforma da lista; remove os seguidores e fecha o perfil |
 | `preserve_consent_proofs` (antes de apagar `auth.users`) | — | Copia todos os registros do titular para `consent_proofs` |
 
 Plataformas aceitas: `web`, `ios`, `android` (ou nula).

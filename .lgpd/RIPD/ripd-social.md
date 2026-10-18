@@ -1,0 +1,192 @@
+# RIPD — Relatório de Impacto à Proteção de Dados
+
+**Atividade**: Seguidores, compartilhamento de treinos e competição (A017, A018, A019)
+**Slug**: ripd-social
+**Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
+**Encarregado**: pendente designação (G2)
+**Equipe**: desenvolvedor (Glauber) + assistente técnico
+**Versão**: v0.2 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-18
+
+> **v0.2**: o modelo mudou depois dos protótipos. Não há mais "ativar o módulo": toda conta tem um perfil social privado com @ aleatório (cartão @/nome/foto encontrável na busca, Art. 7º, V). O consentimento `social_sharing` é pedido ao aceitar o 1º seguidor ou abrir o perfil; perfil aberto é visível a qualquer conta logada; revogar remove os seguidores e fecha o perfil.
+
+---
+
+## 1. Sumário executivo
+
+O guf deixa de ser só pessoal: quem quiser pode ativar um **módulo social** opcional para seguir pessoas, ser seguido, mostrar estatísticas e treinos a seguidores aceitos e **competir** com quem segue de volta (seguimento mútuo), num ranking mensal com pontuação semanal (constância + esforço + bônus de sequência).
+
+Até agora, os dados de treino só eram vistos pelo próprio titular; continua assim até ele autorizar o compartilhamento. A feature os mostra a terceiros, cria contato entre usuários (gatilho registrado em `eca-digital.md`) e introduz uma **decisão automatizada** (o controle de RPE suspeito altera a pontuação). Por isso, este RIPD foi feito antes da implementação, mesmo que o teste da Res. CD/ANPD nº 2/2022 possa não torná-lo obrigatório (seção 2.1).
+
+**Resultado**: prosseguir **com as modificações da seção 12**: módulo desligado por padrão, consentimento específico, campos mínimos, medidas e observações nunca compartilhadas, leitura de terceiros só por funções que conferem a permissão, e transparência do ajuste de RPE. Lançamento público depende da revisão jurídica já pendente.
+
+## 2. Contexto
+
+- **Produto/feature**: módulo social do guf (PWA de musculação, beta com testadores convidados, 18+ por autodeclaração).
+- **Stakeholders**: titulares (usuários e seus seguidores), desenvolvedor/controlador, Supabase (operador).
+- **Volume de titulares estimado**: dezenas no beta; muito abaixo de "larga escala".
+- **Início previsto**: banco e regras em 2026-10 (branch `feat/seguidores-competicao`); telas após o protótipo de design.
+
+### 2.1 Teste de alto risco (Res. CD/ANPD nº 2/2022, Art. 4º)
+
+| Critério | Situação |
+|---|---|
+| Geral (a) larga escala | Não |
+| Geral (b) afeta significativamente interesses e direitos | **Possível**: exposição do histórico de treino a terceiros e ranking entre conhecidos |
+| Específico (c) decisão automatizada | **Sim**: o controle de RPE suspeito troca o valor informado e muda a pontuação |
+| Específico (d) dados sensíveis / adolescentes | **Incerto** ⚖: treino pode ser "dado referente à saúde" (N1 do `data-map.md`); acesso provável de adolescentes (`eca-digital.md`) |
+
+Conclusão: há critério específico e o critério geral é discutível. O relatório é mantido como medida de prestação de contas (Art. 6º, X) e pelo compromisso de produto do `CLAUDE.md`.
+
+## 3. Descrição do tratamento
+
+### 3.1 Fluxo de dados
+
+```mermaid
+flowchart LR
+  T[Titular] -->|ativa módulo + consentimento| C[(consent_records)]
+  T -->|@usuário, visibilidade, ocultar histórico| SP[(social_profiles)]
+  T -->|pedir / aceitar / remover / bloquear| F[(follows / blocks)]
+  T -->|treino + RPE da sessão| W[(workout_sessions)]
+  W -->|cálculo no servidor| S[pontuação semanal]
+  F -->|seguidor aceito| V[RPCs SECURITY DEFINER]
+  S --> V
+  W -->|só se o histórico estiver visível| V
+  V -->|campos mínimos| O[Seguidor / competidor]
+  SP --> A[(audit_log)]
+  F --> A
+```
+
+1. **Coleta**: @usuário escolhido pelo titular; decisões de seguir/aceitar/bloquear; RPE da sessão (1–10) ao finalizar o treino. Nome e foto já existem no perfil (A004/A005).
+2. **Armazenamento**: Supabase (`sa-east-1`), tabelas `social_profiles`, `follows`, `blocks`, coluna `workout_sessions.session_rpe`; parâmetros públicos em `competition_parameters`.
+3. **Uso**: mostrar a seguidores aceitos as estatísticas e a pontuação; mostrar os registros de treino se o titular não os ocultou; calcular ranking entre seguidores mútuos.
+4. **Compartilhamento**: **só com outros usuários autorizados pelo titular** (seguidor aceito ou conta aberta). Nenhum terceiro externo novo.
+5. **Eliminação**: revogar o compartilhamento remove os seguidores e fecha o perfil na hora; excluir a conta apaga tudo em cascata (bloqueios e vínculos de outras pessoas com o titular também).
+
+### 3.2 Sistemas envolvidos
+
+- **Frontend**: PWA estático (Next.js export); telas de seguidores e competição (a implementar a partir do protótipo).
+- **Backend**: Supabase Postgres, RLS e funções (`supabase/migrations/20261018171956_social_competition.sql`).
+- **Cache**: TanStack Query e cópia do último ranking no aparelho (IndexedDB), apagados ao sair da conta.
+- **Observabilidade**: nenhuma ferramenta de analytics (compromisso mantido).
+
+### 3.3 Operadores
+
+- Supabase — `.lgpd/vendors/README.md` (mesmo operador; nenhum novo).
+
+## 4. Necessidade e proporcionalidade
+
+- **Menos dados?** Sim, e foi aplicado:
+  - Terceiros recebem só @usuário, nome, foto, contagens, pontos e (se visível) data, nome, duração, exercícios e séries dos treinos.
+  - **Nunca** recebem medidas corporais (A010), observações em texto livre, RPE individual, e-mail ou fuso.
+  - Busca só por prefixo do @ (mínimo 3 caracteres, até 20 resultados), sem listagem geral de usuários.
+- **Alternativas avaliadas**:
+  - Perfil público para qualquer pessoa: rejeitado. Aumenta exposição e contato com estranhos.
+  - Abrir as tabelas de treino a seguidores por RLS: rejeitado. Um erro numa política vazaria tudo; foram adotadas funções que conferem a permissão.
+  - Duração informada pelo usuário: rejeitada. O tempo medido pelo app é mais fiel e não exige um passo a mais.
+  - Pontuação pela carga levantada: rejeitada pelo produto. A constância e o esforço percebido são mais justos entre níveis diferentes.
+- **Razão da escolha**: o módulo é opcional e desligado; quem não ativa não muda nada no tratamento atual.
+
+## 5. Princípios LGPD (Art. 6)
+
+| Princípio | Como é atendido |
+|---|---|
+| I — Finalidade | Mostrar progresso a pessoas escolhidas e competir com quem segue de volta; descrito no termo do módulo |
+| II — Adequação | O titular escolhe cada seguidor (conta privada) ou abre a conta com aceite explícito |
+| III — Necessidade | Campos mínimos (seção 4); medidas e observações fora |
+| IV — Livre acesso | Listas de seguidores, seguindo, pedidos e bloqueios no app; exportação `guf-export/3` |
+| V — Qualidade | O titular edita @usuário e configurações; pontuação recalculada a cada consulta (sem cópia desatualizada) |
+| VI — Transparência | Regras e parâmetros da pontuação legíveis por todos; ajuste de RPE mostrado ao titular com o motivo |
+| VII — Segurança | RLS só de leitura do que é seu; gravações por funções com auditoria; horários do treino gravados só pelo servidor |
+| VIII — Prevenção | Bloqueio, remoção de seguidor, limite de 50 pedidos/dia, resposta igual para "não existe" e "bloqueado" |
+| IX — Não discriminação | Mesma regra para todos; parâmetros fixos e públicos; sem perfilamento para publicidade |
+| X — Responsabilização | `audit_log`: mudança de visibilidade, aceite e fim de vínculo, bloqueio, desativação; consentimento no `consent_records` |
+
+## 6. Base legal
+
+- **Art. 7º, V** para o cartão do perfil e os vínculos (A017) ⚖; **Art. 7º, I — consentimento** para mostrar treinos e competir (A018–A019), pedido ao aceitar o 1º seguidor ou abrir o perfil (documento `social_sharing`, versão e hash registrados). Se o jurídico entender que dados de treino são dado de saúde (N1), o mesmo consentimento precisa atender ao **Art. 11, I** (específico e destacado). O desenho já segue esse padrão, igual ao módulo de medidas ⚖.
+- **Aceite de cada seguidor** (conta privada) e **aceite ao abrir a conta**: manifestações adicionais dentro do consentimento do módulo, registradas no `audit_log`.
+- O RPE da sessão também serve ao próprio titular (A007, Art. 7º, V); seu uso na pontuação está no consentimento do módulo.
+
+## 7. Direitos do titular
+
+| Direito (Art. 18) | Como é exercido |
+|---|---|
+| I — Confirmação | Configurações › Privacidade mostra se o compartilhamento está autorizado |
+| II — Acesso | Listas no app + `export_my_data` (`guf-export/3`: perfil social, vínculos, bloqueios) |
+| III — Correção | Editar @usuário e configurações |
+| IV — Bloqueio/eliminação | Remover seguidor, deixar de seguir, bloquear, revogar o compartilhamento |
+| V — Portabilidade | Exportação em JSON |
+| VI — Eliminação consentida | Revogar remove os seguidores na hora; excluir a conta apaga o perfil social |
+| VII — Compartilhamento | Lista de quem segue o titular = lista exata de quem vê seus dados |
+| VIII — Não consentir | Sem autorizar, ninguém vê seus treinos; o app funciona igual e você ainda pode seguir pessoas |
+| IX — Revogação | Revogar o compartilhamento (registro no `consent_records`) |
+| **Art. 20 — Revisão de decisão automatizada** | `get_my_competition_sessions` mostra RPE informado, RPE usado e o motivo do ajuste; pedido de revisão pelo canal do titular (`PRIVACY_CONTACT_EMAIL`, 15 dias) |
+
+## 8. Identificação e tratamento de riscos
+
+### 8.1 Matriz de riscos
+
+| ID | Risco | P | I | Nível | Mitigação | Status | Residual |
+|---|---|---|---|---|---|---|---|
+| R001 | Seguidor vê mais do que o titular quis | 2 | 4 | 8 | Privado por padrão; histórico ocultável; campos mínimos; leitura só por funções que conferem `can_view_member` | mitigado | 3 |
+| R002 | Erro de política expõe treinos a qualquer usuário | 2 | 5 | 10 | Nenhuma política nova em tabelas de treino; funções `SECURITY DEFINER` com conferência explícita; testes de permissão antes do lançamento | mitigado (testes pendentes) | 4 |
+| R003 | Contato indesejado / assédio | 3 | 3 | 9 | Sem chat; bloqueio e remoção; busca restrita; limite de pedidos | mitigado | 4 |
+| R004 | Adolescente usando o módulo (acesso provável) | 2 | 4 | 8 | 18+ por autodeclaração; procedimento de conta de menor (`eca-digital.md`) | parcial ⚖ | 6 |
+| R005 | Fraude na pontuação (editar horários, inflar RPE) | 4 | 2 | 8 | Horários gravados só pelo servidor; períodos sem sobreposição; duração limitada a 120 min; controle de RPE suspeito; 1 sessão por dia | mitigado | 4 |
+| R006 | Ajuste automático de RPE injusto | 3 | 2 | 6 | Regra fixa e pública; motivo mostrado ao titular; revisão pelo canal do titular (Art. 20) | mitigado | 3 |
+| R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; consentimento específico | parcial ⚖ | 4 |
+| R008 | Nome e foto aparecem na busca para qualquer conta | 3 | 2 | 6 | @ aleatório no cadastro; busca só por prefixo (≥ 3 caracteres, até 20 resultados); bloqueados não aparecem; nada de treino sem consentimento. Pendente: opção de não aparecer na busca ⚖ | parcial | 4 |
+| R009 | Pressão por comparação (bem-estar) | 2 | 2 | 4 | Pontos premiam constância e não carga; limite de pontos por semana; ranking só entre seguidores mútuos | aceito | 4 |
+
+### 8.2 Riscos não mitigáveis
+
+- **R004**: a autodeclaração de idade continua sendo a única barreira até a decisão jurídica sobre verificação de idade (`eca-digital.md`, seção 4).
+
+## 9. Salvaguardas técnicas
+
+- [x] TLS em trânsito (Supabase/hospedagem)
+- [x] Criptografia em repouso (Supabase)
+- [x] Ids internos (uuid) no `audit_log`, sem nome nem e-mail
+- [x] Menor privilégio: sem escrita direta nas tabelas sociais; leitura de terceiros só por funções
+- [x] Audit log imutável e encadeado (`audit_log`)
+- [x] Horários do treino protegidos por gatilho (integridade da pontuação)
+- [x] Testes SQL de permissão (32 casos, transação desfeita; 2026-10-18)
+- [ ] MFA no painel do Supabase (`security-checklist.md`)
+
+## 10. Salvaguardas administrativas
+
+- [x] Plano de resposta a incidente (`incidents/runbook.md`)
+- [x] Canal do titular e prazo de 15 dias (`dsar/workflow.md`)
+- [ ] Texto do termo do módulo (`social_sharing`) e nova versão da Política de Privacidade ⚖
+- [ ] DPA com o Supabase (G7)
+
+## 11. Consulta a partes interessadas
+
+- Titulares: não realizada (beta pequeno; colher opinião dos testadores na primeira versão).
+- Encarregado: pendente designação.
+- Jurídico: pendente (sem orçamento no beta) ⚖.
+- Segurança: revisão técnica deste relatório (2026-10-18).
+
+## 12. Decisão
+
+- [ ] Prosseguir como planejado
+- [x] Prosseguir com modificações
+- [ ] Não prosseguir
+- [ ] Consultar ANPD
+
+**Modificações exigidas**:
+1. Perfil privado por padrão; treinos só com consentimento; abrir o perfil só com aceite explícito.
+2. Consentimento específico (`social_sharing`) com resumo em camadas, caixa desmarcada e botões de mesmo peso; desativar = revogar e apagar.
+3. Campos mínimos; medidas, observações e RPE individual nunca vão para terceiros.
+4. Transparência e revisão do ajuste de RPE (Art. 20).
+5. Testes de permissão no banco antes de liberar para testadores (feito em 2026-10-18).
+6. Lançamento público só após revisão jurídica (termo do módulo, política, N1 e ECA Digital).
+
+**Aprovado por**:
+- Encarregado: pendente
+- Patrocinador do produto: Glauber — pendente de confirmação
+
+## 13. Plano de revisão
+
+- Próxima revisão obrigatória: antes do lançamento público ou 2027-04-18, o que vier primeiro.
+- Gatilhos para revisão antecipada: perfil visível fora dos seguidores, chat ou mensagens, notificações push, prêmios, mudança nos parâmetros da pontuação, novo operador, incidente, base > 50% maior.

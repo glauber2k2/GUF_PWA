@@ -7,10 +7,13 @@ export const PROJECTS_KEY = "projects";
 /** Resumo de treinos, evolução por exercício e busca de exercícios feitos. */
 export const EVOLUTION_KEY = "evolution";
 
-/** Um treino foi finalizado/descartado/excluído: Início, Histórico, resumos e evolução precisam recarregar. */
+/**
+ * Um treino foi finalizado/descartado/excluído: Início, Histórico, resumos, evolução, perfil social
+ * (números e sequência) e competição precisam recarregar.
+ */
 export function invalidateTrainingData(queryClient: QueryClient, options?: { refetchType?: "active" | "none" }): Promise<unknown> {
   return Promise.all(
-    [HOME_SUMMARY_KEY, HISTORY_KEY, EVOLUTION_KEY].map((key) => queryClient.invalidateQueries({ queryKey: [key], refetchType: options?.refetchType })),
+    [HOME_SUMMARY_KEY, HISTORY_KEY, EVOLUTION_KEY, SOCIAL_KEY, COMPETITION_KEY].map((key) => queryClient.invalidateQueries({ queryKey: [key], refetchType: options?.refetchType })),
   );
 }
 
@@ -33,6 +36,23 @@ export function invalidateProfileData(queryClient: QueryClient): Promise<unknown
     queryClient.invalidateQueries({ queryKey: [HOME_SUMMARY_KEY] }),
     queryClient.invalidateQueries({ queryKey: [HISTORY_KEY] }),
     // Revogar o consentimento de saúde muda o status no leitor de documentos.
+    queryClient.invalidateQueries({ queryKey: [LEGAL_OVERVIEW_KEY] }),
+  ]);
+}
+
+/** Perfil social, seguidores, pedidos e busca. */
+export const SOCIAL_KEY = "social";
+/** Ranking, séries e parâmetros da competição. */
+export const COMPETITION_KEY = "competition";
+
+/**
+ * Vínculos ou privacidade mudaram (seguir, aceitar, bloquear, abrir o perfil, revogar): perfis,
+ * listas, competição e o status do termo no leitor de documentos recarregam.
+ */
+export function invalidateSocialData(queryClient: QueryClient): Promise<unknown> {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: [SOCIAL_KEY] }),
+    queryClient.invalidateQueries({ queryKey: [COMPETITION_KEY] }),
     queryClient.invalidateQueries({ queryKey: [LEGAL_OVERVIEW_KEY] }),
   ]);
 }

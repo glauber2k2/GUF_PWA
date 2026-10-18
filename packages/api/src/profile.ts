@@ -62,7 +62,7 @@ export interface ProfileApi {
  * Implementação (Supabase)
  * ===================================================================== */
 
-const LEGAL_ORDER: LegalDocType[] = ["terms", "privacy", "age_declaration", "health_consent"];
+const LEGAL_ORDER: LegalDocType[] = ["terms", "privacy", "age_declaration", "health_consent", "social_sharing"];
 
 export const getProfile: ProfileApi["getProfile"] = async (client) => {
   try {

@@ -78,6 +78,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       body_measurements: {
         Row: {
           body_fat_pct: number | null
@@ -105,6 +123,60 @@ export type Database = {
           measured_on?: string
           notes?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      competition_parameters: {
+        Row: {
+          bonus_max: number
+          bonus_per_week: number
+          constancy_max: number
+          created_at: string
+          effective_from: string
+          effort_max: number
+          max_minutes: number
+          min_minutes: number
+          reference_load: number
+          rpe_gap: number
+          rpe_high_cap: number
+          rpe_high_share: number
+          rpe_high_value: number
+          rpe_window_days: number
+          sessions_for_max_constancy: number
+        }
+        Insert: {
+          bonus_max: number
+          bonus_per_week: number
+          constancy_max: number
+          created_at?: string
+          effective_from: string
+          effort_max: number
+          max_minutes: number
+          min_minutes: number
+          reference_load: number
+          rpe_gap: number
+          rpe_high_cap: number
+          rpe_high_share: number
+          rpe_high_value: number
+          rpe_window_days: number
+          sessions_for_max_constancy: number
+        }
+        Update: {
+          bonus_max?: number
+          bonus_per_week?: number
+          constancy_max?: number
+          created_at?: string
+          effective_from?: string
+          effort_max?: number
+          max_minutes?: number
+          min_minutes?: number
+          reference_load?: number
+          rpe_gap?: number
+          rpe_high_cap?: number
+          rpe_high_share?: number
+          rpe_high_value?: number
+          rpe_window_days?: number
+          sessions_for_max_constancy?: number
         }
         Relationships: []
       }
@@ -259,6 +331,30 @@ export type Database = {
           muscle_group?: string
           name?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          followee_id: string
+          follower_id: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          followee_id: string
+          follower_id: string
+          status: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+          status?: string
         }
         Relationships: []
       }
@@ -616,6 +712,33 @@ export type Database = {
           },
         ]
       }
+      social_profiles: {
+        Row: {
+          created_at: string
+          handle: string
+          history_hidden: boolean
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          handle: string
+          history_hidden?: boolean
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          handle?: string
+          history_hidden?: boolean
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       workout_active_periods: {
         Row: {
           created_at: string
@@ -662,6 +785,7 @@ export type Database = {
           notes: string | null
           performed_on: string
           routine_id: string | null
+          session_rpe: number | null
           started_at: string
           status: string
           updated_at: string
@@ -677,6 +801,7 @@ export type Database = {
           notes?: string | null
           performed_on?: string
           routine_id?: string | null
+          session_rpe?: number | null
           started_at?: string
           status?: string
           updated_at?: string
@@ -692,6 +817,7 @@ export type Database = {
           notes?: string | null
           performed_on?: string
           routine_id?: string | null
+          session_rpe?: number | null
           started_at?: string
           status?: string
           updated_at?: string
@@ -743,6 +869,77 @@ export type Database = {
           error: true
         } & "the function public.average_duration_seconds with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
       }
+      block_user: { Args: { p_user_id: string }; Returns: undefined }
+      can_view_member: {
+        Args: { p_owner: string; p_viewer: string }
+        Returns: boolean
+      }
+      can_view_member_history: {
+        Args: { p_owner: string; p_viewer: string }
+        Returns: boolean
+      }
+      competition_params_for: {
+        Args: { p_season: string }
+        Returns: {
+          bonus_max: number
+          bonus_per_week: number
+          constancy_max: number
+          created_at: string
+          effective_from: string
+          effort_max: number
+          max_minutes: number
+          min_minutes: number
+          reference_load: number
+          rpe_gap: number
+          rpe_high_cap: number
+          rpe_high_share: number
+          rpe_high_value: number
+          rpe_window_days: number
+          sessions_for_max_constancy: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "competition_parameters"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      competition_season_of: { Args: { p_week_start: string }; Returns: string }
+      competition_session_scores: {
+        Args: { p_from: string; p_to: string; p_user_id: string }
+        Returns: {
+          counted: boolean
+          is_valid: boolean
+          minutes_considered: number
+          rpe_flag: string
+          rpe_informed: number
+          rpe_used: number
+          session_id: string
+          session_load: number
+          training_day: string
+          week_start: string
+        }[]
+      }
+      competition_week_scores: {
+        Args: { p_to: string; p_user_id: string }
+        Returns: {
+          bonus_points: number
+          consecutive_weeks: number
+          constancy_points: number
+          effort_points: number
+          fulfilled: boolean
+          points: number
+          valid_sessions: number
+          week_start: string
+          weekly_load: number
+        }[]
+      }
+      competitors_of: {
+        Args: { p_user_id: string }
+        Returns: {
+          competitor_id: string
+        }[]
+      }
       current_legal_document: {
         Args: { p_doc_type: string }
         Returns: {
@@ -762,8 +959,45 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
       export_my_data: { Args: never; Returns: Json }
+      find_social_profile: { Args: { p_handle: string }; Returns: string }
       finish_workout: { Args: { p_session_id: string }; Returns: Json }
+      get_competition_days: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          day: string
+          records: number
+          user_id: string
+          volume_kg: number
+          workouts: number
+        }[]
+      }
+      get_competition_participants: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          handle: string
+          is_me: boolean
+          name: string
+          user_id: string
+        }[]
+      }
+      get_competition_weeks: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          bonus_points: number
+          constancy_points: number
+          effort_points: number
+          fulfilled: boolean
+          points: number
+          user_id: string
+          valid_sessions: number
+          week_start: string
+          weekly_load: number
+        }[]
+      }
       get_exercise_history: {
         Args: { p_exercise_id: string; p_from?: string }
         Returns: {
@@ -788,6 +1022,68 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_member_evolution: {
+        Args: { p_user_id?: string; p_weeks?: number }
+        Returns: {
+          active_seconds: number
+          max_weight_kg: number
+          sessions: number
+          volume_kg: number
+          week_start: string
+        }[]
+      }
+      get_member_profile: {
+        Args: { p_user_id?: string }
+        Returns: {
+          avatar_url: string
+          best_streak: number
+          current_streak: number
+          first_workout_on: string
+          followers_count: number
+          following_count: number
+          follows_you: boolean
+          handle: string
+          history_hidden: boolean
+          history_visible: boolean
+          is_competitor: boolean
+          is_self: boolean
+          name: string
+          recent_weeks: boolean[]
+          relationship: string
+          unlocked: boolean
+          user_id: string
+          visibility: string
+          workouts_count: number
+        }[]
+      }
+      get_my_competition_sessions: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          counted: boolean
+          is_valid: boolean
+          minutes_considered: number
+          name: string
+          rpe_flag: string
+          rpe_informed: number
+          rpe_used: number
+          session_id: string
+          session_load: number
+          training_day: string
+        }[]
+      }
+      get_my_social: {
+        Args: never
+        Returns: {
+          followers_count: number
+          following_count: number
+          handle: string
+          has_consent: boolean
+          history_hidden: boolean
+          pending_requests_count: number
+          user_id: string
+          visibility: string
+        }[]
+      }
       get_streak: {
         Args: never
         Returns: {
@@ -810,8 +1106,44 @@ export type Database = {
         Args: { p_platform?: string }
         Returns: undefined
       }
+      grant_social_consent: {
+        Args: { p_platform?: string }
+        Returns: undefined
+      }
       has_health_consent: { Args: never; Returns: boolean }
+      has_social_consent: { Args: { p_user_id: string }; Returns: boolean }
+      is_blocked_between: {
+        Args: { p_a: string; p_b: string }
+        Returns: boolean
+      }
       is_premium: { Args: never; Returns: boolean }
+      list_member_workouts: {
+        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
+        Returns: {
+          duration_seconds: number
+          finished_at: string
+          name: string
+          performed_on: string
+          records: number
+          session_id: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
+      list_social_connections: {
+        Args: { p_kind: string; p_user_id?: string }
+        Returns: {
+          avatar_url: string
+          handle: string
+          is_mutual: boolean
+          name: string
+          since: string
+          status: string
+          user_id: string
+        }[]
+      }
+      local_today: { Args: { p_user_id: string }; Returns: string }
+      normalize_handle: { Args: { p_handle: string }; Returns: string }
       pause_workout: {
         Args: { p_at?: string; p_session_id: string }
         Returns: undefined
@@ -837,11 +1169,26 @@ export type Database = {
       }
       purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_consent_proofs: { Args: never; Returns: number }
+      random_social_handle: { Args: never; Returns: string }
+      remove_follower: { Args: { p_user_id: string }; Returns: undefined }
+      request_follow: { Args: { p_user_id: string }; Returns: string }
+      require_social_consent: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      respond_follow_request: {
+        Args: { p_accept: boolean; p_user_id: string }
+        Returns: undefined
+      }
       resume_workout: {
         Args: { p_at?: string; p_session_id: string }
         Returns: undefined
       }
       revoke_health_consent: {
+        Args: { p_platform?: string }
+        Returns: undefined
+      }
+      revoke_social_consent: {
         Args: { p_platform?: string }
         Returns: undefined
       }
@@ -854,6 +1201,51 @@ export type Database = {
           p_weekdays: number[]
         }
         Returns: string
+      }
+      search_social_profiles: {
+        Args: { p_query: string }
+        Returns: {
+          avatar_url: string
+          follows_you: boolean
+          handle: string
+          name: string
+          relationship: string
+          user_id: string
+          visibility: string
+        }[]
+      }
+      session_load_records: {
+        Args: { p_user_id: string }
+        Returns: {
+          performed_on: string
+          records: number
+          session_id: string
+        }[]
+      }
+      set_session_rpe: {
+        Args: { p_rpe: number; p_session_id: string }
+        Returns: undefined
+      }
+      social_relationship: {
+        Args: { p_other: string; p_viewer: string }
+        Returns: string
+      }
+      streak_for: {
+        Args: { p_user_id: string }
+        Returns: {
+          best_streak: number
+          current_streak: number
+          current_week_count: number
+          streak_at_risk: boolean
+          week_secured: boolean
+        }[]
+      }
+      unblock_user: { Args: { p_user_id: string }; Returns: undefined }
+      unfollow: { Args: { p_user_id: string }; Returns: undefined }
+      update_social_handle: { Args: { p_handle: string }; Returns: undefined }
+      update_social_settings: {
+        Args: { p_history_hidden: boolean; p_visibility: string }
+        Returns: undefined
       }
       verify_audit_log: {
         Args: never

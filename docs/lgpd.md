@@ -131,3 +131,5 @@ Manter o beta **só com convidados que sabem que é um teste**. Antes de abrir p
 2. Atualizar `.lgpd/data-map.md`, `.lgpd/legal-basis.md` e `.lgpd/ROPA.md`.
 3. Ação sensível do titular → registrar com `audit_log_append` (migration).
 4. Texto legal mudou → nova versão em `legal_documents` com o hash do script.
+
+**Perfil social, seguidores e competição (2026-10-18):** avaliados em `.lgpd/RIPD/ripd-social.md` (A017–A019). Toda conta tem um cartão de perfil privado (@, nome, foto) visível na busca, por execução de contrato; mostrar treinos a outras pessoas exige o consentimento específico `social_sharing` (Art. 7º, I; padrão do Art. 11, I caso treino seja dado de saúde ⚖), pedido ao aceitar o 1º seguidor ou abrir o perfil. Medidas nunca são compartilhadas; o ajuste automático de RPE é explicado ao titular (Art. 20). Pendências: publicar o termo e a Política 0.3-dev junto com o deploy e, antes do lançamento público, decidir a verificação de idade (risco para adolescentes subiu para médio).
