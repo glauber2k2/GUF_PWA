@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 function createQueryClient() {
   return new QueryClient({
@@ -18,5 +19,11 @@ function createQueryClient() {
 /** TanStack Query: uma instância por aba (criada no primeiro render do cliente). */
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(createQueryClient);
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      {/* Só no `next dev`: o pacote não entra no build de produção. No alto, para não cobrir o menu inferior. */}
+      {process.env.NODE_ENV === "development" && <ReactQueryDevtools buttonPosition="top-right" />}
+    </QueryClientProvider>
+  );
 }
