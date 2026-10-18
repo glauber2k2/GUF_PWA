@@ -234,15 +234,15 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Parte | Situação |
 |---|---|
 | Avaliação LGPD/ECA (A017–A019, RIPD, ROPA, retenção, auditoria) | Feito (rascunho, sem revisão jurídica ⚖) |
-| Migration `20261018171956_social_competition` + correção `20261018202202_get_streak_definer_fix` | Aplicadas em 2026-10-18; 32 testes de permissão no banco passaram (transação desfeita no fim) |
-| Termo `social_sharing` 0.1-dev e Política 0.3-dev (`20261018202908_legal_docs_social_sharing`) | Escrita; **aplicar junto com o deploy do app** (senão todos caem no `/aceite` com o texto antigo) |
+| Migrations `20261018171956_social_competition`, `20261018202202_get_streak_definer_fix` e `20261018213232_social_rules_in_signup_terms` (sem consentimento no meio do uso; fechar o perfil mantém seguidores) | Aplicadas em 2026-10-18; 32 testes de permissão no banco passaram (transação desfeita no fim) |
+| Termos 0.2-dev e Política 0.3-dev com as regras do perfil social (`20261018213650_legal_docs_terms_privacy_social`) | Escrita; **aplicar junto com o deploy do app** (senão todos caem no `/aceite` com o texto antigo) |
 | `packages/core`, `packages/schemas`, `packages/api` (`SocialApi`, `CompetitionApi`), mocks | Feito |
 | Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
 | Busca de pessoas e lista de seguidores/pedidos/bloqueados | Feito (provisório, sem protótipo) |
 | RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
 | Conferir as telas logado, com dados reais | Pendente |
 
-**Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; revogar remove os seguidores; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
+**Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; fechar o perfil mantém os seguidores; remover e bloquear tiram o acesso; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
 
 ### Futuro (fora do MVP)
 

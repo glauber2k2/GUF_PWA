@@ -161,7 +161,6 @@ export function ProfileHistory({
   hasMore,
   loadingMore,
   onMore,
-  onOpenPrivacy,
   onOpenWorkout,
   unit,
 }: {
@@ -171,7 +170,6 @@ export function ProfileHistory({
   hasMore: boolean;
   loadingMore: boolean;
   onMore: () => void;
-  onOpenPrivacy?: () => void;
   onOpenWorkout?: (sessionId: string) => void;
   unit: WeightUnit;
 }) {
@@ -181,14 +179,13 @@ export function ProfileHistory({
       <div className="flex min-h-11 items-center justify-between gap-3">
         <h2 className="m-0 text-lg leading-6 font-bold tracking-[-0.01em]">Histórico de treinos</h2>
         {profile.isSelf && profile.historyHidden && (
-          <button
-            type="button"
-            onClick={onOpenPrivacy}
-            className="flex h-7 items-center gap-1.5 rounded-pill bg-surface-3 px-2.5 text-xs font-semibold text-fg-secondary"
+          <Link
+            href="/configuracoes#pf-privacy"
+            className="flex h-7 items-center gap-1.5 rounded-pill bg-surface-3 px-2.5 text-xs font-semibold text-fg-secondary no-underline"
           >
             <Icon icon={EyeOff} size={14} />
             Só você vê
-          </button>
+          </Link>
         )}
       </div>
 

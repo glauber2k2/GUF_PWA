@@ -362,7 +362,7 @@
 |---|---|
 | Slug | a017-seguidores |
 | Finalidade | Perfil com @, nome e foto encontrável na busca, e escolher quem acompanha o progresso: seguir, pedir, aceitar, remover e bloquear pessoas |
-| Base legal | Proposta: Art. 7º, V — o cartão do perfil e os vínculos são parte do serviço (Termos) ⚖; mostrar treinos depende do consentimento (A018) |
+| Base legal | Proposta: Art. 7º, V — perfil e vínculos são parte do serviço (Termos 0.2) ⚖ |
 | Categorias de titulares | Todos os usuários (perfil privado criado no cadastro); pessoas que o titular bloqueou (só o id) |
 | Sensíveis? | Não |
 | Dados | @usuário (aleatório no cadastro, editável), nome e foto (A004/A005), visibilidade (privada/aberta), opção de ocultar histórico, vínculos (quem segue quem, status, datas), bloqueios |
@@ -370,7 +370,7 @@
 | Sistemas | `social_profiles`, `follows`, `blocks` |
 | Operadores | Supabase |
 | Transferência intl. | Não (banco em `sa-east-1`) |
-| Retenção | Enquanto a conta existir; seguidores até revogar o compartilhamento; bloqueios até desbloquear; tudo apagado em cascata na exclusão |
+| Retenção | Enquanto a conta existir; seguidores até o titular remover; bloqueios até desbloquear; tudo apagado em cascata na exclusão |
 | Segurança | RLS só de leitura do que é seu; gravação por funções com auditoria; busca só por prefixo do @ |
 | Alto risco? | Avaliado — `RIPD/ripd-social.md` |
 | RIPD | `.lgpd/RIPD/ripd-social.md` |
@@ -382,8 +382,8 @@
 |---|---|
 | Slug | a018-compartilhamento-seguidores |
 | Finalidade | Mostrar a seguidores aceitos (ou a qualquer conta logada, com o perfil aberto) estatísticas, sequência, evolução e, se o titular não ocultar, os registros de treino |
-| Base legal | Proposta: Art. 7º, I (Art. 11, I se N1 confirmar dado de saúde) ⚖ |
-| Categorias de titulares | Usuários que autorizaram o compartilhamento |
+| Base legal | Proposta: Art. 7º, V — escolha do titular dentro do serviço (Termos 0.2 / Política 0.3, aceitos no cadastro); Art. 11, I se N1 confirmar dado de saúde ⚖ |
+| Categorias de titulares | Usuários com seguidores aprovados ou perfil aberto |
 | Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
 | Dados | Número de treinos, 1º treino, sequência de semanas, evolução semanal (volume, carga máxima, horas); treinos: data, nome, duração, séries, volume e nº de recordes. **Nunca**: medidas, observações, RPE, e-mail |
 | Fonte | Derivado de A004, A005, A007 |
@@ -402,8 +402,8 @@
 |---|---|
 | Slug | a019-competicao |
 | Finalidade | Calcular a pontuação semanal (constância, esforço e sequência) e o ranking mensal entre seguidores mútuos |
-| Base legal | Proposta: Art. 7º, I (consentimento do módulo) ⚖ |
-| Categorias de titulares | Usuários que se seguem mutuamente (ambos autorizaram o compartilhamento ao aceitar) |
+| Base legal | Proposta: Art. 7º, V (Termos 0.2, aceitos no cadastro) ⚖ |
+| Categorias de titulares | Usuários que se seguem mutuamente |
 | Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
 | Dados | RPE da sessão (1–10), tempo efetivo, dia do treino no fuso do perfil; resultados: pontos, sessões válidas, carga, posição |
 | Fonte | Coletado do titular (RPE) e derivado de A007 |

@@ -9,10 +9,8 @@ export type ApiErrorCode =
   | "routine_not_found"
   | "session_not_found"
   | "exercise_not_found"
-  | "social_consent_required"
   | "handle_taken"
   | "handle_invalid"
-  | "social_unavailable"
   | "person_not_found"
   | "follow_limit"
   | "history_hidden"
@@ -39,10 +37,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   routine_not_found: "Esta rotina não existe mais ou está arquivada. Volte para Projetos e tente de novo.",
   session_not_found: "Este treino foi excluído ou não está mais disponível. Volte e escolha outro.",
   exercise_not_found: "Este exercício não está mais disponível. Volte e escolha outro.",
-  social_consent_required: "Para mostrar seus treinos a outras pessoas, autorize o compartilhamento primeiro.",
   handle_taken: "Esse nome de usuário já está em uso. Escolha outro.",
   handle_invalid: "Use de 3 a 20 caracteres: letras minúsculas, números, ponto ou _ (sem começar ou terminar com ponto ou _).",
-  social_unavailable: "O compartilhamento com seguidores ainda não está disponível. Tente de novo mais tarde.",
   person_not_found: "Não encontramos essa pessoa. Confira o nome de usuário ou peça um novo link.",
   follow_limit: "Você atingiu o limite de pedidos para seguir de hoje. Tente de novo amanhã.",
   history_hidden: "Esta pessoa ocultou o histórico de treinos. As estatísticas e a pontuação continuam visíveis.",
@@ -64,13 +60,11 @@ export function isNetworkError(error: ApiError | null | undefined): boolean {
 /** Códigos próprios do módulo social e da competição (migration social_competition). */
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
   GS002: "handle_taken",
-  GS003: "social_unavailable",
   GS004: "person_not_found",
   GS005: "follow_limit",
   GS006: "history_hidden",
   GS007: "rpe_window_closed",
   GS008: "handle_invalid",
-  GS009: "social_consent_required",
 };
 
 /** Converte erros do PostgREST/rede no ApiError do app. */

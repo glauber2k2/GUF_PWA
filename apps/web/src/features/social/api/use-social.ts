@@ -155,11 +155,3 @@ export function useUpdateSocialSettings() {
 export function useUpdateHandle() {
   return useSocialMutation<string>((api, handle) => api.updateHandle(getSupabaseClient(), handle));
 }
-
-export function useGrantSharingConsent() {
-  return useSocialMutation<void>((api) => api.grantSharingConsent(getSupabaseClient()));
-}
-
-export function useRevokeSharingConsent() {
-  return useSocialMutation<void>((api) => api.revokeSharingConsent(getSupabaseClient()));
-}

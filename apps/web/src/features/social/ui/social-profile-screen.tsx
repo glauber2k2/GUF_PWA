@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Ellipsis, Lock, Shield } from "lucide-react";
+import { ChevronLeft, Ellipsis, Lock } from "lucide-react";
 import { monthYearLabel, trainingTenure } from "@guf/core";
-import { Avatar, Banner, BottomSheet, Icon, IconButton, Skeleton } from "@/shared/components/ds";
+import { Avatar, Banner, Icon, IconButton, Skeleton } from "@/shared/components/ds";
 import { useProfile } from "@/features/profile";
 import { summaryPath } from "@/features/evolution";
 import { useGoBack } from "@/shared/hooks/use-go-back";
@@ -13,7 +13,6 @@ import {
   useMemberEvolution,
   useMemberProfile,
   useMemberWorkouts,
-  useMySocial,
   useSocialSource,
 } from "@/features/social/api/use-social";
 import {
@@ -27,7 +26,6 @@ import {
 } from "@/features/social/components/profile-sections";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
 import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
-import { SocialPrivacySettings } from "@/features/social/components/social-privacy-settings";
 
 function ProfileSkeleton() {
   return (
@@ -54,12 +52,10 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const goBack = useGoBack("/competicao");
   const { dev } = useSocialSource();
   const profile = useMemberProfile(userId);
-  const mySocial = useMySocial();
   const own = useProfile();
   const canUse = useCanUseSocial();
   const unit = own.data?.weightUnit ?? "kg";
   const [period, setPeriod] = useState<EvolutionPeriod>("3M");
-  const [privacyOpen, setPrivacyOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
@@ -78,7 +74,6 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
           <span className="truncate">{data ? `@${data.handle}` : ""}</span>
           {data?.visibility === "private" && <Icon icon={Lock} size={14} label="Perfil privado" className="flex-none text-fg-muted" />}
         </span>
-        {isSelf && <IconButton icon={Shield} label="Privacidade" variant="ghost" onClick={() => setPrivacyOpen(true)} />}
         <IconButton
           icon={Ellipsis}
           label={isSelf ? "Configurações" : "Mais opções"}
@@ -134,7 +129,6 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
                 hasMore={Boolean(workouts.hasNextPage)}
                 loadingMore={workouts.isFetchingNextPage}
                 onMore={() => void workouts.fetchNextPage()}
-                onOpenPrivacy={() => setPrivacyOpen(true)}
                 onOpenWorkout={isSelf ? (id) => router.push(summaryPath(id)) : undefined}
                 unit={unit}
               />
@@ -149,11 +143,6 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
         </>
       )}
 
-      {isSelf && (
-        <BottomSheet placement="screen" open={privacyOpen} onClose={() => setPrivacyOpen(false)} title="Privacidade">
-          {mySocial.data ? <SocialPrivacySettings social={mySocial.data} disabled={!canUse} /> : <Skeleton className="h-40 w-full rounded-md" />}
-        </BottomSheet>
-      )}
     </main>
   );
 }

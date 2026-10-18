@@ -25,11 +25,10 @@ const FEMININE: Partial<Record<LegalReaderDocType, true>> = { privacy: true };
 
 function statusOf(docType: LegalReaderDocType, acceptance: LegalAcceptance, acceptedAt: string | null) {
   if (acceptance === "accepted" && acceptedAt) {
-    const verb = docType === "health_consent" || docType === "social_sharing" ? "Autorizado" : FEMININE[docType] ? "Aceita" : "Aceito";
+    const verb = docType === "health_consent" ? "Autorizado" : FEMININE[docType] ? "Aceita" : "Aceito";
     return { icon: CircleCheck, className: "text-success", text: `${verb} em ${formatDayMonthYear(new Date(acceptedAt))}` };
   }
   if (acceptance === "outdated") return { icon: CircleAlert, className: "text-warning", text: "Nova versão para aceitar" };
-  if (docType === "social_sharing") return { icon: CircleDashed, className: "text-fg-muted", text: "Não autorizado · só é pedido ao aceitar seguidores ou abrir o perfil" };
   return docType === "health_consent"
     ? { icon: CircleDashed, className: "text-fg-muted", text: "Não autorizado · só é pedido ao ativar as medidas corporais" }
     : { icon: CircleDashed, className: "text-fg-muted", text: FEMININE[docType] ? "Não aceita" : "Não aceito" };

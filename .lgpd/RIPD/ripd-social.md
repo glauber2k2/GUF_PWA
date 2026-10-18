@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.2 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-18
+**Versão**: v0.3 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-18
+
+> **v0.3 (decisão do produto)**: nenhum consentimento é pedido no meio do uso. As regras do perfil social estão nos Termos de Uso 0.2 e na Política 0.3, aceitos no cadastro; mostrar treinos é escolha do titular (aprovar seguidor, abrir o perfil), base Art. 7º, V ⚖. Perfil aberto = qualquer conta logada vê; privado = só quem segue. Fechar o perfil não remove seguidores; seguidor sai por remoção ou bloqueio. Risco residual: se treino for dado de saúde (N1), a base precisa ser consentimento específico (Art. 11, I) no cadastro.
 
 > **v0.2**: o modelo mudou depois dos protótipos. Não há mais "ativar o módulo": toda conta tem um perfil social privado com @ aleatório (cartão @/nome/foto encontrável na busca, Art. 7º, V). O consentimento `social_sharing` é pedido ao aceitar o 1º seguidor ou abrir o perfil; perfil aberto é visível a qualquer conta logada; revogar remove os seguidores e fecha o perfil.
 
@@ -17,7 +19,7 @@ O guf deixa de ser só pessoal: quem quiser pode ativar um **módulo social** op
 
 Até agora, os dados de treino só eram vistos pelo próprio titular; continua assim até ele autorizar o compartilhamento. A feature os mostra a terceiros, cria contato entre usuários (gatilho registrado em `eca-digital.md`) e introduz uma **decisão automatizada** (o controle de RPE suspeito altera a pontuação). Por isso, este RIPD foi feito antes da implementação, mesmo que o teste da Res. CD/ANPD nº 2/2022 possa não torná-lo obrigatório (seção 2.1).
 
-**Resultado**: prosseguir **com as modificações da seção 12**: módulo desligado por padrão, consentimento específico, campos mínimos, medidas e observações nunca compartilhadas, leitura de terceiros só por funções que conferem a permissão, e transparência do ajuste de RPE. Lançamento público depende da revisão jurídica já pendente.
+**Resultado**: prosseguir **com as modificações da seção 12**: perfil privado por padrão, regras nos Termos e na Política aceitos no cadastro, campos mínimos, medidas e observações nunca compartilhadas, leitura de terceiros só por funções que conferem a permissão, e transparência do ajuste de RPE. Lançamento público depende da revisão jurídica já pendente.
 
 ## 2. Contexto
 
@@ -43,7 +45,7 @@ Conclusão: há critério específico e o critério geral é discutível. O rela
 
 ```mermaid
 flowchart LR
-  T[Titular] -->|ativa módulo + consentimento| C[(consent_records)]
+  T[Titular] -->|aceita Termos e Política no cadastro| C[(consent_records)]
   T -->|@usuário, visibilidade, ocultar histórico| SP[(social_profiles)]
   T -->|pedir / aceitar / remover / bloquear| F[(follows / blocks)]
   T -->|treino + RPE da sessão| W[(workout_sessions)]
@@ -60,7 +62,7 @@ flowchart LR
 2. **Armazenamento**: Supabase (`sa-east-1`), tabelas `social_profiles`, `follows`, `blocks`, coluna `workout_sessions.session_rpe`; parâmetros públicos em `competition_parameters`.
 3. **Uso**: mostrar a seguidores aceitos as estatísticas e a pontuação; mostrar os registros de treino se o titular não os ocultou; calcular ranking entre seguidores mútuos.
 4. **Compartilhamento**: **só com outros usuários autorizados pelo titular** (seguidor aceito ou conta aberta). Nenhum terceiro externo novo.
-5. **Eliminação**: revogar o compartilhamento remove os seguidores e fecha o perfil na hora; excluir a conta apaga tudo em cascata (bloqueios e vínculos de outras pessoas com o titular também).
+5. **Eliminação**: remover seguidor ou bloquear tira o acesso na hora; excluir a conta apaga tudo em cascata (bloqueios e vínculos de outras pessoas com o titular também).
 
 ### 3.2 Sistemas envolvidos
 
@@ -99,27 +101,27 @@ flowchart LR
 | VII — Segurança | RLS só de leitura do que é seu; gravações por funções com auditoria; horários do treino gravados só pelo servidor |
 | VIII — Prevenção | Bloqueio, remoção de seguidor, limite de 50 pedidos/dia, resposta igual para "não existe" e "bloqueado" |
 | IX — Não discriminação | Mesma regra para todos; parâmetros fixos e públicos; sem perfilamento para publicidade |
-| X — Responsabilização | `audit_log`: mudança de visibilidade, aceite e fim de vínculo, bloqueio, desativação; consentimento no `consent_records` |
+| X — Responsabilização | `audit_log`: mudança de visibilidade, aceite e fim de vínculo, bloqueio; aceite dos Termos e da Política no `consent_records` |
 
 ## 6. Base legal
 
-- **Art. 7º, V** para o cartão do perfil e os vínculos (A017) ⚖; **Art. 7º, I — consentimento** para mostrar treinos e competir (A018–A019), pedido ao aceitar o 1º seguidor ou abrir o perfil (documento `social_sharing`, versão e hash registrados). Se o jurídico entender que dados de treino são dado de saúde (N1), o mesmo consentimento precisa atender ao **Art. 11, I** (específico e destacado). O desenho já segue esse padrão, igual ao módulo de medidas ⚖.
-- **Aceite de cada seguidor** (conta privada) e **aceite ao abrir a conta**: manifestações adicionais dentro do consentimento do módulo, registradas no `audit_log`.
-- O RPE da sessão também serve ao próprio titular (A007, Art. 7º, V); seu uso na pontuação está no consentimento do módulo.
+- **Art. 7º, V** para o cartão do perfil e os vínculos (A017) e para mostrar treinos e competir (A018–A019), por escolha do titular no app (aprovar seguidor, abrir o perfil), com as regras nos Termos 0.2 e na Política 0.3 aceitos no cadastro (versão e hash registrados) ⚖. Se o jurídico entender que dados de treino são dado de saúde (N1), será preciso consentimento específico e destacado (**Art. 11, I**), pedido no cadastro em caixa própria e desmarcada.
+- **Aceite de cada seguidor** (conta privada) e **aceite ao abrir a conta**: escolhas do titular, registradas no `audit_log`.
+- O RPE da sessão também serve ao próprio titular (A007, Art. 7º, V); seu uso na pontuação está descrito nos Termos 0.2.
 
 ## 7. Direitos do titular
 
 | Direito (Art. 18) | Como é exercido |
 |---|---|
-| I — Confirmação | Configurações › Privacidade mostra se o compartilhamento está autorizado |
+| I — Confirmação | Configurações › Privacidade mostra se o perfil está aberto ou privado e se o histórico está oculto |
 | II — Acesso | Listas no app + `export_my_data` (`guf-export/3`: perfil social, vínculos, bloqueios) |
 | III — Correção | Editar @usuário e configurações |
-| IV — Bloqueio/eliminação | Remover seguidor, deixar de seguir, bloquear, revogar o compartilhamento |
+| IV — Bloqueio/eliminação | Remover seguidor, deixar de seguir, bloquear, fechar o perfil, ocultar o histórico |
 | V — Portabilidade | Exportação em JSON |
-| VI — Eliminação consentida | Revogar remove os seguidores na hora; excluir a conta apaga o perfil social |
+| VI — Eliminação | Remover seguidor tira o acesso na hora; excluir a conta apaga o perfil social |
 | VII — Compartilhamento | Lista de quem segue o titular = lista exata de quem vê seus dados |
-| VIII — Não consentir | Sem autorizar, ninguém vê seus treinos; o app funciona igual e você ainda pode seguir pessoas |
-| IX — Revogação | Revogar o compartilhamento (registro no `consent_records`) |
+| VIII — Não consentir | O perfil começa privado: sem aprovar ninguém nem abrir o perfil, ninguém vê seus treinos |
+| IX — Revogação | Fechar o perfil, ocultar o histórico, remover seguidores ou bloquear, a qualquer momento |
 | **Art. 20 — Revisão de decisão automatizada** | `get_my_competition_sessions` mostra RPE informado, RPE usado e o motivo do ajuste; pedido de revisão pelo canal do titular (`PRIVACY_CONTACT_EMAIL`, 15 dias) |
 
 ## 8. Identificação e tratamento de riscos
@@ -134,7 +136,7 @@ flowchart LR
 | R004 | Adolescente usando o módulo (acesso provável) | 2 | 4 | 8 | 18+ por autodeclaração; procedimento de conta de menor (`eca-digital.md`) | parcial ⚖ | 6 |
 | R005 | Fraude na pontuação (editar horários, inflar RPE) | 4 | 2 | 8 | Horários gravados só pelo servidor; períodos sem sobreposição; duração limitada a 120 min; controle de RPE suspeito; 1 sessão por dia | mitigado | 4 |
 | R006 | Ajuste automático de RPE injusto | 3 | 2 | 6 | Regra fixa e pública; motivo mostrado ao titular; revisão pelo canal do titular (Art. 20) | mitigado | 3 |
-| R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; consentimento específico | parcial ⚖ | 4 |
+| R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; perfil privado por padrão; se N1, consentimento no cadastro | parcial ⚖ | 4 |
 | R008 | Nome e foto aparecem na busca para qualquer conta | 3 | 2 | 6 | @ aleatório no cadastro; busca só por prefixo (≥ 3 caracteres, até 20 resultados); bloqueados não aparecem; nada de treino sem consentimento. Pendente: opção de não aparecer na busca ⚖ | parcial | 4 |
 | R009 | Pressão por comparação (bem-estar) | 2 | 2 | 4 | Pontos premiam constância e não carga; limite de pontos por semana; ranking só entre seguidores mútuos | aceito | 4 |
 
@@ -157,7 +159,7 @@ flowchart LR
 
 - [x] Plano de resposta a incidente (`incidents/runbook.md`)
 - [x] Canal do titular e prazo de 15 dias (`dsar/workflow.md`)
-- [ ] Texto do termo do módulo (`social_sharing`) e nova versão da Política de Privacidade ⚖
+- [x] Regras nos Termos 0.2-dev e na Política 0.3-dev (rascunhos; publicar com o deploy) ⚖
 - [ ] DPA com o Supabase (G7)
 
 ## 11. Consulta a partes interessadas
@@ -175,8 +177,8 @@ flowchart LR
 - [ ] Consultar ANPD
 
 **Modificações exigidas**:
-1. Perfil privado por padrão; treinos só com consentimento; abrir o perfil só com aceite explícito.
-2. Consentimento específico (`social_sharing`) com resumo em camadas, caixa desmarcada e botões de mesmo peso; desativar = revogar e apagar.
+1. Perfil privado por padrão; treinos só para seguidores aprovados ou com o perfil aberto (escolha do titular).
+2. Regras nos Termos e na Política aceitos no cadastro (versão e hash); controles de privacidade em Configurações › Privacidade.
 3. Campos mínimos; medidas, observações e RPE individual nunca vão para terceiros.
 4. Transparência e revisão do ajuste de RPE (Art. 20).
 5. Testes de permissão no banco antes de liberar para testadores (feito em 2026-10-18).

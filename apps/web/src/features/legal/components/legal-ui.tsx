@@ -12,14 +12,12 @@ import {
   CornerDownRight,
   Download,
   Dumbbell,
-  EyeOff,
   FileDiff,
   FileText,
   FolderLock,
   Globe,
   HeartOff,
   HeartPulse,
-  Lock,
   LogIn,
   Ruler,
   Shield,
@@ -27,7 +25,6 @@ import {
   Target,
   ToggleLeft,
   Trash2,
-  Trophy,
   TriangleAlert,
   UserCheck,
   Users,
@@ -57,9 +54,6 @@ export const LEGAL_ICONS: Record<LegalIcon, LucideIcon> = {
   "file-text": FileText,
   shield: Shield,
   users: Users,
-  "eye-off": EyeOff,
-  lock: Lock,
-  trophy: Trophy,
 };
 
 const ACTION_ICONS: Record<LegalAction, LucideIcon> = { export: Download, delete: Trash2, revoke: HeartOff };

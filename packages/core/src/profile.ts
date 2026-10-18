@@ -37,19 +37,18 @@ export function isDeleteConfirmation(text: string): boolean {
 }
 
 /** Documentos legais exibidos no Perfil, na ordem. */
-export type LegalDocType = "terms" | "privacy" | "age_declaration" | "health_consent" | "social_sharing";
+export type LegalDocType = "terms" | "privacy" | "age_declaration" | "health_consent";
 
 export const LEGAL_DOC_TITLES: Record<LegalDocType, string> = {
   terms: "Termos de Uso",
   privacy: "Política de Privacidade",
   age_declaration: "Declaração de idade",
   health_consent: "Consentimento de dados de saúde",
-  social_sharing: "Compartilhamento de treinos",
 };
 
 /** "Aceito em 12 mar 2026 · versão 1.0" (a Política é feminina: "Aceita"). */
 export function acceptedLabel(docType: LegalDocType, acceptedAt: string, version: string): string {
-  const verb = docType === "social_sharing" ? "Autorizado" : docType === "privacy" || docType === "age_declaration" ? "Aceita" : "Aceito";
+  const verb = docType === "privacy" || docType === "age_declaration" ? "Aceita" : "Aceito";
   const date = format(new Date(acceptedAt), "d MMM yyyy", { locale: ptBR }).replace(".", "");
   return `${verb} em ${date} · versão ${version}`;
 }
