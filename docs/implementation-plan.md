@@ -235,7 +235,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 |---|---|
 | Avaliação LGPD/ECA (A017–A019, RIPD, ROPA, retenção, auditoria) | Feito (rascunho, sem revisão jurídica ⚖) |
 | Migrations `20261018171956_social_competition`, `20261018202202_get_streak_definer_fix` e `20261018213232_social_rules_in_signup_terms` (sem consentimento no meio do uso; fechar o perfil mantém seguidores) | Aplicadas em 2026-10-18; 32 testes de permissão no banco passaram (transação desfeita no fim) |
-| Termos 0.2-dev e Política 0.3-dev com as regras do perfil social (`20261018213650_legal_docs_terms_privacy_social`) | Escrita; **aplicar junto com o deploy do app** (senão todos caem no `/aceite` com o texto antigo) |
+| Termos 0.2-dev e Política 0.3-dev com as regras do perfil social (`20261018213650_legal_docs_terms_privacy_social`) | Publicados no banco em 2026-10-18; **publicar o app logo** (até lá, o `/aceite` de quem já tem conta mostra o texto antigo) |
 | `packages/core`, `packages/schemas`, `packages/api` (`SocialApi`, `CompetitionApi`), mocks | Feito |
 | Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
 | Busca de pessoas e lista de seguidores/pedidos/bloqueados | Feito (provisório, sem protótipo) |

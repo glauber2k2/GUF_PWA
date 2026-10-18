@@ -159,7 +159,7 @@ flowchart LR
 
 - [x] Plano de resposta a incidente (`incidents/runbook.md`)
 - [x] Canal do titular e prazo de 15 dias (`dsar/workflow.md`)
-- [x] Regras nos Termos 0.2-dev e na Política 0.3-dev (rascunhos; publicar com o deploy) ⚖
+- [x] Regras nos Termos 0.2-dev e na Política 0.3-dev (rascunhos; publicados no banco em 2026-10-18) ⚖
 - [ ] DPA com o Supabase (G7)
 
 ## 11. Consulta a partes interessadas
