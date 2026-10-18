@@ -27,6 +27,9 @@
 | A014 | Exclusão de conta | Sim, se houver medidas | Possível | Não | Em produção (testes) |
 | A015 | Planos e pagamentos | Não | Possível | Não | Futuro |
 | A016 | Registro de auditoria | Não | Possível | Não | Em produção (testes) |
+| A017 | Perfil social e seguidores | Não | Possível | **Avaliado (RIPD)** | Em produção (testes) |
+| A018 | Estatísticas e treinos visíveis a outras pessoas | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
+| A019 | Competição e pontuação semanal | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.
@@ -351,6 +354,67 @@
 | Segurança | Sem acesso pelo app; só inclusão; cadeia de hash (`verify_audit_log()`) |
 | Alto risco? | Não |
 | RIPD | N/A |
+| Owner | Pendente (controlador) |
+
+### A017 — Perfil social e seguidores
+
+| Campo | Valor |
+|---|---|
+| Slug | a017-seguidores |
+| Finalidade | Perfil com @, nome e foto encontrável na busca, e escolher quem acompanha o progresso: seguir, pedir, aceitar, remover e bloquear pessoas |
+| Base legal | Proposta: Art. 7º, V — o cartão do perfil e os vínculos são parte do serviço (Termos) ⚖; mostrar treinos depende do consentimento (A018) |
+| Categorias de titulares | Todos os usuários (perfil privado criado no cadastro); pessoas que o titular bloqueou (só o id) |
+| Sensíveis? | Não |
+| Dados | @usuário (aleatório no cadastro, editável), nome e foto (A004/A005), visibilidade (privada/aberta), opção de ocultar histórico, vínculos (quem segue quem, status, datas), bloqueios |
+| Fonte | Coletado do titular |
+| Sistemas | `social_profiles`, `follows`, `blocks` |
+| Operadores | Supabase |
+| Transferência intl. | Não (banco em `sa-east-1`) |
+| Retenção | Enquanto a conta existir; seguidores até revogar o compartilhamento; bloqueios até desbloquear; tudo apagado em cascata na exclusão |
+| Segurança | RLS só de leitura do que é seu; gravação por funções com auditoria; busca só por prefixo do @ |
+| Alto risco? | Avaliado — `RIPD/ripd-social.md` |
+| RIPD | `.lgpd/RIPD/ripd-social.md` |
+| Owner | Pendente (controlador) |
+
+### A018 — Estatísticas e treinos visíveis a seguidores
+
+| Campo | Valor |
+|---|---|
+| Slug | a018-compartilhamento-seguidores |
+| Finalidade | Mostrar a seguidores aceitos (ou a qualquer conta logada, com o perfil aberto) estatísticas, sequência, evolução e, se o titular não ocultar, os registros de treino |
+| Base legal | Proposta: Art. 7º, I (Art. 11, I se N1 confirmar dado de saúde) ⚖ |
+| Categorias de titulares | Usuários que autorizaram o compartilhamento |
+| Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
+| Dados | Número de treinos, 1º treino, sequência de semanas, evolução semanal (volume, carga máxima, horas); treinos: data, nome, duração, séries, volume e nº de recordes. **Nunca**: medidas, observações, RPE, e-mail |
+| Fonte | Derivado de A004, A005, A007 |
+| Sistemas | Funções `get_member_profile`, `get_member_evolution`, `list_member_workouts` |
+| Operadores | Supabase |
+| Transferência intl. | Não |
+| Retenção | Calculado sob demanda; nada é copiado para o seguidor além do cache do app dele (apagado ao sair da conta) |
+| Segurança | Leitura só por funções `SECURITY DEFINER` que conferem você, seguidor aceito ou perfil aberto (`can_view_member`) e histórico visível (`can_view_member_history`); 32 testes de permissão no banco (2026-10-18) |
+| Alto risco? | Avaliado — RIPD |
+| RIPD | `.lgpd/RIPD/ripd-social.md` |
+| Owner | Pendente (controlador) |
+
+### A019 — Competição e pontuação semanal
+
+| Campo | Valor |
+|---|---|
+| Slug | a019-competicao |
+| Finalidade | Calcular a pontuação semanal (constância, esforço e sequência) e o ranking mensal entre seguidores mútuos |
+| Base legal | Proposta: Art. 7º, I (consentimento do módulo) ⚖ |
+| Categorias de titulares | Usuários que se seguem mutuamente (ambos autorizaram o compartilhamento ao aceitar) |
+| Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
+| Dados | RPE da sessão (1–10), tempo efetivo, dia do treino no fuso do perfil; resultados: pontos, sessões válidas, carga, posição |
+| Fonte | Coletado do titular (RPE) e derivado de A007 |
+| Sistemas | `workout_sessions.session_rpe`, `competition_parameters`, funções `competition_*`, `get_competition_participants`, `get_competition_weeks`, `get_competition_days`, `get_my_competition_sessions` |
+| Operadores | Supabase |
+| Transferência intl. | Não |
+| Retenção | RPE igual a A007; pontuação não é guardada (recalculada a cada consulta) |
+| Segurança | Parâmetros fixos no servidor e públicos; horários do treino gravados só pelo servidor (gatilhos) |
+| Decisão automatizada | **Sim** — controle de RPE suspeito (Art. 20): motivo mostrado ao titular; revisão pelo canal do titular |
+| Alto risco? | Avaliado — RIPD |
+| RIPD | `.lgpd/RIPD/ripd-social.md` |
 | Owner | Pendente (controlador) |
 
 ---

@@ -29,7 +29,7 @@ const PLATFORMS: Record<string, InstallPlatform> = {
 
 /**
  * ?estado= do Perfil — SÓ EM DESENVOLVIMENTO (eliminado do build de produção).
- * Ex.: /perfil?estado=ios-safari · ?estado=sem-saude,offline · ?estado=pendente · ?estado=foto · ?estado=carregando.
+ * Ex.: /configuracoes?estado=ios-safari · ?estado=sem-saude,offline · ?estado=pendente · ?estado=foto · ?estado=carregando.
  * Flags sozinhas usam o cenário padrão do mock.
  */
 export function useDevProfileState(): DevProfileState {

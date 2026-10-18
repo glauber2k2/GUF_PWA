@@ -1,5 +1,5 @@
-import { ProfileScreen } from "@/features/profile";
+import { SocialProfileScreen } from "@/features/social";
 
 export default function PerfilPage() {
-  return <ProfileScreen />;
+  return <SocialProfileScreen userId={null} />;
 }

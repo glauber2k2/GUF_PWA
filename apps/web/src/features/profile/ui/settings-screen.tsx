@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
-import { AppHeader, Banner, LargeTitle } from "@/shared/components/ds";
+import { useEffect, type ReactNode } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Banner, IconButton } from "@/shared/components/ds";
+import { useGoBack } from "@/shared/hooks/use-go-back";
 import { useCanEditProfile, useConsents, useProfile, useProfileSource } from "@/features/profile/api/use-profile";
-import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { useInstallPlatform } from "@/store/global/pwa.store";
 import { AboutSection } from "@/features/profile/components/about-section";
 import { InstallCard } from "@/features/profile/components/install-card";
@@ -14,11 +15,12 @@ import { ProfileSkeleton } from "@/features/profile/components/profile-skeleton"
 import { UserCard } from "@/features/profile/components/user-card";
 
 /**
- * Aba Perfil: dados do usuário, instalar o app, preferências, privacidade (LGPD), sobre e sair.
+ * Configurações (protótipo "Configurações"; abre pelos três pontinhos do Perfil): dados da conta,
+ * instalar o app, preferências, privacidade (perfil social e LGPD), sobre e sair.
  * Alterações só com internet; instalar, tema e sair funcionam sem conexão.
  */
-export function ProfileScreen() {
-  const scrolled = useScrolled();
+export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode }) {
+  const goBack = useGoBack("/perfil");
   const { dev } = useProfileSource();
   const profile = useProfile();
   const consents = useConsents();
@@ -27,7 +29,7 @@ export function ProfileScreen() {
   const platform = dev.platform ?? detected;
   const loading = dev.forceLoading || profile.isPending;
 
-  // Aberto por um atalho (ex.: /perfil#pf-privacy, vindo de um documento legal): rola até a seção
+  // Aberto por um atalho (ex.: /configuracoes#pf-privacy, vindo de um documento legal): rola até a seção
   // quando o conteúdo carrega (antes disso só há o esqueleto).
   useEffect(() => {
     if (loading || !window.location.hash) return;
@@ -36,11 +38,11 @@ export function ProfileScreen() {
 
   return (
     <main className="flex flex-col px-4">
-      <div className="sticky top-0 z-[5] -mx-4 pt-[env(safe-area-inset-top)]">
-        <AppHeader title="Perfil" collapsed={scrolled} />
+      <div className="sticky top-0 z-[5] -mx-4 flex h-14 items-center gap-1 bg-background/90 pr-4 pl-1.5 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
+        <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />
+        <h1 className="m-0 min-w-0 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">Configurações</h1>
       </div>
-      <div className="flex flex-col gap-4">
-        <LargeTitle className="mt-1">Perfil</LargeTitle>
+      <div className="flex flex-col gap-4 pt-2">
         {!canEdit && (
           <Banner tone="warning" title="Sem conexão" className="animate-guf-rise-fast">
             para alterar seu perfil, conecte-se à internet.
@@ -62,7 +64,7 @@ export function ProfileScreen() {
             <UserCard profile={profile.data} canEdit={canEdit} />
             <InstallCard platform={platform} />
             <PreferencesSection profile={profile.data} canEdit={canEdit} />
-            <PrivacySection consents={consents.data} canEdit={canEdit} />
+            <PrivacySection consents={consents.data} canEdit={canEdit} socialPrivacy={socialPrivacy} />
             <AboutSection />
             <ProfileSignOut forcePending={dev.forcePending} />
           </>

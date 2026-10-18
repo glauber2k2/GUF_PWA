@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { CircleCheck, Download, FileCheck, FileDown, FileText, HeartPulse, Mail, Trash2 } from "lucide-react";
 import { acceptedLabel, DSAR_RESPONSE_DAYS, LEGAL_DOC_TITLES, legalReaderTarget, PRIVACY_CONTACT_EMAIL, privacyRequestMailto } from "@guf/core";
 import type { Consents } from "@guf/api";
@@ -14,8 +14,11 @@ import { useDataExport } from "@/features/profile/hooks/use-data-export";
 
 type Overlay = "docs" | "revoke" | "delete" | null;
 
-/** Exportar dados, documentos aceitos, consentimento de saúde e excluir conta (LGPD). */
-export function PrivacySection({ consents, canEdit }: { consents: Consents | undefined; canEdit: boolean }) {
+/**
+ * Perfil social (visibilidade e histórico, vindo da rota), exportar dados, documentos aceitos,
+ * consentimento de saúde e excluir conta (LGPD).
+ */
+export function PrivacySection({ consents, canEdit, socialPrivacy }: { consents: Consents | undefined; canEdit: boolean; socialPrivacy?: ReactNode }) {
   const shell = useAppShell();
   const exporter = useDataExport(canEdit);
   const revoke = useRevokeHealthConsent();
@@ -33,6 +36,7 @@ export function PrivacySection({ consents, canEdit }: { consents: Consents | und
 
   return (
     <ProfileSection id="pf-privacy" title="Privacidade" className="[animation-delay:150ms]">
+      {socialPrivacy}
       <RowGroup first>
         <RowButton
           icon={FileDown}

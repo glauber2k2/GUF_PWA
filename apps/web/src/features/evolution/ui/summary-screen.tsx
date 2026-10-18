@@ -9,7 +9,7 @@ import { useAppShell } from "@/features/app-shell";
 import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, Icon, SavingOverlay } from "@/shared/components/ds";
 import { DetailHeader } from "@/features/evolution/components/detail-header";
 import { summaryPath } from "@/features/evolution/helpers/paths";
-import { useGoBack } from "@/features/evolution/hooks/use-go-back";
+import { useGoBack } from "@/shared/hooks/use-go-back";
 import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { useCountUp } from "@/shared/hooks/use-count-up";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";

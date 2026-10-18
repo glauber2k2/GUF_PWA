@@ -64,6 +64,20 @@
 - Se o módulo de medidas for lançado com público possivelmente menor, aumenta o risco (dado sensível) — reavaliar no RIPD.
 - Mudança de produto que introduza contato entre usuários, ranking público ou publicidade muda esta análise.
 
+## 6.1 Revisão de 2026-10-18 — módulo social (seguidores e competição)
+
+O gatilho da seção 6 aconteceu: o guf passa a ter **contato entre usuários** (seguir/aceitar) e **ranking** (só entre seguidores mútuos, não público). Avaliação em `RIPD/ripd-social.md`.
+
+| Tema | Situação com o módulo |
+|---|---|
+| Contato com estranhos | Sem chat nem mensagens. Seguir exige aprovação (conta privada, padrão). Busca só por prefixo do @; bloqueio e remoção de seguidor; limite de 50 pedidos por dia |
+| Ranking | Só entre quem se segue mutuamente; não há ranking público nem por região |
+| Recompensas | Pontos por regra fixa e pública, sem sorteio, compra ou prêmio (não é loot box) |
+| Perfilamento | O controle de RPE suspeito é uma regra de integridade da pontuação, não perfilamento publicitário; não há publicidade |
+| Geolocalização | Não há |
+
+**Conclusão provisória**: o risco para adolescentes aumenta (de "baixo" para "médio") porque há interação entre usuários. As medidas acima reduzem o contato com estranhos, mas a decisão sobre verificação de idade (seção 4) passa a ser **pré-requisito do lançamento público do módulo** ⚖.
+
 ## 7. Responsável
 
 Controlador (desenvolvedor, pessoa natural) até a designação do Encarregado.

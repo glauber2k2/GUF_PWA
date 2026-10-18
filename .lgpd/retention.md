@@ -23,6 +23,9 @@ O guf **não tem obrigação fiscal, trabalhista ou bancária** hoje (não cobra
 | Foto enviada (bucket `avatars`, futuro) | Enquanto a conta existir ou até trocar/remover | Excluir conta | **Edge Function `delete-account` apaga a pasta `<user_id>/` antes de excluir a conta** (G18, publicado em 2026-10-17); trocar/remover a foto deve apagar o arquivo antigo quando o upload existir | Art. 16; Art. 18, VI |
 | Foto do Google | Enquanto a conta existir | Excluir conta | É só uma URL no perfil/identidade (o arquivo está no Google) | — |
 | Dados no aparelho (IndexedDB, localStorage, cache do TanStack) | Até sair da conta | Sair / excluir conta | `signOut` limpa cache, treino ativo e IndexedDB | Art. 7º, V |
+| Perfil social (`social_profiles`) e vínculos (`follows`) | Perfil enquanto a conta existir; seguidores até revogar o compartilhamento | Revogar / excluir | `revoke_social_consent` remove os seguidores na hora (registra `social_data_deleted`); cascata na exclusão, inclusive vínculos de outras pessoas com o titular | Art. 7º, V e I; Art. 16 |
+| Bloqueios feitos pelo titular (`blocks`) | Até desbloquear ou excluir a conta | Desbloquear / excluir | `unblock_user`; cascata na exclusão de qualquer um dos dois | Proteção do titular |
+| RPE da sessão e pontuação | RPE igual aos treinos; pontuação não é guardada | Excluir o treino ou a conta | Cascata; pontuação recalculada a cada consulta | Art. 7º, I |
 | Arquivo exportado (JSON) | Fica só no aparelho do titular | — | Nunca é guardado no servidor | Art. 18, II e V |
 | Logs da plataforma (Supabase API/Auth, Vercel) | **Retenção do plano** (curta nos planos gratuitos) | Automático pelo fornecedor | Fornecedor | G9 — os "6 meses" do Marco Civil não estão garantidos; só valem para provedor PJ com fins econômicos ⚖ |
 | **Backups do banco** | **Retenção do plano** (a confirmar) | Automático pelo fornecedor | Fornecedor; dados excluídos somem dos backups quando o backup expira | G15 — ver seção 4 |

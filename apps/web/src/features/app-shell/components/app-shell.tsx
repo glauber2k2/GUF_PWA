@@ -20,13 +20,14 @@ import { useClosedWorkoutWatcher } from "@/features/app-shell/hooks/use-closed-w
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
 const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exercicio", "/exercicio/busca"]);
 
-/** Rotas de cada aba (índice do BottomNav). null = tela ainda não construída. */
-const TAB_ROUTES: Array<{ path: string | null; name: string }> = [
+/** Rotas de cada aba (índice do BottomNav) e das telas internas que mantêm a aba acesa. */
+const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }> = [
   { path: "/", name: "Início" },
   { path: "/historico", name: "Histórico" },
   { path: null, name: "Treinar" },
+  { path: "/competicao", name: "Competir", inner: ["/buscar-pessoas"] },
   { path: "/projetos", name: "Projetos" },
-  { path: "/perfil", name: "Perfil" },
+  { path: "/perfil", name: "Perfil", inner: ["/configuracoes", "/seguidores"] },
 ];
 
 /** Limite do overlay "Iniciando treino" depois que a sessão foi criada (se a tela do treino não abrir). */
@@ -197,10 +198,13 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, [summaryLoaded, serverInProgress, activeId, activePersist, devHome.scenario, track, clear]);
 
-  // Aba ativa também nas telas internas dela (ex.: /projetos/detalhe → Projetos).
-  const tabIndex = Math.max(
-    0,
-    TAB_ROUTES.findIndex((t) => t.path === pathname || (t.path && t.path !== "/" && pathname.startsWith(`${t.path}/`))),
+  // Aba ativa também nas telas internas dela (ex.: /projetos/detalhe → Projetos). Perfil de outra
+  // pessoa (/pessoa) não acende nenhuma aba.
+  const tabIndex = TAB_ROUTES.findIndex(
+    (t) =>
+      t.path === pathname ||
+      (t.path && t.path !== "/" && pathname.startsWith(`${t.path}/`)) ||
+      t.inner?.some((inner) => pathname === inner || pathname.startsWith(`${inner}/`)),
   );
   // Aba tocada: o indicador desliza no toque, sem esperar a rota trocar. Vale enquanto a rota
   // ainda é a de onde o toque saiu; trocou a rota, manda a aba da rota.
