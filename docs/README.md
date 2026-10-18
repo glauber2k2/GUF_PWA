@@ -1,5 +1,13 @@
 # Documentação do Guf App
 
+# 0. Informações
+
+Este documento tem como finalidade indexar a documentação do projeto e explicar como mantê-la.
+
+| Feito por | Glauber |
+| --- | --- |
+| Data de Criação | 10/10/2026 |
+
 Documentos de produto e planejamento. As instruções técnicas para quem programa (stack, arquitetura,
 padrões obrigatórios e comandos) ficam no [`CLAUDE.md`](../CLAUDE.md), na raiz do repositório.
 
@@ -16,4 +24,6 @@ padrões obrigatórios e comandos) ficam no [`CLAUDE.md`](../CLAUDE.md), na raiz
 - **Fonte da verdade:** o código e o banco (`supabase/migrations/`). Se um documento divergir do código, o código vale e o documento deve ser corrigido.
 - **Ao concluir uma etapa:** marcar a etapa como entregue no plano e acrescentar ou ajustar as regras novas em `business-rules.md` no mesmo PR.
 - **Regra nova ou alterada:** atualizar `business-rules.md` e, se for uma regra que orienta a implementação, também o `CLAUDE.md`.
+- **Mudou a estrutura de pastas ou as camadas:** atualizar `architecture.md` e a árvore do `CLAUDE.md`.
+- **Padrão de documento** (skill `code-docs`): cabeçalho "0. Informações" (finalidade em uma frase, autor e data de criação), texto curto e direto, diagramas em Mermaid.
 - **Nomes de arquivo:** em inglês (kebab-case); conteúdo em português do Brasil.

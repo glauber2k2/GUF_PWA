@@ -1,5 +1,13 @@
 # Plano de implementação — Guf App
 
+# 0. Informações
+
+Este documento tem como finalidade registrar o que foi entregue, as próximas etapas e as pendências para o lançamento.
+
+| Feito por | Glauber |
+| --- | --- |
+| Data de Criação | 10/10/2026 |
+
 > Atualizado em 11/10/2026 · Branch de referência: `main` (até o PR #23)
 > Regras de negócio: [`business-rules.md`](./business-rules.md) · Instruções técnicas: [`CLAUDE.md`](../CLAUDE.md)
 

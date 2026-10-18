@@ -1,5 +1,13 @@
 # LGPD no Guf App — o que já está feito e o que falta
 
+# 0. Informações
+
+Este documento tem como finalidade resumir para o time o que a LGPD exige do guf, o que já está implementado e o que falta.
+
+| Feito por | Glauber |
+| --- | --- |
+| Data de Criação | 17/10/2026 |
+
 **Atualizado em**: 2026-10-17 · **Fase**: beta gratuito, só com testadores convidados · **Controlador**: o desenvolvedor, como pessoa natural (sem empresa aberta)
 
 Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evidências e os testes ficam em [`.lgpd/`](../.lgpd/STATUS.md) (auditoria completa) e as regras de implementação no [`CLAUDE.md`](../CLAUDE.md).

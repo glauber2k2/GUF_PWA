@@ -1,11 +1,20 @@
 # Regras de negócio — Guf App
 
+# 0. Informações
+
+Este documento tem como finalidade listar as regras de negócio em vigor e onde cada uma está implementada.
+
+| Feito por | Glauber |
+| --- | --- |
+| Data de Criação | 10/10/2026 |
+
 > Atualizado em 11/10/2026 · Reflete o código da `main` (até o PR #23).
 > Regras implementadas no banco valem para todos os apps (web e futuro mobile); regras do `packages/core` são compartilhadas.
 > Plano das próximas etapas: [`implementation-plan.md`](./implementation-plan.md).
 
 **Legenda de onde a regra vive:** **Banco** = `supabase/migrations/` (funções, gatilhos, restrições) ·
-**Core** = `packages/core/src/` · **Schemas** = `packages/schemas/src/` · **API** = `packages/api/src/` · **Web** = `apps/web/src/`.
+**Core** = `packages/core/src/` · **Schemas** = `packages/schemas/src/` · **API** = `packages/api/src/` · **Web** = `apps/web/src/`
+(`features/<feature>/` para o que é de uma tela, `shared/` para o que é comum; ver [`architecture.md`](./architecture.md)).
 
 ---
 
