@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { EvolutionScreen } from "@/components/evolution/evolution-screen";
+import { EvolutionScreen } from "@/features/evolution";
 
 export const metadata: Metadata = {
   title: "Evolução · Guf",

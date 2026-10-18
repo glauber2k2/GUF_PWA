@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { ServiceWorkerUpdater } from "@/components/pwa/service-worker-updater";
-import { THEME_BOOT_SCRIPT } from "@/lib/theme/theme";
-import { Providers } from "@/providers/providers";
+import { ServiceWorkerUpdater } from "@/features/pwa";
+import { THEME_BOOT_SCRIPT } from "@/shared/preferences/theme";
+import { Providers } from "./providers";
 import "./globals.css";
 
 // Fontes do design system (subset latin: cobre todo o português). Arquivos em ./fonts.

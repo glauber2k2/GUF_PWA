@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { NotFoundScreen } from "@/components/not-found/not-found-screen";
+import { NotFoundScreen } from "@/features/not-found";
 
 export const metadata: Metadata = {
   title: "Página não encontrada · guf",

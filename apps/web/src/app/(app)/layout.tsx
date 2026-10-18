@@ -1,7 +1,7 @@
 import { Suspense, type ReactNode } from "react";
-import { AppShell } from "@/components/app-shell/app-shell";
-import { AuthSplash, RequireAuth } from "@/components/auth/guards";
-import { WorkoutProvider } from "@/components/workout/workout-provider";
+import { AppShell } from "@/features/app-shell";
+import { AuthSplash, RequireAuth } from "@/features/auth";
+import { WorkoutProvider } from "@/features/workout";
 
 /**
  * Área logada: exige sessão e aceite dos documentos obrigatórios; moldura com menu inferior.

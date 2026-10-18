@@ -1,4 +1,4 @@
-import { HistoryScreen } from "@/components/history/history-screen";
+import { HistoryScreen } from "@/features/history";
 
 export default function HistoricoPage() {
   return <HistoryScreen />;

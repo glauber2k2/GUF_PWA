@@ -1,4 +1,4 @@
-import { ProjectsScreen } from "@/components/projects/projects-screen";
+import { ProjectsScreen } from "@/features/projects";
 
 export default function ProjetosPage() {
   return <ProjectsScreen />;

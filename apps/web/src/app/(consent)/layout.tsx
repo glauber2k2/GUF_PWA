@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { AuthSplash, RequireAuth } from "@/components/auth/guards";
+import { AuthSplash, RequireAuth } from "@/features/auth";
 
 /** Portão /aceite: exige sessão; sem pendências, volta para o app. */
 export default function ConsentLayout({ children }: { children: ReactNode }) {

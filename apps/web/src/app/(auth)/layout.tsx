@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { AuthSplash, RedirectIfAuthenticated } from "@/components/auth/guards";
+import { AuthSplash, RedirectIfAuthenticated } from "@/features/auth";
 
 /** Telas de acesso: quem já está logado segue para o app. */
 export default function AuthLayout({ children }: { children: ReactNode }) {

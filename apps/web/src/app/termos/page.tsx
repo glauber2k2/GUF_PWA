@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalDocumentPage } from "@/components/legal/legal-document-page";
+import { LegalDocumentPage } from "@/features/legal";
 
 export const metadata: Metadata = {
   title: "Termos de Uso · guf",

@@ -1,0 +1,80 @@
+# Arquitetura de código — Guf App
+
+# 0. Informações
+
+Este documento tem como finalidade explicar como o código do guf é organizado, em camadas e pastas, e por quê.
+
+| Feito por | Glauber |
+| --- | --- |
+| Data de Criação | 18/10/2026 |
+
+Regras detalhadas e caminhos de cada funcionalidade: [`CLAUDE.md`](../CLAUDE.md). Padrões de engenharia: `.claude/skills/code-standards`.
+
+## 1. Bases que não mudam
+
+- **Site estático:** Next.js com `output: "export"`. Não há servidor nosso: nada de Server Actions, Route Handlers, middleware ou SSR com dados.
+- **Backend e banco = Supabase:** Postgres com RLS (é o RLS que protege os dados), RPCs para operações atômicas, gatilhos, pg_cron e Edge Functions para o que exige a chave secreta.
+- **PWA e offline:** Serwist gera o service worker no build; o treino em andamento grava numa fila no aparelho (Dexie) e envia quando há internet.
+
+## 2. Camadas
+
+```mermaid
+flowchart TD
+    A["app/ — rotas e composição"] --> B["features/&lt;f&gt;/ui — telas"]
+    B --> C["features/&lt;f&gt;/hooks e api — orquestração e TanStack Query"]
+    C --> D["packages/api — consultas e gravações"]
+    C --> E["shared/offline — fila e cópias no aparelho (Dexie)"]
+    E --> D
+    C --> F["packages/core — regras puras"]
+    D --> G[("Supabase — RLS, RPCs, gatilhos")]
+    B --> H["shared/components/ds — design system"]
+```
+
+| Camada | Onde | Responsabilidade |
+|---|---|---|
+| Rota | `apps/web/src/app/` | Declara a rota e mostra a tela da feature |
+| Apresentação | `features/<f>/ui`, `features/<f>/components` | Telas e partes da tela |
+| Orquestração | `features/<f>/hooks`, `features/<f>/api` | Estado da tela, cache e invalidação (TanStack Query) |
+| Domínio | `packages/core` | Regras de negócio puras (1RM, volume, recordes, datas, textos) |
+| Validação | `packages/schemas` | Schemas Zod |
+| Acesso a dados | `packages/api` (+ `shared/offline`) | Supabase com contrato `{ data, error }`; fila e cópias locais |
+| Banco | `supabase/` | Tabelas, RLS, RPCs, gatilhos, migrations, Edge Functions |
+
+## 3. Pastas do app web
+
+```
+apps/web/src/
+├── app/                 # rotas; providers.tsx compõe os providers globais
+├── features/<feature>/  # api/ hooks/ helpers/ constants/ components/ providers/ ui/ type.ts index.ts
+├── shared/              # components/ds, components/ui, hooks, helpers, libs, offline, preferences, sound
+├── store/global/        # toast.store.ts, pwa.store.ts
+├── mocks/               # espelho de packages/api para desenvolvimento
+└── styles/tokens/
+```
+
+Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (evolução por exercício e resumo do treino), `exercise-picker`, `history`, `home`, `legal`, `not-found`, `profile`, `projects`, `pwa`, `routine`, `share`, `workout`.
+
+**Regras de dependência**
+- `app/` e outras features importam uma feature só pelo barrel (`@/features/<f>`); dentro da feature, pelo caminho.
+- `shared/` nunca importa `features/`. A composição entre features fica em `app/` (ex.: `app/providers.tsx`).
+- `packages/*` nunca importa `apps/*` nem React.
+- Usado por uma feature só → fica nela. Segundo uso em outra feature → sobe para `shared/` (ou para `packages/` se for regra ou consulta que o app mobile também vai usar).
+
+## 4. SOLID na prática
+
+| Princípio | Como aparece no guf |
+|---|---|
+| Responsabilidade única | Cálculo em `packages/core`, consulta em `packages/api`, tela em `ui/`; um hook por finalidade |
+| Aberto/fechado | Catálogo de modelos de Stories (`share/constants/story-catalog.ts`): modelo novo entra na lista sem mexer na folha |
+| Substituição de Liskov | Mocks em `src/mocks/` têm a mesma assinatura das funções reais (`satisfies XxxApi`); a tela não percebe a troca |
+| Segregação de interfaces | Contratos por domínio (`ProjectsApi`, `ProfileApi`, `EvolutionApi`…) em vez de um cliente único |
+| Inversão de dependência | A tela depende do contrato via `useXxxSource()`, que entrega a API real ou o mock; o cliente Supabase entra por parâmetro (`(client, input)`) |
+
+## 5. Por que pastas por feature funcionam com Supabase
+
+A organização por feature trata do **front**. Com Supabase, o papel de "backend" (controller/service/repository) é dividido entre o banco (RLS, RPCs, gatilhos) e os pacotes do monorepo. Por isso:
+
+- Não existe `shared/http/` nem `fetch` próprio: `packages/api` faz esse papel, com o cliente oficial do Supabase.
+- Cada feature tem uma pasta `api/` fina, só com os hooks do TanStack Query que chamam `packages/api`. A regra de negócio fica em `packages/core`, e a segurança fica no banco.
+- O que é infraestrutura do aparelho (fila offline, cache, preferências, sons) fica em `shared/`, porque várias features usam.
+- Os pacotes (`core`, `schemas`, `api`, `types`) são o que o app Expo vai reaproveitar. As features do web são só a camada de tela.

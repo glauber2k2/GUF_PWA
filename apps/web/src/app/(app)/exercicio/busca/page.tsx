@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ExerciseSearchScreen } from "@/components/evolution/exercise-search-screen";
+import { ExerciseSearchScreen } from "@/features/evolution";
 
 export const metadata: Metadata = {
   title: "Evolução por exercício · Guf",

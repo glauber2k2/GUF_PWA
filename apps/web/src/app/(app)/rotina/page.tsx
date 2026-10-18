@@ -1,4 +1,4 @@
-import { RoutineEditorScreen } from "@/components/routine/routine-editor-screen";
+import { RoutineEditorScreen } from "@/features/routine";
 
 export default function RotinaPage() {
   return <RoutineEditorScreen />;
