@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SummaryScreen } from "@/components/summary/summary-screen";
+import { SummaryScreen } from "@/features/evolution";
 
 export const metadata: Metadata = {
   title: "Resumo do treino · Guf",

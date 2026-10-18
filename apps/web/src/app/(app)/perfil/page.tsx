@@ -1,4 +1,4 @@
-import { ProfileScreen } from "@/components/profile/profile-screen";
+import { ProfileScreen } from "@/features/profile";
 
 export default function PerfilPage() {
   return <ProfileScreen />;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ConsentForm } from "@/components/auth/consent-form";
+import { ConsentForm } from "@/features/auth";
 
 export const metadata: Metadata = {
   title: "Aceite dos termos · Guf",

@@ -48,6 +48,8 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 **Ajuste implementado em `fix/botoes-compartilhamento`:** a linha de ações da escolha do Story usa Compartilhar só com ícone e largura fixa de 56 px; Baixar imagem ocupa o espaço restante sem ultrapassar a tela, ou toda a largura quando não há compartilhamento nativo.
 
+**Implementado em `chore/padroes-engenharia`:** skills de padrões de engenharia em `.claude/skills/` (porta de entrada `code-standards`) e conceitos em `.claude/patterns/`; o `apps/web/src` foi reorganizado por feature (`features/<feature>/` com barrel `index.ts`, `shared/` para o que é comum, `store/global/` para stores externos), sem mudar comportamento. Detalhes em [`architecture.md`](./architecture.md).
+
 ### Lacunas conhecidas no que já existe
 
 | Lacuna | Onde | Impacto |
@@ -57,13 +59,14 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Pendências da auditoria LGPD: controlador e Encarregado definidos, política final, DPAs/transferência internacional, runbook de incidente, canal do titular (G1–G4, G7, G8, G10, G22, G23) | `.lgpd/gaps.md` | **Bloqueia abrir para pessoas de fora** |
 | Prazo de 5 anos da prova de consentimento após exclusão sem validação jurídica | `consent_proofs` | Médio (validar antes do lançamento) |
 | Migração do banco: confirmar variáveis da Vercel, testar o deploy, pausar e excluir o projeto antigo (`us-west-2`) | Painéis Vercel/Supabase | Médio |
-| Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `components/legal/legal-reader-provider.tsx` | Baixo |
+| Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `features/legal/providers/legal-reader-provider.tsx` | Baixo |
 | Tela de consentimento de saúde ainda não existe (chega com o módulo de medidas); o `LegalSummary` já está pronto para ela | Etapa 4 | Médio |
-| `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
-| Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `hooks/use-sheet-drag.ts` | Baixo |
-| Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `components/ds/toast.tsx` | Baixo |
+| `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `shared/components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
+| Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `shared/hooks/use-sheet-drag.ts` | Baixo |
+| Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `shared/components/ds/toast.tsx` | Baixo |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
+| Dados de mock (Início, Projetos, Treino) ainda entram no bundle de produção: os mocks montam dados no carregamento do módulo e o build não consegue descartá-los (já acontecia antes da reorganização de pastas) | `apps/web/src/mocks/` | Baixo: só peso extra no download, nada é exibido |
 
 ## 2. Próximas etapas (ordem recomendada)
 
@@ -134,8 +137,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Implementado (`feat/evolucao`)**
 - API `packages/api/src/evolution.ts` (`EvolutionApi`): `getWorkoutSummary`, `deleteWorkout`, `getExerciseEvolution` (números oficiais do `get_exercise_history` + séries para as repetições e a série do 1RM) e `listTrainedExercises`. Regras puras em `packages/core/src/evolution.ts`. Sem migration.
-- Telas: `components/summary/` (resumo + excluir) e `components/evolution/` (evolução com gráfico Recharts, busca, cabeçalho e rotas). Abertas pela folha do dia do Histórico, pelo card "Concluído" e pela folha do dia da Início (vários treinos no dia → o mais recente), pelos recordes e exercícios do resumo e pelo atalho "Ver evolução de um exercício" do Histórico.
-- Offline: cópia no aparelho (`withDeviceCache`, mesma tabela do Histórico); treino finalizado sem internet e ainda não enviado mostra o resumo calculado no aparelho (`lib/offline/local-summary.ts`).
+- Telas: `features/evolution/` (resumo + excluir) e `features/evolution/` (evolução com gráfico Recharts, busca, cabeçalho e rotas). Abertas pela folha do dia do Histórico, pelo card "Concluído" e pela folha do dia da Início (vários treinos no dia → o mais recente), pelos recordes e exercícios do resumo e pelo atalho "Ver evolução de um exercício" do Histórico.
+- Offline: cópia no aparelho (`withDeviceCache`, mesma tabela do Histórico); treino finalizado sem internet e ainda não enviado mostra o resumo calculado no aparelho (`shared/offline/local-summary.ts`).
 - Mock `apps/web/src/mocks/evolution.ts` + `?estado=` (ver CLAUDE.md).
 - O atalho no cartão do exercício na tela de Treino não entrou (o protótipo não mostra).
 
@@ -159,10 +162,10 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 **Riscos:** textos legais precisam de **validação jurídica** antes da produção.
 
 **Implementado (`feat/perfil`)**
-- Tela `/perfil` (aba Perfil): `components/profile/*`, dados em `packages/api/src/profile.ts` (`getProfile`, `updateProfile`, `getConsents`, `revokeHealthConsent`, `exportMyData`, `deleteAccount`), regras puras em `packages/core/src/profile.ts` e `pwa.ts`, validação em `packages/schemas/src/profile.ts`.
+- Tela `/perfil` (aba Perfil): `features/profile/*`, dados em `packages/api/src/profile.ts` (`getProfile`, `updateProfile`, `getConsents`, `revokeHealthConsent`, `exportMyData`, `deleteAccount`), regras puras em `packages/core/src/profile.ts` e `pwa.ts`, validação em `packages/schemas/src/profile.ts`.
 - Mock em `apps/web/src/mocks/profile.ts` (`satisfies ProfileApi`) com `?estado=` só em desenvolvimento: `padrao`, `sem-saude`, `erro`, `carregando`, `offline`, `pendente` e a plataforma (`android`, `ios-safari`, `ios-outro`, `instalado`, `desconhecido`). O mock nunca exclui conta nem revoga de verdade.
-- Tema Escuro/Claro/Sistema salvo no aparelho (`lib/theme/theme.ts`), aplicado antes da pintura por script no `<head>`.
-- Estado do PWA (`lib/pwa/pwa-store.ts`): convite de instalação guardado, app instalado e versão nova esperando (o mesmo estado do aviso "Nova versão do guf disponível").
+- Tema Escuro/Claro/Sistema salvo no aparelho (`shared/preferences/theme.ts`), aplicado antes da pintura por script no `<head>`.
+- Estado do PWA (`store/global/pwa.store.ts`): convite de instalação guardado, app instalado e versão nova esperando (o mesmo estado do aviso "Nova versão do guf disponível").
 - Versão do app = `version` do `apps/web/package.json` (`NEXT_PUBLIC_APP_VERSION`).
 - Foto do usuário no Perfil e na Início: foto do Google (inclusive conta de e-mail vinculada ao Google depois) com a inicial como reserva; prioridade já preparada para a foto enviada pelo usuário.
 - **Pendente:** upload de foto própria (migration do bucket `avatars` + políticas de acesso e tela de envio/corte) e os textos definitivos dos documentos legais (validação jurídica).

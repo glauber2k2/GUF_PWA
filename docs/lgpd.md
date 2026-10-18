@@ -15,13 +15,13 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 |---|---|---|
 | Só dados necessários | Sem localização, contatos, telefone, dados de pagamento ou de outros apps | Banco (`supabase/migrations/`) |
 | Sem rastreamento | Nenhum analytics, pixel, anúncio, cookie de terceiros ou fonte/CDN externa | App inteiro; compromisso registrado no `CLAUDE.md` |
-| Documentos legais no app | Termos, Política de Privacidade e Termo de Saúde lidos dentro do app, inclusive sem internet, com "Em resumo" e marcação de rascunho | `packages/core/src/legal-content.ts`, `components/legal/` |
+| Documentos legais no app | Termos, Política de Privacidade e Termo de Saúde lidos dentro do app, inclusive sem internet, com "Em resumo" e marcação de rascunho | `packages/core/src/legal-content.ts`, `features/legal/` |
 | Política de Privacidade 0.2-dev | Já informa banco no Brasil, prestadores (Supabase, Vercel, Google), contato do beta, eliminação na hora e prova dos aceites por 5 anos | `legal-content.ts` + migration `privacy_policy_0_2_dev` |
 
 ### 1.2 Consentimento e aceites
 | O quê | Como | Onde |
 |---|---|---|
-| Cadastro com confirmações explícitas | "Tenho 18 anos ou mais" e "Li e aceito os Termos e a Política", ambas desmarcadas; botão bloqueado até marcar | `components/auth/signup-form.tsx` |
+| Cadastro com confirmações explícitas | "Tenho 18 anos ou mais" e "Li e aceito os Termos e a Política", ambas desmarcadas; botão bloqueado até marcar | `features/auth/ui/signup-form.tsx` |
 | Portão de aceite | Documento novo ou versão nova → `/aceite` antes de usar o app, com "O que mudou" | `/aceite`, `pending_documents()` |
 | Consentimento de saúde em camadas | Resumo sempre visível, termo completo, caixa desmarcada, botões de mesmo peso; só para o módulo de medidas | Banco (`grant_health_consent`) + componentes prontos |
 | **Registro de consentimentos fechado** | O app só lê; gravação só por funções do banco que validam origem e plataforma; nada é editado ou apagado (revogar = novo registro) | Migration `consent_ledger_hardening` |

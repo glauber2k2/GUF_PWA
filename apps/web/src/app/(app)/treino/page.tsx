@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkoutScreen } from "@/components/workout/workout-screen";
+import { WorkoutScreen } from "@/features/workout";
 
 export const metadata: Metadata = {
   title: "Treino · Guf",

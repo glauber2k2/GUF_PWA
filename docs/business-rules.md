@@ -13,7 +13,7 @@
 
 | Regra | Onde |
 |---|---|
-| Cadastro por e-mail exige duas confirmações, ambas **desmarcadas** por padrão: "Tenho 18 anos ou mais" e "Li e aceito os Termos de Uso e a Política de Privacidade". O botão fica desabilitado até marcar as duas. | Web (`components/auth/signup-form.tsx`) |
+| Cadastro por e-mail exige duas confirmações, ambas **desmarcadas** por padrão: "Tenho 18 anos ou mais" e "Li e aceito os Termos de Uso e a Política de Privacidade". O botão fica desabilitado até marcar as duas. | Web (`features/auth/ui/signup-form.tsx`) |
 | Cadastro: nome com 2 a 100 caracteres; senha com 8 a 72 caracteres (o medidor de força é só orientação). | Schemas (`auth.ts`) + Core (`password.ts`) |
 | O aceite do cadastro é gravado pelo banco: os ids das versões **vigentes** de termos, privacidade e declaração de idade exibidas na tela vão nos metadados do cadastro, e o gatilho `handle_new_user` registra os aceites. Ids inválidos ou desatualizados são ignorados. | Banco (`handle_new_user`) |
 | Perfil e plano gratuito são criados automaticamente no cadastro. | Banco |
@@ -25,7 +25,7 @@
 | **Hash dos textos legais:** `content_hash`/`summary_hash` de cada versão = SHA-256 do texto exibido no app. Mudou o texto → nova versão por migration, publicada junto com o app. Em desenvolvimento, `/documentos` avisa se o hash do banco não confere. | Core (`legal-hash.ts`) + Banco |
 | **Registro de auditoria:** o banco registra em `audit_log` (sem acesso pelo app) cada aceite e revogação, medidas apagadas, exportação de dados e exclusão de conta, só com id interno, tipo do evento e contagens. Não dá para editar nem apagar (exceto a eliminação automática após 5 anos); a integridade é conferida por cadeia de hash. | Banco (`audit_log`, `verify_audit_log`) |
 | Conta Google com o mesmo e-mail confirmado de uma conta existente é vinculada pelo Supabase. | Supabase Auth |
-| Ao sair da conta: tenta enviar as gravações pendentes; depois apaga do aparelho o cache de consultas, o treino ativo e os dados offline. | Web (`providers/auth-provider.tsx`) |
+| Ao sair da conta: tenta enviar as gravações pendentes; depois apaga do aparelho o cache de consultas, o treino ativo e os dados offline. | Web (`features/auth/providers/auth-provider.tsx`) |
 | A segurança dos dados é do banco (RLS): cada usuário só lê e grava os próprios registros. O app usa apenas a chave pública. | Banco |
 | Dados de medidas corporais nunca vão para logs, Sentry ou analytics. *(Módulo de medidas ainda não implementado.)* | Regra de projeto |
 
@@ -105,15 +105,15 @@
 | Regra | Onde |
 |---|---|
 | Finalizar (online e sem pendências) usa `finish_workout`: fecha o período aberto, grava o tempo efetivo e devolve resumo e recordes oficiais. | Banco + Web |
-| Finalizar sem internet: o treino fica salvo no aparelho, o resumo é calculado no aparelho com as mesmas regras e é enviado quando a conexão volta. | Web (`lib/offline/`) |
+| Finalizar sem internet: o treino fica salvo no aparelho, o resumo é calculado no aparelho com as mesmas regras e é enviado quando a conexão volta. | Web (`shared/offline/`) |
 | Descartar apaga o treino e as gravações pendentes dele. | Web + API |
-| Finalizar ou descartar atualiza a Início e o Histórico (também quando a fila offline envia depois). | Web (`lib/query-keys.ts`) |
+| Finalizar ou descartar atualiza a Início e o Histórico (também quando a fila offline envia depois). | Web (`shared/libs/query-keys.ts`) |
 
 ### 4.5 Offline do treino em andamento
 
 | Regra | Onde |
 |---|---|
-| Toda alteração aparece na hora e entra numa fila no aparelho, enviada em ordem quando há internet (ao reconectar, ao voltar para o app e a cada 20 s). | Web (`lib/offline/outbox.ts`) |
+| Toda alteração aparece na hora e entra numa fila no aparelho, enviada em ordem quando há internet (ao reconectar, ao voltar para o app e a cada 20 s). | Web (`shared/offline/outbox.ts`) |
 | Ids de exercícios, séries e exercícios criados são gerados no aparelho: reenviar não duplica. | Web + API |
 | Sem internet ou sessão expirada: a fila espera. Outros erros: até 5 tentativas; depois a alteração é descartada e o usuário é avisado. | Web |
 
@@ -161,7 +161,7 @@
 | Média da semana considera só **dias treinados com volume** (um dia só de cardio conta como treino, mas não entra na média). Semana sem treino é **lacuna**, nunca zero. | Core |
 | Média do período = média das semanas com treino. Variação % = comparação com o período anterior de mesmo tamanho (sem dados → "Sem dados do período anterior"). Alta em verde; queda em cor neutra (queda não é erro). | Core + Web |
 | Menos de 2 semanas com volume em todo o histórico → aviso "Treine mais algumas semanas para ver sua evolução." | Core + Web |
-| Sem internet, mostra a última cópia salva no aparelho com aviso. | Web (`lib/offline/device-cache.ts`) |
+| Sem internet, mostra a última cópia salva no aparelho com aviso. | Web (`shared/offline/device-cache.ts`) |
 
 ## 8.1 Resumo do treino e evolução por exercício
 
@@ -183,11 +183,11 @@
 
 | Regra | Onde |
 |---|---|
-| Alterar nome, unidade de peso e meta semanal **exige internet**; sem conexão, aviso "Sem conexão – para alterar seu perfil, conecte-se à internet." Instalar o app, trocar o tema e sair funcionam sem internet. | Web (`components/profile/`) |
+| Alterar nome, unidade de peso e meta semanal **exige internet**; sem conexão, aviso "Sem conexão – para alterar seu perfil, conecte-se à internet." Instalar o app, trocar o tema e sair funcionam sem internet. | Web (`features/profile/`) |
 | Meta semanal: toques rápidos em + / − mudam o número na hora, mas geram **uma** gravação (o último valor, 600 ms após o último toque; nunca duas ao mesmo tempo; voltar ao valor salvo não grava). | Core (`coalesce.ts`) + Web (`useCoalescedSave`) |
 | Nome: 1 a 100 caracteres (espaços nas pontas são removidos). Meta semanal: 1 a 7, só exibição (a sequência conta com 1 treino por semana). | Schemas (`profile.ts`) |
 | Unidade kg/lb muda **só a exibição**; o banco guarda sempre kg. Alterações do perfil atualizam Perfil, Início e Histórico. | Web + Banco |
-| Tema Escuro/Claro/Sistema é salvo **no aparelho** (não vai para o banco) e aplicado antes da primeira pintura. | Web (`lib/theme/theme.ts`) |
+| Tema Escuro/Claro/Sistema é salvo **no aparelho** (não vai para o banco) e aplicado antes da primeira pintura. | Web (`shared/preferences/theme.ts`) |
 | "Treinando desde mmm aaaa · N treinos" usa o primeiro treino concluído; sem treino → "Nenhum treino concluído ainda". | Core (`profile.ts`) |
 | Foto do usuário (Perfil e Início): foto enviada pelo usuário (futuro upload; vale para login social e e-mail/senha) > foto atual da conta Google > foto do Google guardada no cadastro > inicial do nome. Se a foto não carregar (sem internet), aparece a inicial. | Core (`avatar.ts`) + API (`resolveAvatarUrl`) + Web (`Avatar`) |
 | Instalar: Android/Chromium com convite → convite nativo; iPhone no Safari → 3 passos; iPhone em outro navegador → "Copiar link" (só o Safari instala no iPhone); já instalado → cartão "App instalado"; demais → passos pelo menu do navegador. | Core (`pwa.ts`) + Web |
@@ -209,16 +209,16 @@
 
 | Regra | Onde |
 |---|---|
-| Folhas que sobem de baixo (`BottomSheet`) fecham de três formas: toque fora, tecla Esc ou arrastar para baixo pela alça/título. Ao soltar, fecham se desceram mais de 30% da altura ou se o gesto foi rápido; senão, voltam ao lugar. O conteúdo da folha não arrasta (para não atrapalhar campos e rolagem). | Web (`ds/overlays.tsx` + `hooks/use-sheet-drag.ts`) |
+| Folhas que sobem de baixo (`BottomSheet`) fecham de três formas: toque fora, tecla Esc ou arrastar para baixo pela alça/título. Ao soltar, fecham se desceram mais de 30% da altura ou se o gesto foi rápido; senão, voltam ao lugar. O conteúdo da folha não arrasta (para não atrapalhar campos e rolagem). | Web (`ds/overlays.tsx` + `shared/hooks/use-sheet-drag.ts`) |
 | Carregamento com a animação da logo (`GufLoader`): **08 (Cometa)** nos botões com `loading`; **09 (Sonar)** na abertura do app (verificação da sessão e carregamento da Início depois do login); **07 (Ponto saltitante)** no "Salvando". Botão carregando não aceita toques (evita gravar duas vezes). | Web (`ds/actions.tsx`, `ds/loading.tsx`) |
 | Ícones com significado fixo: observação = bloco de notas (`NotepadText`); editar/renomear = lápis (`Pencil`); documento legal = `FileText`. | Web |
-| Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`components/share/models/` + `StoryArt`) |
-| A logo completa do guf aparece em todos os modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`components/share/models/` + `ds/brand.tsx`) |
-| Na escolha do Story, o tema da imagem (escuro ou claro) é escolhido na folha e vale para a prévia e o PNG; com fundo transparente, os cartões ficam translúcidos (20–100%). | Web (`components/share/story-art.tsx`) |
+| Stories em PNG: textos neutros, legendas e endereço do site em branco; destaques de volume e recordes mantêm volt/dourado. O CTA fica junto das informações, sem espaço automático até o rodapé. Prévia e PNG usam a mesma arte. | Web (`features/share/components/models/` + `StoryArt`) |
+| A logo completa do guf aparece em todos os modelos de Stories, com 88 px de altura na arte 1080 × 1920, preservando a proporção também nos modelos estreitos e sem fundo. | Web (`features/share/components/models/` + `ds/brand.tsx`) |
+| Na escolha do Story, o tema da imagem (escuro ou claro) é escolhido na folha e vale para a prévia e o PNG; com fundo transparente, os cartões ficam translúcidos (20–100%). | Web (`features/share/components/story-art.tsx`) |
 | Imagens de compartilhamento em três formatos: Stories (1080 × 1920), Feed (1080 × 1350) e Stickers (só a forma, fundo transparente). Cada imagem só aparece quando o dado que ela mostra existe (recorde, sequência, meta, exercício com histórico, projeto, descanso médio). | Web (`story-catalog.ts`) + Core (`share.ts`) |
 | Descanso médio do treino: média dos intervalos entre séries concluídas seguidas do mesmo exercício (intervalos acima de 10 min não contam). | Core (`storyRestAverage`) |
 | Comparação de peso: o volume do treino vira o objeto mais pesado do catálogo que ele alcança (de 20 kg a 200 t); abaixo de 20 kg o modelo não aparece. O valor exibido é o volume na unidade do usuário. | Core (`weight-comparison.ts`) + Web (`WeightComparisonCard`) |
-| Na escolha do Story, Compartilhar mostra só o ícone em um botão de 56 px, com rótulo acessível. Baixar imagem ocupa o restante da linha, ou toda a largura sem compartilhamento nativo; os botões ficam bloqueados enquanto a imagem é gerada. | Web (`components/share/share-story-sheet.tsx`) |
+| Na escolha do Story, Compartilhar mostra só o ícone em um botão de 56 px, com rótulo acessível. Baixar imagem ocupa o restante da linha, ou toda a largura sem compartilhamento nativo; os botões ficam bloqueados enquanto a imagem é gerada. | Web (`features/share/components/share-story-sheet.tsx`) |
 
 ## 10. Pontos em aberto (decisões de produto)
 

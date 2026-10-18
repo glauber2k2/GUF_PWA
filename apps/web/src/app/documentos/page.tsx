@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { LegalCentral } from "@/components/legal/legal-central";
+import { LegalCentral } from "@/features/legal";
 
 export const metadata: Metadata = {
   title: "Documentos legais · guf",

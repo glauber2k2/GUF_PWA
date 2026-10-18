@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DesignSystemShowcase } from "@/components/ds-showcase/showcase";
+import { DesignSystemShowcase } from "@/features/design-system";
 
 /**
  * Vitrine do design system — SÓ EM DESENVOLVIMENTO.
