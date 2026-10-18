@@ -25,8 +25,8 @@
 | A015 | Planos e pagamentos (futuro) | Art. 7º, V; dados fiscais Art. 7º, II | Não |
 | A016 | Registro de auditoria | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Não |
 | A017 | Perfil social e seguidores | Art. 7º, V ⚖ | Em parte (bloquear, remover seguidor, perfil privado) |
-| A018 | Estatísticas e treinos visíveis a outras pessoas | **Art. 7º, I — consentimento** (Art. 11, I se N1) ⚖ | **Sim** (revogar remove os seguidores e fecha o perfil) |
-| A019 | Competição e pontuação | **Art. 7º, I** ⚖ | **Sim** (revogar o compartilhamento) |
+| A018 | Estatísticas e treinos visíveis a outras pessoas | Art. 7º, V (Art. 11, I se N1) ⚖ | Sim, na prática (perfil privado, ocultar histórico, remover seguidor, bloquear) |
+| A019 | Competição e pontuação | Art. 7º, V ⚖ | Sim, na prática (deixar de seguir ou remover o seguidor) |
 
 **Totais**: 1 atividade com consentimento (A010) · 1 com legítimo interesse (A012, LIA em `.lgpd/lia/a012-seguranca.md`) · 10 com execução de contrato · 4 com obrigação legal (A003, A012, A013, A014; A015 parcial) · 1 com exercício regular de direitos (A003 após a exclusão).
 
@@ -208,12 +208,12 @@
 - **Finalidade**: o titular escolhe quem acompanha seu progresso e compete com quem segue de volta.
 - **Dados tratados**: ver `data-map.md` (A017–A019). Medidas, observações e RPE individual nunca vão para terceiros.
 - **Sensíveis?**: Não, com a ressalva N1 ⚖.
-- **Base legal**: A017 (cartão do perfil — @, nome, foto — na busca e os vínculos) por **Art. 7º, V**, como parte do serviço descrita nos Termos e na Política 0.3 ⚖. A018/A019 (mostrar treinos e competir) por **Art. 7º, I** — consentimento específico `social_sharing` (versão e hash), pedido ao aceitar o 1º seguidor ou abrir o perfil. O desenho segue o padrão do Art. 11, I (resumo em camadas, caixa desmarcada, botões de mesmo peso), para continuar válido se o jurídico enquadrar treino como dado de saúde.
-- **Justificativa**: o compartilhamento não é necessário para o serviço contratado (o app funciona sem ele), então não cabe execução de contrato; legítimo interesse foi descartado porque a exposição a terceiros depende da vontade do titular.
-- **Manifestações adicionais**: aceite de cada seguidor (conta privada) e aceite ao abrir a conta, registrados no `audit_log`.
+- **Base legal**: A017 (cartão do perfil — @, nome, foto — na busca e os vínculos) por **Art. 7º, V**, como parte do serviço descrita nos Termos e na Política 0.3 ⚖. A018/A019 (mostrar treinos e competir) também por **Art. 7º, V**: o titular escolhe no app quem vê (aprovar seguidor, abrir o perfil) e as regras estão nos Termos 0.2 e na Política 0.3, aceitos no cadastro (decisão do produto em 2026-10-18: nenhum consentimento no meio do uso). ⚖ Se o jurídico enquadrar treino como dado de saúde (N1), será preciso consentimento específico e destacado (Art. 11, I), pedido no cadastro em caixa própria e desmarcada.
+- **Justificativa**: o compartilhamento acontece só por ação do titular (aprovar seguidor, abrir o perfil) dentro de uma funcionalidade descrita nos Termos; o perfil começa privado e há controles a qualquer momento. Legítimo interesse foi descartado porque a exposição a terceiros depende da vontade do titular.
+- **Manifestações do titular**: aceite de cada seguidor (perfil privado) e abertura do perfil, registrados no `audit_log`.
 - **Decisão automatizada**: controle de RPE suspeito (A019), com transparência e revisão (Art. 20).
-- **Retenção**: perfil enquanto a conta existir; seguidores até revogar o compartilhamento; tudo em cascata na exclusão.
-- **Revogação possível?**: **Sim** — revogar o compartilhamento remove os seguidores e fecha o perfil na hora. O cartão do perfil continua (parte do serviço); a oposição a aparecer na busca vai pelo canal do titular até existir uma opção no app ⚖.
+- **Retenção**: perfil enquanto a conta existir; seguidores até o titular remover; tudo em cascata na exclusão.
+- **Controle do titular**: fechar o perfil (novas pessoas precisam de aprovação; quem já segue continua), ocultar o histórico, remover seguidor e bloquear. A oposição a aparecer na busca vai pelo canal do titular até existir uma opção no app ⚖.
 - **Avaliação de impacto**: `.lgpd/RIPD/ripd-social.md`.
 - **Última revisão**: 2026-10-18
 ---

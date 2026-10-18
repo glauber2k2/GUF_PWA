@@ -21,8 +21,6 @@ export interface MySocial {
   handle: string;
   visibility: SocialVisibility;
   historyHidden: boolean;
-  /** Consentimento de compartilhamento ativo (necessário para aceitar seguidor e abrir o perfil). */
-  hasConsent: boolean;
   followersCount: number;
   followingCount: number;
   pendingRequestsCount: number;
@@ -95,13 +93,9 @@ type Result<T = null> = Promise<ApiResult<T>>;
 export interface SocialApi {
   getMySocial: (client: GufClient) => Result<MySocial>;
   updateHandle: (client: GufClient, handle: string) => Result;
-  /** Abrir o perfil exige o consentimento (social_consent_required) e aceita os pedidos pendentes. */
+  /** Abrir o perfil aceita os pedidos pendentes; fechar mantém quem já segue. */
   updateSettings: (client: GufClient, input: SocialSettings) => Result;
-  grantSharingConsent: (client: GufClient) => Result;
-  /** Remove os seguidores e fecha o perfil. */
-  revokeSharingConsent: (client: GufClient) => Result;
   requestFollow: (client: GufClient, userId: string) => Result<FollowStatus>;
-  /** Aceitar exige o consentimento (social_consent_required). */
   respondFollowRequest: (client: GufClient, input: { userId: string; accept: boolean }) => Result;
   unfollow: (client: GufClient, userId: string) => Result;
   removeFollower: (client: GufClient, userId: string) => Result;
@@ -121,8 +115,6 @@ export interface SocialApi {
 /* =====================================================================
  * Implementação (Supabase)
  * ===================================================================== */
-
-const PLATFORM = "web";
 
 function toVisibility(value: string): SocialVisibility {
   return value === "open" ? "open" : "private";
@@ -162,7 +154,6 @@ export const getMySocial: SocialApi["getMySocial"] = async (client) => {
         handle: row.handle,
         visibility: toVisibility(row.visibility),
         historyHidden: row.history_hidden,
-        hasConsent: row.has_consent,
         followersCount: row.followers_count,
         followingCount: row.following_count,
         pendingRequestsCount: row.pending_requests_count,
@@ -178,10 +169,6 @@ export const updateHandle: SocialApi["updateHandle"] = (client, handle) => run((
 
 export const updateSettings: SocialApi["updateSettings"] = (client, { visibility, historyHidden }) =>
   run(() => client.rpc("update_social_settings", { p_visibility: visibility, p_history_hidden: historyHidden }));
-
-export const grantSharingConsent: SocialApi["grantSharingConsent"] = (client) => run(() => client.rpc("grant_social_consent", { p_platform: PLATFORM }));
-
-export const revokeSharingConsent: SocialApi["revokeSharingConsent"] = (client) => run(() => client.rpc("revoke_social_consent", { p_platform: PLATFORM }));
 
 export const requestFollow: SocialApi["requestFollow"] = async (client, userId) => {
   try {
@@ -337,8 +324,6 @@ export const socialApi = {
   getMySocial,
   updateHandle,
   updateSettings,
-  grantSharingConsent,
-  revokeSharingConsent,
   requestFollow,
   respondFollowRequest,
   unfollow,

@@ -38,7 +38,6 @@ interface MockState {
   scenario: SocialMockScenario;
   me: MockPerson;
   people: MockPerson[];
-  hasConsent: boolean;
   /** "seguidor→seguido" → status. */
   follows: Map<string, "pending" | "accepted">;
   blocks: Set<string>;
@@ -80,7 +79,7 @@ function seed(scenario: SocialMockScenario): MockState {
     follows.set(`bia→${MOCK_ME}`, "pending");
     follows.set(`${MOCK_ME}→ju`, "pending");
   }
-  return { scenario, me, people, hasConsent: scenario === "padrao", follows, blocks: new Set() };
+  return { scenario, me, people, follows, blocks: new Set() };
 }
 
 function current(): MockState {
@@ -205,7 +204,6 @@ export const mockSocialApi = {
       handle: s.me.handle,
       visibility: s.me.visibility,
       historyHidden: s.me.historyHidden,
-      hasConsent: s.hasConsent,
       followersCount: count((_, followee, st) => followee === MOCK_ME && st === "accepted"),
       followingCount: count((follower, _, st) => follower === MOCK_ME && st === "accepted"),
       pendingRequestsCount: count((_, followee, st) => followee === MOCK_ME && st === "pending"),
@@ -225,26 +223,10 @@ export const mockSocialApi = {
     await wait();
     const s = current();
     if (visibility === "open" && s.me.visibility === "private") {
-      if (!s.hasConsent) return { data: null, error: apiError("social_consent_required") };
       for (const [key, st] of s.follows) if (key.endsWith(`→${MOCK_ME}`) && st === "pending") s.follows.set(key, "accepted");
     }
     s.me.visibility = visibility;
     s.me.historyHidden = historyHidden;
-    return { data: null, error: null };
-  },
-  async grantSharingConsent(client) {
-    ignoreClient(client);
-    await wait();
-    current().hasConsent = true;
-    return { data: null, error: null };
-  },
-  async revokeSharingConsent(client) {
-    ignoreClient(client);
-    await wait();
-    const s = current();
-    s.hasConsent = false;
-    s.me.visibility = "private";
-    for (const [key, st] of s.follows) if (key.endsWith(`→${MOCK_ME}`) && st === "accepted") s.follows.delete(key);
     return { data: null, error: null };
   },
   async requestFollow(client, userId) {
@@ -260,7 +242,6 @@ export const mockSocialApi = {
     ignoreClient(client);
     await wait();
     const s = current();
-    if (accept && !s.hasConsent) return { data: null, error: apiError("social_consent_required") };
     if (accept) s.follows.set(`${userId}→${MOCK_ME}`, "accepted");
     else s.follows.delete(`${userId}→${MOCK_ME}`);
     return { data: null, error: null };

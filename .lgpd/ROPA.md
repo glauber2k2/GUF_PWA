@@ -42,8 +42,8 @@
 | A015 | Planos e pagamentos | Recursos pagos | Art. 7º, V; fiscal Art. 7º, II | Assinantes | Plano, validade | Não | Gateway (futuro) | **Futuro** — definir antes de monetizar |
 | A016 | Registro de auditoria | Prestação de contas e apuração de incidentes | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Usuários e ex-usuários | Id interno, evento, data, contagens | Não | Supabase | 5 anos, eliminação mensal ⚖ |
 | A017 | Perfil social e seguidores | Perfil encontrável e escolher quem acompanha o progresso | Art. 7º, V ⚖ | Todos os usuários | @usuário, nome, foto, visibilidade, vínculos, bloqueios | Não | Supabase | Enquanto a conta existir |
-| A018 | Compartilhamento de treinos | Mostrar estatísticas e treinos a seguidores aceitos ou, com o perfil aberto, a qualquer conta | Art. 7º, I (Art. 11, I se N1) ⚖ | Usuários que autorizaram | Nome, foto, pontos, treinos (sem medidas, observações nem RPE) | Não ⚖ | Supabase | Sob demanda |
-| A019 | Competição e pontuação | Ranking por período entre seguidores mútuos | Art. 7º, I ⚖ | Seguidores mútuos | RPE da sessão, tempo efetivo, pontos | Não ⚖ | Supabase | RPE igual a A007; pontos não guardados |
+| A018 | Compartilhamento de treinos | Mostrar estatísticas e treinos a seguidores aceitos ou, com o perfil aberto, a qualquer conta | Art. 7º, V (Art. 11, I se N1) ⚖ | Usuários com seguidores ou perfil aberto | Nome, foto, pontos, treinos (sem medidas, observações nem RPE) | Não ⚖ | Supabase | Sob demanda |
+| A019 | Competição e pontuação | Ranking por período entre seguidores mútuos | Art. 7º, V ⚖ | Seguidores mútuos | RPE da sessão, tempo efetivo, pontos | Não ⚖ | Supabase | RPE igual a A007; pontos não guardados |
 
 \* O registro do consentimento de saúde indica que o titular usa o módulo de medidas, sem conter a medida.
 
@@ -84,7 +84,7 @@ Ver `retention.md` (tabela completa). Resumo: tudo enquanto a conta existir, eli
 ## 7. Decisões automatizadas
 
 - **A008 — finalização automática do treino**: regra fixa (todas as séries concluídas e última há ≥ 30 min), só para quem ligou a opção; pode desligar e pedir revisão (Art. 20). Explicada na política (rascunho v1, seção 5).
-- Nenhuma outra decisão automatizada ou perfilamento.- **A019 — controle de RPE suspeito na pontuação**: regra fixa e pública (RPE ≥ 3 acima da média pessoal das últimas 4 semanas → usa a média; RPE 9–10 em mais de 80% das sessões → limita a 7). Só entre seguidores mútuos (ambos autorizaram o compartilhamento); o titular vê o motivo de cada ajuste e pode pedir revisão (Art. 20). Avaliado em `RIPD/ripd-social.md`.
+- Nenhuma outra decisão automatizada ou perfilamento.- **A019 — controle de RPE suspeito na pontuação**: regra fixa e pública (RPE ≥ 3 acima da média pessoal das últimas 4 semanas → usa a média; RPE 9–10 em mais de 80% das sessões → limita a 7). Só entre seguidores mútuos; o titular vê o motivo de cada ajuste e pode pedir revisão (Art. 20). Avaliado em `RIPD/ripd-social.md`.
 - Nenhuma outra decisão automatizada ou perfilamento.
 
 ## 8. Observações

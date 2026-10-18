@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, ChevronLeft, Users, X } from "lucide-react";
-import type { ApiError, ConnectionKind } from "@guf/api";
+import type { ConnectionKind } from "@guf/api";
 import { Banner, Button, EmptyState, IconButton, SegmentedControl, Skeleton } from "@/shared/components/ds";
 import { useAppShell } from "@/features/app-shell";
 import { useGoBack } from "@/shared/hooks/use-go-back";
@@ -11,12 +10,11 @@ import {
   useCanUseSocial,
   useConnections,
   usePersonByHandle,
+  useRemoveFollower,
   useRespondFollowRequest,
   useUnblockUser,
 } from "@/features/social/api/use-social";
-import { useSharingConsentGate } from "@/features/social/hooks/use-sharing-consent-gate";
 import { PersonRow } from "@/features/social/components/person-row";
-import { SharingConsentSheet } from "@/features/social/components/sharing-consent-sheet";
 
 const TABS: Record<string, { kind: ConnectionKind; label: string; empty: string }> = {
   seguidores: { kind: "followers", label: "Seguidores", empty: "Ninguém segue este perfil ainda." },
@@ -29,8 +27,8 @@ const OWN_TABS = ["seguidores", "seguindo", "pedidos"];
 const OTHER_TABS = ["seguidores", "seguindo"];
 
 /**
- * Seguidores, seguindo e pedidos (/seguidores?aba=…&u=@handle). Aceitar o primeiro pedido pede o
- * consentimento de compartilhamento. Tela provisória (sem protótipo): lista simples.
+ * Seguidores, seguindo, pedidos e bloqueados (/seguidores?aba=…&u=@handle): aceitar ou recusar
+ * pedidos, remover seguidor e desbloquear. Tela provisória (sem protótipo): lista simples.
  */
 export function ConnectionsScreen() {
   const router = useRouter();
@@ -47,8 +45,8 @@ export function ConnectionsScreen() {
   const canUse = useCanUseSocial();
   const respond = useRespondFollowRequest();
   const unblock = useUnblockUser();
-  const onError = useCallback((error: ApiError) => showToast(error.message, { tone: "error" }), [showToast]);
-  const consent = useSharingConsentGate(onError);
+  const remove = useRemoveFollower();
+  const onError = (error: { message: string }) => showToast(error.message, { tone: "error" });
 
   const setTab = (key: string) => {
     const next = new URLSearchParams(params.toString());
@@ -57,10 +55,7 @@ export function ConnectionsScreen() {
   };
 
   const accept = (userId: string) =>
-    consent.run(async () => {
-      await respond.mutateAsync({ userId, accept: true });
-      showToast("Pedido aceito", { tone: "success" });
-    });
+    respond.mutate({ userId, accept: true }, { onSuccess: () => showToast("Pedido aceito", { tone: "success" }), onError });
 
   return (
     <main className="flex flex-col gap-4 px-4">
@@ -95,8 +90,18 @@ export function ConnectionsScreen() {
                     disabled={!canUse}
                     onClick={() => respond.mutate({ userId: person.userId, accept: false }, { onError })}
                   />
-                  <IconButton icon={Check} label="Aceitar" variant="primary" disabled={!canUse} onClick={() => void accept(person.userId)} />
+                  <IconButton icon={Check} label="Aceitar" variant="primary" disabled={!canUse} onClick={() => accept(person.userId)} />
                 </div>
+              )}
+              {tab.kind === "followers" && !handle && (
+                <Button
+                  variant="secondary"
+                  size="md"
+                  disabled={!canUse}
+                  onClick={() => remove.mutate(person.userId, { onSuccess: () => showToast("Seguidor removido", { tone: "info" }), onError })}
+                >
+                  Remover
+                </Button>
               )}
               {tab.kind === "blocked" && (
                 <Button
@@ -112,7 +117,6 @@ export function ConnectionsScreen() {
           ))}
         </div>
       )}
-      <SharingConsentSheet {...consent.sheet} />
     </main>
   );
 }

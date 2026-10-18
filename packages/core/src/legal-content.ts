@@ -20,8 +20,8 @@ export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
 export const DSAR_RESPONSE_DAYS = 15;
 
 /** Documento do leitor (rota do app) ↔ doc_type do banco. */
-export type LegalReaderDoc = "termos" | "privacidade" | "saude" | "compartilhamento";
-export type LegalReaderDocType = "terms" | "privacy" | "health_consent" | "social_sharing";
+export type LegalReaderDoc = "termos" | "privacidade" | "saude";
+export type LegalReaderDocType = "terms" | "privacy" | "health_consent";
 
 /** Ícones por nome (o app mapeia para lucide-react). */
 export type LegalIcon =
@@ -42,12 +42,9 @@ export type LegalIcon =
   | "triangle-alert"
   | "file-text"
   | "shield"
-  | "users"
-  | "eye-off"
-  | "lock"
-  | "trophy";
+  | "users";
 
-/** Atalhos dentro do texto que levam a Perfil › Privacidade. */
+/** Atalhos dentro do texto que levam a Configurações › Privacidade. */
 export type LegalAction = "export" | "delete" | "revoke";
 
 export type LegalBlock =
@@ -109,7 +106,8 @@ const TERMS: LegalDocumentContent = {
     { icon: "user-check", text: "O guf é para pessoas com 18 anos ou mais." },
     { icon: "stethoscope", text: "O app registra treinos. Não substitui a orientação de médico ou profissional de educação física." },
     { icon: "folder-lock", text: "O que você registra continua sendo seu." },
-    { icon: "circle-x", text: "Você pode encerrar a conta quando quiser, em Perfil › Privacidade." },
+    { icon: "users", text: "Seu perfil começa privado. Você escolhe quem segue você e se abre o perfil para todos." },
+    { icon: "circle-x", text: "Você pode encerrar a conta quando quiser, em Configurações › Privacidade." },
     { icon: "bell", text: "Mudanças importantes são avisadas no app antes de valer." },
   ],
   sections: [
@@ -174,6 +172,25 @@ const TERMS: LegalDocumentContent = {
       ],
     },
     {
+      id: "perfil-social",
+      title: "Perfil, seguidores e competição",
+      blocks: [
+        p(
+          "Toda conta tem um perfil com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil para que outras pessoas possam seguir você. O @ começa aleatório e pode ser trocado.",
+        ),
+        p(
+          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência e histórico de treinos. Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
+        ),
+        ul(
+          "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
+          "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
+          "Quem vocês se seguem mutuamente compete com você num ranking de pontos, pelas mesmas regras para todos, publicadas no app.",
+          "Medidas corporais, observações escritas por você e o esforço informado em cada treino nunca aparecem para outras pessoas.",
+          "Não há chat nem mensagens entre usuários. Use o perfil com respeito: contas usadas para assediar outras pessoas podem ser encerradas.",
+        ),
+      ],
+    },
+    {
       id: "planos",
       title: "Planos pagos (futuro)",
       blocks: [
@@ -211,7 +228,13 @@ const TERMS: LegalDocumentContent = {
       blocks: [p("Estes termos seguem a lei brasileira. Fica eleito o foro do domicílio do usuário. Dúvidas: [E-MAIL DE SUPORTE].")],
     },
   ],
-  changes: {},
+  changes: {
+    "0.2-dev": [
+      "Novo: perfil com nome de usuário (@), seguidores e competição entre quem se segue mutuamente.",
+      "Seu perfil começa privado. Abrir o perfil deixa sua evolução, sequência e histórico visíveis para qualquer pessoa com conta no guf.",
+      "Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
+    ],
+  },
 };
 
 const PRIVACY: LegalDocumentContent = {
@@ -225,7 +248,7 @@ const PRIVACY: LegalDocumentContent = {
     { icon: "dumbbell", text: "Só são coletados os dados necessários para registrar seus treinos e mostrar sua evolução." },
     { icon: "ban", text: "Seus dados não são vendidos nem usados para publicidade." },
     { icon: "heart-pulse", text: "Medidas corporais são opcionais e só são coletadas com o seu consentimento." },
-    { icon: "download", text: "Você pode exportar ou apagar seus dados pelo app, em Perfil › Privacidade." },
+    { icon: "download", text: "Você pode exportar ou apagar seus dados pelo app, em Configurações › Privacidade." },
     { icon: "globe", text: "Seus dados ficam guardados no Brasil. Alguns prestadores ficam nos EUA, e a transferência segue as regras da LGPD." },
   ],
   sections: [
@@ -275,7 +298,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Registrar treinos e mostrar evolução", "Treinos e preferências", "Execução de contrato (art. 7º, V)"],
             ["Acompanhar medidas corporais", "Medidas", "Consentimento (art. 11, I)"],
             ["Mostrar seu perfil (@, nome e foto) na busca e receber pedidos para seguir", "Conta e perfil social", "Execução de contrato (art. 7º, V)"],
-            ["Mostrar seus treinos a seguidores e competir", "Treinos, esforço e pontuação", "Consentimento (art. 7º, I)"],
+            ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos, esforço e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
             ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
             ["Cumprir obrigações legais", "Registros de acesso", "Obrigação legal (art. 7º, II)"],
@@ -298,10 +321,10 @@ const PRIVACY: LegalDocumentContent = {
       title: "Perfil, seguidores e competição",
       blocks: [
         p(
-          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link de convite. Seus treinos só aparecem para outras pessoas se você autorizar o compartilhamento, e você pode ocultar o histórico a qualquer momento.",
+          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos. O esforço muito acima da sua média é ajustado automaticamente; você vê o motivo e pode pedir revisão (art. 20)."),
-        { kind: "link", doc: "compartilhamento", text: "Ler o Termo de Consentimento para Compartilhar Treinos" },
+        { kind: "link", doc: "termos", anchor: "perfil-social", text: "Ler as regras do perfil nos Termos de Uso" },
       ],
     },
     {
@@ -315,7 +338,7 @@ const PRIVACY: LegalDocumentContent = {
           "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
           "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
-          "Outras pessoas do guf, só o que você autorizar no compartilhamento de treinos (veja a seção Perfil, seguidores e competição).",
+          "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
         ),
       ],
@@ -340,7 +363,7 @@ const PRIVACY: LegalDocumentContent = {
           rows: [
             ["Conta, treinos e preferências", "Enquanto a conta existir"],
             ["Medidas corporais", "Até você revogar o consentimento ou excluir a conta"],
-            ["Seguidores e bloqueios", "Seguidores até você revogar o compartilhamento ou excluir a conta; bloqueios até desbloquear ou excluir a conta"],
+            ["Perfil social, seguidores e bloqueios", "Enquanto a conta existir; seguidores até você remover; bloqueios até desbloquear"],
             ["Registros de acesso", "[PRAZO DOS REGISTROS DE ACESSO]"],
             ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança do provedor somem em até [PRAZO DOS BACKUPS]"],
             [
@@ -367,7 +390,7 @@ const PRIVACY: LegalDocumentContent = {
         action("export"),
         action("delete"),
         p(
-          `Para outros pedidos, escreva para ${PRIVACY_CONTACT_EMAIL} (ou use Perfil › Privacidade › Outros pedidos sobre seus dados). A resposta sai em até ${DSAR_RESPONSE_DAYS} dias. Você também pode reclamar à ANPD (Autoridade Nacional de Proteção de Dados).`,
+          `Para outros pedidos, escreva para ${PRIVACY_CONTACT_EMAIL} (ou use Configurações › Privacidade › Outros pedidos sobre seus dados). A resposta sai em até ${DSAR_RESPONSE_DAYS} dias. Você também pode reclamar à ANPD (Autoridade Nacional de Proteção de Dados).`,
         ),
       ],
     },
@@ -411,12 +434,12 @@ const PRIVACY: LegalDocumentContent = {
   changes: {
     "0.3-dev": [
       "Novo: perfil com nome de usuário (@), seguidores e competição entre amigos. Seu perfil começa privado.",
-      "Seus treinos só aparecem para outras pessoas se você autorizar o compartilhamento, com termo próprio.",
+      "Seus treinos só aparecem para seguidores que você aprovar ou, se abrir o perfil, para qualquer pessoa com conta no guf.",
       "Novo dado opcional: o esforço do treino (1 a 10), usado na pontuação.",
     ],
     "0.2-dev": [
       "Seus dados ficam guardados no Brasil (São Paulo); a política agora diz quais prestadores usamos (Supabase e Vercel) e quais ficam nos EUA.",
-      `Novo contato para pedidos sobre seus dados: ${PRIVACY_CONTACT_EMAIL}, também em Perfil › Privacidade.`,
+      `Novo contato para pedidos sobre seus dados: ${PRIVACY_CONTACT_EMAIL}, também em Configurações › Privacidade.`,
       "Ao excluir a conta, os dados são apagados na hora; só a prova dos seus aceites fica guardada por 5 anos, com o e-mail em código irreversível.",
       "O prazo dos registros de acesso será definido na versão final (antes dizia 6 meses).",
     ],
@@ -489,96 +512,8 @@ const HEALTH: LegalDocumentContent = {
       id: "como-revogar",
       title: "Como revogar no app",
       blocks: [
-        p("Em Perfil › Privacidade › Dados de saúde, toque em “Revogar consentimento”. Uma confirmação mostra o que será apagado antes de concluir."),
+        p("Em Configurações › Privacidade › Dados de saúde, toque em “Revogar consentimento”. Uma confirmação mostra o que será apagado antes de concluir."),
         action("revoke"),
-      ],
-    },
-  ],
-  changes: {},
-};
-
-const SHARING: LegalDocumentContent = {
-  doc: "compartilhamento",
-  docType: "social_sharing",
-  route: "/termo-de-compartilhamento",
-  title: "Termo de Consentimento para Compartilhar Treinos",
-  shortTitle: "Termo de Compartilhamento",
-  icon: "users",
-  summary: [
-    { icon: "lock", text: "Seu perfil começa privado: sem este consentimento, ninguém vê seus treinos." },
-    { icon: "users", text: "Com ele, quem você aprovar (ou qualquer pessoa no guf, se abrir o perfil) vê suas estatísticas, sequência e evolução." },
-    { icon: "eye-off", text: "Você pode ocultar o histórico de treinos a qualquer momento. Medidas corporais e observações nunca são mostradas." },
-    { icon: "trophy", text: "Quem vocês se seguem mutuamente compete com você num ranking de pontos." },
-    { icon: "toggle-left", text: "É opcional e pode ser revogado: revogar remove seus seguidores e fecha o perfil." },
-  ],
-  sections: [
-    {
-      id: "o-que-e",
-      title: "O que você autoriza",
-      blocks: [
-        p(
-          "Todo perfil do guf tem um nome de usuário (@), nome e foto, que aparecem na busca para que outras pessoas possam pedir para seguir você. Seus dados de treino continuam só com você até você autorizar o compartilhamento.",
-        ),
-        p("Ao autorizar, você permite que o guf mostre os dados abaixo a quem você aprovar como seguidor ou, se você abrir o perfil, a qualquer pessoa com conta no guf."),
-      ],
-    },
-    {
-      id: "dados",
-      title: "O que outras pessoas podem ver",
-      blocks: [
-        {
-          kind: "table",
-          caption: "Dados compartilhados",
-          head: ["Dado", "Quando aparece"],
-          rows: [
-            ["Número de treinos, data do primeiro treino e sequência de semanas", "Sempre que o perfil estiver visível para a pessoa"],
-            ["Evolução semanal (volume, carga máxima e horas)", "Sempre que o perfil estiver visível para a pessoa"],
-            ["Pontos, treinos válidos, volume e recordes na competição", "Para quem vocês se seguem mutuamente"],
-            ["Registros de treino (data, nome, duração, séries e cargas)", "Só se você não ocultar o histórico"],
-          ],
-        },
-        { kind: "note", icon: "eye-off", text: "Nunca são mostrados: medidas corporais, observações escritas por você, o esforço (RPE) de cada treino, e-mail e localização." },
-      ],
-    },
-    {
-      id: "competicao",
-      title: "Competição e pontuação",
-      blocks: [
-        p(
-          "A pontuação semanal soma constância, esforço e sequência, pelas mesmas regras para todos, publicadas no app. Se o esforço informado ficar muito acima da sua média, ele é ajustado automaticamente, e você vê o motivo em cada treino.",
-        ),
-        p(`Se discordar de um ajuste, peça revisão em ${PRIVACY_CONTACT_EMAIL} (art. 20 da LGPD). A resposta sai em até ${DSAR_RESPONSE_DAYS} dias.`),
-      ],
-    },
-    {
-      id: "base-legal",
-      title: "Base legal e escolha livre",
-      blocks: [
-        p(
-          "O compartilhamento depende do seu consentimento (art. 7º, I, da LGPD), registrado com data, hora e versão deste termo. Se você não autorizar, todo o restante do app continua funcionando, e você ainda pode seguir outras pessoas.",
-        ),
-      ],
-    },
-    {
-      id: "revogar",
-      title: "Como revogar",
-      blocks: [
-        p(
-          "Em Configurações › Privacidade, revogue o compartilhamento quando quiser. Na hora, seus seguidores são removidos e o perfil volta a ser privado. Quem você segue e os pedidos que você enviou continuam.",
-        ),
-        p("Bloquear alguém também desfaz o vínculo dos dois lados, e a pessoa deixa de encontrar você."),
-      ],
-    },
-    {
-      id: "nao-fazemos",
-      title: "O que não fazemos",
-      blocks: [
-        ul(
-          "Não há chat nem mensagens entre usuários.",
-          "Não há ranking público: só entre pessoas que se seguem mutuamente.",
-          "Não usamos esses dados para publicidade nem os vendemos.",
-          "Não há prêmios, compras ou sorteios ligados à pontuação.",
-        ),
       ],
     },
   ],
@@ -589,11 +524,10 @@ export const LEGAL_DOCUMENTS: Record<LegalReaderDoc, LegalDocumentContent> = {
   termos: TERMS,
   privacidade: PRIVACY,
   saude: HEALTH,
-  compartilhamento: SHARING,
 };
 
 /** Ordem na central "Documentos legais" e em "Outros documentos". */
-export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude", "compartilhamento"];
+export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude"];
 
 /** Link "mailto:" já com o assunto do pedido. */
 export function privacyRequestMailto(): string {
@@ -630,8 +564,6 @@ export function legalReaderTarget(docType: string): { doc: LegalReaderDoc; ancho
       return { doc: "termos", anchor: "idade" };
     case "health_consent":
       return { doc: "saude" };
-    case "social_sharing":
-      return { doc: "compartilhamento" };
     default:
       return null;
   }

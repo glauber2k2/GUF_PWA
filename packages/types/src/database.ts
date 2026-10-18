@@ -1077,7 +1077,6 @@ export type Database = {
           followers_count: number
           following_count: number
           handle: string
-          has_consent: boolean
           history_hidden: boolean
           pending_requests_count: number
           user_id: string
@@ -1106,12 +1105,7 @@ export type Database = {
         Args: { p_platform?: string }
         Returns: undefined
       }
-      grant_social_consent: {
-        Args: { p_platform?: string }
-        Returns: undefined
-      }
       has_health_consent: { Args: never; Returns: boolean }
-      has_social_consent: { Args: { p_user_id: string }; Returns: boolean }
       is_blocked_between: {
         Args: { p_a: string; p_b: string }
         Returns: boolean
@@ -1172,10 +1166,6 @@ export type Database = {
       random_social_handle: { Args: never; Returns: string }
       remove_follower: { Args: { p_user_id: string }; Returns: undefined }
       request_follow: { Args: { p_user_id: string }; Returns: string }
-      require_social_consent: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
       respond_follow_request: {
         Args: { p_accept: boolean; p_user_id: string }
         Returns: undefined
@@ -1185,10 +1175,6 @@ export type Database = {
         Returns: undefined
       }
       revoke_health_consent: {
-        Args: { p_platform?: string }
-        Returns: undefined
-      }
-      revoke_social_consent: {
         Args: { p_platform?: string }
         Returns: undefined
       }
