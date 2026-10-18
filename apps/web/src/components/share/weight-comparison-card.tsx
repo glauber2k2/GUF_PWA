@@ -1,4 +1,4 @@
-// Cartão "Comparação de peso" (Claude Design · Comparacoes de Peso, sticker S21): o Guf Rat levanta
+// Cartão "Comparação de peso" (Claude Design · Comparacoes de Peso; modelo Comparação de peso): o Guf Rat levanta
 // o objeto equivalente ao volume do treino. 600 px de largura; quem usa decide a escala.
 import type { LiftEffort, StoryComparison } from "@guf/core";
 import { GufRat, Logo, type GufRatOccasion } from "@/components/ds";

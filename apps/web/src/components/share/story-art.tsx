@@ -7,7 +7,7 @@ import type { StoryFormat, StoryTheme } from "./story-types";
 export interface StoryArtProps {
   model: StoryModel;
   data: StoryData;
-  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). Stickers são sempre sem fundo. */
+  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). Stickers: sempre sem fundo; vale para o adesivo. */
   backgroundOpacity: number;
   /** Tema da imagem (escolhido na folha; independe do tema do app). */
   theme: StoryTheme;
@@ -50,8 +50,10 @@ const FORMAT_BOX: Record<StoryFormat, string> = {
 export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function StoryArt({ model, data, backgroundOpacity, theme }, ref) {
   const { Component } = model;
   const format = model.format ?? "story";
-  // Sticker: forma sólida sobre fundo transparente; os outros seguem a opacidade escolhida (valores dinâmicos).
-  const colors = format === "sticker" ? { ...storyArtColors(100, theme), background: "transparent" } : storyArtColors(backgroundOpacity, theme);
+  // Opacidade escolhida (valores dinâmicos). Sticker: fundo sempre transparente e o adesivo segue a mesma
+  // regra dos cartões (20 a 100%).
+  const colors = storyArtColors(backgroundOpacity, theme);
+  if (format === "sticker") colors.background = "transparent";
   return (
     <div ref={ref} data-theme={theme} className={cn(FORMAT_BOX[format], "font-sans text-fg tabular-nums")} style={colors}>
       <Component d={data} />
