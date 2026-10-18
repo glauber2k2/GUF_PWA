@@ -11,7 +11,7 @@ import { canShareImages, downloadImage, shareImage, storyToPng, StoryExportError
 import { cn } from "@/lib/utils";
 import { FitPreview } from "./fit-preview";
 import { StoryArt } from "./story-art";
-import { availableStoryModels, STORY_STYLES } from "./story-catalog";
+import { availableStoryModels, STORY_FORMAT_LABELS, STORY_STYLES } from "./story-catalog";
 import { STORY_HEIGHT, STORY_WIDTH, type StoryTheme } from "./story-types";
 
 /*
@@ -186,6 +186,7 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
     }
   };
   const busy = status === "busy";
+  const sticker = current.format === "sticker";
 
   const enter = (i: number) => ({
     initial: { opacity: 0, y: 16 },
@@ -231,7 +232,7 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
               key={model.id}
               type="button"
               tabIndex={-1}
-              aria-label={`Modelo ${i + 1} de ${models.length}: ${model.name}`}
+              aria-label={`Modelo ${model.id}: ${model.name}, ${STORY_STYLES[model.style]}, ${STORY_FORMAT_LABELS[model.format ?? "story"]}`}
               aria-current={selected}
               onClick={() => go(i)}
               className={cn(
@@ -280,10 +281,13 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
           transition={{ duration: 0.24, ease: MOTION_EASE.standard }}
           className="flex min-w-0 flex-1 flex-col items-center gap-0.5"
         >
-          <span className="max-w-full truncate text-[15px] font-semibold">
-            {current.id} · {current.name}
+          <span className="flex max-w-full min-w-0 items-baseline gap-2">
+            <span className="flex-none font-display text-[17px] font-semibold text-accent-text tabular-nums">{current.id}</span>
+            <span className="truncate text-[15px] font-semibold">{current.name}</span>
           </span>
-          <span className="text-[13px] text-fg-muted">{STORY_STYLES[current.style]}</span>
+          <span className="text-[13px] text-fg-muted">
+            {STORY_STYLES[current.style]} · {STORY_FORMAT_LABELS[current.format ?? "story"]}
+          </span>
         </m.div>
         <IconButton
           icon={ChevronRight}
@@ -306,18 +310,20 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         />
       </m.div>
 
-      {/* Opacidade do fundo (sticker já sai sem fundo) */}
-      <m.div {...enter(4)} className={cn("flex flex-col gap-1", current.format === "sticker" && "hidden")}>
-        <div className="flex items-center justify-between gap-3">
+      {/* Opacidade do fundo (sticker já sai sem fundo: a mesma escala vale para o adesivo, de 20 a 100%) */}
+      <m.div {...enter(4)} className="flex flex-col gap-1">
+        <div className="flex min-h-11 items-center justify-between gap-3">
           <label htmlFor="story-opacity" className="text-sm font-semibold">
-            Opacidade do fundo
+            {sticker ? "Opacidade do adesivo" : "Opacidade do fundo"}
           </label>
-          <Chip
-            label="Sem fundo"
-            icon={SquareDashed}
-            selected={opacity === 0}
-            onChange={(on) => changeOpacity(on ? 0 : lastOpacity || 100)}
-          />
+          {!sticker && (
+            <Chip
+              label="Sem fundo"
+              icon={SquareDashed}
+              selected={opacity === 0}
+              onChange={(on) => changeOpacity(on ? 0 : lastOpacity || 100)}
+            />
+          )}
         </div>
         <div className="flex h-11 items-center gap-3">
           <input

@@ -13,7 +13,7 @@ import { Story04, Story05, Story06 } from "./models/numbers";
 import { Story08 } from "./models/rat";
 import { Story10, Story11, Story12 } from "./models/record";
 import { StoryS01, StoryS02, StoryS03, StoryS04, StoryS05, StoryS06, StoryS07, StoryS08, StoryS09, StoryS10, StoryS11 } from "./models/stickers-a";
-import { StoryS12, StoryS13, StoryS14, StoryS15, StoryS16, StoryS17, StoryS18, StoryS19, StoryS20, StoryS21, StoryS22 } from "./models/stickers-b";
+import { StoryS12, StoryS13, StoryS14, StoryS15, StoryS16, StoryS17, StoryS18, StoryS19, StoryS20, StoryS22 } from "./models/stickers-b";
 import { Story13, Story14, Story15 } from "./models/streak";
 import type { StoryFormat, StoryModelProps } from "./story-types";
 
@@ -35,9 +35,17 @@ export const STORY_STYLES = [
   "Stickers",
 ] as const;
 
+/** Formato exibido na folha, ao lado do estilo. */
+export const STORY_FORMAT_LABELS: Record<StoryFormat, string> = {
+  story: "Story 9:16",
+  feed: "Feed 4:5",
+  sticker: "Adesivo sem fundo",
+};
+
 export interface StoryModel {
-  /** Número do modelo no Claude Design ("01", "20b"…). */
+  /** Número do modelo na folha ("01", "02"…), sequencial pela ordem do carrossel. */
   id: string;
+  /** Título exibido na folha (o estilo e o formato aparecem abaixo dele). */
   name: string;
   /** Índice em STORY_STYLES. */
   style: number;
@@ -58,94 +66,108 @@ const hasRest = (d: StoryData) => d.restAverage !== null;
 const hasTopMuscle = (d: StoryData) => d.topMuscle !== null;
 
 /**
- * Os 37 modelos do design (ShareSheetScreen.dc.html · ALL, na ordem do carrossel), a comparação de
- * peso (Comparacoes de Peso.dc.html) e o canvas "Compartilhamento – PNGs" (cartões C, telas cheias F e
- * stickers S). Modelo novo = nova entrada aqui.
+ * Modelos na ordem do carrossel: os 37 do design (ShareSheetScreen.dc.html · ALL), a comparação de peso
+ * (Comparacoes de Peso.dc.html) e o canvas "Compartilhamento – PNGs" (cartões, telas cheias e stickers).
+ * O nome do componente guarda a referência do design (Story20B, StoryC09, StoryS12…); o número exibido é
+ * sequencial e se ajusta sozinho. Modelo novo = nova entrada aqui.
  */
-export const STORY_MODELS: readonly StoryModel[] = [
-  { id: "01", name: "Frente e costas", style: 0, Component: Story01 },
-  { id: "02", name: "Boneco herói", style: 0, Component: Story02 },
-  { id: "03", name: "Cartão inferior", style: 0, Component: Story03 },
-  { id: "04", name: "Volume gigante", style: 1, Component: Story04 },
-  { id: "05", name: "Empilhado", style: 1, Component: Story05 },
-  { id: "06", name: "Selo do Anel", style: 1, Component: Story06 },
-  { id: "08", name: "Balão de fala", style: 2, Component: Story08 },
-  { id: "10", name: "Troféu", style: 3, Component: Story10, available: hasRecord },
-  { id: "11", name: "Antes e agora", style: 3, Component: Story11, available: hasRecord },
-  { id: "12", name: "Selo dourado", style: 3, Component: Story12, available: hasRecord },
-  { id: "13", name: "Chama", style: 4, Component: Story13, available: hasStreak },
-  { id: "14", name: "Linha de semanas", style: 4, Component: Story14, available: hasStreak },
-  { id: "15", name: "Adesivo de sequência", style: 4, Component: Story15, available: hasStreak },
-  { id: "16", name: "Faixa inferior", style: 5, Component: Story16 },
-  { id: "17", name: "Canto", style: 5, Component: Story17 },
-  { id: "18", name: "Coluna lateral", style: 5, Component: Story18 },
-  { id: "19", name: "Recibo", style: 6, Component: Story19 },
-  { id: "20", name: "Tabela com boneco", style: 6, Component: Story20 },
-  { id: "20b", name: "Boneco no topo", style: 6, Component: Story20B },
-  { id: "20c", name: "Cartões por exercício", style: 6, Component: Story20C },
-  { id: "20d", name: "Tabela de volume", style: 6, Component: Story20D },
-  { id: "21", name: "Volume por exercício", style: 6, Component: Story21 },
-  { id: "37", name: "Treino de hoje com boneco", style: 6, Component: Story37 },
-  { id: "38", name: "Treino de hoje com Guf Rat", style: 6, Component: Story38 },
-  { id: "23", name: "Gráfico de volume", style: 7, Component: Story23 },
-  { id: "24", name: "Meta da semana", style: 7, Component: Story24 },
-  { id: "36", name: "Calendário do mês", style: 7, Component: Story36 },
-  { id: "25", name: "Rat e boneco", style: 8, Component: Story25 },
-  { id: "26", name: "Mês a mês", style: 8, Component: Story26 },
-  { id: "27", name: "Músculos do mês", style: 8, Component: Story27 },
-  { id: "28", name: "Moldura", style: 9, Component: Story28 },
-  { id: "29", name: "Ticket", style: 9, Component: Story29 },
-  { id: "30", name: "Assinatura", style: 9, Component: Story30 },
-  { id: "31", name: "Cantoneiras", style: 9, Component: Story31 },
-  { id: "32", name: "Polaroid", style: 9, Component: Story32 },
-  { id: "33", name: "Assinatura vertical", style: 9, Component: Story33 },
-  { id: "35", name: "Moldura do Anel", style: 9, Component: Story35 },
-  { id: "39", name: "Comparação de peso", style: 10, Component: Story39, available: hasComparison },
-  // Cartões de resumo (ShareCard · C01–C12; C06–C08 são iguais a C02–C04 e ficaram de fora)
-  { id: "c01", name: "Resumo com boneco", style: 11, Component: StoryC01 },
-  { id: "c02", name: "Volume em destaque", style: 11, Component: StoryC02 },
-  { id: "c03", name: "Recordes do treino", style: 11, Component: StoryC03, available: hasRecord },
-  { id: "c04", name: "Treino finalizado", style: 11, Component: StoryC04 },
-  { id: "c05", name: "Resumo com boneco e Guf Rat", style: 11, Component: StoryC05 },
-  { id: "c09", name: "Resumo com boneco · Feed", style: 11, Component: StoryC09, format: "feed" },
-  { id: "c10", name: "Volume em destaque · Feed", style: 11, Component: StoryC10, format: "feed" },
-  { id: "c11", name: "Recordes do treino · Feed", style: 11, Component: StoryC11, format: "feed", available: hasRecord },
-  { id: "c12", name: "Treino finalizado · Feed", style: 11, Component: StoryC12, format: "feed" },
-  // Tela cheia (F01–F10)
-  { id: "f01", name: "Treino concluído", style: 12, Component: StoryF01 },
-  { id: "f02", name: "Sequência", style: 12, Component: StoryF02, available: hasStreak },
-  { id: "f03", name: "Ficha de treino", style: 12, Component: StoryF03 },
-  { id: "f04", name: "Recorde pessoal", style: 12, Component: StoryF04, available: hasRecord },
-  { id: "f05", name: "Volume da semana", style: 12, Component: StoryF05 },
-  { id: "f06", name: "Resumo do mês", style: 12, Component: StoryF06 },
-  { id: "f07", name: "Carga subiu", style: 12, Component: StoryF07, available: hasFeatured },
-  { id: "f08", name: "Projeto", style: 12, Component: StoryF08, available: hasProject },
-  { id: "f09", name: "Números + boneco", style: 12, Component: StoryF09 },
-  { id: "f10", name: "Meta da semana", style: 12, Component: StoryF10, available: hasGoal },
-  // Stickers (S01–S22; só a forma, fundo transparente)
-  { id: "s01", name: "Sequência · pílula", style: 13, Component: StoryS01, format: "sticker", available: hasStreak },
-  { id: "s02", name: "Sequência · selo", style: 13, Component: StoryS02, format: "sticker", available: hasStreak },
-  { id: "s03", name: "Semana de treinos", style: 13, Component: StoryS03, format: "sticker" },
-  { id: "s04", name: "Ficha de treino", style: 13, Component: StoryS04, format: "sticker" },
-  { id: "s05", name: "Ficha com boneco", style: 13, Component: StoryS05, format: "sticker" },
-  { id: "s06", name: "Volume total", style: 13, Component: StoryS06, format: "sticker" },
-  { id: "s07", name: "Tempo de treino", style: 13, Component: StoryS07, format: "sticker" },
-  { id: "s08", name: "Métricas + boneco", style: 13, Component: StoryS08, format: "sticker" },
-  { id: "s09", name: "Recorde dourado", style: 13, Component: StoryS09, format: "sticker", available: hasRecord },
-  { id: "s10", name: "Recorde · Guf Rat", style: 13, Component: StoryS10, format: "sticker", available: hasRecord },
-  { id: "s11", name: "Treino concluído · Guf Rat", style: 13, Component: StoryS11, format: "sticker" },
-  { id: "s12", name: "Dia de treino · Guf Rat", style: 13, Component: StoryS12, format: "sticker" },
-  { id: "s13", name: "Músculo do dia", style: 13, Component: StoryS13, format: "sticker", available: hasTopMuscle },
-  { id: "s14", name: "Mapa muscular da semana", style: 13, Component: StoryS14, format: "sticker" },
-  { id: "s15", name: "Evolução do 1RM", style: 13, Component: StoryS15, format: "sticker", available: hasFeatured },
-  { id: "s16", name: "Meta da semana · Anel", style: 13, Component: StoryS16, format: "sticker", available: hasGoal },
-  { id: "s17", name: "Recibo do treino", style: 13, Component: StoryS17, format: "sticker" },
-  { id: "s18", name: "Descanso médio", style: 13, Component: StoryS18, format: "sticker", available: hasRest },
-  { id: "s19", name: "Marco de treinos", style: 13, Component: StoryS19, format: "sticker" },
-  { id: "s20", name: "Números empilhados", style: 13, Component: StoryS20, format: "sticker" },
-  { id: "s21", name: "Comparação de peso", style: 13, Component: StoryS21, format: "sticker", available: hasComparison },
-  { id: "s22", name: "Ficha lateral + boneco", style: 13, Component: StoryS22, format: "sticker" },
+const MODELS: readonly Omit<StoryModel, "id">[] = [
+  // Mapa muscular
+  { name: "Frente e costas", style: 0, Component: Story01 },
+  { name: "Boneco em destaque", style: 0, Component: Story02 },
+  { name: "Boneco com resumo embaixo", style: 0, Component: Story03 },
+  // Números
+  { name: "Volume gigante", style: 1, Component: Story04 },
+  { name: "Números em coluna", style: 1, Component: Story05 },
+  { name: "Selo do Anel", style: 1, Component: Story06 },
+  // Guf Rat
+  { name: "Guf Rat com balão de fala", style: 2, Component: Story08 },
+  // Recorde
+  { name: "Troféu do recorde", style: 3, Component: Story10, available: hasRecord },
+  { name: "Recorde: antes e agora", style: 3, Component: Story11, available: hasRecord },
+  { name: "Selo dourado do recorde", style: 3, Component: Story12, available: hasRecord },
+  // Sequência
+  { name: "Chama da sequência", style: 4, Component: Story13, available: hasStreak },
+  { name: "Linha de semanas", style: 4, Component: Story14, available: hasStreak },
+  { name: "Adesivo de sequência", style: 4, Component: Story15, available: hasStreak },
+  // Sobre a foto
+  { name: "Faixa no rodapé", style: 5, Component: Story16 },
+  { name: "Resumo no canto", style: 5, Component: Story17 },
+  { name: "Coluna lateral", style: 5, Component: Story18 },
+  // Ficha
+  { name: "Recibo do treino", style: 6, Component: Story19 },
+  { name: "Tabela com boneco", style: 6, Component: Story20 },
+  { name: "Boneco no topo", style: 6, Component: Story20B },
+  { name: "Cartões por exercício", style: 6, Component: Story20C },
+  { name: "Tabela de volume", style: 6, Component: Story20D },
+  { name: "Volume por exercício", style: 6, Component: Story21 },
+  { name: "Treino de hoje com boneco", style: 6, Component: Story37 },
+  { name: "Treino de hoje com Guf Rat", style: 6, Component: Story38 },
+  // Semana
+  { name: "Gráfico de volume", style: 7, Component: Story23 },
+  { name: "Meta da semana", style: 7, Component: Story24 },
+  { name: "Calendário do mês", style: 7, Component: Story36 },
+  // Evolução
+  { name: "Guf Rat e boneco", style: 8, Component: Story25 },
+  { name: "Mês a mês", style: 8, Component: Story26 },
+  { name: "Músculos do mês", style: 8, Component: Story27 },
+  // Moldura
+  { name: "Moldura simples", style: 9, Component: Story28 },
+  { name: "Ingresso", style: 9, Component: Story29 },
+  { name: "Assinatura no rodapé", style: 9, Component: Story30 },
+  { name: "Cantoneiras", style: 9, Component: Story31 },
+  { name: "Polaroide", style: 9, Component: Story32 },
+  { name: "Assinatura vertical", style: 9, Component: Story33 },
+  { name: "Moldura do Anel", style: 9, Component: Story35 },
+  // Comparação
+  { name: "Comparação de peso", style: 10, Component: Story39, available: hasComparison },
+  // Cartões de resumo (C06–C08 do design são iguais a C02–C04 e ficaram de fora; C09–C12 em feed)
+  { name: "Resumo com boneco", style: 11, Component: StoryC01 },
+  { name: "Volume em destaque", style: 11, Component: StoryC02 },
+  { name: "Recordes do treino", style: 11, Component: StoryC03, available: hasRecord },
+  { name: "Treino finalizado", style: 11, Component: StoryC04 },
+  { name: "Resumo com boneco e Guf Rat", style: 11, Component: StoryC05 },
+  { name: "Resumo com boneco", style: 11, Component: StoryC09, format: "feed" },
+  { name: "Volume em destaque", style: 11, Component: StoryC10, format: "feed" },
+  { name: "Recordes do treino", style: 11, Component: StoryC11, format: "feed", available: hasRecord },
+  { name: "Treino finalizado", style: 11, Component: StoryC12, format: "feed" },
+  // Tela cheia
+  { name: "Treino concluído", style: 12, Component: StoryF01 },
+  { name: "Semanas seguidas", style: 12, Component: StoryF02, available: hasStreak },
+  { name: "Ficha de treino completa", style: 12, Component: StoryF03 },
+  { name: "Recorde pessoal", style: 12, Component: StoryF04, available: hasRecord },
+  { name: "Volume da semana", style: 12, Component: StoryF05 },
+  { name: "Resumo do mês", style: 12, Component: StoryF06 },
+  { name: "Carga em alta", style: 12, Component: StoryF07, available: hasFeatured },
+  { name: "Treinos do projeto", style: 12, Component: StoryF08, available: hasProject },
+  { name: "Números e boneco", style: 12, Component: StoryF09 },
+  { name: "Meta da semana", style: 12, Component: StoryF10, available: hasGoal },
+  // Stickers (só a forma, fundo transparente; a opacidade vale para o próprio adesivo)
+  { name: "Sequência em pílula", style: 13, Component: StoryS01, format: "sticker", available: hasStreak },
+  { name: "Sequência em selo", style: 13, Component: StoryS02, format: "sticker", available: hasStreak },
+  { name: "Semana de treinos", style: 13, Component: StoryS03, format: "sticker" },
+  { name: "Ficha de treino", style: 13, Component: StoryS04, format: "sticker" },
+  { name: "Ficha com boneco", style: 13, Component: StoryS05, format: "sticker" },
+  { name: "Volume total", style: 13, Component: StoryS06, format: "sticker" },
+  { name: "Tempo de treino", style: 13, Component: StoryS07, format: "sticker" },
+  { name: "Métricas e boneco", style: 13, Component: StoryS08, format: "sticker" },
+  { name: "Recorde dourado", style: 13, Component: StoryS09, format: "sticker", available: hasRecord },
+  { name: "Recorde com Guf Rat", style: 13, Component: StoryS10, format: "sticker", available: hasRecord },
+  { name: "Treino concluído com Guf Rat", style: 13, Component: StoryS11, format: "sticker" },
+  { name: "Dia de treino com Guf Rat", style: 13, Component: StoryS12, format: "sticker" },
+  { name: "Músculo do dia", style: 13, Component: StoryS13, format: "sticker", available: hasTopMuscle },
+  { name: "Mapa muscular da semana", style: 13, Component: StoryS14, format: "sticker" },
+  { name: "Evolução do 1RM", style: 13, Component: StoryS15, format: "sticker", available: hasFeatured },
+  { name: "Meta da semana em anel", style: 13, Component: StoryS16, format: "sticker", available: hasGoal },
+  { name: "Recibo recortado", style: 13, Component: StoryS17, format: "sticker" },
+  { name: "Descanso médio", style: 13, Component: StoryS18, format: "sticker", available: hasRest },
+  { name: "Marco de treinos", style: 13, Component: StoryS19, format: "sticker" },
+  { name: "Números e bonecos", style: 13, Component: StoryS20, format: "sticker" },
+  { name: "Ficha lateral com bonecos", style: 13, Component: StoryS22, format: "sticker" },
 ];
+
+/** Catálogo com os números sequenciais (01, 02…). */
+export const STORY_MODELS: readonly StoryModel[] = MODELS.map((model, i) => ({ ...model, id: String(i + 1).padStart(2, "0") }));
 
 /** Modelos que fazem sentido para este treino (sem recorde, some o estilo Recorde etc.). */
 export function availableStoryModels(d: StoryData): StoryModel[] {

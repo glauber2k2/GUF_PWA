@@ -1,10 +1,9 @@
-// Stickers S12–S22 (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
+// Stickers S12–S22, sem o S21 (igual ao modelo Comparação de peso) (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
 // altura automática. O StoryArt envolve com folga, tema e fundo transparente; os dados vêm de StoryData.
 import { formatNumber, plural } from "@guf/core";
 import { GufRat, MuscleIcon, type MuscleIconKey } from "@/components/ds";
 import { StoryFigure } from "../story-figure";
 import type { StoryModelProps } from "../story-types";
-import { WeightComparisonCard } from "../weight-comparison-card";
 import { StickerCard, StickerHeader, StickerLogo, StickerSignature, StickerTagline } from "./stickers-a";
 
 /** Treino de perna pelo nome do foco (pose "Dia de perna" do Guf Rat). */
@@ -333,12 +332,6 @@ export function StoryS20({ d }: StoryModelProps) {
       <StickerTagline />
     </StickerCard>
   );
-}
-
-/** S21 · Comparação de peso (o Guf Rat levanta o objeto equivalente ao volume). */
-export function StoryS21({ d }: StoryModelProps) {
-  if (!d.comparison) return null;
-  return <WeightComparisonCard comparison={d.comparison} volume={d.volume} unit={d.unit} caption={d.title} />;
 }
 
 /** S22 · Ficha lateral + bonecos. */
