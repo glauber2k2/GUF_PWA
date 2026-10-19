@@ -46,7 +46,7 @@ flowchart TD
 apps/web/src/
 ├── app/                 # rotas; providers.tsx compõe os providers globais
 ├── features/<feature>/  # api/ hooks/ helpers/ constants/ components/ providers/ ui/ type.ts index.ts
-├── shared/              # components/ds, components/ui, hooks, helpers, libs, offline, preferences, sound
+├── shared/              # components/ds, components/ui, hooks, helpers, libs, offline, preferences, push, sound
 ├── store/global/        # toast.store.ts, pwa.store.ts
 ├── mocks/               # espelho de packages/api para desenvolvimento
 └── styles/tokens/

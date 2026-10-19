@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { BellRing, MonitorSmartphone, Minus, Plus, SunMoon, Target, TimerOff, Weight } from "lucide-react";
-import type { WeightUnit } from "@guf/core";
+import type { InstallPlatform, WeightUnit } from "@guf/core";
 import { WEEKLY_GOAL_MAX, WEEKLY_GOAL_MIN } from "@guf/schemas";
 import type { Profile, ProfileUpdate } from "@guf/api";
 import { useAppShell } from "@/features/app-shell";
@@ -13,6 +13,7 @@ import { useUpdateProfile } from "@/features/profile/api/use-profile";
 import { playRestAlert, useRestAlertPreference, type RestAlertPreference } from "@/shared/sound/rest-alert";
 import { useThemePreference, type ThemePreference } from "@/shared/preferences/theme";
 import { cn } from "@/shared/helpers/class-names";
+import { PushAlertsRow } from "./push-alerts-row";
 import { ProfileSection, RowGroup, RowIcon } from "./profile-ui";
 
 const UNIT_OPTIONS = [
@@ -33,9 +34,9 @@ const REST_ALERT_OPTIONS = [
 
 /**
  * Unidade de peso, meta semanal e finalizar treino automaticamente (salvas no perfil, só com internet); tema, aviso de fim do descanso e tela ligada (salvos no aparelho,
- * funciona sem internet). O banco guarda sempre kg: a unidade muda só a exibição.
+ * funciona sem internet); notificações da competição e de seguidores (inscrição deste aparelho, só com internet). O banco guarda sempre kg: a unidade muda só a exibição.
  */
-export function PreferencesSection({ profile, canEdit }: { profile: Profile; canEdit: boolean }) {
+export function PreferencesSection({ profile, canEdit, platform }: { profile: Profile; canEdit: boolean; platform: InstallPlatform }) {
   const shell = useAppShell();
   const update = useUpdateProfile();
   const [theme, setTheme] = useThemePreference();
@@ -185,6 +186,8 @@ export function PreferencesSection({ profile, canEdit }: { profile: Profile; can
           mesmo com o app fechado.
         </span>
       </RowGroup>
+
+      <PushAlertsRow platform={platform} canEdit={canEdit} />
     </ProfileSection>
   );
 }

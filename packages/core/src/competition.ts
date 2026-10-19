@@ -55,6 +55,9 @@ export function rankLabel(position: number): string {
 }
 
 /** "112 pts" · "1 pt" */
+/** Distância em pontos que dispara o aviso "está chegando" (igual a competition_alert_state no banco). */
+export const COMPETITION_ALERT_GAP = 20;
+
 export function pointsLabel(points: number): string {
   return `${formatNumber(points, 0)} ${points === 1 ? "pt" : "pts"}`;
 }

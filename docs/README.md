@@ -16,6 +16,7 @@ padrões obrigatórios e comandos) ficam no [`CLAUDE.md`](../CLAUDE.md), na raiz
 | [`architecture.md`](./architecture.md) | Arquitetura de código: camadas, pastas por feature, dependências entre elas e por que funciona com Supabase |
 | [`implementation-plan.md`](./implementation-plan.md) | O que já foi entregue, as próximas etapas (ordem, escopo, critérios de aceite) e pendências para o lançamento |
 | [`business-rules.md`](./business-rules.md) | Regras de negócio em vigor, por área do app, com onde cada regra está implementada |
+| [`push-notifications.md`](./push-notifications.md) | Notificações no celular (competição e seguidores): regras, fluxo, custo, situação e configuração (VAPID, secrets, Vault) |
 | [`lgpd.md`](./lgpd.md) | LGPD: o que já está implementado, o que falta e por quê (resumo para o time) |
 | [`../.lgpd/STATUS.md`](../.lgpd/STATUS.md) | Auditoria LGPD: etapas, lacunas (`gaps.md`), mapa de dados, bases legais, fornecedores e registro de consentimentos |
 

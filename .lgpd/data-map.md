@@ -30,6 +30,7 @@
 | A017 | Perfil social e seguidores | Não | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A019 | Competição e pontuação semanal | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
+| A020 | Avisos no celular (Web Push): competição e seguidores | Não | Possível | **Avaliado (RIPD v0.4)** | Configurado (2026-10-19); aguarda a chave pública na Vercel |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.
@@ -414,6 +415,26 @@
 | Segurança | Parâmetros fixos no servidor e públicos; horários do treino gravados só pelo servidor (gatilhos) |
 | Decisão automatizada | **Sim** — controle de RPE suspeito (Art. 20): motivo mostrado ao titular; revisão pelo canal do titular |
 | Alto risco? | Avaliado — RIPD |
+| RIPD | `.lgpd/RIPD/ripd-social.md` |
+| Owner | Pendente (controlador) |
+
+### A020 — Avisos no celular (Web Push): competição e seguidores
+
+| Campo | Valor |
+|---|---|
+| Slug | a020-avisos-competicao |
+| Finalidade | Avisar no aparelho quando alguém segue o titular, pede para seguir ou aceita o pedido dele, e quando um competidor fica a menos de 20 pontos de passá-lo na temporada ou passa |
+| Base legal | Art. 7º, V, só se o titular ligar os avisos no aparelho (Política 0.4-dev) ⚖ |
+| Categorias de titulares | Quem ligou as notificações (recebe); quem seguiu, pediu ou aceitou e os competidores (nome, @ e, na competição, diferença de pontos aparecem no aviso) |
+| Sensíveis? | Não |
+| Dados | Endereço do aparelho no serviço de push, chaves públicas do navegador (p256dh, auth), data da inscrição e do último aviso; posição relativa por par e temporada (ahead · close · behind); último aviso de seguidor por (destinatário, pessoa, tipo) |
+| Fonte | Aparelho do titular (inscrição); derivado de A017 (vínculos) e A019 (posição) |
+| Sistemas | `push_subscriptions`, `competition_alert_states`, `save_push_subscription`, `follow_alerts_sent`, `compute_competition_alerts`, `build_follow_alert`, gatilhos `on_workout_session_competition_alerts` e `on_follow_push_alert` (pg_net), Edge Function `push-alerts`, service worker (`apps/web/sw/sw.ts`) |
+| Operadores | Supabase; o serviço de push do navegador (Google, Apple ou Mozilla) recebe só a mensagem cifrada e metadados ⚖ |
+| Transferência intl. | Sim — serviço de push (EUA), só para quem ligou os avisos ⚖ |
+| Retenção | Inscrição até desligar, sair da conta no aparelho, excluir a conta ou o serviço de push responder 404/410; estados só da temporada atual e da anterior; registro de avisos de seguidores por 1 dia |
+| Segurança | Conteúdo cifrado (RFC 8291) e assinado (VAPID); RLS (titular lê e apaga só as suas; estados sem acesso pelo app) |
+| Alto risco? | Avaliado — RIPD v0.4 |
 | RIPD | `.lgpd/RIPD/ripd-social.md` |
 | Owner | Pendente (controlador) |
 

@@ -63,7 +63,7 @@ export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode })
           <>
             <UserCard profile={profile.data} canEdit={canEdit} />
             <InstallCard platform={platform} />
-            <PreferencesSection profile={profile.data} canEdit={canEdit} />
+            <PreferencesSection profile={profile.data} canEdit={canEdit} platform={platform} />
             <PrivacySection consents={consents.data} canEdit={canEdit} socialPrivacy={socialPrivacy} />
             <AboutSection />
             <ProfileSignOut forcePending={dev.forcePending} />

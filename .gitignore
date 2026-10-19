@@ -35,3 +35,6 @@ yarn-error.log*
 .pnpm-debug.log*
 coverage/
 .vercel
+
+# Chaves VAPID (avisos da competição): contém a chave privada
+vapid.json

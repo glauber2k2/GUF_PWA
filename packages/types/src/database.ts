@@ -126,6 +126,30 @@ export type Database = {
         }
         Relationships: []
       }
+      competition_alert_states: {
+        Row: {
+          rival_id: string
+          season: string
+          state: string
+          updated_at: string
+          watcher_id: string
+        }
+        Insert: {
+          rival_id: string
+          season: string
+          state: string
+          updated_at?: string
+          watcher_id: string
+        }
+        Update: {
+          rival_id?: string
+          season?: string
+          state?: string
+          updated_at?: string
+          watcher_id?: string
+        }
+        Relationships: []
+      }
       competition_parameters: {
         Row: {
           bonus_max: number
@@ -334,6 +358,27 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_alerts_sent: {
+        Row: {
+          actor_id: string
+          kind: string
+          recipient_id: string
+          sent_at: string
+        }
+        Insert: {
+          actor_id: string
+          kind: string
+          recipient_id: string
+          sent_at?: string
+        }
+        Update: {
+          actor_id?: string
+          kind?: string
+          recipient_id?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           accepted_at: string | null
@@ -497,6 +542,36 @@ export type Database = {
           name?: string
           position?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_sent_at: string | null
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_sent_at?: string | null
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_sent_at?: string | null
+          p256dh?: string
           user_id?: string
         }
         Relationships: []
@@ -870,6 +945,16 @@ export type Database = {
         } & "the function public.average_duration_seconds with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
       }
       block_user: { Args: { p_user_id: string }; Returns: undefined }
+      build_follow_alert: {
+        Args: { p_followee_id: string; p_follower_id: string; p_kind: string }
+        Returns: {
+          actor_handle: string
+          actor_id: string
+          actor_name: string
+          kind: string
+          recipient_id: string
+        }[]
+      }
       can_view_member: {
         Args: { p_owner: string; p_viewer: string }
         Returns: boolean
@@ -877,6 +962,10 @@ export type Database = {
       can_view_member_history: {
         Args: { p_owner: string; p_viewer: string }
         Returns: boolean
+      }
+      competition_alert_state: {
+        Args: { p_rival_points: number; p_watcher_points: number }
+        Returns: string
       }
       competition_params_for: {
         Args: { p_season: string }
@@ -905,6 +994,10 @@ export type Database = {
         }
       }
       competition_season_of: { Args: { p_week_start: string }; Returns: string }
+      competition_season_points: {
+        Args: { p_season: string; p_user_id: string }
+        Returns: number
+      }
       competition_session_scores: {
         Args: { p_from: string; p_to: string; p_user_id: string }
         Returns: {
@@ -938,6 +1031,16 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: {
           competitor_id: string
+        }[]
+      }
+      compute_competition_alerts: {
+        Args: { p_user_id: string }
+        Returns: {
+          gap: number
+          kind: string
+          recipient_id: string
+          rival_id: string
+          rival_name: string
         }[]
       }
       current_legal_document: {
@@ -1161,6 +1264,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_consent_proofs: { Args: never; Returns: number }
       random_social_handle: { Args: never; Returns: string }
@@ -1176,6 +1280,10 @@ export type Database = {
       }
       revoke_health_consent: {
         Args: { p_platform?: string }
+        Returns: undefined
+      }
+      save_push_subscription: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined
       }
       save_routine: {

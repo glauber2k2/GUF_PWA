@@ -279,6 +279,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Foto do perfil", "Imagem enviada ou vinda do Google", "Você, opcional"],
             ["Perfil social", "Nome de usuário (@), seguidores, pedidos e bloqueios", "Você"],
             ["Esforço do treino", "Nota de 1 a 10 informada ao finalizar", "Você, opcional"],
+            ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
             ["Medidas corporais", "Peso, % de gordura e circunferências", "Você, opcional e com consentimento"],
           ],
         },
@@ -299,6 +300,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Acompanhar medidas corporais", "Medidas", "Consentimento (art. 11, I)"],
             ["Mostrar seu perfil (@, nome e foto) na busca e receber pedidos para seguir", "Conta e perfil social", "Execução de contrato (art. 7º, V)"],
             ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos, esforço e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
+            ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
             ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
             ["Cumprir obrigações legais", "Registros de acesso", "Obrigação legal (art. 7º, II)"],
@@ -324,6 +326,9 @@ const PRIVACY: LegalDocumentContent = {
           "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos. O esforço muito acima da sua média é ajustado automaticamente; você vê o motivo e pode pedir revisão (art. 20)."),
+        p(
+          "Se você ligar as notificações (Configurações › Preferências), o aparelho recebe um aviso quando alguém começa a seguir você, pede para seguir ou aceita o seu pedido, e quando um competidor fica a menos de 20 pontos de passar você no mês ou passa. O aviso mostra o nome e o @ da pessoa (e, na competição, a diferença de pontos), inclusive na tela bloqueada. Para evitar excesso, o mesmo aviso de seguidor sobre a mesma pessoa sai no máximo uma vez por dia. As notificações são ligadas em cada aparelho, começam desligadas e podem ser desligadas a qualquer momento, no app ou nas configurações do celular.",
+        ),
         { kind: "link", doc: "termos", anchor: "perfil-social", text: "Ler as regras do perfil nos Termos de Uso" },
       ],
     },
@@ -338,6 +343,7 @@ const PRIVACY: LegalDocumentContent = {
           "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
           "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
+          "Serviço de notificações do seu navegador ou celular (Google, Apple ou Mozilla), se você ligar as notificações. O texto do aviso vai criptografado: só o seu aparelho consegue ler.",
           "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
         ),
@@ -348,7 +354,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (só se você entrar com Google) e empresas contratadas pelo Supabase. Essas transferências seguem o art. 33 da LGPD, com [MECANISMO DE TRANSFERÊNCIA].",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (só se você entrar com Google), o serviço de notificações do seu aparelho (só se você ligar as notificações) e empresas contratadas pelo Supabase. Essas transferências seguem o art. 33 da LGPD, com [MECANISMO DE TRANSFERÊNCIA].",
         ),
       ],
     },
@@ -364,6 +370,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Conta, treinos e preferências", "Enquanto a conta existir"],
             ["Medidas corporais", "Até você revogar o consentimento ou excluir a conta"],
             ["Perfil social, seguidores e bloqueios", "Enquanto a conta existir; seguidores até você remover; bloqueios até desbloquear"],
+            ["Avisos no celular", "Até você desligar as notificações, sair da conta no aparelho ou o aparelho deixar de aceitar notificações; o registro dos avisos de seguidores enviados, por 1 dia"],
             ["Registros de acesso", "[PRAZO DOS REGISTROS DE ACESSO]"],
             ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança do provedor somem em até [PRAZO DOS BACKUPS]"],
             [
@@ -432,6 +439,10 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.4-dev": [
+      "Novo e opcional: notificações no celular quando alguém segue você, pede para seguir ou aceita seu pedido, e quando um competidor fica a menos de 20 pontos de passar você no mês ou passa. Começam desligadas.",
+      "Ao ligar as notificações, guardamos o endereço do aparelho no serviço de notificações (Google, Apple ou Mozilla) até você desligar ou sair da conta.",
+    ],
     "0.3-dev": [
       "Novo: perfil com nome de usuário (@), seguidores e competição entre amigos. Seu perfil começa privado.",
       "Seus treinos só aparecem para seguidores que você aprovar ou, se abrir o perfil, para qualquer pessoa com conta no guf.",

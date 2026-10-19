@@ -1,11 +1,13 @@
 # RIPD — Relatório de Impacto à Proteção de Dados
 
-**Atividade**: Seguidores, compartilhamento de treinos e competição (A017, A018, A019)
+**Atividade**: Seguidores, compartilhamento de treinos, competição e avisos no celular (A017, A018, A019, A020)
 **Slug**: ripd-social
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.3 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-18
+**Versão**: v0.4 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-19
+
+> **v0.4 (revisão antecipada — gatilho "notificações push")**: avisos no celular (A020) sobre seguidores (novo seguidor, pedido para seguir, pedido aceito: mostram nome e @ de quem agiu, que escolheu seguir/pedir/aceitar; no máximo 1 aviso por dia por pessoa e tipo, registro em `follow_alerts_sent` por 1 dia; nada sobre recusas, remoções ou bloqueios; bloqueio cancela o aviso) e sobre a competição. Opt-in por aparelho (começa desligado; ligar pede a permissão do sistema), só entre competidores (seguimento mútuo aceito, que cada um aprovou e pode desfazer removendo o seguidor ou deixando de seguir). O aviso mostra o nome do competidor e a diferença de pontos, também na tela bloqueada. Dados novos: endereço do aparelho no serviço de push e chaves públicas do navegador (`push_subscriptions`) e a posição relativa por par na temporada (`competition_alert_states`, só para quem ligou os avisos; temporadas antigas apagadas). Conteúdo cifrado de ponta a ponta (RFC 8291): o serviço de push (Google, Apple ou Mozilla) vê só endereço, horário e tamanho. Política 0.4-dev. Riscos R010–R013.
 
 > **v0.3 (decisão do produto)**: nenhum consentimento é pedido no meio do uso. As regras do perfil social estão nos Termos de Uso 0.2 e na Política 0.3, aceitos no cadastro; mostrar treinos é escolha do titular (aprovar seguidor, abrir o perfil), base Art. 7º, V ⚖. Perfil aberto = qualquer conta logada vê; privado = só quem segue. Fechar o perfil não remove seguidores; seguidor sai por remoção ou bloqueio. Risco residual: se treino for dado de saúde (N1), a base precisa ser consentimento específico (Art. 11, I) no cadastro.
 
@@ -73,7 +75,8 @@ flowchart LR
 
 ### 3.3 Operadores
 
-- Supabase — `.lgpd/vendors/README.md` (mesmo operador; nenhum novo).
+- Supabase — `.lgpd/vendors/README.md` (mesmo operador).
+- Serviço de push do navegador ou do sistema do titular (Google FCM, Apple APNs, Mozilla autopush) — A020; escolhido pelo titular ao usar o navegador, recebe só a mensagem cifrada e metadados (`.lgpd/vendors/push-services.md`) ⚖.
 
 ## 4. Necessidade e proporcionalidade
 
@@ -139,6 +142,10 @@ flowchart LR
 | R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; perfil privado por padrão; se N1, consentimento no cadastro | parcial ⚖ | 4 |
 | R008 | Nome e foto aparecem na busca para qualquer conta | 3 | 2 | 6 | @ aleatório no cadastro; busca só por prefixo (≥ 3 caracteres, até 20 resultados); bloqueados não aparecem; nada de treino sem consentimento. Pendente: opção de não aparecer na busca ⚖ | parcial | 4 |
 | R009 | Pressão por comparação (bem-estar) | 2 | 2 | 4 | Pontos premiam constância e não carga; limite de pontos por semana; ranking só entre seguidores mútuos | aceito | 4 |
+| R010 | Aviso na tela bloqueada revela nome do competidor e pontos a quem pega o celular | 3 | 2 | 6 | Opt-in por aparelho; texto mínimo (nome e diferença, sem treinos); o sistema permite esconder o conteúdo na tela bloqueada | mitigado | 3 |
+| R011 | Avisos de uma conta chegam a outra pessoa no mesmo aparelho (troca de conta) | 2 | 3 | 6 | Sair da conta apaga a inscrição no servidor e cancela no navegador; o mesmo aparelho inscrito por outra conta passa para ela (`save_push_subscription`); excluir a conta apaga em cascata | mitigado | 2 |
+| R012 | Excesso de avisos / pressão (bem-estar) | 3 | 2 | 6 | Competição: só na mudança de posição (um aviso por transição e por competidor), só competidores mútuos, só a temporada atual. Seguidores: no máximo 1 aviso por dia por pessoa e tipo; limite existente de 50 pedidos por dia. Desligar a qualquer momento | mitigado | 3 |
+| R013 | Assédio por avisos (seguir e deixar de seguir repetidamente para aparecer no celular de alguém) | 2 | 3 | 6 | 1 aviso a cada 24 h por pessoa e tipo, conferido no gatilho (nem a requisição sai); bloquear interrompe; o aviso só é enviado se o vínculo ainda existe | mitigado | 3 |
 
 ### 8.2 Riscos não mitigáveis
 
@@ -154,12 +161,14 @@ flowchart LR
 - [x] Horários do treino protegidos por gatilho (integridade da pontuação)
 - [x] Testes SQL de permissão (32 casos, transação desfeita; 2026-10-18)
 - [ ] MFA no painel do Supabase (`security-checklist.md`)
+- [x] Avisos: mensagem cifrada para o aparelho (RFC 8291) e assinada (VAPID); chave privada só nos secrets da Edge Function; função chamada só pelo banco com segredo do Vault; inscrições e estados sem leitura por terceiros (RLS)
 
 ## 10. Salvaguardas administrativas
 
 - [x] Plano de resposta a incidente (`incidents/runbook.md`)
 - [x] Canal do titular e prazo de 15 dias (`dsar/workflow.md`)
 - [x] Regras nos Termos 0.2-dev e na Política 0.3-dev (rascunhos; publicados no banco em 2026-10-18) ⚖
+- [x] Avisos no celular na Política 0.4-dev (rascunho; publicada no banco em 2026-10-19, migration `20261019230418_legal_privacy_push_alerts`) ⚖
 - [ ] DPA com o Supabase (G7)
 
 ## 11. Consulta a partes interessadas
@@ -183,6 +192,7 @@ flowchart LR
 4. Transparência e revisão do ajuste de RPE (Art. 20).
 5. Testes de permissão no banco antes de liberar para testadores (feito em 2026-10-18).
 6. Lançamento público só após revisão jurídica (termo do módulo, política, N1 e ECA Digital).
+7. Avisos no celular (A020): desligados por padrão, por aparelho; competição só entre competidores mútuos e só na mudança de posição; seguidores no máximo 1 por dia por pessoa e tipo; inscrição apagada ao desligar, sair da conta ou excluir a conta.
 
 **Aprovado por**:
 - Encarregado: pendente
@@ -191,4 +201,5 @@ flowchart LR
 ## 13. Plano de revisão
 
 - Próxima revisão obrigatória: antes do lançamento público ou 2027-04-18, o que vier primeiro.
-- Gatilhos para revisão antecipada: perfil visível fora dos seguidores, chat ou mensagens, notificações push, prêmios, mudança nos parâmetros da pontuação, novo operador, incidente, base > 50% maior.
+- Revisões feitas: v0.4 em 2026-10-19 (notificações push da competição e de seguidores).
+- Gatilhos para revisão antecipada: perfil visível fora dos seguidores, chat ou mensagens, outros tipos de notificação push (além dos avisos da competição e de seguidores), prêmios, mudança nos parâmetros da pontuação, novo operador, incidente, base > 50% maior.
