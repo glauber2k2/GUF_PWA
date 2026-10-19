@@ -27,6 +27,7 @@ import { TrainingCalendar } from "@/features/history/components/training-calenda
 import { useHistoryParams } from "@/features/history/hooks/use-history-params";
 import { VolumeChart } from "@/features/history/components/volume-chart";
 import { HISTORY_ANCHOR } from "@/features/history/helpers/paths";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 export interface HistorySectionProps {
   /** Dia aberto na folha ("yyyy-MM-dd"); a Início também abre pelos dias de "Esta semana". */
@@ -126,7 +127,7 @@ function HistoryContent({
         <HistoryStreakCard streak={streak} goal={weeklyGoal} weeks={strip} />
       </div>
 
-      <h2 id={HISTORY_ANCHOR} className="m-0 scroll-mt-4 px-1 pt-2 text-xl leading-[26px] font-bold tracking-[-0.01em]">
+      <h2 id={HISTORY_ANCHOR} data-tour={TOUR_TARGETS.history} className="m-0 scroll-mt-4 px-1 pt-2 text-xl leading-[26px] font-bold tracking-[-0.01em]">
         Histórico
       </h2>
       {firstTrainedOn && <EvolutionShortcut />}

@@ -52,7 +52,7 @@ apps/web/src/
 └── styles/tokens/
 ```
 
-Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (evolução por exercício e resumo do treino), `exercise-picker`, `history`, `home`, `legal`, `not-found`, `profile`, `projects`, `pwa`, `routine`, `share`, `workout`.
+Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (evolução por exercício e resumo do treino), `exercise-picker`, `history`, `home`, `legal`, `not-found`, `onboarding` (tour de onboarding), `profile`, `projects`, `pwa`, `routine`, `share`, `workout`.
 
 **Regras de dependência**
 - `app/` e outras features importam uma feature só pelo barrel (`@/features/<f>`); dentro da feature, pelo caminho.

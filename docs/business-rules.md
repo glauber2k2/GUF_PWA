@@ -238,6 +238,16 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 | Toda mensagem de erro diz **o que aconteceu e como resolver**, em português. | API (`result.ts`) |
 | Erros padronizados: treino já em andamento, treino não encontrado/finalizado, sessão expirada, sem conexão e erro desconhecido. | API (`result.ts`) |
 
+## 9.2 Tour de onboarding
+
+| Regra | Onde |
+|---|---|
+| Começa sozinho uma vez por sessão, só na Início, sem treino em andamento e se o tour ainda não foi concluído neste aparelho. | `TourProvider` (features/onboarding) |
+| 6 passos: boas-vindas → aba Projetos → "Novo projeto" → aba Treinar → registrar série → Histórico. O tour navega até a rota de cada passo; o overlay só aparece na rota do passo. | `TOUR_STEPS` |
+| Pular ou concluir grava "concluído" no aparelho (`guf:tour:main:v1`); um tour novo muda a versão da chave e aparece de novo para todos. | `TourProvider` |
+| Durante o tour a tela não recebe toques: avança só por Pular / Voltar / Próximo ("Começar" no último); Esc pula. Alvo não encontrado em 2 s → card sem recorte. | `TourOverlay`, `useTargetRect` |
+| Rever a qualquer momento: Configurações › Sobre › "Ver tutorial novamente". | `AboutSection` |
+
 ## 9.1 Padrões de interface
 
 | Regra | Onde |

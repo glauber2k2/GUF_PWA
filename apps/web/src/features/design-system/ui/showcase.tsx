@@ -53,6 +53,7 @@ import { cn } from "@/shared/helpers/class-names";
 import { BrandLoadingSection, MuscleSection, StreakSection } from "@/features/design-system/components/brand-sections";
 import { Group, OVERLINE, PANEL, Section, SectionHeader } from "@/features/design-system/components/layout";
 import { MascotSection } from "@/features/design-system/components/mascot-section";
+import { TourSection } from "@/features/design-system/components/tour-section";
 import {
   CALENDAR,
   CHART_PERIOD_OPTIONS,
@@ -92,6 +93,7 @@ const SECTIONS = [
   { id: "musculos", label: "Músculos" },
   { id: "sequencia", label: "Sequência" },
   { id: "mascote", label: "Mascote" },
+  { id: "tutorial", label: "Tutorial" },
 ];
 
 
@@ -150,6 +152,7 @@ function ThemeColumn({ theme, anchors = false }: { theme: ThemeKey; anchors?: bo
       <MuscleSection id={id("musculos")} />
       <StreakSection id={id("sequencia")} />
       <MascotSection id={id("mascote")} />
+      <TourSection id={id("tutorial")} />
     </div>
   );
 }

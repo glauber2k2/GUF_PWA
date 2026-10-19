@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, FileText, Scale, Shield, Sparkles } from "lucide-react";
+import { ChevronRight, FileText, GraduationCap, Scale, Shield, Sparkles } from "lucide-react";
 import { Button, Icon, Logo } from "@/shared/components/ds";
 import { LegalDocLink } from "@/features/legal";
 import { useSignupDocuments } from "@/features/auth";
+import { useTour } from "@/features/onboarding";
 import { applyUpdate, usePwaState } from "@/store/global/pwa.store";
 import { cn } from "@/shared/helpers/class-names";
 import { ProfileSection } from "./profile-ui";
@@ -14,15 +15,21 @@ const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 
 const ROW = "flex min-h-[52px] items-center gap-3 rounded-md px-2 text-[15px] font-medium text-fg no-underline hover:bg-surface-3";
 
-/** Documentos legais (central e leitor no app), versão e "Nova versão disponível". */
+/** Tutorial, documentos legais (central e leitor no app), versão e "Nova versão disponível". */
 export function AboutSection() {
   const docs = useSignupDocuments();
   const { waitingWorker } = usePwaState();
+  const tour = useTour();
 
   return (
     <ProfileSection id="pf-about" title="Sobre" className="[animation-delay:200ms]">
       <div className="flex flex-col px-2 py-1.5">
-        <Link href="/documentos" className={ROW}>
+        <button type="button" onClick={tour.start} className={cn(ROW, "w-full cursor-pointer bg-transparent text-left")}>
+          <Icon icon={GraduationCap} size={18} className="text-fg-secondary" />
+          <span className="flex-1">Ver tutorial novamente</span>
+          <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
+        </button>
+        <Link href="/documentos" className={cn(ROW, "border-t border-border")}>
           <Icon icon={Scale} size={18} className="text-fg-secondary" />
           <span className="flex-1">Documentos legais</span>
           <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
