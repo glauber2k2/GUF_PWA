@@ -45,7 +45,7 @@ guf-app/
 ```
 app/                     # só rotas e composição; page.tsx importa a tela pelo barrel da feature; providers.tsx = raiz de composição
 features/<feature>/      # app-shell, auth, design-system (dev), evolution (evolução + resumo), exercise-picker,
-│                        # competition, history, home, legal, not-found, profile (Configurações), projects, pwa, routine, share, social, workout
+│                        # competition, history, home, legal, not-found, onboarding (tour), profile (Configurações), projects, pwa, routine, share, social, workout
 ├── api/                 # hooks do TanStack Query sobre packages/api (ou mock em dev)
 ├── hooks/               # lógica da feature (um hook por finalidade; use-dev-*-state)
 ├── helpers/             # funções puras da feature (paths, reducers de rascunho, builders)
@@ -218,6 +218,15 @@ Dependências: `app → features → shared / packages`. Dentro da feature, impo
 
 ## Mascote (GufRat)
 - `shared/components/ds/guf-rat.tsx` (Claude Design "Guf Rat Forte v2"): `<GufRat occasion="workoutDone" animated badge size />`, 34 ocasiões (`GUF_RAT_SPECS`, grupos em `GUF_RAT_GROUPS`; as 4 do grupo "Comparações de peso" — `liftLight`, `lift`, `liftHeavy`, `liftImpossible` — vêm do canvas Comparacoes de Peso). Animações = keyframes `guf-rat-*` (base.css); origem/duração por parte vêm dos dados da pose (estilo inline). Rato sempre branco; contorno no tema claro e braço da frente por tokens `--rat-*` (colors.css), então funciona dentro de seções com outro `data-theme`. Movimento reduzido: parado. Vitrine: `/design-system#mascote`.
+
+## Tour de onboarding (tutorial guiado)
+- **Pasta:** `features/onboarding/` (`constants/tour-steps.ts` com os passos e `TOUR_TARGETS`, `hooks/use-target-rect.ts`, `providers/tour-provider.tsx` com `TourProvider`/`useTour`, `components/tour-overlay.tsx`). Montado em `app/(app)/layout.tsx` dentro do `AppShell` (só na área logada, depois da abertura).
+- **Passos (6):** boas-vindas (card no centro) → aba Projetos → "Novo projeto" em `/projetos` → aba Treinar → registrar série (card no centro: a tela do treino só abre com um treino de verdade) → seção Histórico da Início. Cada passo tem `route`; o tour navega até ela nos botões e só mostra o overlay quando a rota bate (saiu da rota pelo voltar do sistema = tour pausado, volta ao retornar).
+- **Alvos:** atributo `data-tour` com os valores de `TOUR_TARGETS` (importar do barrel `@/features/onboarding`, nunca escrever o texto solto). No menu inferior pelo `tourTarget` do `NavItem` (`BottomNav` do design system); no app-shell, os itens são montados na renderização (`buildNavItems`), não na carga do módulo, por causa do ciclo app-shell ↔ workout ↔ onboarding. `useTargetRect` procura o alvo por até 2 s, rola até ele e acompanha a posição (ResizeObserver, scroll em capture, resize e conferência a cada 300 ms); sem alvo, o card aparece sem recorte.
+- **Overlay:** `ScreenPortal` em `z-[80]` (acima de folhas `z-[60]`, avisos `z-[65]` e diálogos `z-[70]`), SVG com `<mask>` em `fill-scrim` e recorte `m.rect` que desliza entre passos, anel `ring-accent`, toques bloqueados (avança só pelos botões), card no rodapé ou no topo quando o alvo está na metade de baixo, `GufRat` do passo, "N de total", Pular · Voltar · Próximo ("Começar" no último). `role="dialog"`, `aria-modal`, foco no card a cada passo, Esc pula. Movimento reduzido: `MotionConfig` + regra global do base.css.
+- **Quando começa:** sozinho uma vez por sessão, só na Início (`/`), sem treino em andamento e se ainda não concluído no aparelho. Conclusão (ou pular) gravada com `createDevicePreference` na chave versionada `guf:tour:main:v1` (pending · done); um tour novo troca a versão. Rever: Configurações › Sobre › "Ver tutorial novamente" (`useTour().start()`).
+- **Vitrine:** `/design-system#tutorial` (`TourSection`) percorre os passos sobre alvos de exemplo, sem trocar de rota nem gravar.
+- **Pendente (decisão):** a conclusão vale por aparelho; guardar no perfil (todos os aparelhos) exige migration — perguntar antes.
 
 ## Página 404
 - `src/app/not-found.tsx` → `NotFoundScreen` (`features/not-found/`), exportada como `out/404.html`. Logado → "Voltar ao início" (/); sem sessão → "Ir para o login". Redireciona sozinha em 10 s (conta só depois de saber se há sessão); "Ficar aqui" pausa. Animação do anel com keyframes `guf-404-*` (base.css), parada em movimento reduzido.

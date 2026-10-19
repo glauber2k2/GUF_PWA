@@ -250,6 +250,19 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; fechar o perfil mantém os seguidores; remover e bloquear tiram o acesso; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
 
+### Etapa 8 — Tour de onboarding (`feat/tutorial-onboarding`)
+
+| Item | Situação |
+|---|---|
+| Feature `features/onboarding/` (passos, alvo medido, provider, overlay com recorte e anel) sem biblioteca nova | Feito |
+| `data-tour` no menu inferior (Projetos, Treinar), "Novo projeto" e título do Histórico | Feito |
+| "Ver tutorial novamente" em Configurações › Sobre; vitrine `/design-system#tutorial` | Feito |
+| Conferido por print (Edge headless) na página de teste: card no centro, no topo e no rodapé, recorte e anel | Feito |
+| Conferir no celular com uma conta nova (primeira entrada) | Pendente |
+| Guardar a conclusão no perfil (vale em todos os aparelhos) | Decisão pendente (exige migration) |
+
+**Critérios de aceite**: tour aparece uma vez na primeira entrada; pular e concluir não voltam a mostrar; rever por Configurações; nada quebra se um alvo não existir; lint e typecheck sem erros.
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.

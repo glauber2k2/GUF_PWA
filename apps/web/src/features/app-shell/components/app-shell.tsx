@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ListPlus, Play, Plus } from "lucide-react";
 import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack } from "@/shared/components/ds";
+import { BOTTOM_NAV_ITEMS, BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack, type NavItem } from "@/shared/components/ds";
 import { useDevHomeState } from "@/features/home";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { useHomeSummary, useStartWorkout } from "@/features/home";
@@ -16,6 +16,7 @@ import { MiniWorkoutCard } from "@/features/workout";
 import { newRoutinePathFor } from "@/features/projects";
 import { useActiveWorkout } from "@/features/workout";
 import { useClosedWorkoutWatcher } from "@/features/app-shell/hooks/use-closed-workout-watcher";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
 const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exercicio", "/exercicio/busca"]);
@@ -28,6 +29,15 @@ const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }>
   { path: "/projetos", name: "Projetos" },
   { path: "/perfil", name: "Perfil", inner: ["/configuracoes", "/seguidores", "/solicitacoes"] },
 ];
+
+/**
+ * Abas destacadas pelo tour de onboarding (data-tour). Montado na renderização, não na carga do
+ * módulo: app-shell, workout e onboarding se importam em ciclo e a constante ainda pode não existir.
+ */
+function buildNavItems(): NavItem[] {
+  const targets: Record<string, string> = { Treinar: TOUR_TARGETS.trainTab, Projetos: TOUR_TARGETS.projectsTab };
+  return BOTTOM_NAV_ITEMS.map((item) => ({ ...item, tourTarget: targets[item.label] }));
+}
 
 /** Limite do overlay "Iniciando treino" depois que a sessão foi criada (se a tela do treino não abrir). */
 const OPENING_TIMEOUT_MS = 8000;
@@ -98,6 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Contador: mais de uma barra pode pedir ao mesmo tempo (ex.: seletor aberto sobre o treino).
   const [raisedCount, setRaisedCount] = useState(0);
   const [startOpen, setStartOpen] = useState(false);
+  const [navItems] = useState(buildNavItems);
 
   const showToast = toasts.show;
   // Treino encerrado pelo servidor (finalização automática): fecha no aparelho e mostra o resumo.
@@ -286,6 +297,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         )}
       >
         <BottomNav
+          items={navItems}
           value={navValue}
           onChange={onNav}
           className="mx-auto max-w-[430px] border-t-0 bg-transparent backdrop-blur-none"

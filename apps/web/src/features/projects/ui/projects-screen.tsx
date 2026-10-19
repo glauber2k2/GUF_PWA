@@ -14,6 +14,7 @@ import { ActiveProjectCard, ArchivedProjects, NoActiveProjectCard, ProjectListIt
 import { useProjectFlows } from "@/features/projects/components/project-flows";
 import { ProjectsSkeleton } from "@/features/projects/components/projects-skeleton";
 import { useProjectActions } from "@/features/projects/hooks/use-project-actions";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 /** Aba Projetos: projeto ativo em destaque, outros projetos e arquivados. */
 export function ProjectsScreen() {
@@ -52,7 +53,7 @@ function ListLayout({ canEdit, onNew, children }: { canEdit: boolean; onNew: (()
       <div className="mt-1 flex flex-none items-center justify-between gap-3">
         <LargeTitle className="m-0">Projetos</LargeTitle>
         {onNew && (
-          <Button variant="secondary" icon={Plus} disabled={!canEdit} onClick={onNew} className="rounded-pill">
+          <Button data-tour={TOUR_TARGETS.newProject} variant="secondary" icon={Plus} disabled={!canEdit} onClick={onNew} className="rounded-pill">
             Novo projeto
           </Button>
         )}

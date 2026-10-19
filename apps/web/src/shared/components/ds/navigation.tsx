@@ -51,6 +51,8 @@ export function LargeTitle({ children, className }: { children: ReactNode; class
 export interface NavItem {
   label: string;
   icon: LucideIcon;
+  /** Valor de `data-tour` (elemento destacado pelo tour de onboarding). */
+  tourTarget?: string;
 }
 
 /** Itens do CLAUDE.md: Início (com o histórico), Competir, Treinar (central), Projetos, Perfil. */
@@ -187,6 +189,7 @@ export function BottomNav({
           <button
             key={item.label}
             type="button"
+            data-tour={item.tourTarget}
             aria-current={on ? "page" : undefined}
             onClick={() => {
               setInner(i);
