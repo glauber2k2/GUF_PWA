@@ -1,9 +1,9 @@
 import { Skeleton } from "@/shared/components/ds";
 
 const CARD = "flex flex-col rounded-lg border border-border bg-surface shadow-e1";
-const WEEK = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"];
+const WEEK = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
 
-/** Carregamento da Início: mesma silhueta dos blocos reais. */
+/** Carregamento da Início (o histórico abaixo tem o próprio esqueleto): mesma silhueta dos blocos reais. */
 export function HomeSkeleton() {
   return (
     <div aria-busy="true" aria-label="Carregando" className="flex flex-col gap-4">
@@ -33,14 +33,6 @@ export function HomeSkeleton() {
             <Skeleton key={d} className="size-9 rounded-pill" />
           ))}
         </div>
-      </div>
-      <div className={`${CARD} gap-3.5 p-5`}>
-        <div className="flex items-center gap-3.5">
-          <Skeleton className="size-12 rounded-md" />
-          <Skeleton className="h-10 w-[150px] rounded-sm" />
-        </div>
-        <Skeleton className="h-2 rounded-pill" />
-        <Skeleton className="w-[70%]" />
       </div>
     </div>
   );

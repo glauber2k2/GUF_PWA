@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Ban, ChevronDown, Clock, Link2, Pencil, Share2, Swords, UserCheck, UserMinus, UserPlus, UserX } from "lucide-react";
-import { FOLLOW_BUTTON_LABELS, followButtonState, socialInvitePath } from "@guf/core";
+import { duelPath, FOLLOW_BUTTON_LABELS, followButtonState, socialInvitePath } from "@guf/core";
 import type { MemberProfile } from "@guf/api";
 import { BottomSheet, Button, ConfirmDialog, IconButton, SheetOption } from "@/shared/components/ds";
 import { useAppShell } from "@/features/app-shell";
@@ -75,7 +75,7 @@ export function VisitorActions({ profile }: { profile: MemberProfile }) {
 
   const onDuel = () =>
     profile.isCompetitor
-      ? router.push(`/competicao?rival=${encodeURIComponent(profile.userId)}`)
+      ? router.push(duelPath(profile.userId))
       : showToast("Vocês ainda não competem", { tone: "info", message: "A competição começa quando vocês se seguem mutuamente." });
 
   const following = state === "following" || state === "requested";

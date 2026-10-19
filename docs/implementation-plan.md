@@ -239,8 +239,11 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | `packages/core`, `packages/schemas`, `packages/api` (`SocialApi`, `CompetitionApi`), mocks | Feito |
 | Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
 | Busca de pessoas e lista de seguidores/pedidos/bloqueados | Feito (provisório, sem protótipo) |
+| Duelo pelo perfil (`/competicao/duelo?id=…`): competição só entre você e a pessoa; telas de competição compartilham `useCompetitionView` + `CompetitionBoard` | Feito |
+| Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
 | RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
 | Conferir as telas logado, com dados reais | Pendente |
+| Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
 
 **Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; fechar o perfil mantém os seguidores; remover e bloquear tiram o acesso; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
 

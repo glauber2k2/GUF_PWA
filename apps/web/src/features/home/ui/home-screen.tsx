@@ -2,11 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight } from "lucide-react";
 import {
   currentWeek,
   formatLongDate,
-  formatShortDate,
   fromLocalISODate,
   greeting,
   routineLetter,
@@ -18,17 +16,18 @@ import type { HomeSummary } from "@guf/api";
 import { useAppShell } from "@/features/app-shell";
 import { summaryPath } from "@/features/evolution";
 import { newRoutinePathFor } from "@/features/projects";
-import { Avatar, Banner, BottomSheet, Button, SheetOption, StatGrid } from "@/shared/components/ds";
+import { Avatar, Banner, BottomSheet, SheetOption } from "@/shared/components/ds";
+import { HISTORY_ANCHOR, HistorySection } from "@/features/history";
+import { prefersReducedMotion } from "@/shared/helpers/motion";
 import { useDevHomeState } from "@/features/home/hooks/use-dev-home-state";
 import { useHomeSummary } from "@/features/home/api/use-home-summary";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { useAuth } from "@/features/auth";
 import { HomeSkeleton } from "@/features/home/components/home-skeleton";
-import { StreakCard } from "@/features/home/components/streak-card";
-import { sessionStats, TodayCard, type TodayCardState } from "@/features/home/components/today-card";
+import { TodayCard, type TodayCardState } from "@/features/home/components/today-card";
 import { WeekCard } from "@/features/home/components/week-card";
 
-type Sheet = { kind: "swap" } | { kind: "day"; iso: string } | null;
+type Sheet = { kind: "swap" } | null;
 
 /**
  * Estado do card "Treino de hoje":
@@ -49,14 +48,19 @@ function todayState(data: HomeSummary, today: string): TodayCardState {
   return data.hasAnyRoutine ? { kind: "empty" } : { kind: "new" };
 }
 
+/** "Esta semana" leva ao histórico, que fica logo abaixo na própria Início. */
+function scrollToHistory() {
+  document.getElementById(HISTORY_ANCHOR)?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
+}
+
 export function HomeScreen() {
-  const router = useRouter();
   const { user } = useAuth();
   const shell = useAppShell();
   const dev = useDevHomeState();
   const online = useOnlineStatus();
   const summary = useHomeSummary();
   const [sheet, setSheet] = useState<Sheet>(null);
+  const [openDay, setOpenDay] = useState<string | null>(null);
   const closeSheet = () => setSheet(null);
 
   const now = new Date();
@@ -95,20 +99,13 @@ export function HomeScreen() {
           week={week}
           userEmail={user?.email ?? null}
           onOpenSheet={setSheet}
+          onSelectDay={setOpenDay}
         />
       )}
 
-      {data && (
-        <>
-          <SwapSheet open={sheet?.kind === "swap"} data={data} today={today} onClose={closeSheet} onPick={(r) => shell.startWorkout(r)} />
-          <DaySheet
-            iso={sheet?.kind === "day" ? sheet.iso : null}
-            data={data}
-            onClose={closeSheet}
-            onOpenSummary={(sessionId) => router.push(summaryPath(sessionId))}
-          />
-        </>
-      )}
+      <HistorySection openDay={openDay} onOpenDayChange={setOpenDay} />
+
+      {data && <SwapSheet open={sheet?.kind === "swap"} data={data} today={today} onClose={closeSheet} onPick={(r) => shell.startWorkout(r)} />}
     </main>
   );
 }
@@ -120,6 +117,7 @@ function HomeContent({
   week,
   userEmail,
   onOpenSheet,
+  onSelectDay,
 }: {
   data: HomeSummary;
   today: string;
@@ -127,6 +125,7 @@ function HomeContent({
   week: ReturnType<typeof currentWeek>;
   userEmail: string | null;
   onOpenSheet: (sheet: Sheet) => void;
+  onSelectDay: (iso: string) => void;
 }) {
   const shell = useAppShell();
   const router = useRouter();
@@ -176,13 +175,9 @@ function HomeContent({
           trainedDays={trainedDays}
           count={data.streak.currentWeekCount}
           goal={data.profile.weeklyGoal}
-          onOpenHistory={() => router.push("/historico")}
-          onSelectDay={(iso) => onOpenSheet({ kind: "day", iso })}
+          onOpenHistory={scrollToHistory}
+          onSelectDay={onSelectDay}
         />
-      </div>
-
-      <div className="animate-guf-rise [animation-delay:240ms]">
-        <StreakCard streak={data.streak} goal={data.profile.weeklyGoal} />
       </div>
     </>
   );
@@ -220,38 +215,6 @@ function SwapSheet({
           }}
         />
       ))}
-    </BottomSheet>
-  );
-}
-
-/** Resumo de um dia treinado da semana (toque no dia). */
-function DaySheet({
-  iso,
-  data,
-  onClose,
-  onOpenSummary,
-}: {
-  iso: string | null;
-  data: HomeSummary;
-  onClose: () => void;
-  onOpenSummary: (sessionId: string) => void;
-}) {
-  const sessions = iso ? data.weekSessions.filter((s) => s.performedOn === iso) : [];
-  const latest = sessions.at(-1);
-  const names = sessions.map((s) => s.name).join(" · ");
-  return (
-    <BottomSheet
-      placement="screen"
-      open={sessions.length > 0}
-      onClose={onClose}
-      title={iso ? formatShortDate(fromLocalISODate(iso)) : undefined}
-      subtitle={sessions.length > 1 ? `${sessions.length} treinos concluídos` : "Concluído"}
-    >
-      <span className="text-[15px] font-medium text-fg-secondary">{names}</span>
-      <StatGrid stats={sessionStats(sessions)} className="pt-2 pb-1" />
-      <Button variant="secondary" size="tall" iconRight={ChevronRight} fullWidth onClick={() => latest && onOpenSummary(latest.id)}>
-        Ver resumo completo
-      </Button>
     </BottomSheet>
   );
 }
