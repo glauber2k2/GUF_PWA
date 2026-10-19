@@ -4,6 +4,7 @@ export { SocialPrivacyGroup } from "./components/social-privacy-group";
 export { useDevSocialState } from "./hooks/use-dev-social-state";
 export type { DevSocialState } from "./hooks/use-dev-social-state";
 export { ConnectionsScreen } from "./ui/connections-screen";
+export { FollowRequestsScreen } from "./ui/follow-requests-screen";
 export { PeopleSearchScreen } from "./ui/people-search-screen";
 export { PersonScreen } from "./ui/person-screen";
 export { SocialProfileScreen } from "./ui/social-profile-screen";

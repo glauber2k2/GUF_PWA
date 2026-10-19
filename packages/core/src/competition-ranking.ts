@@ -208,3 +208,12 @@ export function workoutsToCover(gap: number, metric: CompetitionMetric, totals: 
   const perWorkout = sessions > 0 && total > 0 ? total / sessions : null;
   return perWorkout ? Math.max(1, Math.ceil(gap / perWorkout)) : null;
 }
+
+/**
+ * Só você e uma pessoa (duelo aberto pelo perfil dela); sem `rivalId`, todos os competidores.
+ * @param rivalId id da pessoa do duelo
+ */
+export function headToHeadParticipants<T extends Pick<CompetitionParticipant, "userId" | "isMe">>(participants: readonly T[], rivalId: string | null): T[] {
+  if (!rivalId) return [...participants];
+  return participants.filter((p) => p.isMe || p.userId === rivalId);
+}

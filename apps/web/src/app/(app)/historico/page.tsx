@@ -1,5 +1,5 @@
-import { HistoryScreen } from "@/features/history";
+import { HistoryRedirect } from "@/features/history";
 
 export default function HistoricoPage() {
-  return <HistoryScreen />;
+  return <HistoryRedirect />;
 }

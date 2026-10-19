@@ -13,7 +13,7 @@ import { useDevHistoryState, type DevHistoryState } from "@/features/history/hoo
 
 /**
  * Dados reais por padrão (com cópia no aparelho para abrir sem internet). Em DESENVOLVIMENTO,
- * com ?estado=, usa o mock (mesmo contrato). No build de produção o ramo do mock é eliminado.
+ * com ?estado=, usa o mock (mesmo contrato; roda mesmo sem login). No build de produção o ramo do mock é eliminado.
  */
 function useHistorySource(): { api: HistoryApi; dev: DevHistoryState; cached: boolean } {
   const dev = useDevHistoryState();
@@ -44,7 +44,7 @@ export function useHistoryOverview() {
   const range = weeksRange(new Date(), HISTORY_WEEKS);
   return useQuery({
     queryKey: [HISTORY_KEY, "overview", user?.id, today, dev.scenario],
-    enabled: Boolean(user),
+    enabled: Boolean(user || dev.scenario),
     queryFn: () => run(`overview:${range.from}`, cached, () => api.getHistoryOverview(getSupabaseClient(), range)),
   });
 }
@@ -70,7 +70,7 @@ export function useMonthTrainingDays(month: Date) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monthKey, user, queryClient, dev.scenario]);
 
-  return useQuery({ ...options(month), enabled: Boolean(user) });
+  return useQuery({ ...options(month), enabled: Boolean(user || dev.scenario) });
 }
 
 /** Treinos de um dia (folha do calendário); só busca com um dia selecionado. */
@@ -79,7 +79,7 @@ export function useDaySessions(performedOn: string | null) {
   const { api, dev, cached } = useHistorySource();
   return useQuery({
     queryKey: [HISTORY_KEY, "day", user?.id, performedOn, dev.scenario],
-    enabled: Boolean(user && performedOn),
+    enabled: Boolean((user || dev.scenario) && performedOn),
     queryFn: () => run(`day:${performedOn}`, cached, () => api.getDaySessions(getSupabaseClient(), { performedOn: performedOn ?? "" })),
   });
 }

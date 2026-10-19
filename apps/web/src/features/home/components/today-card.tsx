@@ -55,7 +55,7 @@ export interface TodayCardActions {
 }
 
 /** Soma os números dos treinos concluídos (vários no mesmo dia viram um resumo só). */
-export function sessionStats(sessions: FinishedSession[]) {
+function sessionStats(sessions: FinishedSession[]) {
   const duration = sessions.reduce((t, s) => t + s.durationSeconds, 0);
   const volume = sessions.reduce((t, s) => t + s.volumeKg, 0);
   const sets = sessions.reduce((t, s) => t + s.setCount, 0);

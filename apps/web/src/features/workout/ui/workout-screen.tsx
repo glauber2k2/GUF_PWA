@@ -53,6 +53,7 @@ import {
   TextField,
 } from "@/shared/components/ds";
 import { ExercisePicker } from "@/features/exercise-picker";
+import { historyAnchorPath } from "@/features/history";
 import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/features/workout/hooks/use-dev-workout-state";
 import { useHoldReorder } from "@/shared/hooks/use-hold-reorder";
@@ -612,7 +613,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           onOpenHistory={() => {
             // Finalizado sem internet: o treino entra no histórico quando a fila sincronizar.
             if (summary.pending) shell.showToast(...PENDING_TOAST);
-            router.replace("/historico");
+            router.replace(historyAnchorPath());
           }}
           onShare={() => setSharing(true)}
         />

@@ -120,87 +120,42 @@ interface DuelRow {
   format: (value: number) => string;
 }
 
-/** Duelo: você contra uma pessoa do ranking em cada métrica. */
-export function DuelCard({
-  me,
-  rival,
-  candidates,
-  formatVolume,
-  onPick,
-}: {
-  me: RankedCompetitor;
-  rival: RankedCompetitor;
-  candidates: RankedCompetitor[];
-  formatVolume: (value: number) => string;
-  onPick: (userId: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const count = (value: number) => formatNumber(value, 0);
-  const pick = (totals: CompetitorTotals, key: "points" | "workouts" | "volume" | "records") => metricValue(totals, key);
-  const rows: DuelRow[] = [
-    { label: "Pontos", me: pick(me.totals, "points"), rival: pick(rival.totals, "points"), format: count },
-    { label: "Treinos", me: pick(me.totals, "workouts"), rival: pick(rival.totals, "workouts"), format: count },
-    { label: "Volume", me: pick(me.totals, "volume"), rival: pick(rival.totals, "volume"), format: formatVolume },
-    { label: "Recordes", me: pick(me.totals, "records"), rival: pick(rival.totals, "records"), format: count },
-    { label: "Sequência (sem.)", me: me.currentStreak, rival: rival.currentStreak, format: count },
-  ];
-  const wins = rows.filter((r) => r.me > r.rival).length;
-
+/** Adversário fixo do duelo (duelo aberto pelo perfil da pessoa). */
+function RivalSide({ rival }: { rival: RankedCompetitor }) {
   return (
-    <section aria-label="Duelo" className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 shadow-e1">
-      <div className="flex items-baseline justify-between">
-        <h2 className="m-0 text-lg leading-6 font-semibold tracking-[-0.015em]">Duelo</h2>
-        <span className="text-[13px] text-fg-muted">
-          Você vence em {wins} de {rows.length}
+    <div className="flex min-w-0 flex-col items-center gap-1.5 py-2">
+      <span className="grid rounded-pill border-2 border-data p-0.5">
+        <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
+      </span>
+      <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
+      <span className="text-xs leading-4 text-fg-muted">{rankLabel(rival.rank)} lugar</span>
+    </div>
+  );
+}
+
+/** Adversário que pode ser trocado por outra pessoa do ranking (tela geral da competição). */
+function RivalPicker({ rival, candidates, onPick }: { rival: RankedCompetitor; candidates: RankedCompetitor[]; onPick: (userId: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        aria-label={`Duelando com ${firstName(rival)}. Trocar adversário`}
+        className="flex min-w-0 cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border-strong px-1 pt-2 pb-2.5 text-fg hover:bg-surface-3 active:scale-[0.97]"
+      >
+        <span className="relative grid rounded-pill border-2 border-data p-0.5">
+          <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
+          <span className="absolute -right-1 -bottom-1 grid size-6 place-items-center rounded-pill border border-border-strong bg-surface-elevated">
+            <Icon icon={ArrowLeftRight} size={13} />
+          </span>
         </span>
-      </div>
-      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
-        <div className="flex flex-col items-center gap-1.5 py-2">
-          <span className="grid rounded-pill border-2 border-accent-text p-0.5">
-            <Avatar src={me.avatarUrl} name={me.name ?? me.handle} size="lg" />
-          </span>
-          <span className="text-sm leading-5 font-semibold">Você</span>
-          <span className="text-xs leading-4 text-fg-muted">{rankLabel(me.rank)} lugar</span>
-        </div>
-        <span className="font-display text-2xl font-bold text-fg-muted">VS</span>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          aria-label={`Duelando com ${firstName(rival)}. Trocar adversário`}
-          className="flex min-w-0 cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border-strong px-1 pt-2 pb-2.5 text-fg hover:bg-surface-3 active:scale-[0.97]"
-        >
-          <span className="relative grid rounded-pill border-2 border-data p-0.5">
-            <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
-            <span className="absolute -right-1 -bottom-1 grid size-6 place-items-center rounded-pill border border-border-strong bg-surface-elevated">
-              <Icon icon={ArrowLeftRight} size={13} />
-            </span>
-          </span>
-          <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
-          <span className="flex items-center gap-0.5 text-xs leading-4 font-semibold text-data">
-            Trocar
-            <Icon icon={ChevronDown} size={14} />
-          </span>
-        </button>
-      </div>
-      <div className="flex flex-col gap-3.5">
-        {rows.map((r) => {
-          const total = Math.max(1, r.me + r.rival);
-          return (
-            <div key={r.label} className="flex flex-col gap-1.5">
-              <div className="grid grid-cols-[1fr_auto_1fr] items-baseline gap-2 tabular-nums">
-                <span className={cn("font-display text-xl leading-6 font-semibold", r.me >= r.rival ? "text-accent-text" : "text-fg-secondary")}>{r.format(r.me)}</span>
-                <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">{r.label}</span>
-                <span className={cn("text-right font-display text-xl leading-6 font-semibold", r.rival >= r.me ? "text-data" : "text-fg-secondary")}>{r.format(r.rival)}</span>
-              </div>
-              <div className="flex h-2 gap-[3px]">
-                {/* Proporção de cada lado (dinâmico). */}
-                <span className="rounded-l-pill rounded-r-[2px] bg-accent transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.me / total) }} />
-                <span className="rounded-l-[2px] rounded-r-pill bg-data transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.rival / total) }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
+        <span className="flex items-center gap-0.5 text-xs leading-4 font-semibold text-data">
+          Trocar
+          <Icon icon={ChevronDown} size={14} />
+        </span>
+      </button>
 
       <BottomSheet placement="screen" open={open} onClose={() => setOpen(false)} title="Duelar com">
         <div role="radiogroup" aria-label="Escolher adversário" className="flex max-h-[60vh] flex-col gap-1.5 overflow-y-auto">
@@ -232,6 +187,79 @@ export function DuelCard({
           })}
         </div>
       </BottomSheet>
+    </>
+  );
+}
+
+export interface DuelPicker {
+  candidates: RankedCompetitor[];
+  onPick: (userId: string) => void;
+}
+
+/**
+ * Duelo: você contra uma pessoa em cada métrica.
+ * @param picker sem ele, o adversário é fixo (duelo aberto pelo perfil da pessoa)
+ */
+export function DuelCard({
+  me,
+  rival,
+  formatVolume,
+  picker,
+}: {
+  me: RankedCompetitor;
+  rival: RankedCompetitor;
+  formatVolume: (value: number) => string;
+  picker?: DuelPicker;
+}) {
+  const count = (value: number) => formatNumber(value, 0);
+  const pick = (totals: CompetitorTotals, key: "points" | "workouts" | "volume" | "records") => metricValue(totals, key);
+  const rows: DuelRow[] = [
+    { label: "Pontos", me: pick(me.totals, "points"), rival: pick(rival.totals, "points"), format: count },
+    { label: "Treinos", me: pick(me.totals, "workouts"), rival: pick(rival.totals, "workouts"), format: count },
+    { label: "Volume", me: pick(me.totals, "volume"), rival: pick(rival.totals, "volume"), format: formatVolume },
+    { label: "Recordes", me: pick(me.totals, "records"), rival: pick(rival.totals, "records"), format: count },
+    { label: "Sequência (sem.)", me: me.currentStreak, rival: rival.currentStreak, format: count },
+  ];
+  const wins = rows.filter((r) => r.me > r.rival).length;
+
+  return (
+    <section aria-label="Duelo" className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-5 shadow-e1">
+      <div className="flex items-baseline justify-between">
+        <h2 className="m-0 text-lg leading-6 font-semibold tracking-[-0.015em]">Duelo</h2>
+        <span className="text-[13px] text-fg-muted">
+          Você vence em {wins} de {rows.length}
+        </span>
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+        <div className="flex flex-col items-center gap-1.5 py-2">
+          <span className="grid rounded-pill border-2 border-accent-text p-0.5">
+            <Avatar src={me.avatarUrl} name={me.name ?? me.handle} size="lg" />
+          </span>
+          <span className="text-sm leading-5 font-semibold">Você</span>
+          <span className="text-xs leading-4 text-fg-muted">{rankLabel(me.rank)} lugar</span>
+        </div>
+        <span className="font-display text-2xl font-bold text-fg-muted">VS</span>
+        {picker ? <RivalPicker rival={rival} candidates={picker.candidates} onPick={picker.onPick} /> : <RivalSide rival={rival} />}
+      </div>
+      <div className="flex flex-col gap-3.5">
+        {rows.map((r) => {
+          const total = Math.max(1, r.me + r.rival);
+          return (
+            <div key={r.label} className="flex flex-col gap-1.5">
+              <div className="grid grid-cols-[1fr_auto_1fr] items-baseline gap-2 tabular-nums">
+                <span className={cn("font-display text-xl leading-6 font-semibold", r.me >= r.rival ? "text-accent-text" : "text-fg-secondary")}>{r.format(r.me)}</span>
+                <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">{r.label}</span>
+                <span className={cn("text-right font-display text-xl leading-6 font-semibold", r.rival >= r.me ? "text-data" : "text-fg-secondary")}>{r.format(r.rival)}</span>
+              </div>
+              <div className="flex h-2 gap-[3px]">
+                {/* Proporção de cada lado (dinâmico). */}
+                <span className="rounded-l-pill rounded-r-[2px] bg-accent transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.me / total) }} />
+                <span className="rounded-l-[2px] rounded-r-pill bg-data transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.rival / total) }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </section>
   );
 }

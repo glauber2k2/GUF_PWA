@@ -83,3 +83,8 @@ export function scoringRules(params: CompetitionParameters): string[] {
     "Empate: vence quem tem mais semanas cumpridas, depois mais treinos válidos e depois mais carga na temporada.",
   ];
 }
+
+/** Duelo com uma pessoa (botão de espadas do perfil dela): `/competicao/duelo?id=<userId>`. */
+export function duelPath(userId: string): string {
+  return `/competicao/duelo?id=${encodeURIComponent(userId)}`;
+}

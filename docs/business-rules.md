@@ -158,7 +158,9 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 | Card "Treino de hoje", em ordem de prioridade: em andamento > concluído hoje > treino de hoje do projeto ativo (pelos dias) **ou** dia de descanso com o próximo treino da semana > sem plano (tem rotinas, sem projeto ativo) > usuário novo (nenhuma rotina). | Web (`home-screen.tsx`, `today-card.tsx`) |
 | Card "Esta semana": dias treinados de domingo a sábado e contagem vs. meta. | Web + Banco (`get_training_days`) |
 
-## 8. Histórico
+## 8. Histórico (seção da Início)
+
+O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta semana" rola até ele e os dias da semana abrem a mesma folha do dia do calendário; `/historico` só redireciona para `/#historico`.
 
 | Regra | Onde |
 |---|---|

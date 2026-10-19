@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { CalendarDays, ClipboardList, Dumbbell, GripVertical, House, Swords, User, type LucideIcon } from "lucide-react";
+import { ClipboardList, Dumbbell, GripVertical, House, Swords, User, type LucideIcon } from "lucide-react";
 import { prefersReducedMotion } from "@/shared/helpers/motion";
 import { cn } from "@/shared/helpers/class-names";
 import { Icon } from "./brand";
@@ -53,12 +53,11 @@ export interface NavItem {
   icon: LucideIcon;
 }
 
-/** Itens do CLAUDE.md: Início, Histórico, Treinar (central), Competir, Projetos, Perfil. */
+/** Itens do CLAUDE.md: Início (com o histórico), Competir, Treinar (central), Projetos, Perfil. */
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
   { label: "Início", icon: House },
-  { label: "Histórico", icon: CalendarDays },
-  { label: "Treinar", icon: Dumbbell },
   { label: "Competir", icon: Swords },
+  { label: "Treinar", icon: Dumbbell },
   { label: "Projetos", icon: ClipboardList },
   { label: "Perfil", icon: User },
 ];

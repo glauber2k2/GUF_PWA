@@ -1,4 +1,4 @@
-import { differenceInCalendarMonths, format } from "date-fns";
+import { differenceInCalendarDays, differenceInCalendarMonths, differenceInMinutes, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { fromLocalISODate } from "./dates";
 import { plural } from "./format";
@@ -80,4 +80,35 @@ export function socialPrivacySummary(visibility: SocialVisibility, historyHidden
   return historyHidden
     ? "Qualquer pessoa no guf vê evolução e sequência. O histórico fica só com você."
     : "Qualquer pessoa no guf vê evolução, sequência e histórico.";
+}
+
+/** Quantos @ aparecem no subtítulo da barra de solicitações antes do "e mais N". */
+export const FOLLOW_REQUEST_PREVIEW_HANDLES = 2;
+
+/** "1 solicitação para seguir" · "4 solicitações para seguir". */
+export function followRequestsTitle(count: number): string {
+  return `${plural(count, "solicitação", "solicitações")} para seguir`;
+}
+
+/** "@rafa.costa, @bia.treina e mais 2" (subtítulo da barra de solicitações). */
+export function followRequestsPreview(handles: string[]): string {
+  const shown = handles.slice(0, FOLLOW_REQUEST_PREVIEW_HANDLES).map(formatHandle).join(", ");
+  const rest = handles.length - FOLLOW_REQUEST_PREVIEW_HANDLES;
+  return rest > 0 ? `${shown} e mais ${rest}` : shown;
+}
+
+/**
+ * Quando o pedido chegou: "agora" · "há 25 min" · "há 2 h" · "ontem" · "há 3 dias".
+ * @param since ISO do pedido
+ * @param now relógio atual
+ */
+export function requestedAgoLabel(since: string, now: Date): string {
+  const date = new Date(since);
+  const minutes = Math.max(0, differenceInMinutes(now, date));
+  if (minutes < 1) return "agora";
+  if (minutes < 60) return `há ${minutes} min`;
+  const days = differenceInCalendarDays(now, date);
+  if (days < 1) return `há ${Math.floor(minutes / 60)} h`;
+  if (days === 1) return "ontem";
+  return `há ${days} dias`;
 }

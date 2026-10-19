@@ -23,11 +23,10 @@ const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/exer
 /** Rotas de cada aba (índice do BottomNav) e das telas internas que mantêm a aba acesa. */
 const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }> = [
   { path: "/", name: "Início" },
-  { path: "/historico", name: "Histórico" },
-  { path: null, name: "Treinar" },
   { path: "/competicao", name: "Competir", inner: ["/buscar-pessoas"] },
+  { path: null, name: "Treinar" },
   { path: "/projetos", name: "Projetos" },
-  { path: "/perfil", name: "Perfil", inner: ["/configuracoes", "/seguidores"] },
+  { path: "/perfil", name: "Perfil", inner: ["/configuracoes", "/seguidores", "/solicitacoes"] },
 ];
 
 /** Limite do overlay "Iniciando treino" depois que a sessão foi criada (se a tela do treino não abrir). */

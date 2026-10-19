@@ -69,6 +69,8 @@ function seed(scenario: SocialMockScenario): MockState {
     person("bia", "bia.moreira", "Bia Moreira", { workouts: 160, streak: 9, weeklyVolume: 8300 }),
     person("rafa", "rafa.lima", "Rafa Lima", { visibility: "open", historyHidden: true, workouts: 98, streak: 4, weeklyVolume: 8400 }),
     person("ju", "ju.andrade", "Ju Andrade", { workouts: 75, streak: 6, weeklyVolume: 7000 }),
+    person("pedro", "pedrohk", "Pedro Henrique", { workouts: 40, streak: 2, weeklyVolume: 5200 }),
+    person("camila", "camilarocha", "Camila Rocha", { workouts: 64, streak: 3, weeklyVolume: 6100 }),
   ];
   const follows = new Map<string, "pending" | "accepted">();
   if (scenario === "padrao") {
@@ -76,7 +78,7 @@ function seed(scenario: SocialMockScenario): MockState {
       follows.set(`${MOCK_ME}→${id}`, "accepted");
       follows.set(`${id}→${MOCK_ME}`, "accepted");
     }
-    follows.set(`bia→${MOCK_ME}`, "pending");
+    for (const id of ["bia", "pedro", "camila"]) follows.set(`${id}→${MOCK_ME}`, "pending");
     follows.set(`${MOCK_ME}→ju`, "pending");
   }
   return { scenario, me, people, follows, blocks: new Set() };

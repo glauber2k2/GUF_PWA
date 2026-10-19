@@ -26,6 +26,7 @@ import {
 } from "@/features/social/components/profile-sections";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
 import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
+import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
 
 function ProfileSkeleton() {
   return (
@@ -97,6 +98,8 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
         </Banner>
       ) : (
         <>
+          {/* Perfil aberto aceita os pedidos na hora: a barra só existe no privado. */}
+          {isSelf && data.visibility === "private" && <FollowRequestsBar />}
           <section aria-label="Perfil" className="flex flex-col gap-[18px] pt-1">
             <div className="flex items-center gap-4">
               <span className="grid flex-none rounded-pill border-2 border-accent p-[3px]">
