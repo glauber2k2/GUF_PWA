@@ -27,6 +27,7 @@
 | A017 | Perfil social e seguidores | Art. 7º, V ⚖ | Em parte (bloquear, remover seguidor, perfil privado) |
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Art. 7º, V (Art. 11, I se N1) ⚖ | Sim, na prática (perfil privado, ocultar histórico, remover seguidor, bloquear) |
 | A019 | Competição e pontuação | Art. 7º, V ⚖ | Sim, na prática (deixar de seguir ou remover o seguidor) |
+| A020 | Avisos no celular (competição e seguidores) | Art. 7º, V, ligado pelo titular no aparelho ⚖ | Sim (desligar no app ou nas configurações do celular, ou sair da conta) |
 
 **Totais**: 1 atividade com consentimento (A010) · 1 com legítimo interesse (A012, LIA em `.lgpd/lia/a012-seguranca.md`) · 10 com execução de contrato · 4 com obrigação legal (A003, A012, A013, A014; A015 parcial) · 1 com exercício regular de direitos (A003 após a exclusão).
 

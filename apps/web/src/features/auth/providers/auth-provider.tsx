@@ -2,12 +2,13 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { signOut as apiSignOut, toAuthError, type AuthError, type Session, type User } from "@guf/api";
+import { deletePushSubscription, signOut as apiSignOut, toAuthError, type AuthError, type Session, type User } from "@guf/api";
 import { clearActiveWorkoutCache } from "@/features/workout";
 import { clearOfflineData } from "@/shared/offline/db";
 import { flushOutbox, onWorkoutClosedSynced, startOutboxSync } from "@/shared/offline/outbox";
 import { invalidateTrainingData } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
+import { getDevicePushSubscription, unsubscribeDevicePush } from "@/shared/push/web-push";
 
 interface AuthState {
   user: User | null;
@@ -40,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         queryClient.clear();
         clearActiveWorkoutCache();
         void clearOfflineData();
+        // Avisos da conta que saiu nunca chegam a quem usar o aparelho depois.
+        void unsubscribeDevicePush();
       }
       // Fila offline: envia o que ficou pendente assim que houver sessão.
       if (nextSession) startOutboxSync();
@@ -59,6 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Antes de sair, tenta enviar o que estiver na fila offline (sair apaga os dados do aparelho).
     await flushOutbox();
+    // Com a sessão ainda ativa, tira este aparelho da lista de avisos (sem internet, o endereço
+    // cancelado no SIGNED_OUT deixa de existir e o servidor o apaga no próximo envio).
+    const device = await getDevicePushSubscription().catch(() => null);
+    if (device) await deletePushSubscription(getSupabaseClient(), { endpoint: device.endpoint });
     const { error } = await apiSignOut(getSupabaseClient());
     return error;
   }, []);

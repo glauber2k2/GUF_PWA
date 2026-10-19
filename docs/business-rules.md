@@ -228,6 +228,8 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 | **Parâmetros** fixos no servidor e públicos (`competition_parameters`); mudança só vale a partir da temporada seguinte e nunca altera parâmetros já publicados. | Banco + Core (`scoringRules`) |
 | RPE da sessão (1–10): durante o treino ou até 24 h depois de finalizar (tela ainda não existe). | Banco (`set_session_rpe`) |
 | Horários e tempo do treino são gravados só pelo servidor (o app não consegue aumentar a própria pontuação editando o treino). | Banco (`workout_sessions_guard`, `workout_active_periods_guard`) |
+| **Avisos de seguidores no celular** (mesma opção "Notificações"): "Novo seguidor" (alguém seguiu seu perfil aberto), "Pedido para seguir" (perfil privado; abre `/solicitacoes`) e "Pedido aceito" (para quem pediu; abre o perfil). Nome e @ de quem agiu; no máximo 1 aviso por dia por pessoa e tipo; nada é enviado se o vínculo já mudou ou há bloqueio. Recusar, remover e bloquear não avisam ninguém. | Banco (`build_follow_alert`, `follow_alerts_sent`, gatilho `on_follow_push_alert`) + Edge Function `push-alerts` |
+| **Avisos no celular** (opcional, por aparelho, desligado por padrão): competidor a menos de 20 pontos de passar você na temporada atual ("está chegando"; diferença 0 = "empatou") ou que passou ("te ultrapassou"). Um aviso por mudança de posição e por competidor; quem tem 0 pontos não recebe. Verificado quando um competidor conclui um treino ou informa o esforço. | Banco (`compute_competition_alerts`, `competition_alert_states`) + Edge Function `push-alerts` + Core (`COMPETITION_ALERT_GAP`) |
 
 ## 9. Mensagens ao usuário
 

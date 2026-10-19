@@ -240,7 +240,9 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
 | Busca de pessoas e lista de seguidores/pedidos/bloqueados | Feito (provisório, sem protótipo) |
 | Duelo pelo perfil (`/competicao/duelo?id=…`): competição só entre você e a pessoa; telas de competição compartilham `useCompetitionView` + `CompetitionBoard` | Feito |
+| Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
+| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito; opção em Configurações; `docs/push-notifications.md` | Feito no código; falta configurar VAPID, secrets e Vault, aplicar as migrations, publicar a função e a Política 0.4-dev junto com o app |
 | RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |

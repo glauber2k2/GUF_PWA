@@ -38,6 +38,41 @@ const serwist = new Serwist({
   },
 });
 
+/** Aviso enviado pela Edge Function push-alerts (texto pronto em português). */
+interface PushPayload {
+  title: string;
+  body: string;
+  url?: string;
+  tag?: string;
+}
+
+self.addEventListener("push", (event) => {
+  const payload = event.data?.json() as PushPayload | undefined;
+  if (!payload?.title) return;
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      tag: payload.tag,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      data: { url: payload.url ?? "/" },
+    }),
+  );
+});
+
+// Tocar no aviso: volta para o app aberto (na tela do aviso) ou abre um novo.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data as { url?: string } | null)?.url ?? "/", self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      const open = windows[0];
+      if (open) return open.focus().then((client) => client.navigate(url)).catch(() => self.clients.openWindow(url));
+      return self.clients.openWindow(url);
+    }),
+  );
+});
+
 self.addEventListener("message", (event) => {
   if ((event.data as { type?: string } | null)?.type === "SKIP_WAITING") void self.skipWaiting();
 });
