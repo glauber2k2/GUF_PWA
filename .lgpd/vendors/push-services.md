@@ -11,4 +11,5 @@
 | Transferência internacional | Só metadados e conteúdo cifrado, só de quem ligou os avisos. Base a confirmar no G8 ⚖. |
 | Minimização | Texto curto (nome e @ da pessoa; na competição, a diferença de pontos); validade de 6 h; nenhum identificador da conta no conteúdo além do nome exibido. |
 | Eliminação | Inscrição recusada (404/410) é apagada pela Edge Function `push-alerts`. |
+| Chave privada VAPID | Só no secret `VAPID_KEYS` da Edge Function (e na cópia do controlador fora do git); nunca no app nem no repositório. Rotação em `docs/push-notifications.md`. |
 | Veredito | Aprovado com ressalvas: informado na Política 0.4-dev; revisar com o jurídico antes do lançamento público. |

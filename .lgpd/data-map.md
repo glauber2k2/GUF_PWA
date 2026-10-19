@@ -30,7 +30,7 @@
 | A017 | Perfil social e seguidores | Não | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A019 | Competição e pontuação semanal | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
-| A020 | Avisos no celular (Web Push): competição e seguidores | Não | Possível | **Avaliado (RIPD v0.4)** | Banco aplicado (2026-10-19); aguarda chaves e deploy da função |
+| A020 | Avisos no celular (Web Push): competição e seguidores | Não | Possível | **Avaliado (RIPD v0.4)** | Configurado (2026-10-19); aguarda a chave pública na Vercel |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.

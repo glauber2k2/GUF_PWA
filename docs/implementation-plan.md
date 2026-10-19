@@ -243,7 +243,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Duelo pelo perfil (`/competicao/duelo?id=…`): competição só entre você e a pessoa; telas de competição compartilham `useCompetitionView` + `CompetitionBoard` | Feito |
 | Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
-| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Migrations aplicadas e tipos regenerados em 2026-10-19; falta configurar VAPID, secrets e Vault e publicar a função `push-alerts` |
+| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Banco, chaves VAPID, secrets, Vault e função `push-alerts` configurados em 2026-10-19 (caminho banco → pg_net → função conferido); falta `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel e o teste com dois celulares |
 | RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |

@@ -54,27 +54,53 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 | Migrations `push_alerts`, `legal_privacy_push_alerts` e `push_alerts_follow_cooldown` | Aplicadas no projeto vinculado em 2026-10-19 |
 | Tipos do banco (`packages/types/src/database.ts`) | Regenerados com `supabase gen types` em 2026-10-19 |
 | Política de Privacidade 0.4-dev | Publicada no banco em 2026-10-19: quem já tem conta passa pelo `/aceite`; até o app novo estar no ar, o `/aceite` mostra o texto anterior |
-| Chaves VAPID, secrets da função, `NEXT_PUBLIC_VAPID_PUBLIC_KEY` e segredos do Vault | Pendente (passos 1, 2, 3 e 5) |
-| Deploy da Edge Function `push-alerts` | Pendente (passo 4) |
+| Chaves VAPID | Geradas em 2026-10-19 (`vapid.json` na raiz, fora do git) |
+| Secrets da função (`VAPID_KEYS`, `VAPID_SUBJECT` = `mailto:` do contato de privacidade, `PUSH_ALERTS_SECRET`) | Gravados em 2026-10-19 |
+| Edge Function `push-alerts` | Publicada em 2026-10-19 (`--no-verify-jwt`) |
+| Segredos do Vault (`project_url`, `push_alerts_secret`) | Criados em 2026-10-19 pela CLI (`supabase db query --linked`) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` | Feito em 2026-10-19 |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel | **Pendente**: cadastrar no painel (Settings › Environment Variables, Production e Preview) e publicar de novo; sem ela, a opção "Notificações" aparece como indisponível no site |
+| Teste com um aviso real (dois celulares, contas que se seguem) | **Pendente** |
 
-Enquanto os segredos do Vault não existem, os gatilhos não chamam nada: o app funciona normalmente e a opção "Notificações" só aparece disponível no build com a chave pública.
+**Conferido em 2026-10-19:** sem o segredo, a função responde 401; com o segredo e um usuário inexistente, responde `{"sent":0}`; `post_push_alert` chamado no banco chega à função pelo pg_net (status 200 em `net._http_response`). A leitura das chaves VAPID e o envio só acontecem quando há um aviso de verdade, por isso ainda falta o teste com celulares.
+
+## Chaves e segredos
+
+| Item | Onde fica | Quem usa |
+|---|---|---|
+| Chave pública VAPID | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (`.env.local` e Vercel); pode ficar visível | App, ao inscrever o aparelho |
+| Par de chaves VAPID (com a privada) | Secret `VAPID_KEYS` da função; cópia em `vapid.json` na raiz (fora do git) | Edge Function, ao assinar o envio |
+| `VAPID_SUBJECT` | Secret da função (`mailto:` do `PRIVACY_CONTACT_EMAIL`) | Serviços de push, para contato em caso de problema |
+| Segredo entre banco e função | Secret `PUSH_ALERTS_SECRET` e Vault `push_alerts_secret` (o mesmo valor) | Gatilhos (envia) e função (confere) |
+| URL do projeto | Vault `project_url` | Gatilhos, para chamar a função |
+
+- **Guardar a chave privada:** copie o `vapid.json` para um gerenciador de senhas e apague o arquivo da pasta. Os secrets do Supabase não mostram o valor depois de gravados.
+- **Trocar as chaves VAPID** (se a privada vazar): gerar outro par, gravar `VAPID_KEYS`, trocar `NEXT_PUBLIC_VAPID_PUBLIC_KEY` e publicar o app. As inscrições antigas param de funcionar: apague-as (`delete from push_subscriptions`) e cada pessoa liga as notificações de novo.
+- **Trocar o segredo entre banco e função:** gravar o novo valor no secret `PUSH_ALERTS_SECRET` e no Vault (`vault.update_secret`) ao mesmo tempo. Enquanto os dois forem diferentes, a função recusa as chamadas (401) e nenhum aviso sai.
+- **Conferir falhas:** `select status_code, content, created from net._http_response order by created desc limit 20;` (respostas da função às chamadas do banco) e os logs da função no painel do Supabase (só contagens, sem conteúdo dos avisos).
 
 ## Configuração (uma vez por ambiente)
 
-1. Chaves VAPID: `node supabase/scripts/generate-vapid-keys.mjs > vapid.json` (o JSON tem a chave privada: está no `.gitignore`; apagar depois). A linha `NEXT_PUBLIC_VAPID_PUBLIC_KEY=…` sai no terminal.
+1. Chaves VAPID: `node supabase/scripts/generate-vapid-keys.mjs > vapid.json` (o JSON tem a chave privada: está no `.gitignore`). A linha `NEXT_PUBLIC_VAPID_PUBLIC_KEY=…` sai no terminal.
 2. App: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` e nas variáveis da Vercel.
-3. Secrets da função:
+3. Secrets da função, por arquivo (o valor não aparece na linha de comando nem no histórico do terminal):
    ```
-   npx supabase secrets set VAPID_KEYS="$(cat vapid.json)" VAPID_SUBJECT="mailto:<contato>" PUSH_ALERTS_SECRET=<segredo aleatório>
+   # push-secrets.env (fora do repositório; apagar depois)
+   VAPID_KEYS='<conteúdo do vapid.json em uma linha>'
+   VAPID_SUBJECT=mailto:<contato>
+   PUSH_ALERTS_SECRET=<segredo aleatório, ex.: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))">
+
+   npx supabase secrets set --env-file push-secrets.env
    ```
-4. Publicar: `npx supabase db push` (feito em 2026-10-19 no projeto vinculado) e `npx supabase functions deploy push-alerts --no-verify-jwt --use-api`.
-5. Vault (SQL Editor; segredos não vão em migration):
+4. Publicar: `npx supabase db push` e `npx supabase functions deploy push-alerts --no-verify-jwt --use-api`.
+5. Vault (segredos não vão em migration), pelo SQL Editor ou por `npx supabase db query --linked -f <arquivo.sql>`:
    ```sql
    select vault.create_secret('https://<ref>.supabase.co', 'project_url');
    select vault.create_secret('<mesmo segredo do passo 3>', 'push_alerts_secret');
    ```
-   Sem esses dois segredos, os gatilhos não fazem nada.
-6. Regenerar os tipos (`packages/types/src/database.ts`) depois de aplicar as migrations (feito em 2026-10-19).
+   Para trocar um valor que já existe: `vault.update_secret(<id>, '<novo valor>')`. Sem esses dois segredos, os gatilhos não fazem nada.
+6. Regenerar os tipos (`packages/types/src/database.ts`) depois de aplicar as migrations.
+7. Conferir: chamar a função sem o segredo (401), com o segredo e um usuário inexistente (`{"sent":0}`) e `select public.post_push_alert('{"kind":"competition","user_id":"00000000-0000-0000-0000-000000000000"}')` no banco, olhando a resposta em `net._http_response`.
 
 ## LGPD
 
