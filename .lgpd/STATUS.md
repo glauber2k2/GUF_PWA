@@ -35,7 +35,8 @@
 - `.lgpd/lia/a012-seguranca.md` — v1, 2026-10-16
 - `.lgpd/consent-ledger.md` — v1, 2026-10-17
 - `.lgpd/policies/privacy-policy-v1-draft.md` — v1 rascunho, 2026-10-17 (não publicar)
-- `.lgpd/RIPD/ripd-social.md` + `RIPD/INDEX.md` — v0.1 rascunho, 2026-10-18 (A017–A019)
+- `.lgpd/RIPD/ripd-social.md` + `RIPD/INDEX.md` — v0.1 rascunho, 2026-10-18 (A017–A019); v0.4 em 2026-10-19 (A020, notificações no celular)
+- `.lgpd/vendors/push-services.md` — v1, 2026-10-19 (serviços de push do navegador)
 
 ## L1 — Legacy retrofit ✓
 - Discovery completo (código; painel e contratos não verificados)

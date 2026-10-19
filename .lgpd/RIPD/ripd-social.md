@@ -145,7 +145,7 @@ flowchart LR
 | R010 | Aviso na tela bloqueada revela nome do competidor e pontos a quem pega o celular | 3 | 2 | 6 | Opt-in por aparelho; texto mínimo (nome e diferença, sem treinos); o sistema permite esconder o conteúdo na tela bloqueada | mitigado | 3 |
 | R011 | Avisos de uma conta chegam a outra pessoa no mesmo aparelho (troca de conta) | 2 | 3 | 6 | Sair da conta apaga a inscrição no servidor e cancela no navegador; o mesmo aparelho inscrito por outra conta passa para ela (`save_push_subscription`); excluir a conta apaga em cascata | mitigado | 2 |
 | R012 | Excesso de avisos / pressão (bem-estar) | 3 | 2 | 6 | Competição: só na mudança de posição (um aviso por transição e por competidor), só competidores mútuos, só a temporada atual. Seguidores: no máximo 1 aviso por dia por pessoa e tipo; limite existente de 50 pedidos por dia. Desligar a qualquer momento | mitigado | 3 |
-| R013 | Assédio por avisos (seguir e deixar de seguir repetidamente para aparecer no celular de alguém) | 2 | 3 | 6 | 1 aviso por dia por pessoa e tipo; bloquear interrompe; o aviso só é enviado se o vínculo ainda existe | mitigado | 3 |
+| R013 | Assédio por avisos (seguir e deixar de seguir repetidamente para aparecer no celular de alguém) | 2 | 3 | 6 | 1 aviso a cada 24 h por pessoa e tipo, conferido no gatilho (nem a requisição sai); bloquear interrompe; o aviso só é enviado se o vínculo ainda existe | mitigado | 3 |
 
 ### 8.2 Riscos não mitigáveis
 
@@ -168,7 +168,7 @@ flowchart LR
 - [x] Plano de resposta a incidente (`incidents/runbook.md`)
 - [x] Canal do titular e prazo de 15 dias (`dsar/workflow.md`)
 - [x] Regras nos Termos 0.2-dev e na Política 0.3-dev (rascunhos; publicados no banco em 2026-10-18) ⚖
-- [x] Avisos no celular na Política 0.4-dev (rascunho; migration `20261019230418_legal_privacy_push_alerts`) ⚖
+- [x] Avisos no celular na Política 0.4-dev (rascunho; publicada no banco em 2026-10-19, migration `20261019230418_legal_privacy_push_alerts`) ⚖
 - [ ] DPA com o Supabase (G7)
 
 ## 11. Consulta a partes interessadas

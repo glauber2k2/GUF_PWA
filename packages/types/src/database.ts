@@ -963,6 +963,10 @@ export type Database = {
         Args: { p_owner: string; p_viewer: string }
         Returns: boolean
       }
+      competition_alert_state: {
+        Args: { p_rival_points: number; p_watcher_points: number }
+        Returns: string
+      }
       competition_params_for: {
         Args: { p_season: string }
         Returns: {
@@ -988,10 +992,6 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
-      }
-      competition_alert_state: {
-        Args: { p_rival_points: number; p_watcher_points: number }
-        Returns: string
       }
       competition_season_of: { Args: { p_week_start: string }; Returns: string }
       competition_season_points: {
@@ -1027,6 +1027,12 @@ export type Database = {
           weekly_load: number
         }[]
       }
+      competitors_of: {
+        Args: { p_user_id: string }
+        Returns: {
+          competitor_id: string
+        }[]
+      }
       compute_competition_alerts: {
         Args: { p_user_id: string }
         Returns: {
@@ -1035,12 +1041,6 @@ export type Database = {
           recipient_id: string
           rival_id: string
           rival_name: string
-        }[]
-      }
-      competitors_of: {
-        Args: { p_user_id: string }
-        Returns: {
-          competitor_id: string
         }[]
       }
       current_legal_document: {

@@ -235,6 +235,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 |---|---|
 | Avaliação LGPD/ECA (A017–A019, RIPD, ROPA, retenção, auditoria) | Feito (rascunho, sem revisão jurídica ⚖) |
 | Migrations `20261018171956_social_competition`, `20261018202202_get_streak_definer_fix` e `20261018213232_social_rules_in_signup_terms` (sem consentimento no meio do uso; fechar o perfil mantém seguidores) | Aplicadas em 2026-10-18; 32 testes de permissão no banco passaram (transação desfeita no fim) |
+| Política 0.4-dev com as notificações no celular (`20261019230418_legal_privacy_push_alerts`) | Publicada no banco em 2026-10-19; **publicar o app logo** (até lá, o `/aceite` de quem já tem conta mostra o texto anterior) |
 | Termos 0.2-dev e Política 0.3-dev com as regras do perfil social (`20261018213650_legal_docs_terms_privacy_social`) | Publicados no banco em 2026-10-18; **publicar o app logo** (até lá, o `/aceite` de quem já tem conta mostra o texto antigo) |
 | `packages/core`, `packages/schemas`, `packages/api` (`SocialApi`, `CompetitionApi`), mocks | Feito |
 | Telas: Perfil social (seu e de outra pessoa), Competição, Configurações, menu com 6 abas | Feito, conferido com mocks no navegador |
@@ -242,7 +243,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Duelo pelo perfil (`/competicao/duelo?id=…`): competição só entre você e a pessoa; telas de competição compartilham `useCompetitionView` + `CompetitionBoard` | Feito |
 | Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
-| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito; opção em Configurações; `docs/push-notifications.md` | Feito no código; falta configurar VAPID, secrets e Vault, aplicar as migrations, publicar a função e a Política 0.4-dev junto com o app |
+| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Migrations aplicadas e tipos regenerados em 2026-10-19; falta configurar VAPID, secrets e Vault e publicar a função `push-alerts` |
 | RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
