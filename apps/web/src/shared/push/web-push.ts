@@ -7,15 +7,21 @@ import type { PushSubscriptionKeys } from "@guf/api";
  */
 
 /**
+ * Por que a inscrição falhou (depois da permissão dada): no-service-worker (o app ainda não terminou
+ * de instalar ou atualizar) · invalid-key (chave pública VAPID do build com formato errado) ·
+ * push-service (o serviço de push do navegador recusou, ex.: Brave com o push do Google desligado).
+ */
+export type DeviceSubscribeFailure = "no-service-worker" | "invalid-key" | "push-service";
+
+/**
  * Resultado de inscrever o aparelho: inscrito · denied (permissão negada) · dismissed (fechou o
- * pedido sem escolher) · failed (permissão dada, mas o service worker não ficou pronto ou o serviço
- * de push recusou).
+ * pedido sem escolher) · failed (com o motivo e o código do erro do navegador, para diagnóstico).
  */
 export type DeviceSubscribeResult =
   | { status: "subscribed"; keys: PushSubscriptionKeys }
   | { status: "denied" }
   | { status: "dismissed" }
-  | { status: "failed" };
+  | { status: "failed"; reason: DeviceSubscribeFailure; detail?: string };
 
 /** Aparelho visto pelas telas: o real (abaixo) ou o simulado de desenvolvimento (mocks/push.ts). */
 export interface DevicePush {
@@ -27,8 +33,24 @@ export interface DevicePush {
   unsubscribe: () => Promise<void>;
 }
 
+/** Chave P-256 não comprimida: 65 bytes começando em 0x04. */
+const VAPID_KEY_BYTES = 65;
+const UNCOMPRESSED_POINT_PREFIX = 0x04;
+
+/**
+ * Chave pública como veio do ambiente, sem o que costuma sobrar ao colar no painel da hospedagem:
+ * espaços, aspas e o próprio nome da variável ("NEXT_PUBLIC_VAPID_PUBLIC_KEY=…").
+ */
+export function normalizeVapidKey(raw: string): string {
+  return raw
+    .trim()
+    .replace(/^NEXT_PUBLIC_VAPID_PUBLIC_KEY\s*=\s*/, "")
+    .replace(/^["']|["']$/g, "")
+    .replace(/\s+/g, "");
+}
+
 /** Chave pública VAPID do servidor (a privada fica só nos secrets da Edge Function). */
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+const VAPID_PUBLIC_KEY = normalizeVapidKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "");
 
 /** Espera pelo service worker ativo (logo depois de instalar o app ou de uma atualização ele ainda está subindo). */
 const SERVICE_WORKER_READY_TIMEOUT_MS = 10_000;
@@ -63,9 +85,26 @@ export function toPushSubscriptionKeys(subscription: PushSubscription): PushSubs
   return { endpoint, p256dh: keys.p256dh, auth: keys.auth };
 }
 
-function toApplicationServerKey(base64Url: string): Uint8Array<ArrayBuffer> {
-  const base64 = (base64Url + "=".repeat((4 - (base64Url.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+/** Chave em bytes, ou null se não for uma chave pública P-256 válida (base64url de 65 bytes). */
+function toApplicationServerKey(base64Url: string): Uint8Array<ArrayBuffer> | null {
+  try {
+    const base64 = (base64Url + "=".repeat((4 - (base64Url.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+    return bytes.length === VAPID_KEY_BYTES && bytes[0] === UNCOMPRESSED_POINT_PREFIX ? bytes : null;
+  } catch {
+    return null;
+  }
+}
+
+function sameBytes(a: ArrayBuffer | null | undefined, b: Uint8Array): boolean {
+  if (!a || a.byteLength !== b.length) return false;
+  const view = new Uint8Array(a);
+  return view.every((byte, i) => byte === b[i]);
+}
+
+/** Código do erro do navegador ("AbortError", "InvalidAccessError"…), para o aviso e o suporte. */
+function errorCode(error: unknown): string {
+  return error instanceof Error ? error.name : "Erro";
 }
 
 /**
@@ -82,21 +121,29 @@ async function getActiveRegistration(): Promise<ServiceWorkerRegistration | null
  * @returns a inscrição ou o motivo de não ter inscrito (negou, fechou o pedido ou falhou).
  */
 export async function subscribeDevicePush(): Promise<DeviceSubscribeResult> {
-  if (!isPushSupported()) return { status: "failed" };
+  if (!isPushSupported()) return { status: "failed", reason: "push-service", detail: "sem suporte" };
+  const applicationServerKey = toApplicationServerKey(VAPID_PUBLIC_KEY);
+  if (!applicationServerKey) return { status: "failed", reason: "invalid-key" };
   const permission = await Notification.requestPermission();
   if (permission === "denied") return { status: "denied" };
   if (permission !== "granted") return { status: "dismissed" };
+
+  const registration = await getActiveRegistration().catch(() => null);
+  if (!registration) return { status: "failed", reason: "no-service-worker" };
   try {
-    const registration = await getActiveRegistration();
-    if (!registration) return { status: "failed" };
-    const subscription =
-      (await registration.pushManager.getSubscription()) ??
-      (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toApplicationServerKey(VAPID_PUBLIC_KEY) }));
+    let subscription = await registration.pushManager.getSubscription();
+    // Inscrição antiga feita com outra chave (troca de chaves): o servidor não conseguiria enviar.
+    if (subscription && !sameBytes(subscription.options.applicationServerKey, applicationServerKey)) {
+      await subscription.unsubscribe();
+      subscription = null;
+    }
+    subscription ??= await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey });
     const keys = toPushSubscriptionKeys(subscription);
-    return keys ? { status: "subscribed", keys } : { status: "failed" };
-  } catch {
-    // Serviço de push indisponível ou recusou (ex.: sem internet no momento, navegador sem suporte real).
-    return { status: "failed" };
+    return keys ? { status: "subscribed", keys } : { status: "failed", reason: "push-service", detail: "inscrição sem chaves" };
+  } catch (error) {
+    // InvalidAccessError = o navegador não aceitou a chave; o resto vem do serviço de push.
+    const code = errorCode(error);
+    return { status: "failed", reason: code === "InvalidAccessError" ? "invalid-key" : "push-service", detail: code };
   }
 }
 

@@ -5,7 +5,7 @@ import { pushApi, type PushApi } from "@guf/api";
 import type { InstallPlatform } from "@guf/core";
 import { useProfileSource } from "@/features/profile/api/use-profile";
 import { getSupabaseClient } from "@/shared/libs/supabase";
-import { devicePush, type DevicePush, type DeviceSubscribeResult } from "@/shared/push/web-push";
+import { devicePush, type DevicePush, type DeviceSubscribeFailure, type DeviceSubscribeResult } from "@/shared/push/web-push";
 import { mockDevicePush, mockPushApi, setPushMockFailing } from "@/mocks/push";
 
 /**
@@ -19,8 +19,17 @@ export type PushAlertsOutcome = "enabled" | "disabled" | "blocked" | "dismissed"
 
 const IOS_NOT_INSTALLED: InstallPlatform[] = ["ios-safari", "ios-other-browser"];
 
-const SUBSCRIBE_FAILED_MESSAGE =
-  "Não foi possível ativar as notificações neste aparelho. Feche e abra o app de novo, confira a internet e tente outra vez.";
+/** O que aconteceu e como resolver, por motivo da falha (o código do navegador vai junto). */
+const SUBSCRIBE_FAILED_MESSAGES: Record<DeviceSubscribeFailure, string> = {
+  "no-service-worker": "O app ainda está terminando de instalar ou atualizar. Feche e abra o app e tente de novo.",
+  "invalid-key": "As notificações estão com a configuração errada no servidor. Avise o suporte do guf; não é um problema do seu aparelho.",
+  "push-service":
+    "O serviço de notificações do navegador recusou a inscrição. No Brave, ligue “Usar os serviços do Google para mensagens push” nas configurações de privacidade; nos outros, confira a internet e tente de novo.",
+};
+
+function subscribeFailedMessage(reason: DeviceSubscribeFailure, detail: string | undefined): string {
+  return detail ? `${SUBSCRIBE_FAILED_MESSAGES[reason]} (código: ${detail})` : SUBSCRIBE_FAILED_MESSAGES[reason];
+}
 
 function usePushSource(): { api: PushApi; device: DevicePush } {
   const { mock, dev } = useProfileSource();
@@ -58,13 +67,15 @@ export function usePushAlerts(platform: InstallPlatform) {
   }, [device, platform]);
 
   const enable = useCallback(async (): Promise<PushAlertsOutcome> => {
-    const result = await device.subscribe().catch((): DeviceSubscribeResult => ({ status: "failed" }));
+    const result = await device
+      .subscribe()
+      .catch((error: unknown): DeviceSubscribeResult => ({ status: "failed", reason: "push-service", detail: error instanceof Error ? error.name : undefined }));
     if (result.status === "denied") {
       setStatus("blocked");
       return "blocked";
     }
     if (result.status === "dismissed") return "dismissed";
-    if (result.status === "failed") return { error: SUBSCRIBE_FAILED_MESSAGE };
+    if (result.status === "failed") return { error: subscribeFailedMessage(result.reason, result.detail) };
     const { keys } = result;
     const { error } = await api.savePushSubscription(getSupabaseClient(), keys);
     if (error) {

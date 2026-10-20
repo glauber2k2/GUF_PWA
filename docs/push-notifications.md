@@ -83,11 +83,13 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
-| Permissão aceita, mas o botão volta para desligado e aparece "Não foi possível ativar as notificações neste aparelho" | Service worker ainda não ativo (app recém-instalado ou atualizando) ou serviço de push recusou (sem internet, chave pública inválida) | Fechar e abrir o app e tentar de novo; conferir `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel (sem aspas nem espaços) e publicar de novo |
+| "O app ainda está terminando de instalar ou atualizar" | Service worker não ficou ativo em 10 s (app recém-instalado ou atualizando) | Fechar e abrir o app e tentar de novo |
+| "As notificações estão com a configuração errada no servidor" (ou código `InvalidAccessError`) | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` do build não é uma chave P-256 válida (65 bytes em base64url) | Conferir o valor na Vercel (só a chave, sem o nome da variável) e publicar de novo. Aspas, espaços e o prefixo `NEXT_PUBLIC_VAPID_PUBLIC_KEY=` já são removidos pelo app (`normalizeVapidKey`) |
+| "O serviço de notificações do navegador recusou a inscrição" (código `AbortError` ou outro) | O serviço de push do navegador recusou: Brave com "Usar os serviços do Google para mensagens push" desligado, Chrome sem Google Play Services, sem internet no momento | No Brave, ligar a opção nas configurações de privacidade; nos outros, confirmar a internet e tentar de novo |
 | Opção aparece como indisponível | Build sem `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, navegador sem Web Push ou iPhone fora da Tela de Início | Cadastrar a chave e publicar; no iPhone, instalar o app |
 | Ligado, mas nenhum aviso chega | Segredos do Vault ou da função diferentes, ou função fora do ar | `select status_code, content from net._http_response order by created desc limit 20;` e logs da função |
 
-Até 2026-10-19 a falha na inscrição era engolida (o botão voltava sem aviso); agora `subscribeDevicePush` espera o service worker ativo (`navigator.serviceWorker.ready`, até 10 s) e devolve o motivo (`DeviceSubscribeResult`), e a tela mostra o erro.
+Histórico: até 2026-10-19 a falha na inscrição era engolida (o botão voltava sem aviso). Desde 2026-10-20, `subscribeDevicePush` espera o service worker ativo (`navigator.serviceWorker.ready`, até 10 s), valida e limpa a chave pública, refaz a inscrição feita com outra chave e devolve o motivo (`DeviceSubscribeFailure`: no-service-worker · invalid-key · push-service) com o código do erro do navegador, que aparece no aviso.
 
 ## Configuração (uma vez por ambiente)
 
