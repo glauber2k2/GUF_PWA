@@ -23,6 +23,7 @@ import {
 } from "@guf/core";
 import { Banner, Icon, SegmentedControl } from "@/shared/components/ds";
 import { prefersReducedMotion } from "@/shared/helpers/motion";
+import { CHART_WITHOUT_FOCUS_RING } from "@/shared/helpers/chart";
 import { cn } from "@/shared/helpers/class-names";
 
 const METRIC_OPTIONS = EVOLUTION_METRICS.map((m) => ({ value: m.value, label: m.label }));
@@ -139,7 +140,7 @@ function PointsChart({ series, metric, period, unit }: { series: EvolutionSeries
   };
 
   return (
-    <figure role="group" aria-label={evolutionChartSummary(series, metric, period, unit)} className="m-0 h-[196px] w-full">
+    <figure role="group" aria-label={evolutionChartSummary(series, metric, period, unit)} className={cn("m-0 h-[196px] w-full", CHART_WITHOUT_FOCUS_RING)}>
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
         <ComposedChart data={data} margin={{ top: 12, right: 0, bottom: 0, left: 8 }}>
           <XAxis
