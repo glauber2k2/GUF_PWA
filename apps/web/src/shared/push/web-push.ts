@@ -7,11 +7,12 @@ import type { PushSubscriptionKeys } from "@guf/api";
  */
 
 /**
- * Por que a inscrição falhou (depois da permissão dada): no-service-worker (o app ainda não terminou
- * de instalar ou atualizar) · invalid-key (chave pública VAPID do build com formato errado) ·
+ * Por que a inscrição falhou (depois da permissão dada): service-worker-missing (o site não registrou
+ * service worker nenhum, ex.: /sw.js fora da publicação) · no-service-worker (existe, mas não ficou
+ * ativo a tempo: app instalando ou atualizando) · invalid-key (chave pública VAPID do build com formato errado) ·
  * push-service (o serviço de push do navegador recusou, ex.: Brave com o push do Google desligado).
  */
-export type DeviceSubscribeFailure = "no-service-worker" | "invalid-key" | "push-service";
+export type DeviceSubscribeFailure = "service-worker-missing" | "no-service-worker" | "invalid-key" | "push-service";
 
 /**
  * Resultado de inscrever o aparelho: inscrito · denied (permissão negada) · dismissed (fechou o
@@ -128,6 +129,8 @@ export async function subscribeDevicePush(): Promise<DeviceSubscribeResult> {
   if (permission === "denied") return { status: "denied" };
   if (permission !== "granted") return { status: "dismissed" };
 
+  // Sem registro nenhum, esperar o "ready" não adianta: o service worker não existe neste site.
+  if (!(await navigator.serviceWorker.getRegistration().catch(() => undefined))) return { status: "failed", reason: "service-worker-missing" };
   const registration = await getActiveRegistration().catch(() => null);
   if (!registration) return { status: "failed", reason: "no-service-worker" };
   try {

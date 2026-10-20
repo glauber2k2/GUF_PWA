@@ -21,6 +21,8 @@ const IOS_NOT_INSTALLED: InstallPlatform[] = ["ios-safari", "ios-other-browser"]
 
 /** O que aconteceu e como resolver, por motivo da falha (o código do navegador vai junto). */
 const SUBSCRIBE_FAILED_MESSAGES: Record<DeviceSubscribeFailure, string> = {
+  "service-worker-missing":
+    "O serviço que recebe as notificações não está ativo neste aparelho. Atualize o app (feche e abra); se continuar, avise o suporte do guf.",
   "no-service-worker": "O app ainda está terminando de instalar ou atualizar. Feche e abra o app e tente de novo.",
   "invalid-key": "As notificações estão com a configuração errada no servidor. Avise o suporte do guf; não é um problema do seu aparelho.",
   "push-service":

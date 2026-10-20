@@ -83,6 +83,7 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
+| "O serviço que recebe as notificações não está ativo neste aparelho" | O site não tem service worker registrado. Até 2026-10-20 a Vercel não publicava `/sw.js` (preset Next.js) | Corrigido pelo `vercel.json` (site estático em `out/`). Conferir `https://<domínio>/sw.js` = 200; depois, fechar e abrir o app |
 | "O app ainda está terminando de instalar ou atualizar" | Service worker não ficou ativo em 10 s (app recém-instalado ou atualizando) | Fechar e abrir o app e tentar de novo |
 | "As notificações estão com a configuração errada no servidor" (ou código `InvalidAccessError`) | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` do build não é uma chave P-256 válida (65 bytes em base64url) | Conferir o valor na Vercel (só a chave, sem o nome da variável) e publicar de novo. Aspas, espaços e o prefixo `NEXT_PUBLIC_VAPID_PUBLIC_KEY=` já são removidos pelo app (`normalizeVapidKey`) |
 | "O serviço de notificações do navegador recusou a inscrição" (código `AbortError` ou outro) | O serviço de push do navegador recusou: Brave com "Usar os serviços do Google para mensagens push" desligado, Chrome sem Google Play Services, sem internet no momento | No Brave, ligar a opção nas configurações de privacidade; nos outros, confirmar a internet e tentar de novo |

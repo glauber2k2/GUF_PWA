@@ -72,6 +72,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `shared/components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `shared/hooks/use-sheet-drag.ts` | Baixo |
 | Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `shared/components/ds/toast.tsx` | Baixo |
+| Service worker não era publicado na Vercel (`/sw.js` 404 até 2026-10-20: sem abrir offline e sem notificações) | `vercel.json` (corrigido: site estático em `out/`) | Conferir `/sw.js` em produção depois do deploy |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 | Dados de mock (Início, Projetos, Treino) ainda entram no bundle de produção: os mocks montam dados no carregamento do módulo e o build não consegue descartá-los (já acontecia antes da reorganização de pastas) | `apps/web/src/mocks/` | Baixo: só peso extra no download, nada é exibido |
