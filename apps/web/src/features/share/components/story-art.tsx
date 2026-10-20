@@ -7,66 +7,43 @@ import type { StoryFormat, StoryTheme } from "@/features/share/type";
 export interface StoryArtProps {
   model: StoryModel;
   data: StoryData;
-  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). Stickers: sempre sem fundo; vale para o adesivo. */
+  /** Opacidade escolhida (0–100): dos cartões no modelo com cartões (a imagem fica sem fundo) ou do fundo da imagem nos demais. */
   backgroundOpacity: number;
   /** Tema da imagem (escolhido na folha; independe do tema do app). */
   theme: StoryTheme;
 }
 
-/** Superfícies de cada tema (cartões da arte). */
-const SURFACES: Record<StoryTheme, { surface: string; elevated: string; third: string }> = {
-  dark: { surface: "var(--ink-900)", elevated: "var(--ink-850)", third: "var(--ink-800)" },
-  light: { surface: "var(--paper-0)", elevated: "var(--paper-0)", third: "var(--paper-100)" },
+/** Superfícies e bordas de cada tema (cartões da arte), nos valores de base dos tokens. */
+const SURFACES: Record<StoryTheme, { surface: string; elevated: string; third: string; border: string; borderStrong: string }> = {
+  dark: { surface: "var(--ink-900)", elevated: "var(--ink-850)", third: "var(--ink-800)", border: "var(--ink-750)", borderStrong: "var(--ink-700)" },
+  light: { surface: "var(--paper-0)", elevated: "var(--paper-0)", third: "var(--paper-100)", border: "var(--paper-200)", borderStrong: "var(--paper-300)" },
 };
 
-/**
- * Opacidade mínima dos cartões quando há conteúdo solto no fundo (logo, títulos, boneco): o cartão
- * continua marcando o bloco sobre a foto e o conjunto fica legível.
- */
-const LOOSE_CONTENT_CARD_MIN = 30;
-/** Opacidade mínima de um cartão dentro de outro (subcartão): separa os blocos de informação. */
-const INNER_CARD_MIN = 20;
-
-/** Opacidade dos cartões (%) para a opacidade escolhida: até 0 só quando tudo está dentro de cartões. */
-export function storyCardOpacity(opacity: number, cardsOnly: boolean): number {
-  const o = Math.max(0, Math.min(100, opacity));
-  if (cardsOnly) return o;
-  return Math.round(LOOSE_CONTENT_CARD_MIN + (o * (100 - LOOSE_CONTENT_CARD_MIN)) / 100);
-}
-
-/** Opacidade (%) de um cartão dentro de outro: acompanha a escolhida, com mínimo de 20%. */
-export function storyInnerCardOpacity(opacity: number): number {
-  const o = Math.max(0, Math.min(100, opacity));
-  return Math.round(INNER_CARD_MIN + (o * (100 - INNER_CARD_MIN)) / 100);
-}
-
-/** Cor da superfície na opacidade dada (100 = a cor; 0 = transparente). */
-function surfaceAt(color: string, percent: number): string {
+/** Cor na opacidade dada (100 = a cor; 0 = transparente). */
+function colorAt(color: string, percent: number): string {
   if (percent >= 100) return color;
   if (percent <= 0) return "transparent";
   return `color-mix(in oklab, ${color} ${percent}%, transparent)`;
 }
 
 /**
- * Fundo e cartões pela opacidade (Claude Design · StoryArt): o fundo vai de 0 a 100%. Cartões de fora
- * acompanham até 0 quando todo o conteúdo está dentro deles (`cardsOnly`); senão, de 30 a 100%.
- * Cartões dentro de outro cartão usam as variáveis --story-inner-* (mínimo de 20%), aplicadas pela
- * regra [data-story-art] do base.css.
+ * Cores da arte pela opacidade escolhida (0 a 100%, Claude Design · StoryArt):
+ * - modelo com cartões: a imagem não tem fundo; cartões (inclusive os que ficam dentro de outro) e
+ *   bordas seguem a opacidade. Em 0% só os elementos aparecem (a regra [data-story-art][data-flat]
+ *   do base.css tira também bordas coloridas e sombras);
+ * - modelo sem cartões: a opacidade vale para o fundo da imagem.
  */
-export function storyArtColors(opacity: number, theme: StoryTheme, cardsOnly = false): CSSProperties {
+export function storyArtColors(opacity: number, theme: StoryTheme, hasCards: boolean): CSSProperties {
   const o = Math.max(0, Math.min(100, opacity));
-  const background = o >= 100 ? "var(--background)" : o <= 0 ? "transparent" : `color-mix(in oklab, var(--background) ${o}%, transparent)`;
-  const card = storyCardOpacity(o, cardsOnly);
-  const inner = storyInnerCardOpacity(o);
+  if (!hasCards) return { background: colorAt("var(--background)", o) };
   const s = SURFACES[theme];
   return {
-    background,
-    "--surface": surfaceAt(s.surface, card),
-    "--surface-elevated": surfaceAt(s.elevated, card),
-    "--surface-3": surfaceAt(s.third, card),
-    "--story-inner-surface": surfaceAt(s.surface, inner),
-    "--story-inner-surface-elevated": surfaceAt(s.elevated, inner),
-    "--story-inner-surface-3": surfaceAt(s.third, inner),
+    background: "transparent",
+    "--surface": colorAt(s.surface, o),
+    "--surface-elevated": colorAt(s.elevated, o),
+    "--surface-3": colorAt(s.third, o),
+    "--border": colorAt(s.border, o),
+    "--border-strong": colorAt(s.borderStrong, o),
   } as CSSProperties;
 }
 
@@ -83,13 +60,13 @@ const FORMAT_BOX: Record<StoryFormat, string> = {
 export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function StoryArt({ model, data, backgroundOpacity, theme }, ref) {
   const { Component } = model;
   const format = model.format ?? "story";
-  // Opacidade escolhida (valores dinâmicos). Sticker: fundo sempre transparente e o adesivo segue a mesma
-  // regra dos cartões.
-  const cardsOnly = model.cardsOnly ?? false;
-  const colors = storyArtColors(backgroundOpacity, theme, cardsOnly);
+  // Opacidade escolhida (valores dinâmicos): fundo da imagem ou cartões, conforme o modelo. Sticker:
+  // fundo sempre transparente.
+  const hasCards = model.hasCards ?? false;
+  const colors = storyArtColors(backgroundOpacity, theme, hasCards);
   if (format === "sticker") colors.background = "transparent";
-  // Só cartões e opacidade 0: o cartão de fora some de vez (sem borda nem sombra); só os elementos ficam.
-  const flat = cardsOnly && backgroundOpacity <= 0;
+  // Modelo com cartões em 0%: nenhum cartão aparece (nem borda colorida nem sombra); só os elementos ficam.
+  const flat = hasCards && backgroundOpacity <= 0;
   return (
     <div
       ref={ref}
