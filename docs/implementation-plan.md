@@ -250,14 +250,17 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; fechar o perfil mantém os seguidores; remover e bloquear tiram o acesso; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
 
-### Etapa 8 — Tour de onboarding (`feat/tutorial-onboarding`)
+### Etapa 8 — Tour de onboarding (`feat/tutorial-onboarding` → `feat/tutorial-completo`)
 
 | Item | Situação |
 |---|---|
 | Feature `features/onboarding/` (passos, alvo medido, provider, overlay com recorte e anel) sem biblioteca nova | Feito |
-| `data-tour` no menu inferior (Projetos, Treinar), "Novo projeto" e título do Histórico | Feito |
+| Tour completo: 28 passos em 5 capítulos (Início, Projetos, Treino, Competição, Perfil) | Feito (`feat/tutorial-completo`) |
+| Demonstração da tela de treino com os componentes reais (`WorkoutTourStage`), sem gravar | Feito |
+| Balão de fala ao lado do destaque, com seta (`placeBubble`) | Feito |
+| `data-tour` no menu inferior, cards da Início, sequência, calendário, evolução, projetos, competição e busca de pessoas | Feito |
 | "Ver tutorial novamente" em Configurações › Sobre; vitrine `/design-system#tutorial` | Feito |
-| Conferido por print (Edge headless) na página de teste: card no centro, no topo e no rodapé, recorte e anel | Feito |
+| Conferido por print (Edge headless) numa página de teste: demonstração do treino, balão acima/abaixo e seta | Feito |
 | Conferir no celular com uma conta nova (primeira entrada) | Pendente |
 | Guardar a conclusão no perfil (vale em todos os aparelhos) | Decisão pendente (exige migration) |
 

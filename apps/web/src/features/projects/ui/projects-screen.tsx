@@ -92,14 +92,16 @@ function ProjectsContent({ overview, actions }: { overview: ProjectsOverview; ac
       ) : (
         <>
           {active ? (
-            <ActiveProjectCard
-              project={active}
-              nextRoutine={next?.routine ?? null}
-              nextLabel={next?.label ?? "Hoje"}
-              disabled={disabled}
-              onOpen={() => router.push(projectDetailPath(active.id))}
-              onMenu={() => flows.openProjectMenu(active)}
-            />
+            <div data-tour={TOUR_TARGETS.activeProject}>
+              <ActiveProjectCard
+                project={active}
+                nextRoutine={next?.routine ?? null}
+                nextLabel={next?.label ?? "Hoje"}
+                disabled={disabled}
+                onOpen={() => router.push(projectDetailPath(active.id))}
+                onMenu={() => flows.openProjectMenu(active)}
+              />
+            </div>
           ) : (
             others.length > 0 && <NoActiveProjectCard />
           )}

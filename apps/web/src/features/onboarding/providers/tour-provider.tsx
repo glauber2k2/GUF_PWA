@@ -8,8 +8,11 @@ import { createDevicePreference } from "@/shared/preferences/device-preference";
 import { TOUR_STEPS } from "@/features/onboarding/constants/tour-steps";
 import { TourOverlay } from "@/features/onboarding/components/tour-overlay";
 
-/** Conclusão do tour no aparelho. Versionada: um tour novo (v2) aparece de novo para todos. */
-const tourCompletion = createDevicePreference("guf:tour:main:v1", ["pending", "done"] as const, "pending");
+/**
+ * Conclusão do tour no aparelho. Versionada: um tour novo aparece de novo para todos (v2 = tour
+ * completo, que substituiu o curto de 6 passos da v1).
+ */
+const tourCompletion = createDevicePreference("guf:tour:main:v2", ["pending", "done"] as const, "pending");
 
 /** O tour começa sozinho só na Início (nunca puxa quem abriu um link direto para outra tela). */
 const AUTO_START_ROUTE = "/";

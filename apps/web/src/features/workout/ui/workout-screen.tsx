@@ -68,6 +68,7 @@ import { mockWorkoutApi } from "@/mocks/workout";
 import { SetEditSheet } from "@/features/workout/components/set-edit-sheet";
 import { buildWorkoutExercise, localSummary, toNewWorkoutExercise, workoutSnapshot } from "@/features/workout/helpers/workout-builders";
 import { useActiveWorkout, useWorkoutClock, type ActiveWorkoutState } from "@/features/workout/providers/workout-provider";
+import { AddExerciseButton } from "@/features/workout/components/add-exercise-button";
 import { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX, WorkoutExerciseCard } from "@/features/workout/components/workout-exercise-card";
 import { WorkoutHeader } from "@/features/workout/components/workout-header";
 import { WorkoutSummary } from "@/features/workout/components/workout-summary";
@@ -720,18 +721,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         </div>
 
         {!reorder.active && (
-          <button
-            type="button"
-            onClick={() => setPicker({ mode: "treino" })}
-            className={cn(
-              "flex h-14 flex-none cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong",
-              "bg-transparent text-[15px] font-semibold text-fg hover:bg-surface-3",
-              "transition-[transform,background-color] duration-150 ease-standard active:scale-[.97] motion-reduce:active:scale-100",
-            )}
-          >
-            <Plus size={18} aria-hidden="true" />
-            Adicionar exercício
-          </button>
+          <AddExerciseButton onClick={() => setPicker({ mode: "treino" })} />
         )}
       </main>
 

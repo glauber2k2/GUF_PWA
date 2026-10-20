@@ -26,6 +26,7 @@ import { useAuth } from "@/features/auth";
 import { HomeSkeleton } from "@/features/home/components/home-skeleton";
 import { TodayCard, type TodayCardState } from "@/features/home/components/today-card";
 import { WeekCard } from "@/features/home/components/week-card";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 type Sheet = { kind: "swap" } | null;
 
@@ -149,7 +150,7 @@ function HomeContent({
         </button>
       </header>
 
-      <div className="animate-guf-rise [animation-delay:80ms]">
+      <div data-tour={TOUR_TARGETS.todayCard} className="animate-guf-rise [animation-delay:80ms]">
         <TodayCard
           state={todayState(data, today)}
           actions={{
@@ -169,7 +170,7 @@ function HomeContent({
         />
       </div>
 
-      <div className="animate-guf-rise [animation-delay:160ms]">
+      <div data-tour={TOUR_TARGETS.weekCard} className="animate-guf-rise [animation-delay:160ms]">
         <WeekCard
           week={week}
           trainedDays={trainedDays}

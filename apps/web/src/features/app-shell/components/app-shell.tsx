@@ -35,7 +35,12 @@ const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }>
  * módulo: app-shell, workout e onboarding se importam em ciclo e a constante ainda pode não existir.
  */
 function buildNavItems(): NavItem[] {
-  const targets: Record<string, string> = { Treinar: TOUR_TARGETS.trainTab, Projetos: TOUR_TARGETS.projectsTab };
+  const targets: Record<string, string> = {
+    Competir: TOUR_TARGETS.competeTab,
+    Treinar: TOUR_TARGETS.trainTab,
+    Projetos: TOUR_TARGETS.projectsTab,
+    Perfil: TOUR_TARGETS.profileTab,
+  };
   return BOTTOM_NAV_ITEMS.map((item) => ({ ...item, tourTarget: targets[item.label] }));
 }
 

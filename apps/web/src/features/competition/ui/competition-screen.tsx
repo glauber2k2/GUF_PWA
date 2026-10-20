@@ -12,6 +12,7 @@ import { CompetitionBoard, PeriodCaption } from "@/features/competition/componen
 import { PositionCard } from "@/features/competition/components/position-card";
 import { DuelCard, Podium, RankingList } from "@/features/competition/components/competition-ranking";
 import { RaceChart } from "@/features/competition/components/race-chart";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 const SEARCH_PEOPLE_PATH = "/buscar-pessoas";
 
@@ -74,6 +75,7 @@ export function CompetitionScreen() {
         <Link
           href={SEARCH_PEOPLE_PATH}
           aria-label="Convidar amigos"
+          data-tour={TOUR_TARGETS.inviteFriends}
           className="grid size-11 flex-none place-items-center rounded-md border border-border-strong bg-surface-3 text-fg hover:bg-surface-elevated"
         >
           <Icon icon={UserPlus} size={20} />

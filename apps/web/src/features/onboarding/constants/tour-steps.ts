@@ -1,75 +1,289 @@
 import type { GufRatOccasion } from "@/shared/components/ds";
+import type { TourTargetId } from "./tour-targets";
 
-/**
- * Valores de `data-tour` dos elementos destacados no tour. Quem marca o elemento importa daqui,
- * para o passo e o elemento nunca ficarem com nomes diferentes.
- */
-export const TOUR_TARGETS = {
-  projectsTab: "nav-projects",
-  newProject: "new-project",
-  trainTab: "nav-train",
-  history: "history",
-} as const;
-
-export type TourTarget = (typeof TOUR_TARGETS)[keyof typeof TOUR_TARGETS];
+export type TourChapter = "Início" | "Projetos" | "Treino" | "Competição" | "Perfil";
 
 export interface TourStep {
   id: string;
-  /** Rota onde o passo aparece (sem barra no fim; o tour navega até ela). */
+  chapter: TourChapter;
+  /** Rota onde o passo aparece (só o caminho, sem barra no fim; o tour navega até ela). */
   route: string;
-  /** Elemento destacado; sem alvo, o card aparece no centro (boas-vindas, explicações gerais). */
-  target?: TourTarget;
+  /**
+   * Alvo destacado. Lista = alternativas em ordem (ex.: o atalho de evolução só existe depois do
+   * 1º treino). Sem alvo, o balão aparece no centro.
+   */
+  target?: TourTargetId | readonly TourTargetId[];
+  /** Demonstração desenhada pelo tour sobre a tela (o treino só abre com um treino de verdade). */
+  stage?: "workout";
   title: string;
   body: string;
   rat?: GufRatOccasion;
 }
 
-/** Tour da primeira entrada: projetos → rotinas → iniciar treino → registrar série → histórico. */
+/**
+ * Tour completo, na ordem em que a pessoa usa o app: Início (treino de hoje, semana, sequência,
+ * histórico) → Projetos e rotinas → Treino (demonstração) → Competição e amigos → Perfil.
+ */
 export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "welcome",
+    chapter: "Início",
     route: "/",
     title: "Bem-vindo ao guf",
-    body: "Em menos de 1 minuto você aprende a montar seus treinos e registrar cada série.",
+    body: "Vamos dar uma volta pelo app: Início, projetos, treino, competição e perfil. Leva uns 2 minutos e dá para pular quando quiser.",
     rat: "welcome",
   },
   {
-    id: "projects",
+    id: "today",
+    chapter: "Início",
     route: "/",
-    target: TOUR_TARGETS.projectsTab,
-    title: "Projetos e rotinas",
-    body: "Em Projetos você agrupa suas rotinas, como Treino A, B e C. O projeto ativo define o treino de cada dia.",
-    rat: "tip",
-  },
-  {
-    id: "new-project",
-    route: "/projetos",
-    target: TOUR_TARGETS.newProject,
-    title: "Monte seu plano",
-    body: "Crie um projeto e adicione rotinas com exercícios, séries, repetições e descanso.",
-    rat: "thinking",
-  },
-  {
-    id: "start-workout",
-    route: "/",
-    target: TOUR_TARGETS.trainTab,
-    title: "Hora de treinar",
-    body: "Toque em Treinar para começar uma rotina ou um treino livre. A Início também sugere o treino do dia.",
+    target: "todayCard",
+    title: "Treino de hoje",
+    body: "Aqui aparece o treino sugerido para hoje pelo seu projeto ativo. Toque para começar. Se já treinou, você vê o resumo.",
     rat: "warmup",
   },
   {
-    id: "log-set",
+    id: "week",
+    chapter: "Início",
     route: "/",
-    title: "Registre cada série",
-    body: "No treino, ajuste carga e repetições e toque no botão de concluir ao lado da série. O descanso começa sozinho e tudo funciona sem internet.",
+    target: "weekCard",
+    title: "Esta semana",
+    body: "Os dias em que você treinou nesta semana e quanto falta para a sua meta. Toque num dia para ver o treino.",
+    rat: "info",
+  },
+  {
+    id: "streak",
+    chapter: "Início",
+    route: "/",
+    target: "streakCard",
+    title: "Sua sequência",
+    body: "A sequência conta semanas seguidas com pelo menos 1 treino (de domingo a sábado). Uma semana inteira sem treinar e ela zera. A chama avisa quando a semana está em risco.",
+    rat: "streak",
+  },
+  {
+    id: "calendar",
+    chapter: "Início",
+    route: "/",
+    target: "calendar",
+    title: "Histórico",
+    body: "O calendário marca os dias treinados: quanto mais forte a cor, maior o volume. Toque num dia para ver os treinos e os recordes.",
+    rat: "tip",
+  },
+  {
+    id: "evolution",
+    chapter: "Início",
+    route: "/",
+    target: ["evolution", "history"],
+    title: "Evolução por exercício",
+    body: "Depois do primeiro treino, aparece aqui o atalho para a evolução de cada exercício: carga máxima, volume, 1RM estimado e recordes ao longo do tempo.",
+    rat: "goalReached",
+  },
+  {
+    id: "projects",
+    chapter: "Projetos",
+    route: "/",
+    target: "projectsTab",
+    title: "Projetos e rotinas",
+    body: "Um projeto agrupa suas rotinas, como Treino A, B e C. Só um fica ativo por vez, e é ele que define o treino de cada dia.",
+    rat: "thinking",
+  },
+  {
+    id: "new-project",
+    chapter: "Projetos",
+    route: "/projetos",
+    target: "newProject",
+    title: "Criar um projeto",
+    body: "Toque em Novo projeto para começar um plano, como um ciclo de hipertrofia. Seus Favoritos já vêm prontos.",
+    rat: "tip",
+  },
+  {
+    id: "routines",
+    chapter: "Projetos",
+    route: "/projetos",
+    target: ["activeProject", "newProject"],
+    title: "Montar as rotinas",
+    body: "Toque no projeto para ver e criar rotinas: escolha os exercícios, as séries, as repetições, o descanso e os dias da semana.",
+    rat: "saved",
+  },
+  {
+    id: "start-workout",
+    chapter: "Treino",
+    route: "/",
+    target: "trainTab",
+    title: "Começar um treino",
+    body: "Toque em Treinar para escolher uma rotina do projeto ativo ou um treino vazio. Com um treino aberto, o mesmo botão volta para ele.",
+    rat: "warmup",
+  },
+  {
+    id: "workout-header",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "workoutHeader",
+    title: "A tela do treino",
+    body: "No topo ficam o tempo de treino e as séries feitas. A pausa para o relógio; a seta minimiza o treino sem fechar.",
     rat: "lift",
   },
   {
-    id: "history",
+    id: "workout-exercise",
+    chapter: "Treino",
     route: "/",
-    target: TOUR_TARGETS.history,
-    title: "Acompanhe sua evolução",
-    body: "Aqui ficam sua sequência de semanas, o calendário e a evolução de carga e recordes de cada exercício.",
+    stage: "workout",
+    target: "exerciseHeader",
+    title: "Cada exercício",
+    body: "Toque no nome para abrir ou recolher as séries. Segure o cabeçalho para mudar a ordem dos exercícios.",
+    rat: "tip",
+  },
+  {
+    id: "workout-set",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "setRow",
+    title: "Cada linha é uma série",
+    body: "Tipo da série, o que você fez no último treino (Anterior), carga, repetições e o botão de concluir.",
+    rat: "info",
+  },
+  {
+    id: "workout-load-reps",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "setLoadAndReps",
+    title: "Carga e repetições",
+    body: "Toque na carga ou nas repetições para editar. Use o teclado ou os atalhos −1, +1, +5 e +10.",
+    rat: "loadUp",
+  },
+  {
+    id: "workout-done",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "setDone",
+    title: "Concluir a série",
+    body: "Terminou a série? Toque aqui. O descanso começa sozinho e, se bater recorde, você vê na hora.",
+    rat: "personalRecord",
+  },
+  {
+    id: "workout-set-type",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "setType",
+    title: "Tipo da série",
+    body: "Toque no número da série para trocar o tipo: aquecimento, drop set ou até a falha. Aquecimento não entra no volume.",
+    rat: "dropSet",
+  },
+  {
+    id: "workout-delete-set",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "secondSetRow",
+    title: "Excluir uma série",
+    body: "Arraste a linha da série para a esquerda para excluir. Se foi sem querer, toque em Desfazer no aviso.",
+    rat: "confirmDelete",
+  },
+  {
+    id: "workout-add-set",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "addSet",
+    title: "Adicionar série",
+    body: "Cria mais uma série, já com a carga e as repetições da anterior.",
+    rat: "lift",
+  },
+  {
+    id: "workout-exercise-menu",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "exerciseMenu",
+    title: "Trocar ou remover o exercício",
+    body: "No menu do exercício você escreve uma observação, troca o exercício (mantendo as séries) ou remove ele do treino.",
+    rat: "thinking",
+  },
+  {
+    id: "workout-add-exercise",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "workoutAddExercise",
+    title: "Adicionar exercício",
+    body: "Para incluir outro exercício, toque aqui: busque pelo nome ou filtre pelos músculos.",
+    rat: "legDay",
+  },
+  {
+    id: "workout-finish",
+    chapter: "Treino",
+    route: "/",
+    stage: "workout",
+    target: "workoutFinish",
+    title: "Finalizar o treino",
+    body: "Ao terminar, toque em Finalizar treino. Séries não concluídas saem, e você vê o resumo, os recordes e pode compartilhar nos stories.",
+    rat: "workoutDone",
+  },
+  {
+    id: "compete",
+    chapter: "Competição",
+    route: "/",
+    target: "competeTab",
+    title: "Competir com amigos",
+    body: "Quem se segue mutuamente entra na mesma competição. O ranking do mês recomeça a cada temporada.",
     rat: "goalReached",
+  },
+  {
+    id: "competition-filters",
+    chapter: "Competição",
+    route: "/competicao",
+    target: "competitionFilters",
+    title: "Período e métrica",
+    body: "Escolha o período (este mês, 3 meses, 1 ano ou datas suas) e compare por pontos, volume, treinos ou recordes.",
+    rat: "info",
+  },
+  {
+    id: "competition-rules",
+    chapter: "Competição",
+    route: "/competicao",
+    target: "competitionRules",
+    title: "Como os pontos funcionam",
+    body: "Os pontos premiam a constância: treinos válidos na semana, o esforço informado e semanas seguidas cumpridas. Toque aqui para ver a regra completa.",
+    rat: "thinking",
+  },
+  {
+    id: "invite",
+    chapter: "Competição",
+    route: "/competicao",
+    target: "inviteFriends",
+    title: "Adicionar amigos",
+    body: "Toque aqui para encontrar pessoas e convidar seus amigos.",
+    rat: "welcome",
+  },
+  {
+    id: "people-search",
+    chapter: "Competição",
+    route: "/buscar-pessoas",
+    target: "peopleSearch",
+    title: "Encontrar pessoas",
+    body: "Busque pelo @ ou pelo nome e toque em Seguir. Quando vocês dois se seguem, já competem. Também dá para mandar o link do seu perfil.",
+    rat: "tip",
+  },
+  {
+    id: "profile",
+    chapter: "Perfil",
+    route: "/",
+    target: "profileTab",
+    title: "Seu perfil",
+    body: "Seu @, seguidores e evolução. Nos três pontinhos ficam as Configurações: privacidade, notificações e este tutorial.",
+    rat: "info",
+  },
+  {
+    id: "done",
+    chapter: "Perfil",
+    route: "/",
+    title: "Tudo pronto!",
+    body: "Agora é com você: monte sua rotina e registre o primeiro treino. Bons treinos!",
+    rat: "workoutDone",
   },
 ];
