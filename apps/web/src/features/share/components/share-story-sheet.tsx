@@ -310,14 +310,14 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         />
       </m.div>
 
-      {/* Opacidade do fundo, dos cartões e das bordas, de 0 a 100% (sticker já sai sem fundo: a mesma escala
-          vale para o adesivo). */}
+      {/* Opacidade de 0 a 100%: dos cartões e bordas no modelo com cartões (a imagem fica sem fundo) ou do
+          fundo da imagem nos demais. */}
       <m.div {...enter(4)} className="flex flex-col gap-1">
         <div className="flex min-h-11 items-center justify-between gap-3">
           <label htmlFor="story-opacity" className="text-sm font-semibold">
-            {sticker ? "Opacidade do adesivo" : "Opacidade do fundo"}
+            {sticker ? "Opacidade do adesivo" : current.hasCards ? "Opacidade dos cartões" : "Opacidade do fundo"}
           </label>
-          {!sticker && (
+          {!current.hasCards && (
             <Chip
               label="Sem fundo"
               icon={SquareDashed}
@@ -341,7 +341,9 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
           <span className="w-14 text-right font-display text-[22px] font-semibold tabular-nums">{opacity}%</span>
         </div>
         <span className="text-xs leading-4 text-pretty text-fg-muted">
-          Fundo, cartões e bordas seguem a opacidade. Em 0%, só o conteúdo aparece sobre a foto.
+          {current.hasCards
+            ? "A imagem sai sem fundo. Cartões e bordas seguem a opacidade; em 0%, só o conteúdo aparece sobre a foto."
+            : "A opacidade vale para o fundo da imagem; em 0%, o PNG sai transparente."}
         </span>
       </m.div>
 

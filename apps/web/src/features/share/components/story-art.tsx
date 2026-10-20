@@ -7,7 +7,7 @@ import type { StoryFormat, StoryTheme } from "@/features/share/type";
 export interface StoryArtProps {
   model: StoryModel;
   data: StoryData;
-  /** Opacidade do fundo (0 = PNG transparente, para colar sobre a foto). Stickers: sempre sem fundo; vale para o adesivo. */
+  /** Opacidade escolhida (0–100): dos cartões no modelo com cartões (a imagem fica sem fundo) ou do fundo da imagem nos demais. */
   backgroundOpacity: number;
   /** Tema da imagem (escolhido na folha; independe do tema do app). */
   theme: StoryTheme;
@@ -27,15 +27,18 @@ function colorAt(color: string, percent: number): string {
 }
 
 /**
- * Fundo, cartões e bordas pela opacidade escolhida (Claude Design · StoryArt), de 0 a 100% em todos
- * os modelos, inclusive cartões dentro de outros: em 0% tudo fica transparente e só os elementos
- * aparecem (a regra [data-story-art][data-flat] do base.css tira também bordas coloridas e sombras).
+ * Cores da arte pela opacidade escolhida (0 a 100%, Claude Design · StoryArt):
+ * - modelo com cartões: a imagem não tem fundo; cartões (inclusive os que ficam dentro de outro) e
+ *   bordas seguem a opacidade. Em 0% só os elementos aparecem (a regra [data-story-art][data-flat]
+ *   do base.css tira também bordas coloridas e sombras);
+ * - modelo sem cartões: a opacidade vale para o fundo da imagem.
  */
-export function storyArtColors(opacity: number, theme: StoryTheme): CSSProperties {
+export function storyArtColors(opacity: number, theme: StoryTheme, hasCards: boolean): CSSProperties {
   const o = Math.max(0, Math.min(100, opacity));
+  if (!hasCards) return { background: colorAt("var(--background)", o) };
   const s = SURFACES[theme];
   return {
-    background: colorAt("var(--background)", o),
+    background: "transparent",
     "--surface": colorAt(s.surface, o),
     "--surface-elevated": colorAt(s.elevated, o),
     "--surface-3": colorAt(s.third, o),
@@ -57,12 +60,13 @@ const FORMAT_BOX: Record<StoryFormat, string> = {
 export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function StoryArt({ model, data, backgroundOpacity, theme }, ref) {
   const { Component } = model;
   const format = model.format ?? "story";
-  // Opacidade escolhida (valores dinâmicos). Sticker: fundo sempre transparente e o adesivo segue a mesma
-  // regra dos cartões.
-  const colors = storyArtColors(backgroundOpacity, theme);
+  // Opacidade escolhida (valores dinâmicos): fundo da imagem ou cartões, conforme o modelo. Sticker:
+  // fundo sempre transparente.
+  const hasCards = model.hasCards ?? false;
+  const colors = storyArtColors(backgroundOpacity, theme, hasCards);
   if (format === "sticker") colors.background = "transparent";
-  // Opacidade 0: nenhum cartão aparece (nem borda colorida nem sombra); só os elementos ficam.
-  const flat = backgroundOpacity <= 0;
+  // Modelo com cartões em 0%: nenhum cartão aparece (nem borda colorida nem sombra); só os elementos ficam.
+  const flat = hasCards && backgroundOpacity <= 0;
   return (
     <div
       ref={ref}
