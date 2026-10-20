@@ -1,7 +1,13 @@
 import type { GufRatOccasion } from "@/shared/components/ds";
 import type { TourTargetId } from "./tour-targets";
 
-export type TourChapter = "Início" | "Projetos" | "Treino" | "Competição" | "Perfil";
+/**
+ * Versão do tour, guardada na conta ao concluir (`profiles.tour_completed_version`). Subir a versão
+ * mostra o tour de novo a todos (v2 = tour completo, que substituiu o curto de 6 passos da v1).
+ */
+export const TOUR_VERSION = 2;
+
+export type TourChapter ="Início" | "Projetos" | "Treino" | "Competição" | "Perfil";
 
 export interface TourStep {
   id: string;

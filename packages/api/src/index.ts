@@ -7,6 +7,7 @@ export * from "./history";
 export * from "./projects";
 export * from "./routines";
 export * from "./profile";
+export * from "./onboarding";
 export * from "./evolution";
 export * from "./share";
 export * from "./social";

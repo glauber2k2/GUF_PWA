@@ -242,13 +242,13 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 
 | Regra | Onde |
 |---|---|
-| Começa sozinho uma vez por sessão, só na Início, sem treino em andamento e se o tour ainda não foi concluído neste aparelho. | `TourProvider` (features/onboarding) |
+| Começa sozinho uma vez por sessão, só na Início, sem treino em andamento e se a conta ainda não concluiu o tour (vale em todos os aparelhos; sem internet não começa sozinho). | `TourProvider` (features/onboarding) |
 | 28 passos em 5 capítulos, na ordem de uso: Início (treino de hoje, semana, sequência, calendário, evolução) → Projetos e rotinas → Treino (demonstração da tela: carga, repetições, concluir, tipo, excluir e adicionar série, menu do exercício, adicionar exercício, finalizar) → Competição (período e métrica, pontos, convidar amigos, buscar pessoas) → Perfil. | `TOUR_STEPS` |
 | A tela do treino é mostrada com dados de exemplo e os componentes reais, sem iniciar nem gravar treino. | `WorkoutTourStage` |
 | O balão fica ao lado do que está destacado (abaixo, senão acima), com seta apontando para ele, sem cobri-lo. | `placeBubble` |
-| Pular ou concluir grava "concluído" no aparelho (`guf:tour:main:v2`); um tour novo muda a versão da chave e aparece de novo para todos. | `TourProvider` |
+| Pular ou concluir grava a versão do tour na conta (`profiles.tour_completed_version`); um tour novo sobe `TOUR_VERSION` e aparece de novo para todos. Contas com treino concluído foram marcadas como já vistas. | `TourProvider`, `completeTour` |
 | Durante o tour a tela não recebe toques: avança só por Pular / Voltar / Próximo ("Começar" no último); Esc pula. Alvo que não existe (ex.: atalho de evolução antes do 1º treino) → alternativa do passo ou balão no centro. | `TourOverlay`, `useTargetRect` |
-| Rever a qualquer momento: Configurações › Sobre › "Ver tutorial novamente". | `AboutSection` |
+| Rever a qualquer momento: ícone "?" no topo das Configurações ou Configurações › Sobre › "Ver tutorial novamente" (rever não grava nada). | `SettingsScreen`, `AboutSection` |
 
 ## 9.1 Padrões de interface
 
