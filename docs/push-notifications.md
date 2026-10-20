@@ -59,8 +59,8 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 | Edge Function `push-alerts` | Publicada em 2026-10-19 (`--no-verify-jwt`) |
 | Segredos do Vault (`project_url`, `push_alerts_secret`) | Criados em 2026-10-19 pela CLI (`supabase db query --linked`) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` | Feito em 2026-10-19 |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel | **Pendente**: cadastrar no painel (Settings › Environment Variables, Production e Preview) e publicar de novo; sem ela, a opção "Notificações" aparece como indisponível no site |
-| Teste com um aviso real (dois celulares, contas que se seguem) | **Pendente** |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel | Cadastrada e publicada (2026-10-20) |
+| Teste com um aviso real (dois celulares, contas que se seguem) | **Feito em 2026-10-20**: inscrição no Chrome/Android e aviso de pedido para seguir recebido, depois que o `/sw.js` passou a ser publicado (`fix/service-worker-producao`) |
 
 **Conferido em 2026-10-19:** sem o segredo, a função responde 401; com o segredo e um usuário inexistente, responde `{"sent":0}`; `post_push_alert` chamado no banco chega à função pelo pg_net (status 200 em `net._http_response`). A leitura das chaves VAPID e o envio só acontecem quando há um aviso de verdade, por isso ainda falta o teste com celulares.
 
