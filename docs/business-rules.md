@@ -243,9 +243,11 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 | Regra | Onde |
 |---|---|
 | Começa sozinho uma vez por sessão, só na Início, sem treino em andamento e se o tour ainda não foi concluído neste aparelho. | `TourProvider` (features/onboarding) |
-| 6 passos: boas-vindas → aba Projetos → "Novo projeto" → aba Treinar → registrar série → Histórico. O tour navega até a rota de cada passo; o overlay só aparece na rota do passo. | `TOUR_STEPS` |
-| Pular ou concluir grava "concluído" no aparelho (`guf:tour:main:v1`); um tour novo muda a versão da chave e aparece de novo para todos. | `TourProvider` |
-| Durante o tour a tela não recebe toques: avança só por Pular / Voltar / Próximo ("Começar" no último); Esc pula. Alvo não encontrado em 2 s → card sem recorte. | `TourOverlay`, `useTargetRect` |
+| 28 passos em 5 capítulos, na ordem de uso: Início (treino de hoje, semana, sequência, calendário, evolução) → Projetos e rotinas → Treino (demonstração da tela: carga, repetições, concluir, tipo, excluir e adicionar série, menu do exercício, adicionar exercício, finalizar) → Competição (período e métrica, pontos, convidar amigos, buscar pessoas) → Perfil. | `TOUR_STEPS` |
+| A tela do treino é mostrada com dados de exemplo e os componentes reais, sem iniciar nem gravar treino. | `WorkoutTourStage` |
+| O balão fica ao lado do que está destacado (abaixo, senão acima), com seta apontando para ele, sem cobri-lo. | `placeBubble` |
+| Pular ou concluir grava "concluído" no aparelho (`guf:tour:main:v2`); um tour novo muda a versão da chave e aparece de novo para todos. | `TourProvider` |
+| Durante o tour a tela não recebe toques: avança só por Pular / Voltar / Próximo ("Começar" no último); Esc pula. Alvo que não existe (ex.: atalho de evolução antes do 1º treino) → alternativa do passo ou balão no centro. | `TourOverlay`, `useTargetRect` |
 | Rever a qualquer momento: Configurações › Sobre › "Ver tutorial novamente". | `AboutSection` |
 
 ## 9.1 Padrões de interface

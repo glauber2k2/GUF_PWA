@@ -7,6 +7,7 @@ import { Banner, Icon, Skeleton } from "@/shared/components/ds";
 import { CompetitionFilters, periodCaption } from "@/features/competition/components/competition-filters";
 import { CompetitionRules } from "@/features/competition/components/competition-rules";
 import type { CompetitionView, ReadyBoard } from "@/features/competition/hooks/use-competition-view";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 function CompetitionSkeleton() {
   return (
@@ -38,14 +39,16 @@ export function CompetitionBoard({ view, empty, children }: { view: CompetitionV
   const { board, ready } = view;
   return (
     <div className="flex flex-col gap-4">
-      <CompetitionFilters
-        period={view.period}
-        metric={view.metric}
-        custom={view.custom}
-        today={view.today}
-        onPeriod={view.changePeriod}
-        onMetric={view.setMetric}
-      />
+      <div data-tour={TOUR_TARGETS.competitionFilters}>
+        <CompetitionFilters
+          period={view.period}
+          metric={view.metric}
+          custom={view.custom}
+          today={view.today}
+          onPeriod={view.changePeriod}
+          onMetric={view.setMetric}
+        />
+      </div>
 
       {board.isPending ? (
         <CompetitionSkeleton />
@@ -59,7 +62,9 @@ export function CompetitionBoard({ view, empty, children }: { view: CompetitionV
         children(ready)
       )}
 
-      <CompetitionRules range={view.range} season={toLocalISODate(seasonOf(view.today))} />
+      <div data-tour={TOUR_TARGETS.competitionRules}>
+        <CompetitionRules range={view.range} season={toLocalISODate(seasonOf(view.today))} />
+      </div>
     </div>
   );
 }

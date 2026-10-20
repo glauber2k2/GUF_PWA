@@ -10,6 +10,7 @@ import { useGoBack } from "@/shared/hooks/use-go-back";
 import { useCanUseSocial, useMySocial, usePeopleSearch, useRequestFollow } from "@/features/social/api/use-social";
 import { PersonRow } from "@/features/social/components/person-row";
 import { shareProfileLink } from "@/features/social/components/profile-actions";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 function FollowCell({ person }: { person: PersonSearchResult }) {
   const { showToast } = useAppShell();
@@ -57,13 +58,15 @@ export function PeopleSearchScreen() {
         <h1 className="m-0 min-w-0 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">Encontrar pessoas</h1>
       </div>
 
-      <SearchField placeholder="Buscar por @ ou nome" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
+      <div data-tour={TOUR_TARGETS.peopleSearch} className="flex flex-col gap-4">
+        <SearchField placeholder="Buscar por @ ou nome" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus />
 
-      {me.data && (
-        <Button variant="secondary" size="tall" icon={Share2} fullWidth onClick={() => void shareProfileLink(me.data.handle, showToast)}>
-          Convidar pelo meu link
-        </Button>
-      )}
+        {me.data && (
+          <Button variant="secondary" size="tall" icon={Share2} fullWidth onClick={() => void shareProfileLink(me.data.handle, showToast)}>
+            Convidar pelo meu link
+          </Button>
+        )}
+      </div>
 
       {!ready ? (
         <p className="m-0 text-sm text-fg-secondary">Digite pelo menos 3 letras do @ ou do nome. Vocês competem quando se seguem mutuamente.</p>

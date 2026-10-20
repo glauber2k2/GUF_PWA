@@ -81,6 +81,7 @@ function EvolutionShortcut() {
   return (
     <button
       type="button"
+      data-tour={TOUR_TARGETS.evolution}
       onClick={() => router.push(exerciseSearchPath())}
       className="flex h-12 flex-none animate-guf-rise cursor-pointer items-center gap-2.5 rounded-md border border-border-strong bg-surface pr-3 pl-3.5 text-left text-[15px] text-fg-secondary transition-colors duration-150 ease-standard hover:bg-surface-3 active:scale-[.98] motion-reduce:active:scale-100"
     >
@@ -123,7 +124,7 @@ function HistoryContent({
 
   return (
     <>
-      <div className="animate-guf-rise">
+      <div data-tour={TOUR_TARGETS.streakCard} className="animate-guf-rise">
         <HistoryStreakCard streak={streak} goal={weeklyGoal} weeks={strip} />
       </div>
 
@@ -131,7 +132,7 @@ function HistoryContent({
         Histórico
       </h2>
       {firstTrainedOn && <EvolutionShortcut />}
-      <div className="animate-guf-rise [animation-delay:60ms]">
+      <div data-tour={TOUR_TARGETS.calendar} className="animate-guf-rise [animation-delay:60ms]">
         <TrainingCalendar
           month={month}
           today={today}

@@ -3,3 +3,5 @@ export { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX, WorkoutExerciseCard } from "./com
 export type { ExerciseView } from "./helpers/workout-state";
 export { WorkoutProvider, clearActiveWorkoutCache, useActiveWorkout } from "./providers/workout-provider";
 export { WorkoutScreen } from "./ui/workout-screen";
+export { AddExerciseButton } from "./components/add-exercise-button";
+export { WorkoutHeader } from "./components/workout-header";
