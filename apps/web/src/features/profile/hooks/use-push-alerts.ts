@@ -5,7 +5,7 @@ import { pushApi, type PushApi } from "@guf/api";
 import type { InstallPlatform } from "@guf/core";
 import { useProfileSource } from "@/features/profile/api/use-profile";
 import { getSupabaseClient } from "@/shared/libs/supabase";
-import { devicePush, type DevicePush } from "@/shared/push/web-push";
+import { devicePush, type DevicePush, type DeviceSubscribeResult } from "@/shared/push/web-push";
 import { mockDevicePush, mockPushApi, setPushMockFailing } from "@/mocks/push";
 
 /**
@@ -18,6 +18,9 @@ export type PushAlertsStatus = "checking" | "unsupported" | "needs-install" | "b
 export type PushAlertsOutcome = "enabled" | "disabled" | "blocked" | "dismissed" | { error: string };
 
 const IOS_NOT_INSTALLED: InstallPlatform[] = ["ios-safari", "ios-other-browser"];
+
+const SUBSCRIBE_FAILED_MESSAGE =
+  "Não foi possível ativar as notificações neste aparelho. Feche e abra o app de novo, confira a internet e tente outra vez.";
 
 function usePushSource(): { api: PushApi; device: DevicePush } {
   const { mock, dev } = useProfileSource();
@@ -55,12 +58,14 @@ export function usePushAlerts(platform: InstallPlatform) {
   }, [device, platform]);
 
   const enable = useCallback(async (): Promise<PushAlertsOutcome> => {
-    const keys = await device.subscribe().catch(() => null);
-    if (!keys) {
-      const blocked = device.getPermission() === "denied";
-      setStatus(blocked ? "blocked" : "off");
-      return blocked ? "blocked" : "dismissed";
+    const result = await device.subscribe().catch((): DeviceSubscribeResult => ({ status: "failed" }));
+    if (result.status === "denied") {
+      setStatus("blocked");
+      return "blocked";
     }
+    if (result.status === "dismissed") return "dismissed";
+    if (result.status === "failed") return { error: SUBSCRIBE_FAILED_MESSAGE };
+    const { keys } = result;
     const { error } = await api.savePushSubscription(getSupabaseClient(), keys);
     if (error) {
       await device.unsubscribe();

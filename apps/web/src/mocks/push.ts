@@ -41,7 +41,7 @@ export const mockDevicePush = {
   getCurrent: async () => (subscribed ? MOCK_SUBSCRIPTION : null),
   subscribe: async () => {
     subscribed = true;
-    return MOCK_SUBSCRIPTION;
+    return { status: "subscribed", keys: MOCK_SUBSCRIPTION };
   },
   unsubscribe: async () => {
     subscribed = false;

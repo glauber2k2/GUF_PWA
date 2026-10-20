@@ -6,18 +6,32 @@ import type { PushSubscriptionKeys } from "@guf/api";
  * na Tela de Início (iOS 16.4+).
  */
 
+/**
+ * Resultado de inscrever o aparelho: inscrito · denied (permissão negada) · dismissed (fechou o
+ * pedido sem escolher) · failed (permissão dada, mas o service worker não ficou pronto ou o serviço
+ * de push recusou).
+ */
+export type DeviceSubscribeResult =
+  | { status: "subscribed"; keys: PushSubscriptionKeys }
+  | { status: "denied" }
+  | { status: "dismissed" }
+  | { status: "failed" };
+
 /** Aparelho visto pelas telas: o real (abaixo) ou o simulado de desenvolvimento (mocks/push.ts). */
 export interface DevicePush {
   isSupported: () => boolean;
   getPermission: () => NotificationPermission;
   getCurrent: () => Promise<PushSubscriptionKeys | null>;
-  /** Pede a permissão e inscreve; null = permissão negada ou sem service worker. */
-  subscribe: () => Promise<PushSubscriptionKeys | null>;
+  /** Pede a permissão (precisa vir de um toque) e inscreve o aparelho. */
+  subscribe: () => Promise<DeviceSubscribeResult>;
   unsubscribe: () => Promise<void>;
 }
 
 /** Chave pública VAPID do servidor (a privada fica só nos secrets da Edge Function). */
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
+
+/** Espera pelo service worker ativo (logo depois de instalar o app ou de uma atualização ele ainda está subindo). */
+const SERVICE_WORKER_READY_TIMEOUT_MS = 10_000;
 
 /** O navegador e o build têm o necessário para receber avisos. */
 export function isPushSupported(): boolean {
@@ -55,17 +69,35 @@ function toApplicationServerKey(base64Url: string): Uint8Array<ArrayBuffer> {
 }
 
 /**
- * Pede a permissão (precisa vir de um toque) e inscreve o aparelho.
- * @returns a inscrição, ou null se a pessoa negou a permissão ou o aparelho não tem service worker.
+ * Service worker ATIVO: `pushManager.subscribe` falha com um worker ainda instalando ou esperando,
+ * o que `getRegistration()` devolveria. null se não ficar pronto a tempo.
  */
-export async function subscribeDevicePush(): Promise<PushSubscription | null> {
-  if (!isPushSupported()) return null;
-  if ((await Notification.requestPermission()) !== "granted") return null;
-  const registration = await navigator.serviceWorker.getRegistration();
-  if (!registration) return null;
-  const current = await registration.pushManager.getSubscription();
-  if (current) return current;
-  return registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toApplicationServerKey(VAPID_PUBLIC_KEY) });
+async function getActiveRegistration(): Promise<ServiceWorkerRegistration | null> {
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), SERVICE_WORKER_READY_TIMEOUT_MS));
+  return Promise.race([navigator.serviceWorker.ready, timeout]);
+}
+
+/**
+ * Pede a permissão (precisa vir de um toque) e inscreve o aparelho.
+ * @returns a inscrição ou o motivo de não ter inscrito (negou, fechou o pedido ou falhou).
+ */
+export async function subscribeDevicePush(): Promise<DeviceSubscribeResult> {
+  if (!isPushSupported()) return { status: "failed" };
+  const permission = await Notification.requestPermission();
+  if (permission === "denied") return { status: "denied" };
+  if (permission !== "granted") return { status: "dismissed" };
+  try {
+    const registration = await getActiveRegistration();
+    if (!registration) return { status: "failed" };
+    const subscription =
+      (await registration.pushManager.getSubscription()) ??
+      (await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: toApplicationServerKey(VAPID_PUBLIC_KEY) }));
+    const keys = toPushSubscriptionKeys(subscription);
+    return keys ? { status: "subscribed", keys } : { status: "failed" };
+  } catch {
+    // Serviço de push indisponível ou recusou (ex.: sem internet no momento, navegador sem suporte real).
+    return { status: "failed" };
+  }
 }
 
 /** Cancela a inscrição no navegador: o endereço antigo deixa de receber qualquer aviso. */
@@ -81,9 +113,6 @@ export const devicePush: DevicePush = {
     const subscription = await getDevicePushSubscription();
     return subscription && toPushSubscriptionKeys(subscription);
   },
-  subscribe: async () => {
-    const subscription = await subscribeDevicePush();
-    return subscription && toPushSubscriptionKeys(subscription);
-  },
+  subscribe: subscribeDevicePush,
   unsubscribe: unsubscribeDevicePush,
 };
