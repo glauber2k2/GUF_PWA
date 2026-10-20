@@ -28,7 +28,8 @@ export type OutboxOp =
   | { kind: "pause"; sessionId: string; at: string }
   | { kind: "resume"; sessionId: string; at: string }
   | { kind: "createExercise"; id: string; name: string; muscleGroup: string; equipment: string }
-  | { kind: "finish"; sessionId: string }
+  /** updateRoutine: depois de finalizar, os exercícios e séries do treino viram os da rotina. */
+  | { kind: "finish"; sessionId: string; updateRoutine?: boolean }
   | { kind: "discard"; sessionId: string };
 
 export interface OutboxEntry {

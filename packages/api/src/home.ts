@@ -1,4 +1,4 @@
-import { sessionTotals, targetRepsMin, type ActivePeriod, type SetType } from "@guf/core";
+import { plannedSetValues, sessionTotals, type ActivePeriod, type SetType } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -244,7 +244,8 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
 /**
  * Inicia o treino: cria a sessão (performed_on local, nome da rotina como snapshot; o gatilho
  * abre o 1º período ativo), copia os exercícios da rotina e já cria as séries planejadas
- * (target_sets) preenchidas com carga/reps do último desempenho (ou as reps alvo da rotina).
+ * (target_sets). Carga e repetições: com a rotina em "atualizar automaticamente", as do último
+ * desempenho (ou as reps alvo); senão, as planejadas na rotina (ou vazio) — plannedSetValues.
  * Se algo falhar, a sessão recém-criada é apagada (sem treino "pela metade").
  */
 export const startWorkout: StartWorkout = async (client, { routineId, performedOn }) => {
@@ -253,15 +254,23 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
     if (!userId) return { data: null, error: apiError("not_authenticated") };
 
     let name = FREE_WORKOUT_NAME;
-    let planned: { exercise_id: string; position: number; target_sets: number | null; target_reps: string | null }[] = [];
+    let planned: {
+      exercise_id: string;
+      position: number;
+      target_sets: number | null;
+      target_reps: string | null;
+      target_weight_kg: number | null;
+    }[] = [];
+    let autoProgress = true;
     if (routineId) {
       const routineRes = await client
         .from("routines")
-        .select("name, routine_exercises(exercise_id, position, target_sets, target_reps)")
+        .select("name, auto_progress, routine_exercises(exercise_id, position, target_sets, target_reps, target_weight_kg)")
         .eq("id", routineId)
         .maybeSingle();
       if (routineRes.error || !routineRes.data) return { data: null, error: toApiError(routineRes.error) };
       name = routineRes.data.name;
+      autoProgress = routineRes.data.auto_progress;
       planned = [...routineRes.data.routine_exercises].sort((a, b) => a.position - b.position);
     }
 
@@ -288,12 +297,16 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
         position,
         sets: Array.from({ length: count }, (_, i) => {
           const prev = previous.find((l) => l.set_number === i + 1) ?? lastPrev;
+          const values = plannedSetValues(autoProgress, prev && { weightKg: prev.weight_kg, reps: prev.reps }, {
+            weightKg: p.target_weight_kg === null ? null : Number(p.target_weight_kg),
+            targetReps: p.target_reps,
+          });
           return {
             id: crypto.randomUUID(),
             setNumber: i + 1,
             setType: "normal" as SetType,
-            weightKg: prev?.weight_kg ?? null,
-            reps: prev?.reps ?? targetRepsMin(p.target_reps),
+            weightKg: values.weightKg,
+            reps: values.reps,
             isCompleted: false,
           };
         }),

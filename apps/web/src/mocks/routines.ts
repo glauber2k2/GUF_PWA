@@ -12,18 +12,22 @@ function ignoreClient(client: GufClient) {
   void client;
 }
 
-const SAMPLE: Array<Pick<RoutineExerciseDraft, "name" | "muscleGroup" | "equipment" | "targetSets" | "targetReps" | "restSeconds" | "notes">> = [
-  { name: "Supino reto com barra", muscleGroup: "peito", equipment: "barra", targetSets: 4, targetReps: "8-12", restSeconds: 90, notes: "" },
-  { name: "Supino inclinado com halteres", muscleGroup: "peito", equipment: "halter", targetSets: 3, targetReps: "10", restSeconds: 90, notes: "" },
-  { name: "Crucifixo com halteres", muscleGroup: "peito", equipment: "halter", targetSets: 3, targetReps: "12", restSeconds: 60, notes: "" },
-  { name: "Crossover na polia", muscleGroup: "peito", equipment: "polia", targetSets: 3, targetReps: "12-15", restSeconds: 60, notes: "" },
-  { name: "Tríceps na polia com corda", muscleGroup: "triceps", equipment: "polia", targetSets: 3, targetReps: "12", restSeconds: 60, notes: "Cotovelos colados ao corpo" },
-  { name: "Tríceps testa com barra W", muscleGroup: "triceps", equipment: "barra", targetSets: 2, targetReps: "falha", restSeconds: 90, notes: "" },
-  { name: "Elevação lateral com halteres", muscleGroup: "ombros", equipment: "halter", targetSets: 3, targetReps: "12-15", restSeconds: 45, notes: "" },
+type SampleExercise = Pick<RoutineExerciseDraft, "name" | "muscleGroup" | "equipment" | "targetSets" | "targetReps" | "targetWeightKg" | "restSeconds" | "notes">;
+
+const SAMPLE: SampleExercise[] = [
+  { name: "Supino reto com barra", muscleGroup: "peito", equipment: "barra", targetSets: 4, targetReps: "8-12", targetWeightKg: 60, restSeconds: 90, notes: "" },
+  { name: "Supino inclinado com halteres", muscleGroup: "peito", equipment: "halter", targetSets: 3, targetReps: "10", targetWeightKg: 22, restSeconds: 90, notes: "" },
+  { name: "Crucifixo com halteres", muscleGroup: "peito", equipment: "halter", targetSets: 3, targetReps: "12", targetWeightKg: null, restSeconds: 60, notes: "" },
+  { name: "Crossover na polia", muscleGroup: "peito", equipment: "polia", targetSets: 3, targetReps: "12-15", targetWeightKg: null, restSeconds: 60, notes: "" },
+  { name: "Tríceps na polia com corda", muscleGroup: "triceps", equipment: "polia", targetSets: 3, targetReps: "12", targetWeightKg: 25, restSeconds: 60, notes: "Cotovelos colados ao corpo" },
+  { name: "Tríceps testa com barra W", muscleGroup: "triceps", equipment: "barra", targetSets: 2, targetReps: "falha", targetWeightKg: null, restSeconds: 90, notes: "" },
+  { name: "Elevação lateral com halteres", muscleGroup: "ombros", equipment: "halter", targetSets: 3, targetReps: "12-15", targetWeightKg: 8, restSeconds: 45, notes: "" },
 ];
 
 /** Exercícios detalhados por rotina (o mock de Projetos guarda só o resumo). */
 const details = new Map<string, RoutineExerciseDraft[]>();
+/** Opção "atualizar carga e repetições automaticamente" por rotina (padrão ligada). */
+const autoProgressById = new Map<string, boolean>();
 
 function exercisesFor(routineId: string, count: number): RoutineExerciseDraft[] {
   const saved = details.get(routineId);
@@ -47,6 +51,7 @@ export const mockRoutinesApi = {
       projectId: found.project.id,
       name: found.routine.name,
       weekdays: [...found.routine.weekdays],
+      autoProgress: autoProgressById.get(found.routine.id) ?? true,
       exercises: structuredClone(exercisesFor(found.routine.id, found.routine.exercises.length)),
     };
     return { data: draft, error: null };
@@ -66,6 +71,7 @@ export const mockRoutinesApi = {
     });
     if (!ok) return { data: null, error: apiError("project_not_found") };
     details.set(id, structuredClone(draft.exercises));
+    autoProgressById.set(id, draft.autoProgress);
     return { data: { id }, error: null };
   },
 } satisfies RoutinesApi;

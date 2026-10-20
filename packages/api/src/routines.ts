@@ -17,6 +17,8 @@ export interface RoutineExerciseDraft {
   targetSets: number;
   /** Texto livre: "10", "8-12", "falha". */
   targetReps: string;
+  /** Carga planejada em kg (opcional); usada quando a rotina não atualiza carga automaticamente. */
+  targetWeightKg: number | null;
   restSeconds: number;
   notes: string;
 }
@@ -28,6 +30,11 @@ export interface RoutineDraft {
   name: string;
   /** Dias da semana (ISO: 1 = segunda … 7 = domingo). */
   weekdays: number[];
+  /**
+   * Atualizar carga e repetições automaticamente: o próximo treino começa com o último desempenho.
+   * Desligado: começa com o planejado na rotina (ou vazio).
+   */
+  autoProgress: boolean;
   /** Na ordem da rotina. */
   exercises: RoutineExerciseDraft[];
 }
@@ -52,7 +59,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
     const { data, error } = await client
       .from("routines")
       .select(
-        "id, project_id, name, weekdays, archived_at, routine_exercises(id, exercise_id, position, target_sets, target_reps, rest_seconds, notes, exercises(name, muscle_group, equipment))",
+        "id, project_id, name, weekdays, auto_progress, archived_at, routine_exercises(id, exercise_id, position, target_sets, target_reps, target_weight_kg, rest_seconds, notes, exercises(name, muscle_group, equipment))",
       )
       .eq("id", routineId)
       .order("position", { referencedTable: "routine_exercises", ascending: true })
@@ -65,6 +72,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
         projectId: data.project_id,
         name: data.name,
         weekdays: data.weekdays,
+        autoProgress: data.auto_progress,
         exercises: data.routine_exercises.map((re) => ({
           id: re.id,
           exerciseId: re.exercise_id,
@@ -73,6 +81,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
           equipment: re.exercises?.equipment ?? "outro",
           targetSets: re.target_sets ?? DEFAULT_SETS,
           targetReps: re.target_reps ?? "",
+          targetWeightKg: re.target_weight_kg === null ? null : Number(re.target_weight_kg),
           restSeconds: re.rest_seconds ?? DEFAULT_REST_SECONDS,
           notes: re.notes ?? "",
         })),
@@ -92,11 +101,13 @@ export const saveRoutine: RoutinesApi["saveRoutine"] = async (client, draft) => 
       p_project_id: draft.projectId,
       p_name: draft.name.trim(),
       p_weekdays: [...new Set(draft.weekdays)].sort((a, b) => a - b),
+      p_auto_progress: draft.autoProgress,
       p_exercises: draft.exercises.map((e) => ({
         id: e.id,
         exercise_id: e.exerciseId,
         target_sets: e.targetSets,
         target_reps: e.targetReps.trim(),
+        target_weight_kg: e.targetWeightKg,
         rest_seconds: e.restSeconds,
         notes: e.notes.trim(),
       })),

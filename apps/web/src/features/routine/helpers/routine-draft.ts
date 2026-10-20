@@ -6,10 +6,11 @@ export type DraftAction =
   | { type: "setName"; name: string }
   | { type: "setProject"; projectId: string }
   | { type: "toggleDay"; day: IsoWeekday }
+  | { type: "setAutoProgress"; autoProgress: boolean }
   /** Já convertidos com toPlannedExercise (o id é gerado fora do reducer, que precisa ser puro). */
   | { type: "addExercises"; exercises: RoutineExerciseDraft[] }
   | { type: "replaceExercise"; id: string; exercise: LibraryExercise }
-  | { type: "updateExercise"; id: string; patch: Partial<Pick<RoutineExerciseDraft, "targetSets" | "targetReps" | "restSeconds" | "notes">> }
+  | { type: "updateExercise"; id: string; patch: Partial<Pick<RoutineExerciseDraft, "targetSets" | "targetReps" | "targetWeightKg" | "restSeconds" | "notes">> }
   | { type: "removeExercise"; id: string }
   | { type: "restoreExercise"; index: number; exercise: RoutineExerciseDraft }
   | { type: "reorder"; exercises: RoutineExerciseDraft[] };
@@ -38,6 +39,8 @@ export function draftReducer(draft: RoutineDraft, action: DraftAction): RoutineD
       return { ...draft, projectId: action.projectId };
     case "toggleDay":
       return { ...draft, weekdays: toggleWeekday(draft.weekdays, action.day) };
+    case "setAutoProgress":
+      return { ...draft, autoProgress: action.autoProgress };
     case "addExercises":
       return { ...draft, exercises: [...draft.exercises, ...action.exercises] };
     case "replaceExercise":

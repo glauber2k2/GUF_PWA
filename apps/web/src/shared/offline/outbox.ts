@@ -6,6 +6,7 @@ import {
   discardWorkout,
   finishWorkout,
   getWorkoutStatus,
+  updateRoutineFromWorkout,
   isNetworkError,
   pauseWorkout,
   removeWorkoutExercise,
@@ -95,8 +96,11 @@ async function execute(op: OutboxOp): Promise<{ error: ApiError | null }> {
       return createExercise(client, op);
     case "finish": {
       const res = await finishWorkout(client, { sessionId: op.sessionId });
-      // Já finalizado (ex.: em outro aparelho) conta como feito.
-      return { error: res.error?.code === "workout_not_found" ? null : res.error };
+      // Já finalizado (ex.: em outro aparelho ou numa tentativa anterior desta operação) conta como feito.
+      if (res.error && res.error.code !== "workout_not_found") return { error: res.error };
+      if (!op.updateRoutine) return { error: null };
+      // Na mesma operação: se falhar, a nova tentativa finaliza de novo (já feito) e só atualiza a rotina.
+      return updateRoutineFromWorkout(client, { sessionId: op.sessionId });
     }
     case "discard":
       return discardWorkout(client, { sessionId: op.sessionId });

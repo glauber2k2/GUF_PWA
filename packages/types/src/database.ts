@@ -586,6 +586,7 @@ export type Database = {
           routine_id: string
           target_reps: string | null
           target_sets: number | null
+          target_weight_kg: number | null
           user_id: string
         }
         Insert: {
@@ -597,6 +598,7 @@ export type Database = {
           routine_id: string
           target_reps?: string | null
           target_sets?: number | null
+          target_weight_kg?: number | null
           user_id: string
         }
         Update: {
@@ -608,6 +610,7 @@ export type Database = {
           routine_id?: string
           target_reps?: string | null
           target_sets?: number | null
+          target_weight_kg?: number | null
           user_id?: string
         }
         Relationships: [
@@ -630,6 +633,8 @@ export type Database = {
       routines: {
         Row: {
           archived_at: string | null
+          auto_progress: boolean
+          average_duration_seconds: number | null
           created_at: string
           id: string
           name: string
@@ -639,10 +644,10 @@ export type Database = {
           updated_at: string
           user_id: string
           weekdays: number[]
-          average_duration_seconds: number | null
         }
         Insert: {
           archived_at?: string | null
+          auto_progress?: boolean
           created_at?: string
           id?: string
           name: string
@@ -655,6 +660,7 @@ export type Database = {
         }
         Update: {
           archived_at?: string | null
+          auto_progress?: boolean
           created_at?: string
           id?: string
           name?: string
@@ -1288,6 +1294,7 @@ export type Database = {
       }
       save_routine: {
         Args: {
+          p_auto_progress?: boolean
           p_exercises: Json
           p_name: string
           p_project_id: string
@@ -1336,6 +1343,10 @@ export type Database = {
       }
       unblock_user: { Args: { p_user_id: string }; Returns: undefined }
       unfollow: { Args: { p_user_id: string }; Returns: undefined }
+      update_routine_from_workout: {
+        Args: { p_session_id: string }
+        Returns: string
+      }
       update_social_handle: { Args: { p_handle: string }; Returns: undefined }
       update_social_settings: {
         Args: { p_history_hidden: boolean; p_visibility: string }

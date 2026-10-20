@@ -166,6 +166,12 @@ export type GetWorkoutStatus = (
   input: { sessionId: string },
 ) => Promise<ApiResult<{ status: WorkoutStatus; /** Encerrado pela finalização automática (30 min após a última série). */ autoFinished: boolean }>>;
 
+/**
+ * Faz os exercícios e as séries do treino finalizado virarem os da rotina dele (RPC
+ * update_routine_from_workout). Só depois de finalizar; erros: routine_not_found, routine_empty.
+ */
+export type UpdateRoutineFromWorkout = (client: GufClient, input: { sessionId: string }) => Promise<ApiResult<null>>;
+
 export interface WorkoutApi {
   getWorkout: GetWorkout;
   getExerciseLibrary: GetExerciseLibrary;
@@ -182,6 +188,7 @@ export interface WorkoutApi {
   pauseWorkout: PauseWorkout;
   resumeWorkout: ResumeWorkout;
   finishWorkout: FinishWorkout;
+  updateRoutineFromWorkout: UpdateRoutineFromWorkout;
   discardWorkout: DiscardWorkout;
   getWorkoutStatus: GetWorkoutStatus;
 }
@@ -535,6 +542,15 @@ export const getWorkoutStatus: GetWorkoutStatus = async (client, { sessionId }) 
 };
 
 /** Garante em tempo de compilação que a implementação segue o contrato. */
+export const updateRoutineFromWorkout: UpdateRoutineFromWorkout = async (client, { sessionId }) => {
+  try {
+    const { error } = await client.rpc("update_routine_from_workout", { p_session_id: sessionId });
+    return error ? { data: null, error: toApiError(error) } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const workoutApi = {
   getWorkoutStatus,
   getWorkout,
@@ -552,5 +568,6 @@ export const workoutApi = {
   pauseWorkout,
   resumeWorkout,
   finishWorkout,
+  updateRoutineFromWorkout,
   discardWorkout,
 } satisfies WorkoutApi;

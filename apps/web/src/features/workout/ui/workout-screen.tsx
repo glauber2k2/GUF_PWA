@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import {
   finishWorkout,
+  updateRoutineFromWorkout,
   getExerciseContext,
   isNetworkError,
   type ActiveWorkout,
@@ -61,7 +62,7 @@ import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import type { OutboxOp } from "@/shared/offline/db";
 import { dismissOutboxFailure, enqueue, flushOutbox, hasPendingFor, useOutboxStatus } from "@/shared/offline/outbox";
 import { loadWorkout, removeWorkoutSnapshot, saveWorkoutSnapshot, type DataSource } from "@/shared/offline/workout-repo";
-import { invalidateTrainingData } from "@/shared/libs/query-keys";
+import { invalidatePlanningData, invalidateTrainingData } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { cn } from "@/shared/helpers/class-names";
 import { mockWorkoutApi } from "@/mocks/workout";
@@ -229,7 +230,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const unit = workout.weightUnit;
 
   const [sheet, setSheet] = useState<Sheet>(() => (dev.has("timer") ? { kind: "timer" } : null));
-  const [dialog, setDialog] = useState<"finish" | "discard" | null>(() => (dev.has("confirmar") ? "finish" : null));
+  const [dialog, setDialog] = useState<"finish" | "update-routine" | "discard" | null>(() => (dev.has("confirmar") ? "finish" : null));
   const [edit, setEdit] = useState<{ exerciseId: string; setIndex: number; field: EditableField } | null>(() =>
     dev.has("editando") && workout.exercises[0] ? { exerciseId: workout.exercises[0].id, setIndex: 0, field: "weightKg" } : null,
   );
@@ -543,7 +544,14 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     void invalidateTrainingData(queryClient);
   };
 
-  const finish = async () => {
+  /** Confirmou finalizar: treino de rotina pergunta antes se a rotina deve virar este treino. */
+  const confirmFinish = () => {
+    if (workout.routineId) return setDialog("update-routine");
+    void finish(false);
+  };
+
+  const finish = async (updateRoutine: boolean) => {
+    setDialog(null);
     setFinishing(true);
     const local = localSummary(state, clock);
     try {
@@ -559,6 +567,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         const { data, error } = await finishWorkout(getSupabaseClient(), { sessionId: workout.id });
         if (data) {
           await removeWorkoutSnapshot(workout.id);
+          if (updateRoutine) await applyToRoutine();
           closeOut();
           return setSummary({ data, pending: false });
         }
@@ -575,13 +584,24 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         }
         if (!isNetworkError(error)) return showToast(error.message, { tone: "error" });
       }
-      // Sem conexão: finaliza no aparelho e envia quando a internet voltar.
-      await enqueue({ kind: "finish", sessionId: workout.id });
+      // Sem conexão: finaliza no aparelho e envia quando a internet voltar (a rotina vai junto).
+      await enqueue({ kind: "finish", sessionId: workout.id, updateRoutine });
       closeOut();
       setSummary({ data: local, pending: true });
     } finally {
       setFinishing(false);
     }
+  };
+
+  /** Os exercícios e séries deste treino viram os da rotina (já finalizado no servidor). */
+  const applyToRoutine = async () => {
+    const { error } = await updateRoutineFromWorkout(getSupabaseClient(), { sessionId: workout.id });
+    if (error) {
+      shell.showToast("Rotina não atualizada", { tone: "error", message: error.message });
+      return;
+    }
+    void invalidatePlanningData(queryClient);
+    shell.showToast("Rotina atualizada", { tone: "success", message: "O próximo treino começa igual a este." });
   };
 
   const discard = async () => {
@@ -872,7 +892,18 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         cancelLabel="Continuar"
         confirmLabel="Finalizar"
         onCancel={() => setDialog(null)}
-        onConfirm={() => void finish()}
+        onConfirm={confirmFinish}
+      />
+      <ConfirmDialog
+        placement="screen"
+        open={dialog === "update-routine" && !finishing}
+        title="Atualizar a rotina?"
+        message={`Os exercícios e as séries deste treino passam a ser os da rotina ${workout.name}, para o próximo treino começar igual a este.`}
+        cancelLabel="Manter rotina"
+        confirmLabel="Atualizar rotina"
+        balanced
+        onCancel={() => void finish(false)}
+        onConfirm={() => void finish(true)}
       />
       <ConfirmDialog
         placement="screen"

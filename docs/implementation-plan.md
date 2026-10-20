@@ -128,6 +128,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Decisões pendentes:** design da aba no Claude Design.
 
+**Atualização 2026-10-20 (`feat/rotina-atualizacao`):** toggle "Atualizar carga e repetições automaticamente" por rotina (`routines.auto_progress`) com carga planejada opcional por exercício (`routine_exercises.target_weight_kg`); ao finalizar um treino de rotina, pergunta se a rotina deve virar o treino (`update_routine_from_workout`). Migration `20261020011329_routine_auto_progress` validada no banco numa transação desfeita; **falta aplicar**.
+
 ---
 
 ### Etapa 2 — Resumo do treino e histórico por exercício

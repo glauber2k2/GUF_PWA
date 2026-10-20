@@ -1,13 +1,20 @@
 "use client";
 
+import { useState } from "react";
 import { Ellipsis, GripVertical, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
   formatClock,
+  formatNumber,
   formatTargetReps,
+  fromDisplayWeight,
   muscleGroupLabel,
+  parseKeypadValue,
   ROUTINE_REST_OPTIONS,
   TIMES_SIGN,
+  toDisplayWeight,
+  toKeypadValue,
+  type WeightUnit,
 } from "@guf/core";
 import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN, TARGET_REPS_MAX_LENGTH } from "@guf/schemas";
 import type { RoutineExerciseDraft } from "@guf/api";
@@ -24,6 +31,10 @@ export interface RoutineExerciseCardProps {
   disabled: boolean;
   /** Mostrar o erro de repetições (depois de tentar salvar). */
   showErrors: boolean;
+  /** Unidade de exibição da carga planejada (o rascunho guarda kg). */
+  unit: WeightUnit;
+  /** Carga planejada só importa quando a rotina não atualiza carga automaticamente. */
+  showTargetWeight: boolean;
   itemRef: (node: HTMLElement | null) => void;
   handleProps: Record<string, unknown>;
   onToggle: () => void;
@@ -38,12 +49,15 @@ export function RoutineExerciseCard({
   dragging,
   disabled,
   showErrors,
+  unit,
+  showTargetWeight,
   itemRef,
   handleProps,
   onToggle,
   onMenu,
   dispatch,
 }: RoutineExerciseCardProps) {
+  const targetWeight = showTargetWeight ? toDisplayWeight(exercise.targetWeightKg, unit) : null;
   const reps = exercise.targetReps.trim();
   const repsError = showErrors && !reps ? "Informe as repetições." : undefined;
   const update = (patch: Extract<DraftAction, { type: "updateExercise" }>["patch"]) =>
@@ -90,6 +104,7 @@ export function RoutineExerciseCard({
               {exercise.targetSets} {TIMES_SIGN} {formatTargetReps(reps) ?? "—"}
             </span>
             <span className="flex items-center gap-1 text-xs text-fg-muted tabular-nums">
+              {targetWeight !== null && <span>{formatNumber(targetWeight)} {unit} ·</span>}
               <Icon icon={Timer} size={12} />
               {formatClock(exercise.restSeconds)}
             </span>
@@ -126,6 +141,9 @@ export function RoutineExerciseCard({
             error={repsError}
             onChange={(e) => update({ targetReps: e.target.value })}
           />
+          {showTargetWeight && (
+            <TargetWeightField valueKg={exercise.targetWeightKg} unit={unit} disabled={disabled} onChange={(kg) => update({ targetWeightKg: kg })} />
+          )}
           <div className="flex flex-col gap-1.5">
             <span className="text-[13px] font-medium text-fg-secondary">Descanso</span>
             <SegmentedControl
@@ -139,5 +157,36 @@ export function RoutineExerciseCard({
         </div>
       )}
     </div>
+  );
+}
+
+/** Carga planejada (opcional) na unidade do usuário; vazio = começar sem carga. */
+function TargetWeightField({
+  valueKg,
+  unit,
+  disabled,
+  onChange,
+}: {
+  valueKg: number | null;
+  unit: WeightUnit;
+  disabled: boolean;
+  onChange: (kg: number | null) => void;
+}) {
+  // Texto local: o número sozinho perderia a vírgula enquanto a pessoa digita ("82,").
+  const [text, setText] = useState(() => toKeypadValue(toDisplayWeight(valueKg, unit)));
+  return (
+    <TextField
+      label={`Carga planejada (${unit})`}
+      inputMode="decimal"
+      value={text}
+      maxLength={7}
+      disabled={disabled}
+      hint="Opcional. Vazio: o treino começa sem carga."
+      onChange={(e) => {
+        const next = e.target.value.replace(/[^\d,.]/g, "");
+        setText(next);
+        onChange(next.trim() ? fromDisplayWeight(parseKeypadValue(next), unit) : null);
+      }}
+    />
   );
 }

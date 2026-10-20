@@ -99,3 +99,20 @@ export function targetRepsMin(targetReps: string | null | undefined): number | n
   const match = targetReps?.match(/\d+/);
   return match ? Number(match[0]) : null;
 }
+
+/**
+ * Carga e repetições de uma série planejada ao iniciar o treino pela rotina.
+ * @param autoProgress opção da rotina: true = repete o último desempenho (sem histórico, as
+ *   repetições alvo); false = o que a pessoa definiu na rotina (carga planejada e o mínimo das
+ *   repetições alvo) ou vazio
+ * @returns valores da série (carga em kg)
+ */
+export function plannedSetValues(
+  autoProgress: boolean,
+  previous: { weightKg: number | null; reps: number | null } | undefined,
+  planned: { weightKg: number | null; targetReps: string | null },
+): { weightKg: number | null; reps: number | null } {
+  if (autoProgress && previous) return { weightKg: previous.weightKg, reps: previous.reps ?? targetRepsMin(planned.targetReps) };
+  if (autoProgress) return { weightKg: null, reps: targetRepsMin(planned.targetReps) };
+  return { weightKg: planned.weightKg, reps: targetRepsMin(planned.targetReps) };
+}

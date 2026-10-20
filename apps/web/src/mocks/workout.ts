@@ -318,6 +318,13 @@ export const resumeWorkout: WorkoutApi["resumeWorkout"] = async (client) => {
   return ok;
 };
 
+/** Demonstração: não há rotina gravada para atualizar; só confirma. */
+export const updateRoutineFromWorkout: WorkoutApi["updateRoutineFromWorkout"] = async (client) => {
+  ignoreClient(client);
+  await wait();
+  return ok;
+};
+
 export const finishWorkout: WorkoutApi["finishWorkout"] = async (client, { sessionId }) => {
   ignoreClient(client);
   await wait();
@@ -374,6 +381,7 @@ export const mockWorkoutApi = {
   pauseWorkout,
   resumeWorkout,
   finishWorkout,
+  updateRoutineFromWorkout,
   discardWorkout,
 } satisfies WorkoutApi;
 
