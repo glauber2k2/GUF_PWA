@@ -615,6 +615,20 @@
   .guf-rat, .guf-rat * { animation: none !important; }
 }
 
+/* Arte dos stories (StoryArt): escopo dos tokens de superfície. Dentro de um cartão, os cartões
+   internos (subcartões) usam --story-inner-* (opacidade mínima de 20%, valores definidos no StoryArt),
+   enquanto o cartão de fora segue a opacidade da arte. Com data-flat (todo o conteúdo em cartões e
+   opacidade 0), o cartão de fora some de vez: sem borda nem sombra; bordas internas continuam. */
+[data-story-art] [class*="bg-surface"] * {
+  --surface: var(--story-inner-surface);
+  --surface-elevated: var(--story-inner-surface-elevated);
+  --surface-3: var(--story-inner-surface-3);
+}
+[data-story-art][data-flat] [class*="bg-surface"]:not([class*="bg-surface"] *) {
+  border-color: transparent;
+  box-shadow: none;
+}
+
 /* Modo de reordenar do treino: cards balançam (como ícones da tela inicial do celular). */
 @keyframes guf-wiggle {
   0%, 100% { transform: rotate(-0.6deg); }
