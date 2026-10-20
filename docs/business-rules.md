@@ -43,7 +43,7 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 | Regra | Onde |
 |---|---|
 | Peso **sempre em kg no banco**; a conversão para lb (1 lb = 0,45359237 kg) é só na exibição, conforme `profiles.weight_unit`. Exibição com até 1 casa; gravação em kg com 2 casas. | Core (`units.ts`) |
-| Edição de carga: passo de 2 em kg e de 5 em lb; atalhos −1 / +1 / +5 / +10 na unidade exibida. | Web (`set-edit-sheet.tsx`, DS `QuickLoad`) |
+| Edição de carga: passo de 2 em kg e de 5 em lb; atalhos −1 / +1 / +5 / +10 na unidade exibida (somam). Repetições: atalhos 6 / 8 / 10 / 12 / 15 (substituem o valor). No teclado numérico, o valor atual aparece destacado e o primeiro dígito o substitui, sem precisar apagar. | Web (`set-edit-sheet.tsx`, DS `QuickLoad`, `QuickReps`, `NumericKeypad replaceOnFirstKey`) |
 | Datas de calendário (`performed_on`) são a **data local** do aparelho ("yyyy-MM-dd"), nunca a data UTC do banco. | Core (`dates.ts`) |
 | Semana vai de **domingo a sábado** (calendários, sequência, meta semanal, dias da rotina e imagens de compartilhamento). | Core (`dates.ts`) + Banco (`get_streak`) |
 | Números em pt-BR (vírgula decimal, ponto de milhar); sinal de menos tipográfico (−) e "×" em carga × repetições. | Core (`format.ts`) |
@@ -135,7 +135,7 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 | **1RM estimado** (Epley) = carga × (1 + repetições / 30), arredondado a 1 casa, com o mesmo arredondamento do Postgres. Aquecimentos não contam. | Core (`training.ts`) + Banco |
 | **Recorde de carga:** carga maior que a maior carga de todos os treinos concluídos anteriores do exercício. Empate não é recorde. | Core (`records.ts`, `session.ts`) + Banco |
 | **Primeira vez de um exercício não gera recorde.** | Core + Banco |
-| No treino, o recorde só aparece **ao concluir** a série; várias séries no mesmo treino podem bater recorde em sequência (cada uma vira a nova referência). | Core (`markLoadRecords`) |
+| No treino, o recorde só aparece **ao concluir** a série e fica em **uma série por exercício**: a de maior carga do treino (a primeira, em caso de empate), se passar do recorde anterior. Bateu de novo numa série seguinte? O recorde passa para ela (igual ao `finish_workout`). A série com recorde mostra o troféu dourado com brilho no botão de concluir. | Core (`markLoadRecords`), DS `SetRow` |
 | Recordes de um treino passado (folha do dia no Histórico): comparam com os treinos concluídos antes dele — dias anteriores e, no mesmo dia, os que terminaram antes. | Core (`sessionLoadRecord`) + API (`history.ts`) |
 | O resumo do `finish_workout` também retorna recorde de 1RM estimado; o app exibe só o de carga máxima. | Banco + API |
 

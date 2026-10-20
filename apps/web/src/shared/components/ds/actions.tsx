@@ -80,17 +80,26 @@ export function Button({
       ) : null}
       {children}
       {iconRight && !loading ? <Icon icon={iconRight} size={s.icon} /> : null}
-      {showSheen && (
-        <span
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-0 animate-guf-sheen bg-[length:250%_100%] bg-[position:160%_0]",
-            "bg-linear-[105deg] from-transparent from-38% via-sheen via-50% to-transparent to-62%",
-            "motion-reduce:hidden",
-          )}
-        />
-      )}
+      {showSheen && <SheenOverlay />}
     </button>
+  );
+}
+
+/**
+ * Brilho que atravessa o elemento de tempos em tempos (some com movimento reduzido). O pai precisa
+ * de `relative overflow-hidden`. Usado na ação principal da tela e no botão da série com recorde.
+ */
+export function SheenOverlay({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 animate-guf-sheen bg-[length:250%_100%] bg-[position:160%_0]",
+        "bg-linear-[105deg] from-transparent from-38% via-sheen via-50% to-transparent to-62%",
+        "motion-reduce:hidden",
+        className,
+      )}
+    />
   );
 }
 
