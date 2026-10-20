@@ -79,6 +79,16 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 - **Trocar o segredo entre banco e função:** gravar o novo valor no secret `PUSH_ALERTS_SECRET` e no Vault (`vault.update_secret`) ao mesmo tempo. Enquanto os dois forem diferentes, a função recusa as chamadas (401) e nenhum aviso sai.
 - **Conferir falhas:** `select status_code, content, created from net._http_response order by created desc limit 20;` (respostas da função às chamadas do banco) e os logs da função no painel do Supabase (só contagens, sem conteúdo dos avisos).
 
+## Problemas comuns
+
+| Sintoma | Causa provável | O que fazer |
+|---|---|---|
+| Permissão aceita, mas o botão volta para desligado e aparece "Não foi possível ativar as notificações neste aparelho" | Service worker ainda não ativo (app recém-instalado ou atualizando) ou serviço de push recusou (sem internet, chave pública inválida) | Fechar e abrir o app e tentar de novo; conferir `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel (sem aspas nem espaços) e publicar de novo |
+| Opção aparece como indisponível | Build sem `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, navegador sem Web Push ou iPhone fora da Tela de Início | Cadastrar a chave e publicar; no iPhone, instalar o app |
+| Ligado, mas nenhum aviso chega | Segredos do Vault ou da função diferentes, ou função fora do ar | `select status_code, content from net._http_response order by created desc limit 20;` e logs da função |
+
+Até 2026-10-19 a falha na inscrição era engolida (o botão voltava sem aviso); agora `subscribeDevicePush` espera o service worker ativo (`navigator.serviceWorker.ready`, até 10 s) e devolve o motivo (`DeviceSubscribeResult`), e a tela mostra o erro.
+
 ## Configuração (uma vez por ambiente)
 
 1. Chaves VAPID: `node supabase/scripts/generate-vapid-keys.mjs > vapid.json` (o JSON tem a chave privada: está no `.gitignore`). A linha `NEXT_PUBLIC_VAPID_PUBLIC_KEY=…` sai no terminal.
