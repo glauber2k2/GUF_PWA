@@ -310,7 +310,8 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
         />
       </m.div>
 
-      {/* Opacidade do fundo (sticker já sai sem fundo: a mesma escala vale para o adesivo, de 20 a 100%) */}
+      {/* Opacidade do fundo (sticker já sai sem fundo: a mesma escala vale para o adesivo). Cartões até 0 só
+          quando tudo está dentro deles; senão ficam com no mínimo 30%. */}
       <m.div {...enter(4)} className="flex flex-col gap-1">
         <div className="flex min-h-11 items-center justify-between gap-3">
           <label htmlFor="story-opacity" className="text-sm font-semibold">
@@ -339,6 +340,11 @@ function ShareStoryBody({ data, models, idx, setIdx, onSaved }: ShareStoryBodyPr
           />
           <span className="w-14 text-right font-display text-[22px] font-semibold tabular-nums">{opacity}%</span>
         </div>
+        <span className="text-xs leading-4 text-pretty text-fg-muted">
+          {current.cardsOnly
+            ? "Em 0%, os cartões também ficam transparentes e só o conteúdo aparece sobre a foto."
+            : "Os cartões ficam com no mínimo 30% para o texto continuar legível sobre a foto."}
+        </span>
       </m.div>
 
       {status === "error" && error && (

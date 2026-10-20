@@ -20,14 +20,27 @@ const SURFACES: Record<StoryTheme, { surface: string; elevated: string; third: s
 };
 
 /**
- * Fundo e cartões pela opacidade (Claude Design · StoryArt): o fundo vai de 0 a 100% e os cartões
- * acompanham de 20 a 100%, para continuarem legíveis sobre a foto.
+ * Opacidade mínima dos cartões quando há conteúdo solto no fundo (logo, títulos, boneco): o cartão
+ * continua marcando o bloco sobre a foto e o conjunto fica legível.
  */
-export function storyArtColors(opacity: number, theme: StoryTheme): CSSProperties {
+const LOOSE_CONTENT_CARD_MIN = 30;
+
+/** Opacidade dos cartões (%) para a opacidade escolhida: até 0 só quando tudo está dentro de cartões. */
+export function storyCardOpacity(opacity: number, cardsOnly: boolean): number {
+  const o = Math.max(0, Math.min(100, opacity));
+  if (cardsOnly) return o;
+  return Math.round(LOOSE_CONTENT_CARD_MIN + (o * (100 - LOOSE_CONTENT_CARD_MIN)) / 100);
+}
+
+/**
+ * Fundo e cartões pela opacidade (Claude Design · StoryArt): o fundo vai de 0 a 100%. Os cartões
+ * acompanham até 0 quando todo o conteúdo está dentro deles (`cardsOnly`); senão, de 30 a 100%.
+ */
+export function storyArtColors(opacity: number, theme: StoryTheme, cardsOnly = false): CSSProperties {
   const o = Math.max(0, Math.min(100, opacity));
   const background = o >= 100 ? "var(--background)" : o <= 0 ? "transparent" : `color-mix(in oklab, var(--background) ${o}%, transparent)`;
-  const card = Math.round(20 + o * 0.8);
-  const mix = (color: string) => (card >= 100 ? color : `color-mix(in oklab, ${color} ${card}%, transparent)`);
+  const card = storyCardOpacity(o, cardsOnly);
+  const mix = (color: string) => (card >= 100 ? color : card <= 0 ? "transparent" : `color-mix(in oklab, ${color} ${card}%, transparent)`);
   const s = SURFACES[theme];
   return {
     background,
@@ -51,8 +64,8 @@ export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function Story
   const { Component } = model;
   const format = model.format ?? "story";
   // Opacidade escolhida (valores dinâmicos). Sticker: fundo sempre transparente e o adesivo segue a mesma
-  // regra dos cartões (20 a 100%).
-  const colors = storyArtColors(backgroundOpacity, theme);
+  // regra dos cartões.
+  const colors = storyArtColors(backgroundOpacity, theme, model.cardsOnly ?? false);
   if (format === "sticker") colors.background = "transparent";
   return (
     <div ref={ref} data-theme={theme} className={cn(FORMAT_BOX[format], "font-sans text-fg tabular-nums")} style={colors}>

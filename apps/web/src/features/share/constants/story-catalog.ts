@@ -52,6 +52,12 @@ export interface StoryModel {
   Component: ComponentType<StoryModelProps>;
   /** Formato da imagem (padrão: story 1080 × 1920). */
   format?: StoryFormat;
+  /**
+   * Todo o conteúdo fica dentro de cartões (nada solto no fundo, nem logo): os cartões acompanham a
+   * opacidade até 0. Sem isso, os cartões ficam com no mínimo 30% (`storyArtColors`). Conferido
+   * modelo a modelo pelo DOM em 2026-10-20 (todos os stickers e 10 stories).
+   */
+  cardsOnly?: boolean;
   /** Só aparece quando o dado existe (ex.: recorde, sequência). */
   available?: (d: StoryData) => boolean;
 }
@@ -75,7 +81,7 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   // Mapa muscular
   { name: "Frente e costas", style: 0, Component: Story01 },
   { name: "Boneco em destaque", style: 0, Component: Story02 },
-  { name: "Boneco com resumo embaixo", style: 0, Component: Story03 },
+  { name: "Boneco com resumo embaixo", style: 0, cardsOnly: true, Component: Story03 },
   // Números
   { name: "Volume gigante", style: 1, Component: Story04 },
   { name: "Números em coluna", style: 1, Component: Story05 },
@@ -89,24 +95,24 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   // Sequência
   { name: "Chama da sequência", style: 4, Component: Story13, available: hasStreak },
   { name: "Linha de semanas", style: 4, Component: Story14, available: hasStreak },
-  { name: "Adesivo de sequência", style: 4, Component: Story15, available: hasStreak },
+  { name: "Adesivo de sequência", style: 4, cardsOnly: true, Component: Story15, available: hasStreak },
   // Sobre a foto
-  { name: "Faixa no rodapé", style: 5, Component: Story16 },
-  { name: "Resumo no canto", style: 5, Component: Story17 },
-  { name: "Coluna lateral", style: 5, Component: Story18 },
+  { name: "Faixa no rodapé", style: 5, cardsOnly: true, Component: Story16 },
+  { name: "Resumo no canto", style: 5, cardsOnly: true, Component: Story17 },
+  { name: "Coluna lateral", style: 5, cardsOnly: true, Component: Story18 },
   // Ficha
-  { name: "Recibo do treino", style: 6, Component: Story19 },
+  { name: "Recibo do treino", style: 6, cardsOnly: true, Component: Story19 },
   { name: "Tabela com boneco", style: 6, Component: Story20 },
   { name: "Boneco no topo", style: 6, Component: Story20B },
   { name: "Cartões por exercício", style: 6, Component: Story20C },
   { name: "Tabela de volume", style: 6, Component: Story20D },
   { name: "Volume por exercício", style: 6, Component: Story21 },
-  { name: "Treino de hoje com boneco", style: 6, Component: Story37 },
-  { name: "Treino de hoje com Guf Rat", style: 6, Component: Story38 },
+  { name: "Treino de hoje com boneco", style: 6, cardsOnly: true, Component: Story37 },
+  { name: "Treino de hoje com Guf Rat", style: 6, cardsOnly: true, Component: Story38 },
   // Semana
   { name: "Gráfico de volume", style: 7, Component: Story23 },
   { name: "Meta da semana", style: 7, Component: Story24 },
-  { name: "Calendário do mês", style: 7, Component: Story36 },
+  { name: "Calendário do mês", style: 7, cardsOnly: true, Component: Story36 },
   // Evolução
   { name: "Guf Rat e boneco", style: 8, Component: Story25 },
   { name: "Mês a mês", style: 8, Component: Story26 },
@@ -120,7 +126,7 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   { name: "Assinatura vertical", style: 9, Component: Story33 },
   { name: "Moldura do Anel", style: 9, Component: Story35 },
   // Comparação
-  { name: "Comparação de peso", style: 10, Component: Story39, available: hasComparison },
+  { name: "Comparação de peso", style: 10, cardsOnly: true, Component: Story39, available: hasComparison },
   // Cartões de resumo (C06–C08 do design são iguais a C02–C04 e ficaram de fora; C09–C12 em feed)
   { name: "Resumo com boneco", style: 11, Component: StoryC01 },
   { name: "Volume em destaque", style: 11, Component: StoryC02 },
@@ -143,27 +149,27 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   { name: "Números e boneco", style: 12, Component: StoryF09 },
   { name: "Meta da semana", style: 12, Component: StoryF10, available: hasGoal },
   // Stickers (só a forma, fundo transparente; a opacidade vale para o próprio adesivo)
-  { name: "Sequência em pílula", style: 13, Component: StoryS01, format: "sticker", available: hasStreak },
-  { name: "Sequência em selo", style: 13, Component: StoryS02, format: "sticker", available: hasStreak },
-  { name: "Semana de treinos", style: 13, Component: StoryS03, format: "sticker" },
-  { name: "Ficha de treino", style: 13, Component: StoryS04, format: "sticker" },
-  { name: "Ficha com boneco", style: 13, Component: StoryS05, format: "sticker" },
-  { name: "Volume total", style: 13, Component: StoryS06, format: "sticker" },
-  { name: "Tempo de treino", style: 13, Component: StoryS07, format: "sticker" },
-  { name: "Métricas e boneco", style: 13, Component: StoryS08, format: "sticker" },
-  { name: "Recorde dourado", style: 13, Component: StoryS09, format: "sticker", available: hasRecord },
-  { name: "Recorde com Guf Rat", style: 13, Component: StoryS10, format: "sticker", available: hasRecord },
-  { name: "Treino concluído com Guf Rat", style: 13, Component: StoryS11, format: "sticker" },
-  { name: "Dia de treino com Guf Rat", style: 13, Component: StoryS12, format: "sticker" },
-  { name: "Músculo do dia", style: 13, Component: StoryS13, format: "sticker", available: hasTopMuscle },
-  { name: "Mapa muscular da semana", style: 13, Component: StoryS14, format: "sticker" },
-  { name: "Evolução do 1RM", style: 13, Component: StoryS15, format: "sticker", available: hasFeatured },
-  { name: "Meta da semana em anel", style: 13, Component: StoryS16, format: "sticker", available: hasGoal },
-  { name: "Recibo recortado", style: 13, Component: StoryS17, format: "sticker" },
-  { name: "Descanso médio", style: 13, Component: StoryS18, format: "sticker", available: hasRest },
-  { name: "Marco de treinos", style: 13, Component: StoryS19, format: "sticker" },
-  { name: "Números e bonecos", style: 13, Component: StoryS20, format: "sticker" },
-  { name: "Ficha lateral com bonecos", style: 13, Component: StoryS22, format: "sticker" },
+  { name: "Sequência em pílula", style: 13, cardsOnly: true, Component: StoryS01, format: "sticker", available: hasStreak },
+  { name: "Sequência em selo", style: 13, cardsOnly: true, Component: StoryS02, format: "sticker", available: hasStreak },
+  { name: "Semana de treinos", style: 13, cardsOnly: true, Component: StoryS03, format: "sticker" },
+  { name: "Ficha de treino", style: 13, cardsOnly: true, Component: StoryS04, format: "sticker" },
+  { name: "Ficha com boneco", style: 13, cardsOnly: true, Component: StoryS05, format: "sticker" },
+  { name: "Volume total", style: 13, cardsOnly: true, Component: StoryS06, format: "sticker" },
+  { name: "Tempo de treino", style: 13, cardsOnly: true, Component: StoryS07, format: "sticker" },
+  { name: "Métricas e boneco", style: 13, cardsOnly: true, Component: StoryS08, format: "sticker" },
+  { name: "Recorde dourado", style: 13, cardsOnly: true, Component: StoryS09, format: "sticker", available: hasRecord },
+  { name: "Recorde com Guf Rat", style: 13, cardsOnly: true, Component: StoryS10, format: "sticker", available: hasRecord },
+  { name: "Treino concluído com Guf Rat", style: 13, cardsOnly: true, Component: StoryS11, format: "sticker" },
+  { name: "Dia de treino com Guf Rat", style: 13, cardsOnly: true, Component: StoryS12, format: "sticker" },
+  { name: "Músculo do dia", style: 13, cardsOnly: true, Component: StoryS13, format: "sticker", available: hasTopMuscle },
+  { name: "Mapa muscular da semana", style: 13, cardsOnly: true, Component: StoryS14, format: "sticker" },
+  { name: "Evolução do 1RM", style: 13, cardsOnly: true, Component: StoryS15, format: "sticker", available: hasFeatured },
+  { name: "Meta da semana em anel", style: 13, cardsOnly: true, Component: StoryS16, format: "sticker", available: hasGoal },
+  { name: "Recibo recortado", style: 13, cardsOnly: true, Component: StoryS17, format: "sticker" },
+  { name: "Descanso médio", style: 13, cardsOnly: true, Component: StoryS18, format: "sticker", available: hasRest },
+  { name: "Marco de treinos", style: 13, cardsOnly: true, Component: StoryS19, format: "sticker" },
+  { name: "Números e bonecos", style: 13, cardsOnly: true, Component: StoryS20, format: "sticker" },
+  { name: "Ficha lateral com bonecos", style: 13, cardsOnly: true, Component: StoryS22, format: "sticker" },
 ];
 
 /** Catálogo com os números sequenciais (01, 02…). */
