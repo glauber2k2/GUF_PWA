@@ -274,7 +274,7 @@ export const EXERCISE = {
   name: "Supino reto",
   tags: ["Peito", "Barra"],
   rest: "1:30",
-  bestKg: 80,
+  best1RmKg: 80,
   sets: [
     { type: "warmup", previous: "40 × 12", weightKg: 40, reps: 12, done: true },
     { type: "normal", previous: "80 × 10", weightKg: 80, reps: 10, done: true },

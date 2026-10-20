@@ -59,8 +59,8 @@ export interface WorkoutExercise {
   restSeconds: number;
   /** Observação do exercício (do treino ou, se vazia, a salva na rotina). */
   note: string | null;
-  /** Maior carga já registrada antes deste treino; null = primeira vez (sem PR). */
-  bestKg: number | null;
+  /** Maior 1RM estimado antes deste treino (o recorde a bater); null = primeira vez (sem PR). */
+  best1RmKg: number | null;
   sets: WorkoutSet[];
 }
 
@@ -101,7 +101,7 @@ export interface FinishedWorkoutSummary {
 /** Contexto para montar um exercício novo no treino (online). */
 export interface ExerciseContext {
   previous: PreviousSet[];
-  bestKg: number | null;
+  best1RmKg: number | null;
   restSeconds: number;
   routineNote: string | null;
 }
@@ -224,13 +224,13 @@ function sessionExerciseRow(sessionId: string, exercise: NewWorkoutExercise): Se
   return { id: exercise.id, session_id: sessionId, exercise_id: exercise.exerciseId, position: exercise.position } as SessionExerciseInsert;
 }
 
-/** Melhor carga histórica (get_exercise_records → max_weight); sem histórico = null (sem PR). */
-async function bestLoadKg(client: GufClient, exerciseId: string): Promise<number | null> {
+/** Melhor 1RM estimado histórico (get_exercise_records → best_e1rm); sem histórico = null (sem PR). */
+async function fetchBest1RmKg(client: GufClient, exerciseId: string): Promise<number | null> {
   const { data, error } = await client.rpc("get_exercise_records", { p_exercise_id: exerciseId });
   if (error || !data || typeof data !== "object") return null;
-  const records = data as { sessions?: number; max_weight?: { value?: number | null } | null };
+  const records = data as { sessions?: number; best_e1rm?: { value?: number | null } | null };
   if (!records.sessions) return null;
-  const value = records.max_weight?.value;
+  const value = records.best_e1rm?.value;
   return typeof value === "number" ? value : value != null ? Number(value) : null;
 }
 
@@ -243,7 +243,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
       routineId
         ? client.from("routine_exercises").select("exercise_id, rest_seconds, notes").eq("routine_id", routineId)
         : Promise.resolve({ data: [] as { exercise_id: string; rest_seconds: number | null; notes: string | null }[], error: null }),
-      Promise.all(ids.map((id) => bestLoadKg(client, id))),
+      Promise.all(ids.map((id) => fetchBest1RmKg(client, id))),
     ]);
     if (lastRes.error) return { data: null, error: toApiError(lastRes.error) };
     if (routineRes.error) return { data: null, error: toApiError(routineRes.error) };
@@ -255,7 +255,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
         previous: (lastRes.data ?? [])
           .filter((p) => p.exercise_id === id)
           .map((p) => ({ setNumber: p.set_number, weightKg: p.weight_kg, reps: p.reps, setType: asSetType(p.set_type) })),
-        bestKg: bests[i] ?? null,
+        best1RmKg: bests[i] ?? null,
         restSeconds: planned?.rest_seconds ?? DEFAULT_REST_SECONDS,
         routineNote: planned?.notes ?? null,
       };
@@ -312,7 +312,7 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
           equipment: se.exercises?.equipment ?? "outro",
           restSeconds: ctx?.restSeconds ?? DEFAULT_REST_SECONDS,
           note: se.notes ?? ctx?.routineNote ?? null,
-          bestKg: ctx?.bestKg ?? null,
+          best1RmKg: ctx?.best1RmKg ?? null,
           sets: se.set_logs.map((l) => {
             const prev = ctx?.previous.find((p) => p.setNumber === l.set_number);
             return {
@@ -494,7 +494,8 @@ interface FinishJson {
   pauses?: number | null;
   sets?: number | null;
   total_volume_kg?: number | string | null;
-  personal_records?: Array<{ name: string; pr_type: string; value: number | string; reps: number | null }>;
+  /** best_e1rm: value = 1RM do recorde, weight/reps = série que o bateu. */
+  personal_records?: Array<{ name: string; pr_type: string; value: number | string; reps: number | null; weight?: number | string | null }>;
 }
 
 export const finishWorkout: FinishWorkout = async (client, { sessionId }) => {
@@ -509,10 +510,10 @@ export const finishWorkout: FinishWorkout = async (client, { sessionId }) => {
         pauseCount: json.pauses ?? 0,
         volumeKg: Number(json.total_volume_kg ?? 0),
         setCount: json.sets ?? 0,
-        // A tela mostra recordes de carga ("Maior carga · …").
+        // Recorde medido pelo 1RM estimado; a tela mostra a série que o bateu (carga × repetições).
         personalRecords: (json.personal_records ?? [])
-          .filter((p) => p.pr_type === "max_weight")
-          .map((p) => ({ exerciseName: p.name, weightKg: Number(p.value), reps: p.reps ?? 0 })),
+          .filter((p) => p.pr_type === "best_e1rm")
+          .map((p) => ({ exerciseName: p.name, weightKg: Number(p.weight ?? 0), reps: p.reps ?? 0 })),
       },
       error: null,
     };

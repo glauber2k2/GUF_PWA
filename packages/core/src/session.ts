@@ -1,6 +1,6 @@
 /** Regras do treino em andamento (puras, sem React). */
 import { formatLoadReps, formatNumber } from "./format";
-import type { SetType } from "./training";
+import { estimate1RM, type SetType } from "./training";
 
 /** Ordem dos grupos musculares no seletor de exercícios (códigos de exercises.muscle_group). */
 export const MUSCLE_GROUP_ORDER = [
@@ -159,22 +159,29 @@ export function pauseCount(clock: WorkoutClock): number {
 export interface RecordCandidate {
   setType: SetType;
   weightKg: number | null;
+  reps: number | null;
   isCompleted: boolean;
 }
 
+/** 1RM estimado de uma série que conta para recorde (concluída e sem aquecimento); senão null. */
+function candidate1Rm(set: RecordCandidate): number | null {
+  if (!set.isCompleted || set.setType === "warmup") return null;
+  return estimate1RM(set.weightKg, set.reps);
+}
+
 /**
- * Marca a série que bate o recorde de carga do exercício: a de maior carga do treino (a primeira,
- * em caso de empate), se passar do recorde anterior. Bateu de novo numa série seguinte? O recorde
- * passa para ela: um recorde por exercício por treino, como no finish_workout.
- * Aquecimento e séries não concluídas não contam; sem histórico (previousBestKg nulo) não há PR.
+ * Marca a série que bate o recorde do exercício, medido pelo 1RM estimado (Epley, igual ao banco):
+ * vale subir a carga ou fazer mais repetições com a mesma carga. Fica a série de maior 1RM do
+ * treino (a primeira, em caso de empate), se passar do melhor 1RM anterior; bater de novo move o
+ * recorde para a nova série — um por exercício por treino, como no finish_workout.
+ * Aquecimento e séries não concluídas não contam; sem histórico (previousBest1RmKg nulo) não há PR.
  */
-export function markLoadRecords(sets: readonly RecordCandidate[], previousBestKg: number | null | undefined): boolean[] {
-  if (previousBestKg === null || previousBestKg === undefined) return sets.map(() => false);
-  const counts = (s: RecordCandidate): s is RecordCandidate & { weightKg: number } =>
-    s.isCompleted && s.setType !== "warmup" && typeof s.weightKg === "number";
-  const sessionBest = sets.reduce((best, s) => (counts(s) && s.weightKg > best ? s.weightKg : best), previousBestKg);
-  if (sessionBest <= previousBestKg) return sets.map(() => false);
-  const recordIndex = sets.findIndex((s) => counts(s) && s.weightKg === sessionBest);
+export function markRecordSets(sets: readonly RecordCandidate[], previousBest1RmKg: number | null | undefined): boolean[] {
+  if (previousBest1RmKg === null || previousBest1RmKg === undefined) return sets.map(() => false);
+  const oneRms = sets.map(candidate1Rm);
+  const sessionBest = oneRms.reduce<number>((best, value) => (value !== null && value > best ? value : best), previousBest1RmKg);
+  if (sessionBest <= previousBest1RmKg) return sets.map(() => false);
+  const recordIndex = oneRms.findIndex((value) => value === sessionBest);
   return sets.map((_, i) => i === recordIndex);
 }
 

@@ -239,44 +239,58 @@ export interface ExerciseSessionBest {
   sessionId: string;
   performedOn: string;
   maxWeightKg: number;
+  /** Maior 1RM estimado do treino (get_exercise_history.best_e1rm_kg); null sem série válida. */
+  best1RmKg: number | null;
+}
+
+/** Treinos concluídos ANTES de `sessionId`: dias anteriores e, no mesmo dia, os que terminaram antes. */
+function sessionsBefore(
+  history: readonly ExerciseSessionBest[],
+  sessionId: string,
+  performedOn: string,
+  earlierSameDay: ReadonlySet<string>,
+): ExerciseSessionBest[] {
+  return history.filter(
+    (h) => h.sessionId !== sessionId && (h.performedOn < performedOn || (h.performedOn === performedOn && earlierSameDay.has(h.sessionId))),
+  );
 }
 
 /**
- * O treino `sessionId` bateu o recorde de carga do exercício?
- * Compara com todos os treinos concluídos ANTES dele: dias anteriores e, no mesmo dia,
- * os que terminaram antes (`earlierSameDay`). Primeira vez do exercício nunca é recorde.
- * Retorna a carga do recorde ou null.
+ * O treino `sessionId` bateu o recorde do exercício? Medido pelo 1RM estimado (mais carga ou
+ * mais repetições com a mesma carga), como no finish_workout, contra todos os treinos concluídos
+ * antes dele. Primeira vez do exercício nunca é recorde.
+ * @returns o 1RM do recorde (kg) ou null
  */
-export function sessionLoadRecord(
+export function sessionRecord1Rm(
   history: readonly ExerciseSessionBest[],
   sessionId: string,
   performedOn: string,
   earlierSameDay: ReadonlySet<string>,
 ): number | null {
-  const current = history.find((h) => h.sessionId === sessionId);
-  if (!current) return null;
-  const previous = history.filter(
-    (h) => h.sessionId !== sessionId && (h.performedOn < performedOn || (h.performedOn === performedOn && earlierSameDay.has(h.sessionId))),
-  );
+  const current = history.find((h) => h.sessionId === sessionId)?.best1RmKg ?? null;
+  if (current === null) return null;
+  const previous = sessionsBefore(history, sessionId, performedOn, earlierSameDay)
+    .map((h) => h.best1RmKg)
+    .filter((value): value is number => value !== null);
   if (previous.length === 0) return null;
-  const previousBest = Math.max(...previous.map((h) => h.maxWeightKg));
-  return current.maxWeightKg > previousBest ? current.maxWeightKg : null;
+  return current > Math.max(...previous) ? current : null;
 }
 
-/** Melhor carga ANTES do treino (mesma janela do sessionLoadRecord) e o dia em que foi feita; null = primeira vez. */
-export function previousLoadBest(
+/** Melhor 1RM ANTES do treino (mesma janela do sessionRecord1Rm) e o dia em que foi feito; null = primeira vez. */
+export function previousBest1Rm(
   history: readonly ExerciseSessionBest[],
   sessionId: string,
   performedOn: string,
   earlierSameDay: ReadonlySet<string>,
-): { weightKg: number; performedOn: string } | null {
-  let best: ExerciseSessionBest | null = null;
-  for (const h of history) {
-    if (h.sessionId === sessionId) continue;
-    if (!(h.performedOn < performedOn || (h.performedOn === performedOn && earlierSameDay.has(h.sessionId)))) continue;
-    if (!best || h.maxWeightKg > best.maxWeightKg || (h.maxWeightKg === best.maxWeightKg && h.performedOn > best.performedOn)) best = h;
+): { oneRmKg: number; performedOn: string } | null {
+  let best: { oneRmKg: number; performedOn: string } | null = null;
+  for (const h of sessionsBefore(history, sessionId, performedOn, earlierSameDay)) {
+    if (h.best1RmKg === null) continue;
+    if (!best || h.best1RmKg > best.oneRmKg || (h.best1RmKg === best.oneRmKg && h.performedOn > best.performedOn)) {
+      best = { oneRmKg: h.best1RmKg, performedOn: h.performedOn };
+    }
   }
-  return best ? { weightKg: best.maxWeightKg, performedOn: best.performedOn } : null;
+  return best;
 }
 
 /* ---------------------------------------------------------------------

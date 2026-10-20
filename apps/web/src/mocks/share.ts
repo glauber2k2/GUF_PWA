@@ -49,8 +49,8 @@ function sampleInput(today: Date): StoryInput {
     scenario === "sem-recordes" || scenario === "novo"
       ? []
       : [
-          { exerciseName: "Supino reto com barra", weightKg: 80, reps: 8, previousWeightKg: 75, previousOn: lastMonth },
-          { exerciseName: "Tríceps na polia", weightKg: 30, reps: 12, previousWeightKg: 27.5, previousOn: lastMonth },
+          { exerciseName: "Supino reto com barra", weightKg: 80, reps: 8, oneRmKg: 101.3, previous1RmKg: 95, previousOn: lastMonth },
+          { exerciseName: "Tríceps na polia", weightKg: 30, reps: 12, oneRmKg: 42, previous1RmKg: 38.5, previousOn: lastMonth },
         ];
   // 16 semanas: 12 seguidas com treino (as 4 mais antigas sem).
   const trainingDays = Array.from({ length: 16 * 7 }, (_, i) => addLocalDays(today, -i))

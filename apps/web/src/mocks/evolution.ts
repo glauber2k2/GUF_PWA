@@ -24,8 +24,8 @@ import {
   bestLoadSet,
   estimate1RM,
   recordSetIndex,
-  previousLoadBest,
-  sessionLoadRecord,
+  previousBest1Rm,
+  sessionRecord1Rm,
   sessionTotals,
   toLocalISODate,
   weekStart,
@@ -66,7 +66,7 @@ interface MockExercise {
   step: number;
   sets: number;
   warmup?: boolean;
-  /** O último treino bate o recorde de carga. */
+  /** O último treino bate o recorde (1RM estimado). */
   record?: boolean;
 }
 
@@ -211,7 +211,8 @@ function historyOf(exerciseId: string): ExerciseSessionBest[] {
   return liveSessions().flatMap((s) => {
     const e = s.exercises.find((x) => x.exercise.id === exerciseId);
     const best = e ? bestLoadSet(e.sets) : null;
-    return best ? [{ sessionId: s.id, performedOn: s.performedOn, maxWeightKg: best.weightKg }] : [];
+    const oneRm = e ? best1RMSet(e.sets) : null;
+    return best ? [{ sessionId: s.id, performedOn: s.performedOn, maxWeightKg: best.weightKg, best1RmKg: oneRm?.oneRmKg ?? null }] : [];
   });
 }
 
@@ -232,16 +233,18 @@ function toSummary(s: MockSession): WorkoutSummaryDetail {
   const records: WorkoutSummaryRecord[] = [];
   const exercises = s.exercises.map<SummaryExercise>(({ exercise, sets }, i) => {
     const history = historyOf(exercise.id);
-    const recordKg = sessionLoadRecord(history, s.id, s.performedOn, earlierSameDay);
-    const recordIndex = recordSetIndex(sets, recordKg);
-    if (recordKg !== null) {
-      const previous = previousLoadBest(history, s.id, s.performedOn, earlierSameDay);
+    const record1RmKg = sessionRecord1Rm(history, s.id, s.performedOn, earlierSameDay);
+    const recordIndex = recordSetIndex(sets, record1RmKg);
+    const recordSet = sets[recordIndex ?? -1];
+    if (record1RmKg !== null && recordSet) {
+      const previous = previousBest1Rm(history, s.id, s.performedOn, earlierSameDay);
       records.push({
         exerciseId: exercise.id,
         exerciseName: exercise.name,
-        weightKg: recordKg,
-        reps: sets[recordIndex ?? -1]?.reps ?? null,
-        previousWeightKg: previous?.weightKg ?? null,
+        weightKg: recordSet.weightKg ?? 0,
+        reps: recordSet.reps ?? null,
+        oneRmKg: record1RmKg,
+        previous1RmKg: previous?.oneRmKg ?? null,
         previousOn: previous?.performedOn ?? null,
       });
     }

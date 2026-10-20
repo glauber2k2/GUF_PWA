@@ -1,6 +1,6 @@
 import type { ActiveWorkout, ExerciseContext, FinishedWorkoutSummary, LibraryExercise, NewWorkoutExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
 import { DEFAULT_REST_SECONDS } from "@guf/api";
-import { markLoadRecords, pauseCount, sessionTotals, workoutElapsedSeconds, type SetType, type WorkoutClock } from "@guf/core";
+import { markRecordSets, pauseCount, sessionTotals, workoutElapsedSeconds, type SetType, type WorkoutClock } from "@guf/core";
 import type { WorkoutViewState } from "./workout-state";
 
 /* Montagem de exercícios/séries com ids gerados no aparelho (funciona offline). */
@@ -30,7 +30,7 @@ export function buildWorkoutExercise(
     equipment: library.equipment,
     restSeconds: context?.restSeconds ?? DEFAULT_REST_SECONDS,
     note: context?.routineNote ?? null,
-    bestKg: context?.bestKg ?? null,
+    best1RmKg: context?.best1RmKg ?? null,
     sets: Array.from({ length: total }, (_, i) => {
       const prev = previousFor(context, i + 1);
       return {
@@ -78,7 +78,7 @@ export function workoutSnapshot(base: ActiveWorkout, state: WorkoutViewState, cl
       equipment: e.equipment,
       restSeconds: e.restSeconds,
       note: e.note,
-      bestKg: e.bestKg,
+      best1RmKg: e.best1RmKg,
       sets: e.sets,
     })),
   };
@@ -99,7 +99,7 @@ export function localSummary(state: WorkoutViewState, clock: WorkoutClock, now =
     volumeKg: totals.volumeKg,
     setCount: totals.setCount,
     personalRecords: state.exercises.flatMap((e) => {
-      const flags = markLoadRecords(e.sets, e.bestKg);
+      const flags = markRecordSets(e.sets, e.best1RmKg);
       return e.sets
         .filter((_, i) => flags[i])
         .map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));

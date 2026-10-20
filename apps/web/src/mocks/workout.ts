@@ -3,7 +3,7 @@
  * (WorkoutApi). A tela usa os DADOS REAIS; este mock existe só para o modo de demonstração
  * em DESENVOLVIMENTO (/treino?id=demo&estado=demo), com o treino do design e sem gravar nada.
  */
-import { markLoadRecords, sessionTotals, workoutElapsedSeconds, type SetType } from "@guf/core";
+import { markRecordSets, sessionTotals, workoutElapsedSeconds, type SetType } from "@guf/core";
 import {
   apiError,
   DEFAULT_REST_SECONDS,
@@ -108,7 +108,7 @@ const library: LibraryExercise[] = LIB.map(([name, muscleGroup, equipment], i) =
 const byName = (name: string) => library.find((e) => e.name === name)!;
 
 /** Melhor carga histórica fictícia (null = nunca fez → não gera PR). */
-const BEST_KG: Record<string, number> = {
+const BEST_1RM_KG: Record<string, number> = {
   "Puxada frontal": 62.5,
   "Remada curvada": 70,
   "Remada baixa": 65,
@@ -140,7 +140,7 @@ function seedExercise(name: string, restSeconds: number, note: string | null, se
     equipment: ex.equipment,
     restSeconds,
     note,
-    bestKg: BEST_KG[name] ?? null,
+    best1RmKg: BEST_1RM_KG[name] ?? null,
     sets: sets.map(seedSet),
   };
 }
@@ -240,7 +240,7 @@ export const getExerciseContext: WorkoutApi["getExerciseContext"] = async (clien
   const context: Awaited<ReturnType<WorkoutApi["getExerciseContext"]>>["data"] = {};
   for (const id of exerciseIds) {
     const ex = library.find((e) => e.id === id);
-    context[id] = { previous: [], bestKg: ex ? (BEST_KG[ex.name] ?? null) : null, restSeconds: DEFAULT_REST_SECONDS, routineNote: null };
+    context[id] = { previous: [], best1RmKg: ex ? (BEST_1RM_KG[ex.name] ?? null) : null, restSeconds: DEFAULT_REST_SECONDS, routineNote: null };
   }
   return { data: context, error: null };
 };
@@ -331,7 +331,7 @@ export const finishWorkout: WorkoutApi["finishWorkout"] = async (client, { sessi
   const workout = session(sessionId);
   const totals = sessionTotals(workout.exercises.flatMap((e) => e.sets));
   const personalRecords = workout.exercises.flatMap((e) => {
-    const flags = markLoadRecords(e.sets, e.bestKg);
+    const flags = markRecordSets(e.sets, e.best1RmKg);
     return e.sets.filter((_, i) => flags[i]).map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));
   });
   const clock = { startedAt: workout.startedAt, periods: workout.activePeriods };

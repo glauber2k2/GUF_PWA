@@ -159,9 +159,12 @@ export interface StoryInput {
     exercises: ReadonlyArray<{ name: string; muscleGroup: string; sets: readonly StorySetInput[]; setCount: number; volumeKg: number }>;
     records: ReadonlyArray<{
       exerciseName: string;
+      /** Série do recorde (o que a pessoa levantou). */
       weightKg: number;
       reps: number | null;
-      previousWeightKg: number | null;
+      /** 1RM estimado do recorde e o melhor 1RM antes dele (a comparação é feita no 1RM). */
+      oneRmKg: number;
+      previous1RmKg: number | null;
       previousOn: string | null;
     }>;
   };
@@ -498,20 +501,21 @@ export function buildStoryData(input: StoryInput): StoryData {
 
   const records: StoryRecord[] = summary.records.map((r) => {
     const ex = exercises.find((e) => e.name === r.exerciseName);
-    const prev = r.previousWeightKg;
+    // Recorde por 1RM: mais repetições com a mesma carga também aparecem como evolução.
+    const prev = r.previous1RmKg;
     const prevDate = r.previousOn ? fromLocalISODate(r.previousOn) : null;
     const sameMonth = prevDate && prevDate.getMonth() === day.getMonth() && prevDate.getFullYear() === day.getFullYear();
-    const deltaDisplay = prev !== null ? (toDisplayWeight(r.weightKg, unit) ?? 0) - (toDisplayWeight(prev, unit) ?? 0) : null;
+    const deltaDisplay = prev !== null ? (toDisplayWeight(r.oneRmKg, unit) ?? 0) - (toDisplayWeight(prev, unit) ?? 0) : null;
     return {
       exerciseName: r.exerciseName,
       load: formatNumber(toDisplayWeight(r.weightKg, unit) ?? 0),
       delta: deltaDisplay !== null ? `${formatSigned(deltaDisplay)} ${unit}` : "Novo",
-      deltaPct: prev ? `${formatSigned(((r.weightKg - prev) / prev) * 100)}%` : null,
+      deltaPct: prev ? `${formatSigned(((r.oneRmKg - prev) / prev) * 100)}%` : null,
       reps: r.reps,
       previousDate: prevDate ? dayMonth(prevDate) : null,
       previousLoad: prev !== null ? formatNumber(toDisplayWeight(prev, unit) ?? 0) : null,
       previousLabel: prevDate && !sameMonth ? monthName(prevDate).toUpperCase() : "ANTES",
-      previousPct: prev ? Math.round((prev / r.weightKg) * 10000) / 100 : 0,
+      previousPct: prev ? Math.round((prev / r.oneRmKg) * 10000) / 100 : 0,
       scheme: ex?.scheme ?? "",
     };
   });
