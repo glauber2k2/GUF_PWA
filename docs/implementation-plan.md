@@ -128,7 +128,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Decisões pendentes:** design da aba no Claude Design.
 
-**Atualização 2026-10-20 (`feat/rotina-atualizacao`):** toggle "Atualizar carga e repetições automaticamente" por rotina (`routines.auto_progress`) com carga planejada opcional por exercício (`routine_exercises.target_weight_kg`); ao finalizar um treino de rotina, pergunta se a rotina deve virar o treino (`update_routine_from_workout`). Migration `20261020011329_routine_auto_progress` validada no banco numa transação desfeita; **falta aplicar**.
+**Atualização 2026-10-20 (`feat/rotina-atualizacao`):** toggle "Atualizar carga e repetições automaticamente" por rotina (`routines.auto_progress`) com carga planejada opcional por exercício (`routine_exercises.target_weight_kg`); ao finalizar um treino de rotina, pergunta se a rotina deve virar o treino (`update_routine_from_workout`). Migration `20261020011329_routine_auto_progress` aplicada no banco em 2026-10-20.
 
 ---
 
@@ -248,7 +248,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
 | Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Banco, chaves VAPID, secrets, Vault e função `push-alerts` configurados em 2026-10-19 (caminho banco → pg_net → função conferido); falta `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel e o teste com dois celulares |
-| Pontuação sem esforço (RPE): constância, sequência, recordes e volume (`20261020012117_competition_scoring_without_rpe`, validada no banco numa transação desfeita; **falta aplicar**) | Feito no código (`feat/pontuacao-competicao`); falta nova versão dos Termos/Política sem a menção ao esforço |
+| Pontuação sem esforço (RPE): constância, sequência, recordes e volume (`20261020012117_competition_scoring_without_rpe`); Termos 0.3-dev e Política 0.5-dev sem o esforço (`20261020085455_legal_docs_competition_without_rpe`) | Aplicado no banco em 2026-10-20 (`feat/treino-rotina-competicao`); **publicar o app logo** (até lá, a tela de competição do app antigo falha e o `/aceite` mostra o texto anterior) |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
 

@@ -646,7 +646,6 @@ export type Database = {
         Row: {
           archived_at: string | null
           auto_progress: boolean
-          average_duration_seconds: number | null
           created_at: string
           id: string
           name: string
@@ -656,6 +655,7 @@ export type Database = {
           updated_at: string
           user_id: string
           weekdays: number[]
+          average_duration_seconds: number | null
         }
         Insert: {
           archived_at?: string | null
@@ -996,6 +996,8 @@ export type Database = {
           effort_max: number
           max_minutes: number
           min_minutes: number
+          record_points: number
+          records_max: number
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number
@@ -1003,6 +1005,8 @@ export type Database = {
           rpe_high_value: number
           rpe_window_days: number
           sessions_for_max_constancy: number
+          volume_max: number
+          volume_window_weeks: number
         }
         SetofOptions: {
           from: "*"

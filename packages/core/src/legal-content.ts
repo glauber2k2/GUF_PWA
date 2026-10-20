@@ -184,8 +184,8 @@ const TERMS: LegalDocumentContent = {
         ul(
           "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
-          "Quem vocês se seguem mutuamente compete com você num ranking de pontos, pelas mesmas regras para todos, publicadas no app.",
-          "Medidas corporais, observações escritas por você e o esforço informado em cada treino nunca aparecem para outras pessoas.",
+          "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e volume), pelas mesmas regras para todos, publicadas no app.",
+          "Medidas corporais e observações escritas por você nunca aparecem para outras pessoas.",
           "Não há chat nem mensagens entre usuários. Use o perfil com respeito: contas usadas para assediar outras pessoas podem ser encerradas.",
         ),
       ],
@@ -229,6 +229,10 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.3-dev": [
+      "A pontuação da competição passa a ser calculada pela constância, pelos recordes de carga e pelo volume dos treinos.",
+      "O esforço do treino (nota de 1 a 10) não é mais pedido nem usado.",
+    ],
     "0.2-dev": [
       "Novo: perfil com nome de usuário (@), seguidores e competição entre quem se segue mutuamente.",
       "Seu perfil começa privado. Abrir o perfil deixa sua evolução, sequência e histórico visíveis para qualquer pessoa com conta no guf.",
@@ -278,7 +282,6 @@ const PRIVACY: LegalDocumentContent = {
             ["Preferências", "Tema, unidade de peso e meta semanal", "Você"],
             ["Foto do perfil", "Imagem enviada ou vinda do Google", "Você, opcional"],
             ["Perfil social", "Nome de usuário (@), seguidores, pedidos e bloqueios", "Você"],
-            ["Esforço do treino", "Nota de 1 a 10 informada ao finalizar", "Você, opcional"],
             ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
             ["Medidas corporais", "Peso, % de gordura e circunferências", "Você, opcional e com consentimento"],
           ],
@@ -299,7 +302,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Registrar treinos e mostrar evolução", "Treinos e preferências", "Execução de contrato (art. 7º, V)"],
             ["Acompanhar medidas corporais", "Medidas", "Consentimento (art. 11, I)"],
             ["Mostrar seu perfil (@, nome e foto) na busca e receber pedidos para seguir", "Conta e perfil social", "Execução de contrato (art. 7º, V)"],
-            ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos, esforço e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
+            ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
             ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
             ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
@@ -325,7 +328,7 @@ const PRIVACY: LegalDocumentContent = {
         p(
           "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
         ),
-        p("A pontuação da competição é calculada pelas mesmas regras para todos. O esforço muito acima da sua média é ajustado automaticamente; você vê o motivo e pode pedir revisão (art. 20)."),
+        p("A pontuação da competição é calculada pelas mesmas regras para todos, a partir dos treinos: constância, recordes de carga e volume comparado à sua própria média. As regras ficam publicadas em Competição › Como funciona."),
         p(
           "Se você ligar as notificações (Configurações › Preferências), o aparelho recebe um aviso quando alguém começa a seguir você, pede para seguir ou aceita o seu pedido, e quando um competidor fica a menos de 20 pontos de passar você no mês ou passa. O aviso mostra o nome e o @ da pessoa (e, na competição, a diferença de pontos), inclusive na tela bloqueada. Para evitar excesso, o mesmo aviso de seguidor sobre a mesma pessoa sai no máximo uma vez por dia. As notificações são ligadas em cada aparelho, começam desligadas e podem ser desligadas a qualquer momento, no app ou nas configurações do celular.",
         ),
@@ -439,6 +442,10 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.5-dev": [
+      "O esforço do treino (nota de 1 a 10) não é mais coletado, e o ajuste automático do esforço na pontuação deixou de existir.",
+      "A pontuação da competição passa a usar a constância, os recordes de carga e o volume dos treinos.",
+    ],
     "0.4-dev": [
       "Novo e opcional: notificações no celular quando alguém segue você, pede para seguir ou aceita seu pedido, e quando um competidor fica a menos de 20 pontos de passar você no mês ou passa. Começam desligadas.",
       "Ao ligar as notificações, guardamos o endereço do aparelho no serviço de notificações (Google, Apple ou Mozilla) até você desligar ou sair da conta.",
