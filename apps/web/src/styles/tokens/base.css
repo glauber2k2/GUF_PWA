@@ -615,16 +615,10 @@
   .guf-rat, .guf-rat * { animation: none !important; }
 }
 
-/* Arte dos stories (StoryArt): escopo dos tokens de superfície. Dentro de um cartão, os cartões
-   internos (subcartões) usam --story-inner-* (opacidade mínima de 20%, valores definidos no StoryArt),
-   enquanto o cartão de fora segue a opacidade da arte. Com data-flat (todo o conteúdo em cartões e
-   opacidade 0), o cartão de fora some de vez: sem borda nem sombra; bordas internas continuam. */
-[data-story-art] [class*="bg-surface"] * {
-  --surface: var(--story-inner-surface);
-  --surface-elevated: var(--story-inner-surface-elevated);
-  --surface-3: var(--story-inner-surface-3);
-}
-[data-story-art][data-flat] [class*="bg-surface"]:not([class*="bg-surface"] *) {
+/* Arte dos stories (StoryArt) com opacidade 0 (data-flat): os tokens de superfície e borda já ficam
+   transparentes; isto tira também as bordas de cor própria (volt, dourado) e as sombras dos cartões,
+   em qualquer nível. Só os elementos aparecem. */
+[data-story-art][data-flat] [class*="bg-surface"] {
   border-color: transparent;
   box-shadow: none;
 }
