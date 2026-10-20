@@ -54,6 +54,7 @@ export function SocialPrivacySettings({ social, disabled = false }: { social: My
       <PrivacyRow icon={Lock} title="Perfil privado" description="Só seguidores aprovados veem sua evolução e sequência.">
         <Switch
           label="Perfil privado"
+          hideLabel
           checked={social.visibility === "private"}
           disabled={disabled || update.isPending}
           onChange={(isPrivate) => save(isPrivate ? "private" : "open", social.historyHidden)}
@@ -63,6 +64,7 @@ export function SocialPrivacySettings({ social, disabled = false }: { social: My
       <PrivacyRow icon={EyeOff} title="Ocultar histórico de treinos" description="Ninguém vê seus treinos, nem seguidores. Vale com o perfil aberto ou privado.">
         <Switch
           label="Ocultar histórico de treinos"
+          hideLabel
           checked={social.historyHidden}
           disabled={disabled || update.isPending}
           onChange={(hidden) => save(social.visibility, hidden)}

@@ -78,10 +78,11 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
   return (
     <ProfileSection id="pf-prefs" title="Preferências" className="[animation-delay:100ms]">
       <RowGroup first padded className={cn("flex flex-col gap-2.5", lockedRow)}>
-        <div aria-disabled={locked || undefined} className="flex items-center gap-3">
+        <div aria-disabled={locked || undefined} className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <RowIcon icon={Weight} />
-          <span className="flex-1 text-[15px] leading-5 font-semibold">Unidade de peso</span>
+          <span className="min-w-0 flex-1 text-[15px] leading-5 font-semibold">Unidade de peso</span>
           <SegmentedControl
+            className="ml-auto"
             size="sm"
             label="Unidade de peso"
             options={UNIT_OPTIONS}
@@ -91,14 +92,14 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
             }}
           />
         </div>
-        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">Seus registros continuam salvos; só muda a exibição.</span>
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted min-[360px]:pl-12">Seus registros continuam salvos; só muda a exibição.</span>
       </RowGroup>
 
       <RowGroup padded className={cn("flex flex-col gap-2.5", lockedRow)}>
-        <div aria-disabled={locked || undefined} className="flex items-center gap-3">
+        <div aria-disabled={locked || undefined} className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <RowIcon icon={Target} />
-          <span className="flex-1 text-[15px] leading-5 font-semibold">Meta semanal</span>
-          <div role="group" aria-label="Meta semanal" className="flex items-center gap-1">
+          <span className="min-w-0 flex-1 text-[15px] leading-5 font-semibold">Meta semanal</span>
+          <div role="group" aria-label="Meta semanal" className="ml-auto flex items-center gap-1">
             <IconButton
               icon={Minus}
               label="Diminuir meta"
@@ -117,7 +118,7 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
             />
           </div>
         </div>
-        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted min-[360px]:pl-12">
           A meta serve para acompanhar; a sequência conta com 1 treino por semana.
         </span>
       </RowGroup>
@@ -160,7 +161,7 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
             className="flex-1 leading-5 font-semibold"
           />
         </div>
-        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted min-[360px]:pl-12">
           A tela não apaga sozinha durante o treino, para o aviso do descanso tocar. Gasta um pouco mais de bateria.
         </span>
       </RowGroup>
@@ -181,7 +182,7 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
             className="flex-1 leading-5 font-semibold"
           />
         </div>
-        <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted min-[360px]:pl-12">
           Com todas as séries concluídas, o treino é finalizado sozinho após 30 minutos sem atividade, com o horário da última série. Funciona
           mesmo com o app fechado.
         </span>

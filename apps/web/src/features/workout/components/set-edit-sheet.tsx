@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Minus } from "lucide-react";
 import { adjustLoad, parseKeypadValue, previousLabel, toDisplayWeight, toKeypadValue, type WeightUnit } from "@guf/core";
 import type { WorkoutSet } from "@guf/api";
-import { BottomSheet, Button, NumericKeypad, QuickLoad, SegmentedControl, Stepper } from "@/shared/components/ds";
+import { BottomSheet, Button, NumericKeypad, QuickLoad, QuickReps, SegmentedControl, Stepper } from "@/shared/components/ds";
 import type { EditableField } from "@/features/workout/helpers/workout-state";
 
 export interface SetEditSheetProps {
@@ -23,7 +23,10 @@ export interface SetEditSheetProps {
   onDone: () => void;
 }
 
-/** Editar carga/repetições de uma série: Stepper + carga rápida, ou teclado numérico. */
+/**
+ * Editar carga/repetições de uma série: Stepper + atalhos (carga: −1/+1/+5/+10 somam; repetições:
+ * 6/8/10/12/15 substituem), ou teclado numérico em que o primeiro dígito substitui o valor atual.
+ */
 export function SetEditSheet({ open, title, set, field, unit, onFieldChange, onValueChange, onDone }: SetEditSheetProps) {
   const [keypad, setKeypad] = useState(false);
   const [typed, setTyped] = useState<string | null>(null);
@@ -56,6 +59,9 @@ export function SetEditSheet({ open, title, set, field, unit, onFieldChange, onV
       />
       {keypad ? (
         <NumericKeypad
+          // Trocar de campo recomeça a digitação (o 1º dígito volta a substituir).
+          key={field}
+          replaceOnFirstKey
           value={typed ?? toKeypadValue(isLoad ? displayLoad : (set?.reps ?? null))}
           unit={isLoad ? unit : "reps"}
           label={isLoad ? loadLabel : "Repetições"}
@@ -81,7 +87,11 @@ export function SetEditSheet({ open, title, set, field, unit, onFieldChange, onV
             valueClickLabel={isLoad ? "Digitar carga" : "Digitar repetições"}
           />
           <span className="-mt-1 text-center text-xs text-fg-muted">Toque no número para digitar</span>
-          {isLoad && <QuickLoad onSelect={(delta) => onValueChange(field, adjustLoad(displayLoad, delta))} />}
+          {isLoad ? (
+            <QuickLoad onSelect={(delta) => onValueChange(field, adjustLoad(displayLoad, delta))} />
+          ) : (
+            <QuickReps value={set?.reps ?? null} onSelect={(reps) => onValueChange(field, reps)} />
+          )}
         </>
       )}
       <div className={keypad ? "grid grid-cols-[auto_minmax(0,1fr)] gap-2 pt-1" : "grid pt-1"}>

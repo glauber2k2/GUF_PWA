@@ -13,24 +13,15 @@ export interface CompetitionParameters {
   effectiveFrom: string;
   sessionsForMaxConstancy: number;
   constancyMax: number;
-  effortMax: number;
-  referenceLoad: number;
   minMinutes: number;
   maxMinutes: number;
   bonusPerWeek: number;
   bonusMax: number;
-  rpeGap: number;
-  rpeHighValue: number;
-  rpeHighShare: number;
-  rpeHighCap: number;
-  rpeWindowDays: number;
+  recordPoints: number;
+  recordsMax: number;
+  volumeMax: number;
+  volumeWindowWeeks: number;
 }
-
-/** Motivo do ajuste de RPE de uma sessão, como o banco devolve. */
-export type RpeAdjustment = "above_average" | "high_share";
-
-export const RPE_MIN = 1;
-export const RPE_MAX = 10;
 
 /** Temporada (1º dia do mês) da semana que contém a data: o mês do sábado em que a semana termina. */
 export function seasonOf(date: Date): Date {
@@ -62,28 +53,18 @@ export function pointsLabel(points: number): string {
   return `${formatNumber(points, 0)} ${points === 1 ? "pt" : "pts"}`;
 }
 
-/** Explicação do ajuste automático de RPE (transparência da decisão automatizada, LGPD Art. 20). */
-export function rpeAdjustmentText(adjustment: RpeAdjustment, informed: number, used: number, params: CompetitionParameters): string {
-  const weeks = Math.round(params.rpeWindowDays / 7);
-  if (adjustment === "high_share") {
-    const share = Math.round(params.rpeHighShare * 100);
-    return `Você marcou esforço ${params.rpeHighValue} ou mais em mais de ${share}% das sessões das últimas ${weeks} semanas. Esta sessão contou com esforço ${formatNumber(used)} no lugar de ${informed}.`;
-  }
-  return `O esforço ${informed} ficou ${formatNumber(params.rpeGap, 0)} ou mais pontos acima da sua média das últimas ${weeks} semanas. Esta sessão contou com a sua média (${formatNumber(used)}).`;
-}
-
 /** Regras da pontuação em frases curtas, montadas com os parâmetros do servidor ("Como funciona"). */
 export function scoringRules(params: CompetitionParameters): string[] {
   const perSession = params.constancyMax / params.sessionsForMaxConstancy;
-  const weeks = Math.round(params.rpeWindowDays / 7);
+  const weekMax = params.constancyMax + params.bonusMax + params.recordsMax + params.volumeMax;
   return [
-    `Vale o treino com pelo menos ${formatNumber(params.minMinutes, 0)} minutos de tempo efetivo; acima de ${formatNumber(params.maxMinutes, 0)} minutos, o excedente não conta.`,
-    "Conta no máximo um treino por dia (o de maior carga).",
-    `Constância: ${formatNumber(perSession, 0)} pontos por treino válido na semana, até ${formatNumber(params.constancyMax, 0)} pontos com ${params.sessionsForMaxConstancy} treinos.`,
-    `Esforço: carga = esforço (1 a 10) × minutos. A soma da semana vale até ${formatNumber(params.effortMax, 0)} pontos ao chegar a ${formatNumber(params.referenceLoad, 0)}.`,
+    `Vale o treino com pelo menos ${formatNumber(params.minMinutes, 0)} minutos de tempo efetivo; conta no máximo um treino por dia.`,
+    `Constância (o que mais pesa): ${formatNumber(perSession, 0)} pontos por treino válido na semana, até ${formatNumber(params.constancyMax, 0)} pontos com ${params.sessionsForMaxConstancy} treinos.`,
     `Sequência: semana com ${params.sessionsForMaxConstancy} ou mais treinos válidos rende ${formatNumber(params.bonusPerWeek, 0)} pontos multiplicados pelas semanas cumpridas seguidas, até ${formatNumber(params.bonusMax, 0)} pontos.`,
-    `Esforço muito acima da sua média das últimas ${weeks} semanas é ajustado automaticamente, e você vê o motivo em cada treino.`,
-    "Empate: vence quem tem mais semanas cumpridas, depois mais treinos válidos e depois mais carga na temporada.",
+    `Recordes: ${formatNumber(params.recordPoints, 0)} pontos por recorde de carga batido na semana, até ${formatNumber(params.recordsMax, 0)} pontos.`,
+    `Volume: até ${formatNumber(params.volumeMax, 0)} pontos, comparando o volume da semana com a sua média das últimas ${params.volumeWindowWeeks} semanas com treino. Quem mantém ou aumenta o próprio volume ganha tudo.`,
+    `Máximo de ${formatNumber(weekMax, 0)} pontos por semana.`,
+    "Empate: vence quem tem mais semanas cumpridas, depois mais treinos válidos e depois mais volume no período.",
   ];
 }
 

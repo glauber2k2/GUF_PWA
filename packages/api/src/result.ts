@@ -14,7 +14,6 @@ export type ApiErrorCode =
   | "person_not_found"
   | "follow_limit"
   | "history_hidden"
-  | "rpe_window_closed"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -42,7 +41,6 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   person_not_found: "Não encontramos essa pessoa. Confira o nome de usuário ou peça um novo link.",
   follow_limit: "Você atingiu o limite de pedidos para seguir de hoje. Tente de novo amanhã.",
   history_hidden: "Esta pessoa ocultou o histórico de treinos. As estatísticas e a pontuação continuam visíveis.",
-  rpe_window_closed: "O prazo para informar o esforço deste treino terminou (até 24 horas depois de finalizar).",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -63,7 +61,6 @@ const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
   GS004: "person_not_found",
   GS005: "follow_limit",
   GS006: "history_hidden",
-  GS007: "rpe_window_closed",
   GS008: "handle_invalid",
 };
 

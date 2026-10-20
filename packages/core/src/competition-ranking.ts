@@ -29,8 +29,12 @@ export interface CompetitionWeekScore {
   userId: string;
   weekStart: string;
   points: number;
+  /** Partes dos pontos da semana (já arredondados pelo servidor). */
+  constancyPoints: number;
+  bonusPoints: number;
+  recordPoints: number;
+  volumePoints: number;
   validSessions: number;
-  weeklyLoad: number;
   fulfilled: boolean;
 }
 
@@ -49,7 +53,6 @@ export interface CompetitorTotals {
   records: number;
   fulfilledWeeks: number;
   validSessions: number;
-  load: number;
 }
 
 export interface RankedCompetitor extends CompetitionParticipant {
@@ -68,7 +71,7 @@ const PREVIOUS_RANK_FRACTION = 0.7;
 
 const PERIOD_DAYS: Record<Exclude<CompetitionPeriod, "month" | "custom">, number> = { "3m": 90, "6m": 182, "1y": 364 };
 
-const EMPTY_TOTALS: CompetitorTotals = { points: 0, workouts: 0, volumeKg: 0, records: 0, fulfilledWeeks: 0, validSessions: 0, load: 0 };
+const EMPTY_TOTALS: CompetitorTotals = { points: 0, workouts: 0, volumeKg: 0, records: 0, fulfilledWeeks: 0, validSessions: 0 };
 
 /**
  * Período de datas. "Este mês" = temporada: semanas cujo sábado cai no mês (pode começar no
@@ -114,7 +117,6 @@ export function competitorTotals(userId: string, weeks: readonly CompetitionWeek
     if (week.userId !== userId || (until && week.weekStart > until)) continue;
     totals.points += week.points;
     totals.validSessions += week.validSessions;
-    totals.load += week.weeklyLoad;
     if (week.fulfilled) totals.fulfilledWeeks += 1;
   }
   for (const day of days) {
@@ -133,10 +135,10 @@ export function metricValue(totals: CompetitorTotals, metric: CompetitionMetric)
   return totals.records;
 }
 
-/** Chaves de ordenação: a métrica; em pontos, o desempate da regra (semanas cumpridas, sessões válidas, carga). */
+/** Chaves de ordenação: a métrica; em pontos, o desempate da regra (semanas cumpridas, sessões válidas, volume). */
 function sortKeys(totals: CompetitorTotals, metric: CompetitionMetric): number[] {
   const value = metricValue(totals, metric);
-  return metric === "points" ? [value, totals.fulfilledWeeks, totals.validSessions, totals.load] : [value, totals.points];
+  return metric === "points" ? [value, totals.fulfilledWeeks, totals.validSessions, totals.volumeKg] : [value, totals.points];
 }
 
 function compareKeys(a: number[], b: number[]): number {

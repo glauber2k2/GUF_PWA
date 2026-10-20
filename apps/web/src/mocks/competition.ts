@@ -32,20 +32,19 @@ interface MockCompetitor {
   rate: number;
   volume: number;
   recordChance: number;
-  rpe: number;
   streak: number;
 }
 
 function competitors(): MockCompetitor[] {
   const all: MockCompetitor[] = [
-    { userId: "me", handle: "glauber.treina", name: "Glauber Souza", rate: 4.1, volume: 8800, recordChance: 0.22, rpe: 7, streak: 7 },
-    { userId: "lucas", handle: "lucas.prado", name: "Lucas Prado", rate: 5, volume: 9200, recordChance: 0.2, rpe: 8, streak: 12 },
-    { userId: "bia", handle: "bia.moreira", name: "Bia Moreira", rate: 4.6, volume: 8300, recordChance: 0.24, rpe: 7, streak: 9 },
-    { userId: "rafa", handle: "rafa.lima", name: "Rafa Lima", rate: 4, volume: 8400, recordChance: 0.2, rpe: 6, streak: 4 },
-    { userId: "ju", handle: "ju.andrade", name: "Ju Andrade", rate: 3.6, volume: 7000, recordChance: 0.18, rpe: 7, streak: 6 },
-    { userId: "thiago", handle: "thiago.reis", name: "Thiago Reis", rate: 3, volume: 9800, recordChance: 0.15, rpe: 8, streak: 2 },
-    { userId: "carol", handle: "carol.nunes", name: "Carol Nunes", rate: 3.2, volume: 6100, recordChance: 0.2, rpe: 6, streak: 5 },
-    { userId: "dudu", handle: "dudu.faria", name: "Dudu Faria", rate: 2.2, volume: 7400, recordChance: 0.12, rpe: 7, streak: 1 },
+    { userId: "me", handle: "glauber.treina", name: "Glauber Souza", rate: 4.1, volume: 8800, recordChance: 0.22, streak: 7 },
+    { userId: "lucas", handle: "lucas.prado", name: "Lucas Prado", rate: 5, volume: 9200, recordChance: 0.2, streak: 12 },
+    { userId: "bia", handle: "bia.moreira", name: "Bia Moreira", rate: 4.6, volume: 8300, recordChance: 0.24, streak: 9 },
+    { userId: "rafa", handle: "rafa.lima", name: "Rafa Lima", rate: 4, volume: 8400, recordChance: 0.2, streak: 4 },
+    { userId: "ju", handle: "ju.andrade", name: "Ju Andrade", rate: 3.6, volume: 7000, recordChance: 0.18, streak: 6 },
+    { userId: "thiago", handle: "thiago.reis", name: "Thiago Reis", rate: 3, volume: 9800, recordChance: 0.15, streak: 2 },
+    { userId: "carol", handle: "carol.nunes", name: "Carol Nunes", rate: 3.2, volume: 6100, recordChance: 0.2, streak: 5 },
+    { userId: "dudu", handle: "dudu.faria", name: "Dudu Faria", rate: 2.2, volume: 7400, recordChance: 0.12, streak: 1 },
   ];
   if (scenario === "vazio") return all.slice(0, 1);
   if (scenario === "lider") return all.map((c) => (c.userId === "me" ? { ...c, rate: 5.6, volume: 10_400 } : c));
@@ -78,21 +77,36 @@ function simulate(range: { from: string; to: string }) {
     let consecutive = 0;
     for (let week = first; week <= last; week = addLocalDays(week, 7)) {
       let sessions = 0;
-      let load = 0;
+      let records = 0;
       for (let d = 0; d < 7; d++) {
         const day = addLocalDays(week, d);
         if (day > last || next() >= c.rate / 7) continue;
         sessions += 1;
-        load += c.rpe * (45 + Math.round(next() * 40));
+        const record = next() < c.recordChance ? 1 : 0;
+        records += record;
         const iso = toLocalISODate(day);
         if (iso >= range.from) {
-          days.push({ userId: c.userId, day: iso, workouts: 1, volumeKg: Math.round(c.volume * (0.85 + next() * 0.3)), records: next() < c.recordChance ? 1 : 0 });
+          days.push({ userId: c.userId, day: iso, workouts: 1, volumeKg: Math.round(c.volume * (0.85 + next() * 0.3)), records: record });
         }
       }
       const fulfilled = sessions >= 3;
       consecutive = fulfilled ? consecutive + 1 : 0;
-      const points = Math.round(Math.min(sessions, 3) * 20 + Math.min(40, (load / 1800) * 40) + (fulfilled ? Math.min(20, 5 * consecutive) : 0));
-      weeks.push({ userId: c.userId, weekStart: toLocalISODate(week), points, validSessions: sessions, weeklyLoad: load, fulfilled });
+      // Mesma regra do servidor (competition_week_scores), com volume simulado perto da média.
+      const constancyPoints = Math.min(sessions, 3) * 20;
+      const bonusPoints = fulfilled ? Math.min(20, 5 * consecutive) : 0;
+      const recordPoints = Math.min(25, records * 5);
+      const volumePoints = sessions > 0 ? Math.round(15 * Math.min(1, 0.7 + next() * 0.4) * 100) / 100 : 0;
+      weeks.push({
+        userId: c.userId,
+        weekStart: toLocalISODate(week),
+        points: Math.round(constancyPoints + bonusPoints + recordPoints + volumePoints),
+        constancyPoints,
+        bonusPoints,
+        recordPoints,
+        volumePoints,
+        validSessions: sessions,
+        fulfilled,
+      });
     }
   }
   return { days, weeks };
@@ -120,28 +134,6 @@ export const mockCompetitionApi = {
     }));
     return { data: { participants, ...simulate(range) }, error: null };
   },
-  async getMyCompetitionSessions(client, range) {
-    ignoreClient(client);
-    await wait();
-    const { days } = simulate(range);
-    const data = days
-      .filter((d) => d.userId === "me")
-      .slice(-6)
-      .reverse()
-      .map((d, i) => ({
-        sessionId: `me-${d.day}`,
-        name: "Treino A – Peito e Tríceps",
-        trainingDay: d.day,
-        minutesConsidered: 52,
-        isValid: true,
-        counted: true,
-        rpeInformed: i === 1 ? 10 : 7,
-        rpeUsed: i === 1 ? 6.8 : 7,
-        rpeAdjustment: i === 1 ? ("above_average" as const) : null,
-        load: i === 1 ? 353.6 : 364,
-      }));
-    return { data, error: null };
-  },
   async getCompetitionParameters(client) {
     ignoreClient(client);
     await wait(100);
@@ -150,24 +142,16 @@ export const mockCompetitionApi = {
         effectiveFrom: "2026-01-01",
         sessionsForMaxConstancy: 3,
         constancyMax: 60,
-        effortMax: 40,
-        referenceLoad: 1800,
         minMinutes: 20,
         maxMinutes: 120,
         bonusPerWeek: 5,
         bonusMax: 20,
-        rpeGap: 3,
-        rpeHighValue: 9,
-        rpeHighShare: 0.8,
-        rpeHighCap: 7,
-        rpeWindowDays: 28,
+        recordPoints: 5,
+        recordsMax: 25,
+        volumeMax: 15,
+        volumeWindowWeeks: 4,
       },
       error: null,
     };
-  },
-  async setSessionRpe(client) {
-    ignoreClient(client);
-    await wait();
-    return { data: null, error: null };
   },
 } satisfies CompetitionApi;

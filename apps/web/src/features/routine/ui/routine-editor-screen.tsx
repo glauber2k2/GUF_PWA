@@ -22,8 +22,10 @@ import {
   SavingOverlay,
   SheetOption,
   Skeleton,
+  Switch,
   TextField,
 } from "@/shared/components/ds";
+import { useProfile } from "@/features/profile";
 import { ExercisePicker } from "@/features/exercise-picker";
 import { OfflineEditBanner } from "@/features/projects";
 import { PROJECTS_PATH, projectDetailPath } from "@/features/projects";
@@ -84,7 +86,7 @@ export function RoutineEditorScreen() {
   const initial: RoutineDraft | null =
     routine.data ??
     (!routineId && projects.some((p) => p.id === projectParam)
-      ? { id: null, projectId: projectParam as string, name: "", weekdays: [], exercises: [] }
+      ? { id: null, projectId: projectParam as string, name: "", weekdays: [], autoProgress: true, exercises: [] }
       : null);
   if (!initial) {
     return (
@@ -104,6 +106,8 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
   const shell = useAppShell();
   const canEdit = useCanEditPlanning();
   const { api, mock } = useRoutinesSource();
+  // Carga planejada na unidade do usuário (o banco guarda kg).
+  const unit = useProfile().data?.weightUnit ?? "kg";
   const [draft, dispatch] = useReducer(draftReducer, initial);
   const [openId, setOpenId] = useState<string | null>(null);
   const [showErrors, setShowErrors] = useState(false);
@@ -251,6 +255,21 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
         onToggle={(day: IsoWeekday) => dispatch({ type: "toggleDay", day })}
       />
 
+      <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-3.5">
+        <Switch
+          label="Atualizar carga e repetições automaticamente"
+          checked={draft.autoProgress}
+          disabled={disabled}
+          onChange={(on) => dispatch({ type: "setAutoProgress", autoProgress: on })}
+          className="leading-5 font-semibold"
+        />
+        <span className="text-[13px] leading-[18px] text-pretty text-fg-muted">
+          {draft.autoProgress
+            ? "O próximo treino já começa com a carga e as repetições do último."
+            : "O próximo treino começa com a carga e as repetições definidas em cada exercício abaixo (ou vazio)."}
+        </span>
+      </div>
+
       <div className="flex items-baseline justify-between gap-2 pt-2">
         <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">Exercícios</span>
         <span aria-live="polite" className="text-[13px] leading-[18px] text-fg-secondary tabular-nums">
@@ -286,6 +305,8 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
                   dragging={reorder.draggingId === exercise.id}
                   disabled={disabled}
                   showErrors={showErrors}
+                  unit={unit}
+                  showTargetWeight={!draft.autoProgress}
                   itemRef={reorder.itemRef(exercise.id)}
                   handleProps={reorder.handleProps(exercise.id)}
                   onToggle={() => setOpenId(openId === exercise.id ? null : exercise.id)}

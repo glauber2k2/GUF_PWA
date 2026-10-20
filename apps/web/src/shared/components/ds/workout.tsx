@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, NotepadText, Timer, type LucideIcon } from "lucide-react";
+import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, NotepadText, Timer, Trophy, type LucideIcon } from "lucide-react";
 import { formatClock, formatNumber, isLoadRecord, MINUS_SIGN, type SetType } from "@guf/core";
 import { cn } from "@/shared/helpers/class-names";
+import { SheenOverlay } from "./actions";
 import { Icon } from "./brand";
 import { PRBadge, SET_TYPE_META } from "./display";
 
@@ -87,23 +88,26 @@ export function SetRow({
       >
         {label}
       </button>
-      <span className="flex items-center gap-1.5 overflow-hidden text-sm whitespace-nowrap text-fg-muted tabular-nums">
-        {previous}
+      {/* O selo de recorde nunca é cortado: quem encolhe (com reticências) é o "Anterior". */}
+      <span className="flex min-w-0 items-center gap-1.5 text-sm whitespace-nowrap text-fg-muted tabular-nums">
+        <span className="min-w-0 truncate">{previous}</span>
         {pr && <PRBadge size="sm" animate />}
       </span>
       {cell("kg", weightKg)}
       {cell("reps", reps)}
       <button
         type="button"
-        aria-label={`${done ? "Desmarcar" : "Concluir"} série ${number}`}
+        aria-label={`${done ? "Desmarcar" : "Concluir"} série ${number}${done && pr ? " (recorde pessoal)" : ""}`}
         aria-pressed={done}
         onClick={onToggle}
         className={cn(
           "grid h-12 w-[52px] cursor-pointer place-items-center rounded-md",
-          done ? (pr ? "bg-pr text-accent-foreground" : "bg-accent text-accent-foreground") : "bg-surface-3 text-fg-muted",
+          done ? (pr ? "relative overflow-hidden bg-pr text-pr-foreground" : "bg-accent text-accent-foreground") : "bg-surface-3 text-fg-muted",
         )}
       >
-        <Icon icon={Check} size={22} className={pop ? "animate-guf-pop" : undefined} />
+        {/* Série com recorde: troféu dourado com brilho de tempos em tempos. */}
+        <Icon icon={done && pr ? Trophy : Check} size={22} className={pop ? "animate-guf-pop" : undefined} />
+        {done && pr && <SheenOverlay />}
       </button>
     </div>
   );
@@ -407,6 +411,45 @@ export function QuickLoad({
   );
 }
 
+/** Repetições mais usadas: tocar troca o valor (não soma). */
+const QUICK_REPS_DEFAULTS = [6, 8, 10, 12, 15] as const;
+
+/** Atalhos de repetições: cada botão substitui o valor atual. */
+export function QuickReps({
+  options = QUICK_REPS_DEFAULTS,
+  value,
+  onSelect,
+  className,
+}: {
+  options?: readonly number[];
+  /** Valor atual (o atalho igual a ele fica marcado). */
+  value?: number | null;
+  onSelect?: (reps: number) => void;
+  className?: string;
+}) {
+  return (
+    <div role="group" aria-label="Repetições rápidas" className={cn("grid auto-cols-fr grid-flow-col gap-2", className)}>
+      {options.map((reps) => {
+        const on = reps === value;
+        return (
+          <button
+            key={reps}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onSelect?.(reps)}
+            className={cn(
+              "h-12 cursor-pointer rounded-pill border font-display text-xl font-semibold tabular-nums",
+              on ? "border-accent-text bg-accent/16 text-accent-text" : "border-border-strong bg-transparent text-fg",
+            )}
+          >
+            {reps}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const KEYPAD_KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "⌫"] as const;
 
 export interface NumericKeypadProps {
@@ -416,6 +459,11 @@ export interface NumericKeypadProps {
   unit?: string;
   label?: string;
   maxLength?: number;
+  /**
+   * O valor inicial é só uma sugestão (o que já estava na série): a primeira tecla o substitui, sem
+   * precisar apagar. Para recomeçar a digitação em outro campo, remonte o teclado (`key`).
+   */
+  replaceOnFirstKey?: boolean;
   className?: string;
 }
 
@@ -427,12 +475,15 @@ export function NumericKeypad({
   unit = "kg",
   label = "Teclado numérico",
   maxLength = 5,
+  replaceOnFirstKey = false,
   className,
 }: NumericKeypadProps) {
   const [inner, setInner] = useState(defaultValue);
+  const [pristine, setPristine] = useState(replaceOnFirstKey);
   const current = value ?? inner;
   const press = (key: (typeof KEYPAD_KEYS)[number]) => {
-    let next = current;
+    let next = pristine ? "" : current;
+    setPristine(false);
     if (key === "⌫") next = next.slice(0, -1);
     else if (key === ",") {
       if (!next.includes(",")) next = (next || "0") + ",";
@@ -444,7 +495,10 @@ export function NumericKeypad({
     <div className={cn("grid gap-2 rounded-lg border border-border bg-surface-elevated p-3", className)}>
       <div className="flex items-baseline justify-between px-2 py-1">
         <span className="text-[13px] text-fg-secondary">{label}</span>
-        <span className="font-display text-4xl font-semibold tabular-nums" aria-live="polite">
+        <span
+          className={cn("rounded-sm px-1 font-display text-4xl font-semibold tabular-nums", pristine && "bg-accent/16")}
+          aria-live="polite"
+        >
           {current || "0"}
           <span className="text-lg text-fg-muted"> {unit}</span>
         </span>

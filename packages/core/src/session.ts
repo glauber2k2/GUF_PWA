@@ -163,17 +163,19 @@ export interface RecordCandidate {
 }
 
 /**
- * Marca as séries que batem recorde de carga, em sequência (cada recorde vira a nova referência).
+ * Marca a série que bate o recorde de carga do exercício: a de maior carga do treino (a primeira,
+ * em caso de empate), se passar do recorde anterior. Bateu de novo numa série seguinte? O recorde
+ * passa para ela: um recorde por exercício por treino, como no finish_workout.
  * Aquecimento e séries não concluídas não contam; sem histórico (previousBestKg nulo) não há PR.
  */
 export function markLoadRecords(sets: readonly RecordCandidate[], previousBestKg: number | null | undefined): boolean[] {
   if (previousBestKg === null || previousBestKg === undefined) return sets.map(() => false);
-  let best = previousBestKg;
-  return sets.map((s) => {
-    const isRecord = s.isCompleted && s.setType !== "warmup" && typeof s.weightKg === "number" && s.weightKg > best;
-    if (isRecord) best = s.weightKg as number;
-    return isRecord;
-  });
+  const counts = (s: RecordCandidate): s is RecordCandidate & { weightKg: number } =>
+    s.isCompleted && s.setType !== "warmup" && typeof s.weightKg === "number";
+  const sessionBest = sets.reduce((best, s) => (counts(s) && s.weightKg > best ? s.weightKg : best), previousBestKg);
+  if (sessionBest <= previousBestKg) return sets.map(() => false);
+  const recordIndex = sets.findIndex((s) => counts(s) && s.weightKg === sessionBest);
+  return sets.map((_, i) => i === recordIndex);
 }
 
 /** "12 de 22 séries" */

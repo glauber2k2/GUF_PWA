@@ -6,6 +6,8 @@ export const ROUTINE_SETS_MIN = 1;
 export const ROUTINE_SETS_MAX = 20;
 export const TARGET_REPS_MAX_LENGTH = 20;
 export const EXERCISE_NOTE_MAX_LENGTH = 500;
+/** Carga planejada (kg), opcional: 0–1000 (routine_exercises.target_weight_kg). */
+export const TARGET_WEIGHT_MAX_KG = 1000;
 
 export const plannedExerciseSchema = z.object({
   id: z.string(),
@@ -15,6 +17,7 @@ export const plannedExerciseSchema = z.object({
     .trim()
     .min(1, "Informe as repetições.")
     .max(TARGET_REPS_MAX_LENGTH, `Use até ${TARGET_REPS_MAX_LENGTH} caracteres.`),
+  targetWeightKg: z.number().min(0).max(TARGET_WEIGHT_MAX_KG, `Use até ${TARGET_WEIGHT_MAX_KG} kg.`).nullable(),
   restSeconds: z.number().int().min(0).max(900),
   notes: z.string().trim().max(EXERCISE_NOTE_MAX_LENGTH, `Use até ${EXERCISE_NOTE_MAX_LENGTH} caracteres na observação.`),
 });

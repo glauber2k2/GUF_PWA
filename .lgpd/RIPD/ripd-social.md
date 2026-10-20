@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.4 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-19
+**Versão**: v0.5 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-20
+
+> **v0.5**: o esforço da sessão (RPE) deixou de ser pedido e de entrar na pontuação. Com isso sai a única decisão automatizada do módulo (controle de RPE suspeito, Art. 20) e o dado deixa de ser coletado (a coluna antiga fica sem uso). A pontuação passa a ser constância + sequência + recordes + volume (comparado à média do próprio titular), com regras fixas e públicas. R006 eliminado; R005 revisto. Termos 0.3-dev e Política 0.5-dev sem a menção ao esforço (rascunhos, publicados em 2026-10-20) ⚖.
 
 > **v0.4 (revisão antecipada — gatilho "notificações push")**: avisos no celular (A020) sobre seguidores (novo seguidor, pedido para seguir, pedido aceito: mostram nome e @ de quem agiu, que escolheu seguir/pedir/aceitar; no máximo 1 aviso por dia por pessoa e tipo, registro em `follow_alerts_sent` por 1 dia; nada sobre recusas, remoções ou bloqueios; bloqueio cancela o aviso) e sobre a competição. Opt-in por aparelho (começa desligado; ligar pede a permissão do sistema), só entre competidores (seguimento mútuo aceito, que cada um aprovou e pode desfazer removendo o seguidor ou deixando de seguir). O aviso mostra o nome do competidor e a diferença de pontos, também na tela bloqueada. Dados novos: endereço do aparelho no serviço de push e chaves públicas do navegador (`push_subscriptions`) e a posição relativa por par na temporada (`competition_alert_states`, só para quem ligou os avisos; temporadas antigas apagadas). Conteúdo cifrado de ponta a ponta (RFC 8291): o serviço de push (Google, Apple ou Mozilla) vê só endereço, horário e tamanho. Política 0.4-dev. Riscos R010–R013.
 
@@ -137,8 +139,8 @@ flowchart LR
 | R002 | Erro de política expõe treinos a qualquer usuário | 2 | 5 | 10 | Nenhuma política nova em tabelas de treino; funções `SECURITY DEFINER` com conferência explícita; testes de permissão antes do lançamento | mitigado (testes pendentes) | 4 |
 | R003 | Contato indesejado / assédio | 3 | 3 | 9 | Sem chat; bloqueio e remoção; busca restrita; limite de pedidos | mitigado | 4 |
 | R004 | Adolescente usando o módulo (acesso provável) | 2 | 4 | 8 | 18+ por autodeclaração; procedimento de conta de menor (`eca-digital.md`) | parcial ⚖ | 6 |
-| R005 | Fraude na pontuação (editar horários, inflar RPE) | 4 | 2 | 8 | Horários gravados só pelo servidor; períodos sem sobreposição; duração limitada a 120 min; controle de RPE suspeito; 1 sessão por dia | mitigado | 4 |
-| R006 | Ajuste automático de RPE injusto | 3 | 2 | 6 | Regra fixa e pública; motivo mostrado ao titular; revisão pelo canal do titular (Art. 20) | mitigado | 3 |
+| R005 | Fraude na pontuação (editar horários, registrar cargas falsas) | 4 | 2 | 8 | Horários gravados só pelo servidor; períodos sem sobreposição; 1 sessão por dia; teto por parte (recordes até 25, volume até 15 e relativo à própria média) | mitigado | 4 |
+| R006 | Ajuste automático de RPE injusto | — | — | — | Eliminado em 2026-10-20: o esforço saiu da pontuação | eliminado | 0 |
 | R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; perfil privado por padrão; se N1, consentimento no cadastro | parcial ⚖ | 4 |
 | R008 | Nome e foto aparecem na busca para qualquer conta | 3 | 2 | 6 | @ aleatório no cadastro; busca só por prefixo (≥ 3 caracteres, até 20 resultados); bloqueados não aparecem; nada de treino sem consentimento. Pendente: opção de não aparecer na busca ⚖ | parcial | 4 |
 | R009 | Pressão por comparação (bem-estar) | 2 | 2 | 4 | Pontos premiam constância e não carga; limite de pontos por semana; ranking só entre seguidores mútuos | aceito | 4 |

@@ -1,4 +1,4 @@
-import { HANDLE_MAX_LENGTH, HANDLE_MIN_LENGTH, HANDLE_PATTERN, RPE_MAX, RPE_MIN, normalizeHandle } from "@guf/core";
+import { HANDLE_MAX_LENGTH, HANDLE_MIN_LENGTH, HANDLE_PATTERN, normalizeHandle } from "@guf/core";
 import { z } from "zod";
 import { NAME_MAX_LENGTH } from "./auth";
 
@@ -25,8 +25,6 @@ export const socialSettingsSchema = z.object({
 
 export type SocialSettingsValues = z.infer<typeof socialSettingsSchema>;
 
-/** Esforço percebido da sessão (RPE de 1 a 10). */
-export const sessionRpeSchema = z.number().int().min(RPE_MIN).max(RPE_MAX);
 
 /** Editar perfil: nome (mesma regra do Perfil) e @. */
 export const editSocialProfileSchema = z.object({

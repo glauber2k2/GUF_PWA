@@ -191,6 +191,9 @@ function RivalPicker({ rival, candidates, onPick }: { rival: RankedCompetitor; c
   );
 }
 
+/** Menor fatia de um lado da barra do duelo (quem tem 0 ainda aparece). */
+const MIN_BAR_SHARE = 0.04;
+
 export interface DuelPicker {
   candidates: RankedCompetitor[];
   onPick: (userId: string) => void;
@@ -243,18 +246,28 @@ export function DuelCard({
       </div>
       <div className="flex flex-col gap-3.5">
         {rows.map((r) => {
-          const total = Math.max(1, r.me + r.rival);
+          const total = r.me + r.rival;
+          // Os dois zerados: metades iguais em cor neutra (ninguém está na frente).
+          const tied = total === 0;
+          const meShare = tied ? 1 : Math.max(MIN_BAR_SHARE, r.me / total);
+          const rivalShare = tied ? 1 : Math.max(MIN_BAR_SHARE, r.rival / total);
           return (
             <div key={r.label} className="flex flex-col gap-1.5">
               <div className="grid grid-cols-[1fr_auto_1fr] items-baseline gap-2 tabular-nums">
-                <span className={cn("font-display text-xl leading-6 font-semibold", r.me >= r.rival ? "text-accent-text" : "text-fg-secondary")}>{r.format(r.me)}</span>
+                <span className={cn("font-display text-xl leading-6 font-semibold", !tied && r.me >= r.rival ? "text-accent-text" : "text-fg-secondary")}>{r.format(r.me)}</span>
                 <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">{r.label}</span>
-                <span className={cn("text-right font-display text-xl leading-6 font-semibold", r.rival >= r.me ? "text-data" : "text-fg-secondary")}>{r.format(r.rival)}</span>
+                <span className={cn("text-right font-display text-xl leading-6 font-semibold", !tied && r.rival >= r.me ? "text-data" : "text-fg-secondary")}>{r.format(r.rival)}</span>
               </div>
               <div className="flex h-2 gap-[3px]">
                 {/* Proporção de cada lado (dinâmico). */}
-                <span className="rounded-l-pill rounded-r-[2px] bg-accent transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.me / total) }} />
-                <span className="rounded-l-[2px] rounded-r-pill bg-data transition-[flex-grow] duration-300" style={{ flexGrow: Math.max(0.04, r.rival / total) }} />
+                <span
+                  className={cn("basis-0 rounded-l-pill rounded-r-[2px] transition-[flex-grow] duration-300", tied ? "bg-surface-3" : "bg-accent")}
+                  style={{ flexGrow: meShare }}
+                />
+                <span
+                  className={cn("basis-0 rounded-l-[2px] rounded-r-pill transition-[flex-grow] duration-300", tied ? "bg-surface-3" : "bg-data")}
+                  style={{ flexGrow: rivalShare }}
+                />
               </div>
             </div>
           );

@@ -228,14 +228,19 @@ export interface SwitchProps {
   defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;
   label?: string;
+  /** O rótulo vale só para leitores de tela (a linha já mostra o título ao lado). */
+  hideLabel?: boolean;
   disabled?: boolean;
   className?: string;
 }
 
-export function Switch({ checked, defaultChecked = false, onChange, label, disabled = false, className }: SwitchProps) {
+/** Interruptor: a bolinha desliza (parada com movimento reduzido) e o rótulo quebra linha em telas estreitas. */
+export function Switch({ checked, defaultChecked = false, onChange, label, hideLabel = false, disabled = false, className }: SwitchProps) {
   const [inner, setInner] = useState(defaultChecked);
   const on = checked ?? inner;
   const active = on && !disabled;
+  // Com rótulo visível, a linha inteira fica esmaecida; sozinho, o próprio botão.
+  const standalone = !label || hideLabel;
   const control = (
     <button
       type="button"
@@ -249,19 +254,27 @@ export function Switch({ checked, defaultChecked = false, onChange, label, disab
         onChange?.(!on);
       }}
       className={cn(
-        "flex h-8 w-[52px] flex-none cursor-pointer rounded-pill p-[3px] transition-colors duration-200",
-        on ? "justify-end" : "justify-start",
+        "group flex h-8 w-[52px] flex-none cursor-pointer items-center rounded-pill p-[3px] transition-colors duration-200 ease-standard",
         active ? "bg-accent" : "bg-surface-3",
         disabled && "cursor-not-allowed",
+        disabled && standalone && "opacity-50",
       )}
     >
-      <span className={cn("size-[26px] rounded-pill shadow-thumb", active ? "bg-accent-foreground" : "bg-fg-muted")} />
+      {/* 52 − 2×3 (borda interna) − 26 (bolinha) = 20 px de curso. */}
+      <span
+        className={cn(
+          "size-[26px] rounded-pill shadow-thumb transition-[translate,background-color,scale] duration-200 ease-standard",
+          "group-active:scale-[0.92] motion-reduce:group-active:scale-100",
+          on ? "translate-x-5" : "translate-x-0",
+          active ? "bg-accent-foreground" : "bg-fg-muted",
+        )}
+      />
     </button>
   );
-  if (!label) return control;
+  if (standalone) return control;
   return (
     <div className={cn("flex min-h-11 items-center justify-between gap-3", disabled && "opacity-50", className)}>
-      <span className="text-[15px]" aria-hidden="true">
+      <span className="min-w-0 flex-1 text-[15px] text-pretty" aria-hidden="true">
         {label}
       </span>
       {control}

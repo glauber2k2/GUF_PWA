@@ -71,18 +71,18 @@ export function PrivacySection({ consents, canEdit, socialPrivacy }: { consents:
       </RowGroup>
 
       <RowGroup padded className="flex flex-col gap-2.5">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <RowIcon icon={HeartPulse} />
           <span className="min-w-0 flex-1 text-[15px] leading-5 font-semibold">
             Dados de saúde <span className="font-normal text-fg-secondary">(medidas corporais)</span>
           </span>
           {health ? (
-            <span className="flex h-[26px] flex-none items-center gap-1.5 rounded-pill bg-success/16 px-2.5 text-xs font-bold text-success">
+            <span className="ml-auto flex h-[26px] flex-none items-center gap-1.5 rounded-pill bg-success/16 px-2.5 text-xs font-bold text-success">
               <Icon icon={CircleCheck} size={13} />
               Autorizado
             </span>
           ) : (
-            <span className="flex h-[26px] flex-none items-center rounded-pill bg-surface-3 px-2.5 text-xs font-bold text-fg-secondary">
+            <span className="ml-auto flex h-[26px] flex-none items-center rounded-pill bg-surface-3 px-2.5 text-xs font-bold text-fg-secondary">
               Não autorizado
             </span>
           )}

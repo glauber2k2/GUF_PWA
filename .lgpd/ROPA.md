@@ -85,7 +85,7 @@ Ver `retention.md` (tabela completa). Resumo: tudo enquanto a conta existir, eli
 ## 7. Decisões automatizadas
 
 - **A008 — finalização automática do treino**: regra fixa (todas as séries concluídas e última há ≥ 30 min), só para quem ligou a opção; pode desligar e pedir revisão (Art. 20). Explicada na política (rascunho v1, seção 5).
-- Nenhuma outra decisão automatizada ou perfilamento.- **A019 — controle de RPE suspeito na pontuação**: regra fixa e pública (RPE ≥ 3 acima da média pessoal das últimas 4 semanas → usa a média; RPE 9–10 em mais de 80% das sessões → limita a 7). Só entre seguidores mútuos; o titular vê o motivo de cada ajuste e pode pedir revisão (Art. 20). Avaliado em `RIPD/ripd-social.md`.
+- Nenhuma outra decisão automatizada ou perfilamento.- **A019 — controle de RPE suspeito na pontuação** (REMOVIDO em 2026-10-20: o esforço não é mais pedido nem usado): regra fixa e pública (RPE ≥ 3 acima da média pessoal das últimas 4 semanas → usa a média; RPE 9–10 em mais de 80% das sessões → limita a 7). Só entre seguidores mútuos; o titular vê o motivo de cada ajuste e pode pedir revisão (Art. 20). Avaliado em `RIPD/ripd-social.md`.
 - Nenhuma outra decisão automatizada ou perfilamento.
 
 ## 8. Observações
