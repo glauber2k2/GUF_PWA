@@ -72,7 +72,6 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `shared/components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `shared/hooks/use-sheet-drag.ts` | Baixo |
 | Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `shared/components/ds/toast.tsx` | Baixo |
-| Service worker não era publicado na Vercel (`/sw.js` 404 até 2026-10-20: sem abrir offline e sem notificações) | `vercel.json` (corrigido: site estático em `out/`) | Conferir `/sw.js` em produção depois do deploy |
 | Iniciar treino não funciona sem internet | `startWorkout` cria a sessão no servidor | Baixo (limitação aceita) |
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 | Dados de mock (Início, Projetos, Treino) ainda entram no bundle de produção: os mocks montam dados no carregamento do módulo e o build não consegue descartá-los (já acontecia antes da reorganização de pastas) | `apps/web/src/mocks/` | Baixo: só peso extra no download, nada é exibido |
@@ -248,7 +247,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Duelo pelo perfil (`/competicao/duelo?id=…`): competição só entre você e a pessoa; telas de competição compartilham `useCompetitionView` + `CompetitionBoard` | Feito |
 | Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
-| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Banco, chaves VAPID, secrets, Vault e função `push-alerts` configurados em 2026-10-19 (caminho banco → pg_net → função conferido); falta `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel e o teste com dois celulares |
+| Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Em produção e testado em 2026-10-20 (pedido para seguir recebido no Chrome/Android) |
 | Pontuação sem esforço (RPE): constância, sequência, recordes e volume (`20261020012117_competition_scoring_without_rpe`); Termos 0.3-dev e Política 0.5-dev sem o esforço (`20261020085455_legal_docs_competition_without_rpe`) | Aplicado no banco em 2026-10-20 (`feat/treino-rotina-competicao`); **publicar o app logo** (até lá, a tela de competição do app antigo falha e o `/aceite` mostra o texto anterior) |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
