@@ -30,7 +30,7 @@ export function PushAlertsRow({ platform, canEdit }: { platform: InstallPlatform
     if (outcome === "enabled") shell.showToast("Notificações ligadas", { tone: "success" });
     else if (outcome === "disabled") shell.showToast("Notificações desligadas", { tone: "info" });
     else if (outcome === "blocked") shell.showToast("Notificações bloqueadas", { tone: "warning", message: STATUS_HINTS.blocked });
-    else if (typeof outcome === "object") shell.showToast(outcome.error, { tone: "error" });
+    else if (typeof outcome === "object") shell.showToast("Não foi possível alterar as notificações", { tone: "error", message: outcome.error });
   };
 
   return (
