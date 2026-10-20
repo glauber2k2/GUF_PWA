@@ -186,6 +186,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 ---
 
+**Atualização 2026-10-20 (`fix/configuracoes-layout`):** Configurações responsivas em telas estreitas (linhas com rótulo e controle quebram linha; título da privacidade do perfil social não aparece mais duplicado) e interruptor com animação da bolinha.
+
 ### Etapa 4 — Medidas corporais (módulo opcional)
 
 **Branch:** `feat/medidas` · **Prioridade:** média

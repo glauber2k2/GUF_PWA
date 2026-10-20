@@ -45,11 +45,11 @@ export function PushAlertsRow({ platform, canEdit }: { platform: InstallPlatform
           className="flex-1 leading-5 font-semibold"
         />
       </div>
-      <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+      <span className="text-[13px] min-[360px]:pl-12 leading-[18px] text-pretty text-fg-muted">
         Avisa neste aparelho quando alguém segue você, pede para seguir ou aceita seu pedido, e quando um competidor fica a menos de{" "}
         {COMPETITION_ALERT_GAP} pontos de passar você no mês ou passa.
       </span>
-      {hint && <span className="pl-12 text-[13px] leading-[18px] text-pretty text-fg-secondary">{hint}</span>}
+      {hint && <span className="text-[13px] min-[360px]:pl-12 leading-[18px] text-pretty text-fg-secondary">{hint}</span>}
     </RowGroup>
   );
 }
