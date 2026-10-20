@@ -35,17 +35,6 @@ export function useCompetitionBoard(range: CompetitionRange) {
   });
 }
 
-/** Suas sessões no período, com o ajuste de RPE explicado (só ao abrir "Como funciona"). */
-export function useMyCompetitionSessions(range: CompetitionRange, enabled: boolean) {
-  const { user } = useAuth();
-  const { api, dev } = useCompetitionSource();
-  return useQuery({
-    queryKey: [COMPETITION_KEY, "my-sessions", user?.id, range.from, range.to, dev.competitionScenario],
-    enabled: (Boolean(user) || dev.competitionScenario !== null) && enabled,
-    queryFn: async () => unwrap(await api.getMyCompetitionSessions(getSupabaseClient(), range)),
-  });
-}
-
 /** Regras públicas da pontuação vigentes na temporada. */
 export function useCompetitionParameters(season: string) {
   const { user } = useAuth();

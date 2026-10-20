@@ -160,6 +160,8 @@ export type Database = {
           effort_max: number
           max_minutes: number
           min_minutes: number
+          record_points: number
+          records_max: number
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number
@@ -167,6 +169,8 @@ export type Database = {
           rpe_high_value: number
           rpe_window_days: number
           sessions_for_max_constancy: number
+          volume_max: number
+          volume_window_weeks: number
         }
         Insert: {
           bonus_max: number
@@ -177,6 +181,8 @@ export type Database = {
           effort_max: number
           max_minutes: number
           min_minutes: number
+          record_points?: number
+          records_max?: number
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number
@@ -184,6 +190,8 @@ export type Database = {
           rpe_high_value: number
           rpe_window_days: number
           sessions_for_max_constancy: number
+          volume_max?: number
+          volume_window_weeks?: number
         }
         Update: {
           bonus_max?: number
@@ -194,6 +202,8 @@ export type Database = {
           effort_max?: number
           max_minutes?: number
           min_minutes?: number
+          record_points?: number
+          records_max?: number
           reference_load?: number
           rpe_gap?: number
           rpe_high_cap?: number
@@ -201,6 +211,8 @@ export type Database = {
           rpe_high_value?: number
           rpe_window_days?: number
           sessions_for_max_constancy?: number
+          volume_max?: number
+          volume_window_weeks?: number
         }
         Relationships: []
       }
@@ -1010,12 +1022,10 @@ export type Database = {
           counted: boolean
           is_valid: boolean
           minutes_considered: number
-          rpe_flag: string
-          rpe_informed: number
-          rpe_used: number
+          records: number
           session_id: string
-          session_load: number
           training_day: string
+          volume: number
           week_start: string
         }[]
       }
@@ -1025,12 +1035,14 @@ export type Database = {
           bonus_points: number
           consecutive_weeks: number
           constancy_points: number
-          effort_points: number
           fulfilled: boolean
           points: number
+          record_points: number
+          records: number
           valid_sessions: number
+          volume_points: number
           week_start: string
-          weekly_load: number
+          weekly_volume: number
         }[]
       }
       competitors_of: {
@@ -1098,13 +1110,15 @@ export type Database = {
         Returns: {
           bonus_points: number
           constancy_points: number
-          effort_points: number
           fulfilled: boolean
           points: number
+          record_points: number
+          records: number
           user_id: string
           valid_sessions: number
+          volume_points: number
           week_start: string
-          weekly_load: number
+          weekly_volume: number
         }[]
       }
       get_exercise_history: {
@@ -1163,21 +1177,6 @@ export type Database = {
           user_id: string
           visibility: string
           workouts_count: number
-        }[]
-      }
-      get_my_competition_sessions: {
-        Args: { p_from: string; p_to: string }
-        Returns: {
-          counted: boolean
-          is_valid: boolean
-          minutes_considered: number
-          name: string
-          rpe_flag: string
-          rpe_informed: number
-          rpe_used: number
-          session_id: string
-          session_load: number
-          training_day: string
         }[]
       }
       get_my_social: {
@@ -1322,10 +1321,6 @@ export type Database = {
           records: number
           session_id: string
         }[]
-      }
-      set_session_rpe: {
-        Args: { p_rpe: number; p_session_id: string }
-        Returns: undefined
       }
       social_relationship: {
         Args: { p_other: string; p_viewer: string }

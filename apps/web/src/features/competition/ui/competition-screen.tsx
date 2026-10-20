@@ -45,7 +45,7 @@ function FullRanking({ board }: { board: ReadyBoard }) {
 
 /**
  * Competição (protótipo "Competição"): você e quem vocês se seguem mutuamente. Pontos pela regra do
- * servidor (constância, esforço e sequência); volume, treinos e recordes como comparação.
+ * servidor (constância, sequência, recordes e volume); volume, treinos e recordes também como métrica.
  */
 export function CompetitionScreen() {
   const scrolled = useScrolled();

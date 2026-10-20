@@ -402,18 +402,18 @@
 | Campo | Valor |
 |---|---|
 | Slug | a019-competicao |
-| Finalidade | Calcular a pontuação semanal (constância, esforço e sequência) e o ranking mensal entre seguidores mútuos |
+| Finalidade | Calcular a pontuação semanal (constância, sequência, recordes e volume) e o ranking mensal entre seguidores mútuos |
 | Base legal | Proposta: Art. 7º, V (Termos 0.2, aceitos no cadastro) ⚖ |
 | Categorias de titulares | Usuários que se seguem mutuamente |
 | Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
-| Dados | RPE da sessão (1–10), tempo efetivo, dia do treino no fuso do perfil; resultados: pontos, sessões válidas, carga, posição |
-| Fonte | Coletado do titular (RPE) e derivado de A007 |
+| Dados | Tempo efetivo, dia do treino no fuso do perfil, volume e recordes de carga das sessões; resultados: pontos (por parte), sessões válidas, posição. Sem esforço/RPE desde 2026-10-20 |
+| Fonte | Derivado de A007 (registro de treinos) |
 | Sistemas | `workout_sessions.session_rpe`, `competition_parameters`, funções `competition_*`, `get_competition_participants`, `get_competition_weeks`, `get_competition_days`, `get_my_competition_sessions` |
 | Operadores | Supabase |
 | Transferência intl. | Não |
-| Retenção | RPE igual a A007; pontuação não é guardada (recalculada a cada consulta) |
+| Retenção | Pontuação não é guardada (recalculada a cada consulta); `session_rpe` antigo sem uso, apagado com a conta |
 | Segurança | Parâmetros fixos no servidor e públicos; horários do treino gravados só pelo servidor (gatilhos) |
-| Decisão automatizada | **Sim** — controle de RPE suspeito (Art. 20): motivo mostrado ao titular; revisão pelo canal do titular |
+| Decisão automatizada | Não desde 2026-10-20 (o controle de RPE suspeito saiu junto com o esforço); a pontuação é soma de regras fixas e públicas |
 | Alto risco? | Avaliado — RIPD |
 | RIPD | `.lgpd/RIPD/ripd-social.md` |
 | Owner | Pendente (controlador) |

@@ -248,7 +248,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     route: "/competicao",
     target: "competitionRules",
     title: "Como os pontos funcionam",
-    body: "Os pontos premiam a constância: treinos válidos na semana, o esforço informado e semanas seguidas cumpridas. Toque aqui para ver a regra completa.",
+    body: "O que mais pesa é a constância: 3 treinos na semana já valem 60 pontos, e semanas seguidas cumpridas somam mais. Depois vêm os recordes batidos e o seu volume. Toque aqui para ver a regra completa.",
     rat: "thinking",
   },
   {

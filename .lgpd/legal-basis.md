@@ -212,7 +212,7 @@
 - **Base legal**: A017 (cartão do perfil — @, nome, foto — na busca e os vínculos) por **Art. 7º, V**, como parte do serviço descrita nos Termos e na Política 0.3 ⚖. A018/A019 (mostrar treinos e competir) também por **Art. 7º, V**: o titular escolhe no app quem vê (aprovar seguidor, abrir o perfil) e as regras estão nos Termos 0.2 e na Política 0.3, aceitos no cadastro (decisão do produto em 2026-10-18: nenhum consentimento no meio do uso). ⚖ Se o jurídico enquadrar treino como dado de saúde (N1), será preciso consentimento específico e destacado (Art. 11, I), pedido no cadastro em caixa própria e desmarcada.
 - **Justificativa**: o compartilhamento acontece só por ação do titular (aprovar seguidor, abrir o perfil) dentro de uma funcionalidade descrita nos Termos; o perfil começa privado e há controles a qualquer momento. Legítimo interesse foi descartado porque a exposição a terceiros depende da vontade do titular.
 - **Manifestações do titular**: aceite de cada seguidor (perfil privado) e abertura do perfil, registrados no `audit_log`.
-- **Decisão automatizada**: controle de RPE suspeito (A019), com transparência e revisão (Art. 20).
+- **Decisão automatizada**: nenhuma desde 2026-10-20. O controle de RPE suspeito (A019, Art. 20) saiu junto com o esforço; a pontuação passou a ser constância, sequência, recordes e volume.
 - **Retenção**: perfil enquanto a conta existir; seguidores até o titular remover; tudo em cascata na exclusão.
 - **Controle do titular**: fechar o perfil (novas pessoas precisam de aprovação; quem já segue continua), ocultar o histórico, remover seguidor e bloquear. A oposição a aparecer na busca vai pelo canal do titular até existir uma opção no app ⚖.
 - **Avaliação de impacto**: `.lgpd/RIPD/ripd-social.md`.

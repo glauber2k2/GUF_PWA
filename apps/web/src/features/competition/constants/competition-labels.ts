@@ -2,7 +2,7 @@ import { CalendarDays, CalendarRange, Calendar, Dumbbell, Medal, Weight, Zap, ty
 import type { CompetitionMetric, CompetitionPeriod } from "@guf/core";
 
 export const METRICS: Record<CompetitionMetric, { label: string; unit: string; subtitle: string; icon: LucideIcon; accumulated: string }> = {
-  points: { label: "Pontos", unit: "pts", subtitle: "Constância, esforço e sequência", icon: Zap, accumulated: "Pontos acumulados" },
+  points: { label: "Pontos", unit: "pts", subtitle: "Constância, sequência, recordes e volume", icon: Zap, accumulated: "Pontos acumulados" },
   volume: { label: "Volume", unit: "kg", subtitle: "Carga × repetições", icon: Weight, accumulated: "Volume acumulado" },
   workouts: { label: "Treinos", unit: "treinos", subtitle: "Treinos concluídos", icon: Dumbbell, accumulated: "Treinos acumulados" },
   records: { label: "Recordes", unit: "recordes", subtitle: "Recordes de carga batidos", icon: Medal, accumulated: "Recordes acumulados" },

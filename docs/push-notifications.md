@@ -27,7 +27,7 @@ Quem liga **Configurações › Preferências › Notificações** recebe avisos
 
 ```mermaid
 flowchart TD
-  A["Treino concluído ou RPE informado<br/>(workout_sessions)"] --> G1["Gatilho on_workout_session_competition_alerts<br/>só se algum competidor tem aparelho inscrito"]
+  A["Treino concluído<br/>(workout_sessions)"] --> G1["Gatilho on_workout_session_competition_alerts<br/>só se algum competidor tem aparelho inscrito"]
   B["Seguir, pedir ou aceitar<br/>(follows: insert; pending → accepted)"] --> G2["Gatilho on_follow_push_alert<br/>só se o destinatário tem aparelho inscrito<br/>e o mesmo aviso não saiu nas últimas 24 h"]
   G1 --> P["post_push_alert → pg_net<br/>(depois do commit, em segundo plano)"]
   G2 --> P
@@ -45,7 +45,7 @@ flowchart TD
 
 ## Custo
 
-Uma chamada da Edge Function por evento que tem destinatário com notificações ligadas (treino concluído, RPE informado, seguir, pedir, aceitar). Ex.: 1.000 usuários × (15 treinos + ~10 eventos de seguidores) por mês ≈ 25 mil chamadas, contra 500 mil no Free e 2 milhões no Pro. pg_net e a entrega do push (Google/Apple/Mozilla) não custam nada.
+Uma chamada da Edge Function por evento que tem destinatário com notificações ligadas (treino concluído, seguir, pedir, aceitar). Ex.: 1.000 usuários × (15 treinos + ~10 eventos de seguidores) por mês ≈ 25 mil chamadas, contra 500 mil no Free e 2 milhões no Pro. pg_net e a entrega do push (Google/Apple/Mozilla) não custam nada.
 
 ## Situação (2026-10-19)
 

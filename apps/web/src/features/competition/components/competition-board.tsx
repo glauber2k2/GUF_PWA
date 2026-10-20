@@ -63,7 +63,7 @@ export function CompetitionBoard({ view, empty, children }: { view: CompetitionV
       )}
 
       <div data-tour={TOUR_TARGETS.competitionRules}>
-        <CompetitionRules range={view.range} season={toLocalISODate(seasonOf(view.today))} />
+        <CompetitionRules season={toLocalISODate(seasonOf(view.today))} />
       </div>
     </div>
   );

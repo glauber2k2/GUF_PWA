@@ -246,7 +246,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Foto do Google para outras pessoas em contas de e-mail vinculadas depois (gatilho `sync_social_avatar` + preenchimento das contas existentes) | Aplicada em 2026-10-19 |
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
 | Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Banco, chaves VAPID, secrets, Vault e função `push-alerts` configurados em 2026-10-19 (caminho banco → pg_net → função conferido); falta `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel e o teste com dois celulares |
-| RPE ao finalizar o treino (pela fila offline) | Pendente: falta o protótipo |
+| Pontuação sem esforço (RPE): constância, sequência, recordes e volume (`20261020012117_competition_scoring_without_rpe`, validada no banco numa transação desfeita; **falta aplicar**) | Feito no código (`feat/pontuacao-competicao`); falta nova versão dos Termos/Política sem a menção ao esforço |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
 
@@ -273,7 +273,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.
 - Login com Apple (junto com o app iOS).
 - Planos pagos (`entitlements`, `is_premium()` já existem no banco).
-- Esforço percebido por série (RPE): a coluna `set_logs.rpe` já existe, mas não é usada pelo app (o RPE da sessão, usado na competição, fica em `workout_sessions.session_rpe`).
+- Esforço percebido (RPE): fora da competição desde 2026-10-20; as colunas `set_logs.rpe` e `workout_sessions.session_rpe` seguem sem uso.
 - Animações com Anime.js, Motion e React Bits (previstas na stack, ainda não instaladas).
 - Iniciar treino sem internet (exigiria criar a sessão no aparelho e sincronizar depois).
 
