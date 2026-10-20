@@ -4,15 +4,9 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { usePathname, useRouter } from "next/navigation";
 import { useHomeSummary } from "@/features/home";
 import { useActiveWorkout } from "@/features/workout";
-import { createDevicePreference } from "@/shared/preferences/device-preference";
-import { TOUR_STEPS } from "@/features/onboarding/constants/tour-steps";
+import { TOUR_STEPS, TOUR_VERSION } from "@/features/onboarding/constants/tour-steps";
 import { TourOverlay } from "@/features/onboarding/components/tour-overlay";
-
-/**
- * Conclusão do tour no aparelho. Versionada: um tour novo aparece de novo para todos (v2 = tour
- * completo, que substituiu o curto de 6 passos da v1).
- */
-const tourCompletion = createDevicePreference("guf:tour:main:v2", ["pending", "done"] as const, "pending");
+import { useCompleteTour, useTourProgress } from "@/features/onboarding/api/use-tour-progress";
 
 /** O tour começa sozinho só na Início (nunca puxa quem abriu um link direto para outra tela). */
 const AUTO_START_ROUTE = "/";
@@ -26,7 +20,8 @@ interface TourApi {
 const TourContext = createContext<TourApi | null>(null);
 
 /**
- * Tour de onboarding da área logada: começa sozinho na primeira entrada (sem treino em andamento),
+ * Tour de onboarding da área logada: começa sozinho na primeira entrada DA CONTA (a conclusão fica no
+ * perfil, vale em todos os aparelhos; sem treino em andamento),
  * navega até a rota de cada passo e só mostra o overlay quando a rota bate. Pular conta como
  * concluído. Se a pessoa sair da rota do passo (ex.: voltar do sistema), o tour fica pausado e
  * reaparece ao voltar.
@@ -39,12 +34,16 @@ export function TourProvider({ children }: { children: ReactNode }) {
   const summary = useHomeSummary();
   // O treino aberto no banco só chega ao aparelho depois (efeito do AppShell): conferir os dois.
   const hasWorkout = Boolean(active) || Boolean(summary.data?.inProgress);
-  const [completion, setCompletion] = tourCompletion.use();
+  const progress = useTourProgress();
+  const { mutate: completeTour } = useCompleteTour();
+  const isDone = (progress.data?.completedVersion ?? 0) >= TOUR_VERSION;
+  // Sem resposta da conta (carregando ou sem internet) não conta como pendente.
+  const isPending = progress.data !== undefined && !isDone;
   const [index, setIndex] = useState<number | null>(null);
   const [autoStarted, setAutoStarted] = useState(false);
 
   // Primeira entrada: começa uma vez por sessão (ajuste durante a renderização, sem efeito).
-  if (!autoStarted && completion === "pending" && !summary.isPending && !hasWorkout && pathname === AUTO_START_ROUTE) {
+  if (!autoStarted && isPending && !summary.isPending && !hasWorkout && pathname === AUTO_START_ROUTE) {
     setAutoStarted(true);
     setIndex(0);
   }
@@ -60,9 +59,10 @@ export function TourProvider({ children }: { children: ReactNode }) {
   );
 
   const finish = useCallback(() => {
-    setCompletion("done");
+    // Rever pelas Configurações não grava de novo.
+    if (!isDone) completeTour(TOUR_VERSION);
     setIndex(null);
-  }, [setCompletion]);
+  }, [isDone, completeTour]);
 
   const start = useCallback(() => goTo(0), [goTo]);
 

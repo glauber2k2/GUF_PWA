@@ -489,6 +489,7 @@ export type Database = {
           name: string | null
           onboarded_at: string | null
           timezone: string
+          tour_completed_version: number | null
           updated_at: string
           weekly_goal: number
           weight_unit: string
@@ -501,6 +502,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           timezone?: string
+          tour_completed_version?: number | null
           updated_at?: string
           weekly_goal?: number
           weight_unit?: string
@@ -513,6 +515,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           timezone?: string
+          tour_completed_version?: number | null
           updated_at?: string
           weekly_goal?: number
           weight_unit?: string

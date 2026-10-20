@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CircleHelp } from "lucide-react";
 import { Banner, IconButton } from "@/shared/components/ds";
 import { useGoBack } from "@/shared/hooks/use-go-back";
+import { useTour } from "@/features/onboarding";
 import { useCanEditProfile, useConsents, useProfile, useProfileSource } from "@/features/profile/api/use-profile";
 import { useInstallPlatform } from "@/store/global/pwa.store";
 import { AboutSection } from "@/features/profile/components/about-section";
@@ -21,6 +22,7 @@ import { UserCard } from "@/features/profile/components/user-card";
  */
 export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode }) {
   const goBack = useGoBack("/perfil");
+  const tour = useTour();
   const { dev } = useProfileSource();
   const profile = useProfile();
   const consents = useConsents();
@@ -40,7 +42,8 @@ export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode })
     <main className="flex flex-col px-4">
       <div className="sticky top-0 z-[5] -mx-4 flex h-14 items-center gap-1 bg-background/90 pr-4 pl-1.5 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
         <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />
-        <h1 className="m-0 min-w-0 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">Configurações</h1>
+        <h1 className="m-0 min-w-0 flex-1 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">Configurações</h1>
+        <IconButton icon={CircleHelp} label="Ver tutorial" variant="ghost" onClick={tour.start} />
       </div>
       <div className="flex flex-col gap-4 pt-2">
         {!canEdit && (

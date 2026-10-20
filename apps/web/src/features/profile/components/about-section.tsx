@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, FileText, GraduationCap, Scale, Shield, Sparkles } from "lucide-react";
+import { ChevronRight, CircleHelp, FileText, Scale, Shield, Sparkles } from "lucide-react";
 import { Button, Icon, Logo } from "@/shared/components/ds";
 import { LegalDocLink } from "@/features/legal";
 import { useSignupDocuments } from "@/features/auth";
@@ -25,7 +25,7 @@ export function AboutSection() {
     <ProfileSection id="pf-about" title="Sobre" className="[animation-delay:200ms]">
       <div className="flex flex-col px-2 py-1.5">
         <button type="button" onClick={tour.start} className={cn(ROW, "w-full cursor-pointer bg-transparent text-left")}>
-          <Icon icon={GraduationCap} size={18} className="text-fg-secondary" />
+          <Icon icon={CircleHelp} size={18} className="text-fg-secondary" />
           <span className="flex-1">Ver tutorial novamente</span>
           <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
         </button>
