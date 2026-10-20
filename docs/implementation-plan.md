@@ -269,7 +269,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | "Ver tutorial novamente" em Configurações › Sobre; vitrine `/design-system#tutorial` | Feito |
 | Conferido por print (Edge headless) numa página de teste: demonstração do treino, balão acima/abaixo e seta | Feito |
 | Conferir no celular com uma conta nova (primeira entrada) | Pendente |
-| Guardar a conclusão na conta (`profiles.tour_completed_version`, vale em todos os aparelhos) + ícone "?" nas Configurações | Feito (`feat/tour-por-conta`; migration a aplicar no banco) |
+| Guardar a conclusão na conta (`profiles.tour_completed_version`, vale em todos os aparelhos) + ícone "?" nas Configurações | Feito (`feat/tour-por-conta`; migration aplicada no banco em 2026-10-20) |
 
 **Critérios de aceite**: tour aparece uma vez na primeira entrada; pular e concluir não voltam a mostrar; rever por Configurações; nada quebra se um alvo não existir; lint e typecheck sem erros.
 
