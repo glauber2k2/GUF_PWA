@@ -70,18 +70,13 @@ export function best1RMSet(sets: readonly PerformedSet[]): { weightKg: number; r
 }
 
 /**
- * Índice da série marcada como recorde no resumo: a melhor série com a carga do recorde
- * (mais repetições; a primeira em caso de empate). null = sem recorde.
+ * Índice da série marcada como recorde no resumo: a primeira série cujo 1RM estimado é o do
+ * recorde. null = sem recorde.
  */
-export function recordSetIndex(sets: readonly PerformedSet[], recordKg: number | null): number | null {
-  if (recordKg === null) return null;
-  let index: number | null = null;
-  sets.forEach((s, i) => {
-    if (!isWorkingSet(s) || s.weightKg !== recordKg) return;
-    const current = index === null ? null : sets[index];
-    if (current === null || current === undefined || (s.reps ?? 0) > (current.reps ?? 0)) index = i;
-  });
-  return index;
+export function recordSetIndex(sets: readonly PerformedSet[], record1RmKg: number | null): number | null {
+  if (record1RmKg === null) return null;
+  const index = sets.findIndex((s) => isWorkingSet(s) && estimate1RM(s.weightKg, s.reps) === record1RmKg);
+  return index === -1 ? null : index;
 }
 
 /* ---------------------------------------------------------------------

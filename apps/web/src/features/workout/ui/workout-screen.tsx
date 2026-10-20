@@ -30,7 +30,7 @@ import {
   formatElapsed,
   formatNumber,
   fromDisplayWeight,
-  markLoadRecords,
+  markRecordSets,
   nextSetLabel,
   setsProgressLabel,
   toDisplayWeight,
@@ -361,7 +361,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       return;
     }
     const nextSets = ex.sets.map((s, i) => (i === setIndex ? { ...s, isCompleted: true } : s));
-    const isRecord = markLoadRecords(nextSets, ex.bestKg)[setIndex] ?? false;
+    const isRecord = markRecordSets(nextSets, ex.best1RmKg)[setIndex] ?? false;
     vibrate(isRecord ? [20, 40, 20] : 15);
     setPopped(`${ex.id}:${setIndex}`);
     const after = state.exercises.map((e, i) => (i === exerciseIndex ? { ...e, sets: nextSets } : e));

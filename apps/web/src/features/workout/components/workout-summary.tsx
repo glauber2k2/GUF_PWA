@@ -88,7 +88,7 @@ export function WorkoutSummary({
           {prs.map((pr, i) => (
             <div key={`${pr.exerciseName}-${i}`} className="animate-guf-rise" style={{ animationDelay: `${300 + i * 120}ms` }}>
               <PRHighlight
-                label={`Maior carga · ${pr.exerciseName}`}
+                label={`Recorde · ${pr.exerciseName}`}
                 value={`${formatNumber(toDisplayWeight(pr.weightKg, unit) ?? 0)} ${unit} ${TIMES_SIGN} ${pr.reps}`}
               />
             </div>

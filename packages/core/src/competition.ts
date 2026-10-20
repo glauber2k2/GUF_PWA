@@ -61,7 +61,7 @@ export function scoringRules(params: CompetitionParameters): string[] {
     `Vale o treino com pelo menos ${formatNumber(params.minMinutes, 0)} minutos de tempo efetivo; conta no máximo um treino por dia.`,
     `Constância (o que mais pesa): ${formatNumber(perSession, 0)} pontos por treino válido na semana, até ${formatNumber(params.constancyMax, 0)} pontos com ${params.sessionsForMaxConstancy} treinos.`,
     `Sequência: semana com ${params.sessionsForMaxConstancy} ou mais treinos válidos rende ${formatNumber(params.bonusPerWeek, 0)} pontos multiplicados pelas semanas cumpridas seguidas, até ${formatNumber(params.bonusMax, 0)} pontos.`,
-    `Recordes: ${formatNumber(params.recordPoints, 0)} pontos por recorde de carga batido na semana, até ${formatNumber(params.recordsMax, 0)} pontos.`,
+    `Recordes: ${formatNumber(params.recordPoints, 0)} pontos por recorde batido na semana (maior 1RM estimado: mais carga ou mais repetições com a mesma carga), até ${formatNumber(params.recordsMax, 0)} pontos.`,
     `Volume: até ${formatNumber(params.volumeMax, 0)} pontos, comparando o volume da semana com a sua média das últimas ${params.volumeWindowWeeks} semanas com treino. Quem mantém ou aumenta o próprio volume ganha tudo.`,
     `Máximo de ${formatNumber(weekMax, 0)} pontos por semana.`,
     "Empate: vence quem tem mais semanas cumpridas, depois mais treinos válidos e depois mais volume no período.",

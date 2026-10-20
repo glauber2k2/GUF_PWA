@@ -5,7 +5,7 @@ import { ChevronDown, Dumbbell, Ellipsis, GripVertical, Plus, NotepadText, Timer
 import {
   equipmentLabel,
   formatClock,
-  markLoadRecords,
+  markRecordSets,
   muscleGroupLabel,
   previousLabel,
   setsProgressLabel,
@@ -79,7 +79,7 @@ export function WorkoutExerciseCard({
   holdProps,
   reorder,
 }: WorkoutExerciseCardProps) {
-  const records = markLoadRecords(e.sets, e.bestKg);
+  const records = markRecordSets(e.sets, e.best1RmKg);
   const done = e.sets.filter((s) => s.isCompleted).length;
   const allDone = e.sets.length > 0 && done === e.sets.length;
   let normalCount = 0;

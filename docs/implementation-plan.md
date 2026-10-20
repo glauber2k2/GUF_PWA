@@ -254,6 +254,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Critérios de aceite**: quem não pode ver não vê nada além do cartão (testado no banco); histórico oculto bloqueia só os registros; fechar o perfil mantém os seguidores; remover e bloquear tiram o acesso; ajuste de RPE aparece com o motivo; exportação traz os dados sociais; lint, typecheck e build sem erros.
 
+**Atualização 2026-10-20 (`feat/recorde-1rm`):** recorde pessoal medido pelo 1RM estimado em todo o app e no banco (`20261020102933_personal_records_by_1rm`: `finish_workout` e `session_load_records`). Validada no banco numa transação desfeita.
+
 ### Etapa 8 — Tour de onboarding (`feat/tutorial-onboarding` → `feat/tutorial-completo`)
 
 | Item | Situação |

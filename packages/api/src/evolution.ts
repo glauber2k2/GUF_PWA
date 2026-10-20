@@ -4,8 +4,8 @@ import {
   durationSeconds,
   pauseStats,
   recordSetIndex,
-  previousLoadBest,
-  sessionLoadRecord,
+  previousBest1Rm,
+  sessionRecord1Rm,
   sessionTotals,
   withRecords,
   type ExerciseSessionEvolution,
@@ -28,7 +28,7 @@ export interface SummarySet {
   setType: SetType;
   weightKg: number | null;
   reps: number | null;
-  /** Série que bateu o recorde de carga do exercício neste treino. */
+  /** Série que bateu o recorde do exercício (maior 1RM estimado) neste treino. */
   isRecord: boolean;
 }
 
@@ -49,10 +49,13 @@ export interface SummaryExercise {
 export interface WorkoutSummaryRecord {
   exerciseId: string;
   exerciseName: string;
+  /** Série do recorde (o que a pessoa levantou). */
   weightKg: number;
   reps: number | null;
-  /** Melhor carga antes deste treino (o recorde batido) e o dia em que foi feita. */
-  previousWeightKg: number | null;
+  /** 1RM estimado do recorde: o recorde é medido pelo 1RM (mais carga ou mais repetições). */
+  oneRmKg: number;
+  /** Melhor 1RM antes deste treino (o recorde batido) e o dia em que foi feito. */
+  previous1RmKg: number | null;
   previousOn: string | null;
 }
 
@@ -168,16 +171,18 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
       const name = se.exercises?.name ?? "Exercício";
       const performed = sets.map(toPerformed);
       const history = histories.data.get(se.exercise_id) ?? [];
-      const recordKg = sessionLoadRecord(history, s.id, s.performed_on, earlierSameDay);
-      const recordIndex = recordSetIndex(performed, recordKg);
-      if (recordKg !== null) {
-        const previous = previousLoadBest(history, s.id, s.performed_on, earlierSameDay);
+      const record1RmKg = sessionRecord1Rm(history, s.id, s.performed_on, earlierSameDay);
+      const recordIndex = recordSetIndex(performed, record1RmKg);
+      const recordSet = performed[recordIndex ?? -1];
+      if (record1RmKg !== null && recordSet) {
+        const previous = previousBest1Rm(history, s.id, s.performed_on, earlierSameDay);
         records.push({
           exerciseId: se.exercise_id,
           exerciseName: name,
-          weightKg: recordKg,
-          reps: performed[recordIndex ?? -1]?.reps ?? null,
-          previousWeightKg: previous?.weightKg ?? null,
+          weightKg: recordSet.weightKg ?? 0,
+          reps: recordSet.reps ?? null,
+          oneRmKg: record1RmKg,
+          previous1RmKg: previous?.oneRmKg ?? null,
           previousOn: previous?.performedOn ?? null,
         });
       }

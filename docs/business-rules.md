@@ -134,11 +134,11 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 | **Volume** = Σ carga × repetições das séries concluídas, sem aquecimento. | Core (`workout.ts`) + Banco |
 | **Séries** (no resumo) = séries concluídas, sem aquecimento. | Core + Banco |
 | **1RM estimado** (Epley) = carga × (1 + repetições / 30), arredondado a 1 casa, com o mesmo arredondamento do Postgres. Aquecimentos não contam. | Core (`training.ts`) + Banco |
-| **Recorde de carga:** carga maior que a maior carga de todos os treinos concluídos anteriores do exercício. Empate não é recorde. | Core (`records.ts`, `session.ts`) + Banco |
+| **Recorde pessoal = maior 1RM estimado** (Epley, 1 casa, igual no core e no banco): o 1RM do treino maior que o de todos os treinos concluídos anteriores do exercício. Subir a carga ou fazer mais repetições com a mesma carga conta. Empate não é recorde. | Core (`estimate1RM`, `markRecordSets`) + Banco (`finish_workout`, `session_load_records`) |
 | **Primeira vez de um exercício não gera recorde.** | Core + Banco |
-| No treino, o recorde só aparece **ao concluir** a série e fica em **uma série por exercício**: a de maior carga do treino (a primeira, em caso de empate), se passar do recorde anterior. Bateu de novo numa série seguinte? O recorde passa para ela (igual ao `finish_workout`). A série com recorde mostra o troféu dourado com brilho no botão de concluir. | Core (`markLoadRecords`), DS `SetRow` |
+| No treino, o recorde só aparece **ao concluir** a série e fica em **uma série por exercício**: a de maior 1RM estimado do treino (a primeira, em caso de empate), se passar do melhor 1RM anterior. Bateu de novo numa série seguinte? O recorde passa para ela (igual ao `finish_workout`). A série com recorde mostra o troféu dourado com brilho no botão de concluir. | Core (`markRecordSets`), DS `SetRow` |
 | Recordes de um treino passado (folha do dia no Histórico): comparam com os treinos concluídos antes dele — dias anteriores e, no mesmo dia, os que terminaram antes. | Core (`sessionLoadRecord`) + API (`history.ts`) |
-| O resumo do `finish_workout` também retorna recorde de 1RM estimado; o app exibe só o de carga máxima. | Banco + API |
+| O `finish_workout` devolve um recorde por exercício (`pr_type = best_e1rm`): o 1RM, o 1RM anterior e a série que o bateu (`weight`, `reps`); o resumo mostra "Recorde · exercício" com carga × repetições. | Banco + API |
 
 ## 6. Sequência de semanas (streak)
 
@@ -180,7 +180,7 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 | Regra | Onde |
 |---|---|
 | Resumo: duração efetiva (sem pausas), volume e séries com a mesma regra da Início/Histórico (séries concluídas, sem aquecimento); linha "Tempo efetivo · N pausas · m:ss parado" quando houve pausa (pausas = períodos ativos − 1). | Core (`evolution.ts`) + API |
-| Recordes do treino: carga máxima maior que a de todos os treinos concluídos ANTES (dias anteriores e, no mesmo dia, os que terminaram antes); primeira vez não gera recorde. A série marcada é a de mais repetições com a carga do recorde. | Core (`sessionLoadRecord`, `recordSetIndex`) + API |
+| Recordes do treino: maior 1RM estimado maior que o de todos os treinos concluídos ANTES (dias anteriores e, no mesmo dia, os que terminaram antes); primeira vez não gera recorde. A série marcada é a primeira com o 1RM do recorde. Nos stories, a comparação com o recorde anterior ("antes", diferença e %) é feita pelo 1RM. | Core (`sessionRecord1Rm`, `previousBest1Rm`, `recordSetIndex`) |
 | Dia com vários treinos: "Ver resumo" abre o mais recente; o cabeçalho mostra discretamente a posição no dia ("1/2", "2/2", pela ordem de término). Ao excluir um deles, a tela mostra o mais recente que sobrou; excluído o último do dia, sai da tela. | API (`daySessionIds`) + Web |
 | A lista de exercícios mostra só séries concluídas (aquecimento, drop set e falha identificados por letra). | API + Web |
 | Excluir treino: só treino concluído, só com internet e sem gravações pendentes na fila; confirmação com "Cancelar" e "Excluir" de mesmo peso. Séries, exercícios e pausas saem junto; calendário, sequência, recordes e evolução se recalculam (o banco calcula tudo a partir dos treinos existentes). | API (`deleteWorkout`) + Banco (cascade) + Web |
@@ -271,4 +271,3 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 
 - Quais medidas corporais entram no módulo de medidas.
 - Esforço percebido (RPE): removido da competição em 2026-10-20; as colunas antigas (`workout_sessions.session_rpe`, `set_logs.rpe`) seguem sem uso até uma limpeza.
-- Exibir também o recorde de 1RM estimado no resumo do treino (o banco já calcula).

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, NotepadText, Timer, Trophy, type LucideIcon } from "lucide-react";
-import { formatClock, formatNumber, isLoadRecord, MINUS_SIGN, type SetType } from "@guf/core";
+import { formatClock, formatNumber, isSetRecord, MINUS_SIGN, type SetType } from "@guf/core";
 import { cn } from "@/shared/helpers/class-names";
 import { SheenOverlay } from "./actions";
 import { Icon } from "./brand";
@@ -146,8 +146,8 @@ export interface ExerciseCardProps {
   rest?: string;
   icon?: LucideIcon;
   sets?: ExerciseSet[];
-  /** Maior carga anterior do exercício; nulo = primeira vez (não gera PR). */
-  bestKg?: number | null;
+  /** Maior 1RM estimado anterior do exercício; nulo = primeira vez (não gera PR). */
+  best1RmKg?: number | null;
   defaultExpanded?: boolean;
   onSetToggle?: (index: number, set: ExerciseSet, isRecord: boolean) => void;
   onNameClick?: () => void;
@@ -170,7 +170,7 @@ export function ExerciseCard({
   rest,
   icon = Dumbbell,
   sets: initialSets = [],
-  bestKg = null,
+  best1RmKg = null,
   defaultExpanded = true,
   onSetToggle,
   onNameClick,
@@ -180,7 +180,7 @@ export function ExerciseCard({
   const [expanded, setExpanded] = useState(defaultExpanded);
   const [justDone, setJustDone] = useState(-1);
 
-  const isRecord = (s: ExerciseSet) => isLoadRecord({ setType: s.type, weightKg: s.weightKg, done: s.done }, bestKg);
+  const isRecord = (s: ExerciseSet) => isSetRecord({ setType: s.type, weightKg: s.weightKg, reps: s.reps, done: s.done }, best1RmKg);
 
   const toggle = (i: number) => {
     const current = sets[i];

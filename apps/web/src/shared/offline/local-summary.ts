@@ -1,5 +1,5 @@
 import type { ActiveWorkout, SummaryExercise, WorkoutSummaryDetail, WorkoutSummaryRecord } from "@guf/api";
-import { durationSeconds, markLoadRecords, pauseStats, recordSetIndex, sessionTotals, workoutElapsedSeconds } from "@guf/core";
+import { durationSeconds, estimate1RM, markRecordSets, pauseStats, sessionTotals, workoutElapsedSeconds } from "@guf/core";
 import { offlineDb } from "./db";
 import { isClosedLocally } from "./outbox";
 
@@ -20,17 +20,18 @@ export function summaryFromWorkout(w: ActiveWorkout, finishedAt: Date): WorkoutS
   const exercises = w.exercises.flatMap<SummaryExercise>((e) => {
     const done = e.sets.filter((s) => s.isCompleted);
     if (done.length === 0) return [];
-    const flags = markLoadRecords(done, e.bestKg);
-    const recordKg = done.reduce<number | null>((best, s, i) => (flags[i] && (best === null || (s.weightKg ?? 0) > best) ? (s.weightKg ?? null) : best), null);
-    const recordIndex = recordSetIndex(done, recordKg);
-    // No aparelho só se conhece o recorde anterior (bestKg), não o dia em que foi feito.
-    if (recordKg !== null)
+    const recordIndex = markRecordSets(done, e.best1RmKg).indexOf(true);
+    const recordSet = done[recordIndex];
+    const record1RmKg = recordSet ? estimate1RM(recordSet.weightKg, recordSet.reps) : null;
+    // No aparelho só se conhece o recorde anterior (best1RmKg), não o dia em que foi feito.
+    if (recordSet && record1RmKg !== null)
       records.push({
         exerciseId: e.exerciseId,
         exerciseName: e.name,
-        weightKg: recordKg,
-        reps: done[recordIndex ?? -1]?.reps ?? null,
-        previousWeightKg: e.bestKg,
+        weightKg: recordSet.weightKg ?? 0,
+        reps: recordSet.reps,
+        oneRmKg: record1RmKg,
+        previous1RmKg: e.best1RmKg,
         previousOn: null,
       });
     const totals = sessionTotals(done);

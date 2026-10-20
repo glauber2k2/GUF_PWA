@@ -488,7 +488,7 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
             tags={EXERCISE.tags}
             rest={EXERCISE.rest}
             sets={EXERCISE.sets}
-            bestKg={EXERCISE.bestKg}
+            best1RmKg={EXERCISE.best1RmKg}
           />
           <div className={cn(PANEL, "grid gap-1 py-3")}>
             <SetRowHeader />

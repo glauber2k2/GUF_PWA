@@ -1,4 +1,4 @@
-import { sessionLoadRecord, sessionTotals, type ExerciseSessionBest, type LoggedSet, type WeightUnit } from "@guf/core";
+import { sessionRecord1Rm, sessionTotals, type ExerciseSessionBest, type LoggedSet, type WeightUnit } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -137,7 +137,12 @@ export async function exerciseHistories(client: GufClient, exerciseIds: readonly
     data: new Map(
       exerciseIds.map((id, i) => [
         id,
-        (results[i]?.data ?? []).map((h) => ({ sessionId: h.session_id, performedOn: h.performed_on, maxWeightKg: Number(h.max_weight_kg) })),
+        (results[i]?.data ?? []).map((h) => ({
+          sessionId: h.session_id,
+          performedOn: h.performed_on,
+          maxWeightKg: Number(h.max_weight_kg),
+          best1RmKg: h.best_e1rm_kg === null ? null : Number(h.best_e1rm_kg),
+        })),
       ]),
     ),
     error: null,
@@ -145,7 +150,7 @@ export async function exerciseHistories(client: GufClient, exerciseIds: readonly
 }
 
 /**
- * Treinos concluídos de um dia, com volume/séries (regras do core) e os recordes de carga
+ * Treinos concluídos de um dia, com volume/séries (regras do core) e os recordes (pelo 1RM estimado)
  * batidos em cada um — mesma regra do finish_workout, comparando com os treinos anteriores.
  */
 export const getDaySessions: GetDaySessions = async (client, { performedOn }) => {
@@ -178,7 +183,7 @@ export const getDaySessions: GetDaySessions = async (client, { performedOn }) =>
         // Treinos do mesmo dia que terminaram antes deste (a lista está em ordem de término).
         const earlierSameDay = new Set(sessions.slice(0, index).map((s) => s.row.id));
         const records = exercises.flatMap<DayRecord>((e) => {
-          const load = sessionLoadRecord(histories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay);
+          const load = sessionRecord1Rm(histories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay);
           return load === null ? [] : [{ exerciseName: e.name, weightKg: load, reps: repsAtLoad(e.sets, load) }];
         });
         const totals = sessionTotals(exercises.flatMap((e) => e.sets));

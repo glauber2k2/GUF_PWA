@@ -13,7 +13,7 @@ export const WORKOUT_DEMO_EXERCISES: readonly ExerciseView[] = [
     equipment: "barra",
     restSeconds: 90,
     note: null,
-    bestKg: 70,
+    best1RmKg: 85,
     open: true,
     flash: false,
     sets: [
@@ -30,7 +30,7 @@ export const WORKOUT_DEMO_EXERCISES: readonly ExerciseView[] = [
     equipment: "barra",
     restSeconds: 90,
     note: null,
-    bestKg: 50,
+    best1RmKg: 70,
     open: false,
     flash: false,
     sets: [
