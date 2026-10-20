@@ -22,6 +22,7 @@ import {
 } from "@guf/core";
 import { Banner, Icon, SegmentedControl } from "@/shared/components/ds";
 import { prefersReducedMotion } from "@/shared/helpers/motion";
+import { CHART_WITHOUT_FOCUS_RING } from "@/shared/helpers/chart";
 import { cn } from "@/shared/helpers/class-names";
 
 const PERIOD_OPTIONS = (Object.keys(CHART_PERIOD_WEEKS) as ChartPeriod[]).map((value) => ({ value, label: CHART_PERIOD_LABELS[value].short }));
@@ -182,7 +183,7 @@ function WeeklyBars({ points, unit, axisMax, summary }: { points: ChartPoint[]; 
   const xTicks = count <= 4 ? points.map((p) => p.weekStart) : [0, Math.floor((count - 1) / 2), count - 1].map((i) => points[i]?.weekStart ?? "");
 
   return (
-    <figure role="group" aria-label={summary} className="m-0 h-[196px] w-full">
+    <figure role="group" aria-label={summary} className={cn("m-0 h-[196px] w-full", CHART_WITHOUT_FOCUS_RING)}>
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
         <ComposedChart data={points} margin={{ top: 8, right: 0, bottom: 0, left: 0 }} barCategoryGap={count <= 4 ? "54%" : count <= 13 ? "38%" : "28%"}>
           <CartesianGrid vertical={false} strokeDasharray="3 4" stroke="var(--color-border)" />
