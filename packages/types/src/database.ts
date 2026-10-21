@@ -1302,15 +1302,6 @@ export type Database = {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined
       }
-      save_workout_edit: {
-        Args: {
-          p_active_seconds: number
-          p_exercises: Json
-          p_note: string
-          p_session_id: string
-        }
-        Returns: undefined
-      }
       save_routine: {
         Args: {
           p_auto_progress?: boolean
@@ -1321,6 +1312,15 @@ export type Database = {
           p_weekdays: number[]
         }
         Returns: string
+      }
+      save_workout_edit: {
+        Args: {
+          p_active_seconds: number
+          p_exercises: Json
+          p_note: string
+          p_session_id: string
+        }
+        Returns: undefined
       }
       search_social_profiles: {
         Args: { p_query: string }
