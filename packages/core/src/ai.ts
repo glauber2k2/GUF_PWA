@@ -46,6 +46,7 @@ const TOOL_PHRASES: Record<string, string[]> = {
     "Escolhendo trocas equivalentes",
   ],
   rotinas: ["Lendo suas rotinas", "Conferindo séries e descanso", "Avaliando a divisão da semana"],
+  regras_da_competicao: ["Lendo as regras da competição", "Conferindo como os pontos são somados"],
 };
 
 /** Frases que se alternam no "pensando": as da ferramenta em uso ou, sem ferramenta, as gerais. */

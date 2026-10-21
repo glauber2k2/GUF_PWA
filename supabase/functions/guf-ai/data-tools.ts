@@ -94,6 +94,27 @@ function summarizeSession(row: SessionRow, ref: string, unit: WeightUnit, withSe
   };
 }
 
+interface CompetitionParametersRow {
+  sessions_for_max_constancy: number;
+  constancy_max: number;
+  min_minutes: number;
+  bonus_per_week: number;
+  bonus_max: number;
+  record_points: number;
+  records_max: number;
+  volume_max: number;
+  volume_window_weeks: number;
+}
+
+const SATURDAY = 6;
+
+/** Temporada da data (mesma regra de seasonOf em packages/core/src/competition.ts): mês do sábado que fecha a semana. */
+function seasonStart(today: string): string {
+  const date = new Date(`${today}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + SATURDAY - date.getUTCDay());
+  return `${date.toISOString().slice(0, 7)}-01`;
+}
+
 /** Monta as ferramentas de um usuário (o contexto fica preso aqui; o modelo não escolhe de quem lê). */
 export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
   const sessionRefs = new Map<string, string>();
@@ -295,6 +316,32 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
               carga_planejada: r.auto_progress ? null : toUnit(e.target_weight_kg, unit),
             })),
           })),
+        };
+      },
+    }),
+
+    regras_da_competicao: tool({
+      description:
+        "Regras da competição do app com os valores vigentes: o que é treino válido, como os pontos da semana são somados (constância, sequência, recordes e volume), máximo semanal e desempate. Não traz pontos nem posição de ninguém.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        const { data } = await db.from("competition_parameters")
+          .select("sessions_for_max_constancy, constancy_max, min_minutes, bonus_per_week, bonus_max, record_points, records_max, volume_max, volume_window_weeks")
+          .lte("effective_from", seasonStart(today))
+          .order("effective_from", { ascending: false }).limit(1).maybeSingle();
+        if (!data) return { erro: "Não foi possível ler as regras da competição agora." };
+        // numeric do Postgres chega como texto pelo PostgREST.
+        const p = Object.fromEntries(Object.entries(data).map(([k, v]) => [k, Number(v)])) as unknown as CompetitionParametersRow;
+        return {
+          treino_valido: `pelo menos ${p.min_minutes} minutos de tempo efetivo (tempo medido, sem pausas); no máximo 1 por dia (o de maior volume)`,
+          semana: "domingo a sábado; o dia é o do início do treino",
+          temporada: "o mês; uma semana pertence ao mês do sábado em que termina",
+          constancia: `${p.constancy_max / p.sessions_for_max_constancy} pontos por treino válido, até ${p.constancy_max} (${p.sessions_for_max_constancy} treinos); é o que mais pesa`,
+          sequencia: `semana com ${p.sessions_for_max_constancy} ou mais treinos válidos é "cumprida"; ${p.bonus_per_week} pontos × semanas cumpridas seguidas, até ${p.bonus_max}; zera numa semana não cumprida e continua entre temporadas`,
+          recordes: `${p.record_points} pontos por recorde batido na semana (maior 1RM estimado de um exercício: mais carga ou mais repetições com a mesma carga), até ${p.records_max}; a primeira vez de um exercício não é recorde`,
+          volume: `até ${p.volume_max} pontos: ${p.volume_max} × (volume da semana ÷ média das suas últimas ${p.volume_window_weeks} semanas com treino), limitado a ${p.volume_max}; sem histórico, ${p.volume_max} se treinou`,
+          maximo_por_semana: p.constancy_max + p.bonus_max + p.records_max + p.volume_max,
+          desempate: "mais semanas cumpridas, depois mais treinos válidos, depois mais volume",
         };
       },
     }),
