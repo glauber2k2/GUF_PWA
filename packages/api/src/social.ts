@@ -337,6 +337,7 @@ interface MemberWorkoutRow {
   started_at: string;
   finished_at: string | null;
   active_seconds: number | null;
+  edited_at: string | null;
   period_count: number;
   owner: { user_id: string; handle: string | null; name: string | null; avatar_url: string | null };
   day_session_ids: string[];
@@ -369,6 +370,7 @@ function toMemberWorkout(client: GufClient, row: MemberWorkoutRow, weightUnit: W
     performedOn: row.performed_on,
     startedAt: row.started_at,
     finishedAt: row.finished_at,
+    editedAt: row.edited_at,
     durationSeconds: duration,
     ...pauseStats(row.period_count, durationSeconds(row.started_at, row.finished_at), duration),
     ...buildSummaryTotals(exercises),

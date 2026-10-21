@@ -3,7 +3,7 @@
  *
  * As telas usam os DADOS REAIS (packages/api). Este mock existe só para visualizar os estados do design
  * em DESENVOLVIMENTO, via ?estado= (ver useDevEvolutionState):
- * resumo: padrao · sem-recordes · livre · pausas · nao-encontrado · erro
+ * resumo: padrao · sem-recordes · livre · pausas · editado · nao-encontrado · erro
  * evolução: padrao · primeira-vez · um-treino · erro
  * Sem ?id= (ou id desconhecido), cada cenário escolhe um treino/exercício de exemplo.
  * "Excluir" só tira o treino da memória do mock — nunca apaga nada de verdade.
@@ -34,7 +34,7 @@ import {
   type SetType,
 } from "@guf/core";
 
-export type EvolutionMockScenario = "padrao" | "sem-recordes" | "livre" | "pausas" | "nao-encontrado" | "primeira-vez" | "um-treino" | "erro";
+export type EvolutionMockScenario = "padrao" | "sem-recordes" | "livre" | "pausas" | "editado" | "nao-encontrado" | "primeira-vez" | "um-treino" | "erro";
 
 let scenario: EvolutionMockScenario = "padrao";
 const deleted: string[] = [];
@@ -270,6 +270,8 @@ function toSummary(s: MockSession): WorkoutSummaryDetail {
     performedOn: s.performedOn,
     startedAt: s.startedAt,
     finishedAt: s.finishedAt,
+    // Editado uma hora depois de terminar (cenário ?estado=editado).
+    editedAt: scenario === "editado" ? new Date(new Date(s.finishedAt).getTime() + 3_600_000).toISOString() : null,
     durationSeconds: s.durationSeconds,
     pauseCount: pauses ? 2 : 0,
     pausedSeconds: pauses ? 390 : 0,

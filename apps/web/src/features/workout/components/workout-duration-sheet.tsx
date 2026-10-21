@@ -12,7 +12,7 @@ export interface WorkoutDurationSheetProps {
   onSave: (seconds: number) => void;
 }
 
-/** Corrigir o tempo efetivo de um treino concluído (horas e minutos, de 1 min a 24 h). */
+/** Corrigir o tempo efetivo de um treino concluído (horas, minutos e segundos, de 1 min a 24 h). */
 export function WorkoutDurationSheet({ open, seconds, onClose, onSave }: WorkoutDurationSheetProps) {
   return (
     <BottomSheet placement="screen" open={open} onClose={onClose} title="Tempo do treino" subtitle="Tempo treinando, sem as pausas">
@@ -22,18 +22,29 @@ export function WorkoutDurationSheet({ open, seconds, onClose, onSave }: Workout
   );
 }
 
+type DurationPart = "hours" | "minutes" | "seconds";
+
+const DURATION_FIELDS: Array<{ part: DurationPart; label: string }> = [
+  { part: "hours", label: "Horas" },
+  { part: "minutes", label: "Minutos" },
+  { part: "seconds", label: "Segundos" },
+];
+
 const digitsOnly = (value: string) => value.replace(/\D/g, "").slice(0, 2);
 
 function DurationForm({ seconds, onSave }: { seconds: number; onSave: (seconds: number) => void }) {
   const initial = toDurationParts(seconds);
-  const [hours, setHours] = useState(String(initial.hours));
-  const [minutes, setMinutes] = useState(String(initial.minutes));
+  const [values, setValues] = useState<Record<DurationPart, string>>({
+    hours: String(initial.hours),
+    minutes: String(initial.minutes),
+    seconds: String(initial.seconds),
+  });
   const [error, setError] = useState<string | null>(null);
 
   const save = () => {
-    const next = toEditedDurationSeconds(Number(hours || 0), Number(minutes || 0));
+    const next = toEditedDurationSeconds(Number(values.hours || 0), Number(values.minutes || 0), Number(values.seconds || 0));
     if (next === null) {
-      setError("Use de 1 minuto a 24 horas (minutos de 0 a 59).");
+      setError("Use de 1 minuto a 24 horas (minutos e segundos de 0 a 59).");
       return;
     }
     onSave(next);
@@ -47,29 +58,27 @@ function DurationForm({ seconds, onSave }: { seconds: number; onSave: (seconds: 
         save();
       }}
     >
-      <div className="grid grid-cols-2 gap-3">
-        <TextField
-          label="Horas"
-          inputMode="numeric"
-          autoComplete="off"
-          value={hours}
-          onChange={(e) => {
-            setError(null);
-            setHours(digitsOnly(e.target.value));
-          }}
-        />
-        <TextField
-          label="Minutos"
-          inputMode="numeric"
-          autoComplete="off"
-          value={minutes}
-          error={error ?? undefined}
-          onChange={(e) => {
-            setError(null);
-            setMinutes(digitsOnly(e.target.value));
-          }}
-        />
+      <div className="grid grid-cols-3 gap-3">
+        {DURATION_FIELDS.map(({ part, label }) => (
+          <TextField
+            key={part}
+            label={label}
+            inputMode="numeric"
+            autoComplete="off"
+            value={values[part]}
+            aria-invalid={error ? true : undefined}
+            onChange={(e) => {
+              setError(null);
+              setValues((v) => ({ ...v, [part]: digitsOnly(e.target.value) }));
+            }}
+          />
+        ))}
       </div>
+      {error && (
+        <p role="alert" className="-mt-2 text-[13px] leading-[18px] text-danger">
+          {error}
+        </p>
+      )}
       <p className="text-[13px] leading-[18px] text-fg-muted">Na competição, vale o menor entre este tempo e o medido pelo app.</p>
       <Button type="submit" size="tall" fullWidth>
         Salvar tempo

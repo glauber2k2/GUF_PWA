@@ -875,6 +875,7 @@ export type Database = {
           active_seconds: number | null
           auto_finished: boolean
           created_at: string
+          edited_at: string | null
           finished_at: string | null
           id: string
           measured_active_seconds: number | null
@@ -892,6 +893,7 @@ export type Database = {
           active_seconds?: number | null
           auto_finished?: boolean
           created_at?: string
+          edited_at?: string | null
           finished_at?: string | null
           id?: string
           measured_active_seconds?: number | null
@@ -909,6 +911,7 @@ export type Database = {
           active_seconds?: number | null
           auto_finished?: boolean
           created_at?: string
+          edited_at?: string | null
           finished_at?: string | null
           id?: string
           measured_active_seconds?: number | null
