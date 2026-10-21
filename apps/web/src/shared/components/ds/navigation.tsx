@@ -48,11 +48,17 @@ export function LargeTitle({ children, className }: { children: ReactNode; class
   );
 }
 
+/** Indicador de novidade num item do menu (bolinha); o texto é lido pelo leitor de tela. */
+export interface NavBadge {
+  label: string;
+}
+
 export interface NavItem {
   label: string;
   icon: LucideIcon;
   /** Valor de `data-tour` (elemento destacado pelo tour de onboarding). */
   tourTarget?: string;
+  badge?: NavBadge;
 }
 
 /** Itens do CLAUDE.md: Início (com o histórico), Competir, Treinar (central), Projetos, Perfil. */
@@ -206,14 +212,22 @@ export function BottomNav({
                 iconRefs.current[i] = el;
               }}
               className={cn(
-                "grid h-8 place-items-center rounded-pill transition-colors duration-300 ease-standard",
+                "relative grid h-8 place-items-center rounded-pill transition-colors duration-300 ease-standard",
                 center ? "w-14 bg-accent text-accent-foreground" : "w-12",
                 !center && on && "text-accent-text",
               )}
             >
               <Icon icon={item.icon} size={20} />
+              {/* accent-text: no tema claro é o verde escuro (contraste 3:1 de elemento gráfico). */}
+              {item.badge && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0.5 right-2.5 size-2.5 animate-guf-pop-in rounded-pill bg-accent-text ring-2 ring-surface motion-reduce:animate-none"
+                />
+              )}
             </span>
             {item.label}
+            {item.badge && <span className="sr-only">, {item.badge.label}</span>}
           </button>
         );
       })}

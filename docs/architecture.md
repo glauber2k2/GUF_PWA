@@ -59,6 +59,7 @@ Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (ev
 - `shared/` nunca importa `features/`. A composição entre features fica em `app/` (ex.: `app/providers.tsx`).
 - `packages/*` nunca importa `apps/*` nem React.
 - Usado por uma feature só → fica nela. Segundo uso em outra feature → sobe para `shared/` (ou para `packages/` se for regra ou consulta que o app mobile também vai usar).
+- Exemplo de inversão de dependência: alertas do menu inferior. As features publicam em `store/global/nav-alerts.store.ts` e o AppShell só lê; as fontes são montadas em `app/(app)/layout.tsx` (o AppShell não importa as features que o importam).
 - Exemplo: o resumo do treino é usado pelo seu treino (`evolution`) e pelo de outra pessoa (`social`), então as partes ficam em `shared/components/workout-summary/` sem conhecer rotas nem a origem dos dados (recebem `WorkoutSummaryBase` e callbacks/slots); cada tela decide o que é tocável e quais ações aparecem. A montagem dos dados também é única (`packages/api/src/summary-builder.ts`, interno do pacote).
 
 ## 4. SOLID na prática

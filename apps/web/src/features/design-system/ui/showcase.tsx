@@ -66,6 +66,7 @@ import {
   ICONS,
   METRIC_OPTIONS,
   MUSCLE_FILTERS,
+  NAV_ITEMS_WITH_BADGE,
   NEXT_ROUTINE,
   PERIOD_OPTIONS,
   PROJECTS,
@@ -528,6 +529,7 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
             <ReorderList items={REORDER_ITEMS} />
           </div>
           <BottomNav defaultValue={0} />
+          <BottomNav items={NAV_ITEMS_WITH_BADGE} defaultValue={0} />
         </div>
       </Group>
 
