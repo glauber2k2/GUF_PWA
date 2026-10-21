@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.5 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-20
+**Versão**: v0.6 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-21
+
+> **v0.6**: detalhe do treino de outra pessoa (`/pessoa/treino`, função `get_member_workout`, migration `20261021120000_member_workout_detail`). Quem já via o histórico de treinos (você, seguidor aceito ou perfil aberto, e o titular não ocultou) passa a abrir cada treino com data e hora, duração, pausas, volume, exercícios, séries concluídas (tipo, carga e repetições) e recordes. Não amplia quem vê nem cria categoria nova de dado: os Termos 0.3-dev já dizem que essas pessoas veem o "histórico de treinos" e a seção 4 já listava exercícios e séries. Continuam fora: observações, RPE, projeto e rotina (planejamento), medidas. Leitura só pela função `SECURITY DEFINER` que confere `can_view_member_history`; treino inexistente e treino sem permissão dão a mesma resposta (GS009), para não revelar se o id existe. R001 e R007 revistos (mais detalhe por treino, mesmo público); residual sem mudança.
 
 > **v0.5**: o esforço da sessão (RPE) deixou de ser pedido e de entrar na pontuação. Com isso sai a única decisão automatizada do módulo (controle de RPE suspeito, Art. 20) e o dado deixa de ser coletado (a coluna antiga fica sem uso). A pontuação passa a ser constância + sequência + recordes + volume (comparado à média do próprio titular), com regras fixas e públicas. R006 eliminado; R005 revisto. Termos 0.3-dev e Política 0.5-dev sem a menção ao esforço (rascunhos, publicados em 2026-10-20) ⚖.
 
@@ -135,13 +137,13 @@ flowchart LR
 
 | ID | Risco | P | I | Nível | Mitigação | Status | Residual |
 |---|---|---|---|---|---|---|---|
-| R001 | Seguidor vê mais do que o titular quis | 2 | 4 | 8 | Privado por padrão; histórico ocultável; campos mínimos; leitura só por funções que conferem `can_view_member` | mitigado | 3 |
+| R001 | Seguidor vê mais do que o titular quis | 2 | 4 | 8 | Privado por padrão; histórico ocultável (esconde a lista e o detalhe de cada treino); campos mínimos (sem observações, RPE, projeto ou rotina); leitura só por funções que conferem `can_view_member`/`can_view_member_history` | mitigado | 3 |
 | R002 | Erro de política expõe treinos a qualquer usuário | 2 | 5 | 10 | Nenhuma política nova em tabelas de treino; funções `SECURITY DEFINER` com conferência explícita; testes de permissão antes do lançamento | mitigado (testes pendentes) | 4 |
 | R003 | Contato indesejado / assédio | 3 | 3 | 9 | Sem chat; bloqueio e remoção; busca restrita; limite de pedidos | mitigado | 4 |
 | R004 | Adolescente usando o módulo (acesso provável) | 2 | 4 | 8 | 18+ por autodeclaração; procedimento de conta de menor (`eca-digital.md`) | parcial ⚖ | 6 |
 | R005 | Fraude na pontuação (editar horários, registrar cargas falsas) | 4 | 2 | 8 | Horários gravados só pelo servidor; períodos sem sobreposição; 1 sessão por dia; teto por parte (recordes até 25, volume até 15 e relativo à própria média) | mitigado | 4 |
 | R006 | Ajuste automático de RPE injusto | — | — | — | Eliminado em 2026-10-20: o esforço saiu da pontuação | eliminado | 0 |
-| R007 | Inferência sobre saúde pelo histórico compartilhado | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; perfil privado por padrão; se N1, consentimento no cadastro | parcial ⚖ | 4 |
+| R007 | Inferência sobre saúde pelo histórico compartilhado (inclusive cargas e séries no detalhe do treino) | 2 | 3 | 6 | Medidas nunca compartilhadas; histórico ocultável; perfil privado por padrão; se N1, consentimento no cadastro | parcial ⚖ | 4 |
 | R008 | Nome e foto aparecem na busca para qualquer conta | 3 | 2 | 6 | @ aleatório no cadastro; busca só por prefixo (≥ 3 caracteres, até 20 resultados); bloqueados não aparecem; nada de treino sem consentimento. Pendente: opção de não aparecer na busca ⚖ | parcial | 4 |
 | R009 | Pressão por comparação (bem-estar) | 2 | 2 | 4 | Pontos premiam constância e não carga; limite de pontos por semana; ranking só entre seguidores mútuos | aceito | 4 |
 | R010 | Aviso na tela bloqueada revela nome do competidor e pontos a quem pega o celular | 3 | 2 | 6 | Opt-in por aparelho; texto mínimo (nome e diferença, sem treinos); o sistema permite esconder o conteúdo na tela bloqueada | mitigado | 3 |
@@ -162,6 +164,7 @@ flowchart LR
 - [x] Audit log imutável e encadeado (`audit_log`)
 - [x] Horários do treino protegidos por gatilho (integridade da pontuação)
 - [x] Testes SQL de permissão (32 casos, transação desfeita; 2026-10-18)
+- [x] Detalhe do treino de terceiros só por `get_member_workout` (confere `can_view_member_history`; resposta igual para inexistente e sem permissão)
 - [ ] MFA no painel do Supabase (`security-checklist.md`)
 - [x] Avisos: mensagem cifrada para o aparelho (RFC 8291) e assinada (VAPID); chave privada só nos secrets da Edge Function; função chamada só pelo banco com segredo do Vault; inscrições e estados sem leitura por terceiros (RLS)
 
@@ -203,5 +206,5 @@ flowchart LR
 ## 13. Plano de revisão
 
 - Próxima revisão obrigatória: antes do lançamento público ou 2027-04-18, o que vier primeiro.
-- Revisões feitas: v0.4 em 2026-10-19 (notificações push da competição e de seguidores).
+- Revisões feitas: v0.4 em 2026-10-19 (notificações push da competição e de seguidores); v0.5 em 2026-10-20 (pontuação sem RPE); v0.6 em 2026-10-21 (detalhe do treino de outra pessoa).
 - Gatilhos para revisão antecipada: perfil visível fora dos seguidores, chat ou mensagens, outros tipos de notificação push (além dos avisos da competição e de seguidores), prêmios, mudança nos parâmetros da pontuação, novo operador, incidente, base > 50% maior.
