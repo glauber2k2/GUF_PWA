@@ -8,6 +8,7 @@ export type ApiErrorCode =
   | "routine_empty"
   | "routine_not_found"
   | "session_not_found"
+  | "workout_empty"
   | "exercise_not_found"
   | "handle_taken"
   | "handle_invalid"
@@ -35,6 +36,7 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   routine_empty: "Adicione pelo menos 1 exercício para salvar a rotina.",
   routine_not_found: "Esta rotina não existe mais ou está arquivada. Volte para Projetos e tente de novo.",
   session_not_found: "Este treino foi excluído ou não está mais disponível. Volte e escolha outro.",
+  workout_empty: "O treino precisa de pelo menos uma série concluída. Para apagar o treino inteiro, use \"Excluir treino\" no resumo.",
   exercise_not_found: "Este exercício não está mais disponível. Volte e escolha outro.",
   handle_taken: "Esse nome de usuário já está em uso. Escolha outro.",
   handle_invalid: "Use de 3 a 20 caracteres: letras minúsculas, números, ponto ou _ (sem começar ou terminar com ponto ou _).",
@@ -75,6 +77,9 @@ export function toApiError(error: unknown): ApiError {
     if (code === "GP002") return apiError("project_locked"); // Favoritos protegido
     if (code === "GP003") return apiError("routine_empty"); // save_routine sem exercícios
     if (code === "GP004") return apiError("routine_not_found"); // save_routine
+    if (code === "GW001") return apiError("session_not_found"); // save_workout_edit: treino concluído inexistente
+    if (code === "GW002") return apiError("workout_empty"); // save_workout_edit sem séries concluídas
+    if (code === "GW003") return apiError("exercise_not_found"); // save_workout_edit
     const socialCode = SOCIAL_ERROR_CODES[code ?? ""];
     if (socialCode) return apiError(socialCode);
     if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");

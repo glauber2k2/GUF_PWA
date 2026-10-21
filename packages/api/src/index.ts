@@ -13,3 +13,4 @@ export * from "./share";
 export * from "./social";
 export * from "./competition";
 export * from "./push";
+export * from "./workout-edit";

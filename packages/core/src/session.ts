@@ -247,3 +247,23 @@ export function parseKeypadValue(text: string): number {
 export function toKeypadValue(value: number | null): string {
   return value === null ? "" : formatNumber(value).replace(/\./g, "");
 }
+
+/** Limites do tempo corrigido de um treino concluído (os mesmos do save_workout_edit no banco). */
+export const EDITED_DURATION_MIN_SECONDS = 60;
+export const EDITED_DURATION_MAX_SECONDS = 24 * 3600;
+
+/** Horas e minutos inteiros de uma duração (os segundos ficam de fora). */
+export function toDurationParts(totalSeconds: number): { hours: number; minutes: number } {
+  const totalMinutes = Math.floor(Math.max(0, totalSeconds) / 60);
+  return { hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 };
+}
+
+/**
+ * Duração em segundos a partir de horas e minutos digitados.
+ * @returns null quando fica fora dos limites do tempo corrigido (1 min a 24 h)
+ */
+export function toEditedDurationSeconds(hours: number, minutes: number): number | null {
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || minutes < 0 || minutes > 59) return null;
+  const seconds = (hours * 60 + minutes) * 60;
+  return seconds >= EDITED_DURATION_MIN_SECONDS && seconds <= EDITED_DURATION_MAX_SECONDS ? seconds : null;
+}

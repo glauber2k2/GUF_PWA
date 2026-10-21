@@ -877,6 +877,7 @@ export type Database = {
           created_at: string
           finished_at: string | null
           id: string
+          measured_active_seconds: number | null
           name: string | null
           notes: string | null
           performed_on: string
@@ -893,6 +894,7 @@ export type Database = {
           created_at?: string
           finished_at?: string | null
           id?: string
+          measured_active_seconds?: number | null
           name?: string | null
           notes?: string | null
           performed_on?: string
@@ -909,6 +911,7 @@ export type Database = {
           created_at?: string
           finished_at?: string | null
           id?: string
+          measured_active_seconds?: number | null
           name?: string | null
           notes?: string | null
           performed_on?: string
@@ -1297,6 +1300,15 @@ export type Database = {
       }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: undefined
+      }
+      save_workout_edit: {
+        Args: {
+          p_active_seconds: number
+          p_exercises: Json
+          p_note: string
+          p_session_id: string
+        }
         Returns: undefined
       }
       save_routine: {

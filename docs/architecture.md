@@ -61,6 +61,7 @@ Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (ev
 - Usado por uma feature só → fica nela. Segundo uso em outra feature → sobe para `shared/` (ou para `packages/` se for regra ou consulta que o app mobile também vai usar).
 - Exemplo de inversão de dependência: alertas do menu inferior. As features publicam em `store/global/nav-alerts.store.ts` e o AppShell só lê; as fontes são montadas em `app/(app)/layout.tsx` (o AppShell não importa as features que o importam).
 - Exemplo: o resumo do treino é usado pelo seu treino (`evolution`) e pelo de outra pessoa (`social`), então as partes ficam em `shared/components/workout-summary/` sem conhecer rotas nem a origem dos dados (recebem `WorkoutSummaryBase` e callbacks/slots); cada tela decide o que é tocável e quais ações aparecem. A montagem dos dados também é única (`packages/api/src/summary-builder.ts`, interno do pacote).
+- Exemplo de inversão de dependência na tela do treino: `useWorkoutEditing` (lista de exercícios, séries, observações, troca e reordenação) recebe um `WorkoutChangeSink` que diz para onde vai cada alteração. O treino em andamento passa a fila offline (`outboxSink`); a edição de um treino concluído passa um destino vazio e grava tudo de uma vez no fim (`save_workout_edit`). O `WorkoutEditor` desenha a lista e as folhas sem saber qual dos dois está em uso; cada tela só compõe cabeçalho, rodapé e as próprias ações.
 
 ## 4. SOLID na prática
 

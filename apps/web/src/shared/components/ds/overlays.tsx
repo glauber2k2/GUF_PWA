@@ -116,11 +116,23 @@ export interface SheetOptionProps {
   highlighted?: boolean;
   /** Ação de "adicionar" (borda tracejada). */
   dashed?: boolean;
+  /** Indisponível agora (ex.: sem internet); o subtítulo explica o motivo. */
+  disabled?: boolean;
   onClick?: () => void;
   className?: string;
 }
 
-export function SheetOption({ letter, icon, title, subtitle, highlighted = false, dashed = false, onClick, className }: SheetOptionProps) {
+export function SheetOption({
+  letter,
+  icon,
+  title,
+  subtitle,
+  highlighted = false,
+  dashed = false,
+  disabled = false,
+  onClick,
+  className,
+}: SheetOptionProps) {
   if (dashed) {
     return (
       <button
@@ -140,10 +152,12 @@ export function SheetOption({ letter, icon, title, subtitle, highlighted = false
   return (
     <button
       type="button"
+      disabled={disabled}
       onClick={onClick}
       className={cn(
         "flex w-full cursor-pointer items-center gap-3 rounded-[14px] px-3.5 text-left text-fg",
         highlighted ? "min-h-16 border-[1.5px] border-accent-text bg-accent/10" : "min-h-14 border border-border bg-surface",
+        disabled && "cursor-not-allowed opacity-55",
         className,
       )}
     >
