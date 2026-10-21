@@ -2,22 +2,55 @@
 
 import { useState } from "react";
 import { Check, ChevronDown, Dumbbell, Minus, Pause, Play, Plus, SkipForward, NotepadText, Timer, Trophy, type LucideIcon } from "lucide-react";
-import { formatClock, formatNumber, isSetRecord, MINUS_SIGN, type SetType } from "@guf/core";
+import {
+  formatClock,
+  formatNumber,
+  isSetRecord,
+  MINUS_SIGN,
+  type SetMetricDefinition,
+  type SetType,
+  type SetValues,
+  type WeightUnit,
+} from "@guf/core";
 import { cn } from "@/shared/helpers/class-names";
 import { SheenOverlay } from "./actions";
 import { Icon } from "./brand";
 import { PRBadge, SET_TYPE_META } from "./display";
 
-/** Colunas da linha de série: tipo · anterior · kg · reps · concluir. */
-const SET_GRID = "grid grid-cols-[40px_minmax(0,1fr)_72px_60px_52px] gap-1.5";
+/** Colunas da linha de série: tipo · anterior · medida 1 · medida 2 · concluir (kg/reps ou km/tempo). */
+const SET_GRID = "grid grid-cols-[40px_minmax(0,1fr)_72px_64px_52px] gap-1.5";
 
 const SET_TYPE_ORDER: SetType[] = ["normal", "warmup", "dropset", "failure"];
 
 const fmtCell = (v: number | null | undefined) => (typeof v === "number" ? formatNumber(v) : "—");
 
 export interface SetFieldState {
-  key: "kg" | "reps";
+  /** Chave da célula (a mesma de SetCell.key). */
+  key: string;
   state: "editing" | "error";
+}
+
+/** Célula medida da linha (carga, repetições, distância, tempo…), com o valor já formatado. */
+export interface SetCell {
+  key: string;
+  /** Nome acessível ("Carga", "Distância"). */
+  label: string;
+  /** Texto exibido ("82,5", "32:10", "—"). */
+  value: string;
+}
+
+/** Células da linha a partir das medidas do exercício (força: kg/reps; cardio: km/tempo). */
+export function metricCells(metric: SetMetricDefinition, values: SetValues, unit: WeightUnit): readonly [SetCell, SetCell] {
+  const [first, second] = metric.fields;
+  return [
+    { key: first.key, label: first.cellLabel, value: first.formatCell(values[first.key], unit) },
+    { key: second.key, label: second.cellLabel, value: second.formatCell(values[second.key], unit) },
+  ];
+}
+
+/** Títulos das duas colunas medidas para o SetRowHeader. */
+export function metricColumns(metric: SetMetricDefinition, unit: WeightUnit): readonly [string, string] {
+  return [metric.fields[0].header(unit), metric.fields[1].header(unit)];
 }
 
 export interface SetRowProps {
@@ -25,8 +58,8 @@ export interface SetRowProps {
   /** Número exibido nas séries normais. */
   number?: number;
   previous?: string;
-  weightKg?: number | null;
-  reps?: number | null;
+  /** As duas medidas da série, na ordem das colunas do cabeçalho. */
+  cells: readonly [SetCell, SetCell];
   done?: boolean;
   pr?: boolean;
   /** Anima o check ("pop") logo após concluir. */
@@ -34,15 +67,14 @@ export interface SetRowProps {
   field?: SetFieldState;
   onToggle?: () => void;
   onCycleType?: () => void;
-  onEditField?: (key: "kg" | "reps") => void;
+  onEditField?: (key: string) => void;
 }
 
 export function SetRow({
   type = "normal",
   number = 1,
   previous = "—",
-  weightKg,
-  reps,
+  cells,
   done = false,
   pr = false,
   pop = false,
@@ -54,20 +86,21 @@ export function SetRow({
   const meta = SET_TYPE_META[type];
   const label = type === "normal" ? String(number) : meta.letter;
 
-  const cell = (key: "kg" | "reps", value: number | null | undefined) => {
+  const cell = ({ key, label: cellLabel, value }: SetCell) => {
     const state = field?.key === key ? field.state : null;
     return (
       <button
+        key={key}
         type="button"
         onClick={() => onEditField?.(key)}
-        aria-label={key === "kg" ? "Carga" : "Repetições"}
+        aria-label={cellLabel}
         className={cn(
           "grid h-12 cursor-pointer place-items-center rounded-[10px] bg-surface-3 font-display text-[22px] font-semibold text-fg tabular-nums",
           state === "editing" && "border-[1.5px] border-focus",
           state === "error" && "border-[1.5px] border-danger",
         )}
       >
-        {fmtCell(value)}
+        {value}
       </button>
     );
   };
@@ -93,8 +126,7 @@ export function SetRow({
         <span className="min-w-0 truncate">{previous}</span>
         {pr && <PRBadge size="sm" animate />}
       </span>
-      {cell("kg", weightKg)}
-      {cell("reps", reps)}
+      {cells.map(cell)}
       <button
         type="button"
         aria-label={`${done ? "Desmarcar" : "Concluir"} série ${number}${done && pr ? " (recorde pessoal)" : ""}`}
@@ -113,8 +145,8 @@ export function SetRow({
   );
 }
 
-/** Cabeçalho das colunas de série; `unit` segue a unidade do usuário (o banco guarda kg). */
-export function SetRowHeader({ unit = "kg" }: { unit?: "kg" | "lb" }) {
+/** Cabeçalho das colunas de série; `columns` = títulos das duas medidas ("kg"/"Reps", "km"/"Tempo"). */
+export function SetRowHeader({ columns }: { columns: readonly [string, string] }) {
   return (
     <div
       className={cn(
@@ -124,8 +156,8 @@ export function SetRowHeader({ unit = "kg" }: { unit?: "kg" | "lb" }) {
     >
       <span className="text-center">Série</span>
       <span>Anterior</span>
-      <span className="text-center">{unit}</span>
-      <span className="text-center">Reps</span>
+      <span className="text-center">{columns[0]}</span>
+      <span className="text-center">{columns[1]}</span>
       <span />
     </div>
   );
@@ -257,7 +289,7 @@ export function ExerciseCard({
       </div>
       {expanded && (
         <>
-          <SetRowHeader />
+          <SetRowHeader columns={["kg", "Reps"]} />
           {sets.map((s, i) => {
             if (s.type === "normal") normalCount++;
             return (
@@ -266,8 +298,10 @@ export function ExerciseCard({
                 type={s.type}
                 number={normalCount}
                 previous={s.previous}
-                weightKg={s.weightKg}
-                reps={s.reps}
+                cells={[
+                  { key: "kg", label: "Carga", value: fmtCell(s.weightKg) },
+                  { key: "reps", label: "Repetições", value: fmtCell(s.reps) },
+                ]}
                 done={s.done}
                 pr={isRecord(s)}
                 pop={justDone === i}

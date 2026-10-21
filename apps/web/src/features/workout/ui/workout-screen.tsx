@@ -14,7 +14,7 @@ import {
   type FinishedWorkoutSummary,
   type WorkoutSet,
 } from "@guf/api";
-import { finishWorkoutMessage, formatElapsed, nextSetLabel, setsProgressLabel, toDisplayWeight, toLocalISODate } from "@guf/core";
+import { finishWorkoutMessage, formatElapsed, nextSetLabel, pickSetValues, setsProgressLabel, toLocalISODate } from "@guf/core";
 import { useAppShell, useRaisedToast, type ToastOptions } from "@/features/app-shell";
 import {
   Banner,
@@ -185,7 +185,7 @@ function outboxSink(sessionId: string, queue: (op: OutboxOp) => void): WorkoutCh
       kind: "saveSet",
       sessionId,
       sessionExerciseId,
-      set: { id: set.id, setNumber: set.setNumber, setType: set.setType, weightKg: set.weightKg, reps: set.reps, isCompleted: set.isCompleted },
+      set: { id: set.id, setNumber: set.setNumber, setType: set.setType, ...pickSetValues(set), isCompleted: set.isCompleted },
     });
   return {
     saveSet,
@@ -244,8 +244,8 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const startRestAfter = (exercises: ExerciseView[], exerciseIndex: number, setIndex: number) => {
     const ex = exercises[exerciseIndex];
     if (!ex) return;
-    const labels = exercises.map((e) => ({ exerciseName: e.name, sets: e.sets.map((s) => ({ ...s, weightKg: toDisplayWeight(s.weightKg, unit) })) }));
-    startRest(ex.restSeconds, nextSetLabel(labels, exerciseIndex, setIndex));
+    const labels = exercises.map((e) => ({ exerciseName: e.name, muscleGroup: e.muscleGroup, sets: e.sets }));
+    startRest(ex.restSeconds, nextSetLabel(labels, exerciseIndex, setIndex, unit));
   };
 
   const editing = useWorkoutEditing({

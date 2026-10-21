@@ -651,18 +651,8 @@
   from { opacity: 0; transform: translateX(8px); }
   to { opacity: 1; transform: none; }
 }
-/* GUF AI: campo da pergunta subindo junto com o teclado (quique leve + brilho volt que assenta no foco). */
+/* GUF AI: campo da pergunta acompanhando o teclado (desliza pouco e aparece; sem quique). */
 @keyframes guf-ai-lift {
-  0% {
-    transform: translateY(24px) scale(0.97);
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 0%, transparent);
-  }
-  60% {
-    transform: translateY(-4px) scale(1.01);
-    box-shadow: 0 0 0 7px color-mix(in oklab, var(--accent) 22%, transparent);
-  }
-  100% {
-    transform: none;
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 14%, transparent);
-  }
+  from { opacity: 0.6; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
 }

@@ -4,6 +4,7 @@
  * Lê o treino do mock do Resumo (mesmos cenários) e "salvar" não grava nada.
  */
 import { apiError, DEFAULT_REST_SECONDS, type GufClient, type SummaryExercise, type WorkoutEditApi, type WorkoutExercise } from "@guf/api";
+import { pickSetValues } from "@guf/core";
 import { mockEvolutionApi } from "./evolution";
 
 const LATENCY_MS = 450;
@@ -26,8 +27,7 @@ function toEditableExercise(exercise: SummaryExercise, best1RmKg: number | null)
       id: `${exercise.id}-serie-${i + 1}`,
       setNumber: s.setNumber,
       setType: s.setType,
-      weightKg: s.weightKg,
-      reps: s.reps,
+      ...pickSetValues(s),
       isCompleted: true,
       previous: null,
     })),

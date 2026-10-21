@@ -1,4 +1,4 @@
-import type { ActivePeriod, SetType, WeightUnit } from "@guf/core";
+import { pickSetValues, type ActivePeriod, type SetType, type SetValues, type WeightUnit } from "@guf/core";
 import type { Database } from "@guf/types";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
@@ -27,24 +27,20 @@ export interface LibraryExercise {
   isCustom: boolean;
 }
 
-/** Desempenho de uma série no último treino (coluna "Anterior"). Peso em kg. */
-export interface PreviousSet {
+/** Desempenho de uma série no último treino (coluna "Anterior"). Peso em kg, tempo em segundos. */
+export interface PreviousSet extends SetValues {
   setNumber: number;
-  weightKg: number | null;
-  reps: number | null;
   setType: SetType;
 }
 
-/** Série registrada no treino (set_logs). Peso sempre em kg. */
-export interface WorkoutSet {
+/** Série registrada no treino (set_logs). Peso em kg; cardio usa distância (km) e tempo (s). */
+export interface WorkoutSet extends SetValues {
   id: string;
   setNumber: number;
   setType: SetType;
-  weightKg: number | null;
-  reps: number | null;
   isCompleted: boolean;
   /** Desempenho na mesma posição do último treino (coluna "Anterior"). */
-  previous: { weightKg: number | null; reps: number | null } | null;
+  previous: SetValues | null;
 }
 
 /** Exercício do treino (session_exercises + dados do exercício). */
@@ -106,13 +102,11 @@ export interface ExerciseContext {
   routineNote: string | null;
 }
 
-export interface SetInput {
+export interface SetInput extends SetValues {
   /** id gerado no aparelho (crypto.randomUUID()). */
   id: string;
   setNumber: number;
   setType: SetType;
-  weightKg: number | null;
-  reps: number | null;
   isCompleted: boolean;
 }
 
@@ -206,6 +200,12 @@ const FREE_WORKOUT_NAME = "Treino livre";
 const asSetType = (value: string): SetType =>
   value === "warmup" || value === "dropset" || value === "failure" ? value : "normal";
 
+/** Colunas medidas de set_logs → valores da série (numeric chega como texto em alguns casos). */
+export function toSetValues(row: { weight_kg: number | null; reps: number | null; distance_km?: number | null; duration_seconds?: number | null }): SetValues {
+  const toNumber = (value: number | null | undefined) => (value === null || value === undefined ? null : Number(value));
+  return { weightKg: toNumber(row.weight_kg), reps: row.reps, distanceKm: toNumber(row.distance_km), durationSeconds: row.duration_seconds ?? null };
+}
+
 /** set_logs a gravar: user_id, session_id, exercise_id e completed_at vêm por gatilho (CLAUDE.md). */
 function setRow(sessionExerciseId: string, set: SetInput): SetLogInsert {
   return {
@@ -215,6 +215,8 @@ function setRow(sessionExerciseId: string, set: SetInput): SetLogInsert {
     set_type: set.setType,
     weight_kg: set.weightKg,
     reps: set.reps,
+    distance_km: set.distanceKm,
+    duration_seconds: set.durationSeconds,
     is_completed: set.isCompleted,
   } as SetLogInsert;
 }
@@ -254,7 +256,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
       context[id] = {
         previous: (lastRes.data ?? [])
           .filter((p) => p.exercise_id === id)
-          .map((p) => ({ setNumber: p.set_number, weightKg: p.weight_kg, reps: p.reps, setType: asSetType(p.set_type) })),
+          .map((p) => ({ setNumber: p.set_number, setType: asSetType(p.set_type), ...toSetValues(p) })),
         best1RmKg: bests[i] ?? null,
         restSeconds: planned?.rest_seconds ?? DEFAULT_REST_SECONDS,
         routineNote: planned?.notes ?? null,
@@ -272,7 +274,7 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
       client
         .from("workout_sessions")
         .select(
-          "id, name, status, routine_id, performed_on, started_at, notes, routines(projects(name)), workout_active_periods(started_at, ended_at), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group, equipment), set_logs(id, set_number, set_type, weight_kg, reps, is_completed))",
+          "id, name, status, routine_id, performed_on, started_at, notes, routines(projects(name)), workout_active_periods(started_at, ended_at), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group, equipment), set_logs(id, set_number, set_type, weight_kg, reps, distance_km, duration_seconds, is_completed))",
         )
         .eq("id", sessionId)
         .order("position", { referencedTable: "session_exercises", ascending: true })
@@ -319,10 +321,9 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
               id: l.id,
               setNumber: l.set_number,
               setType: asSetType(l.set_type),
-              weightKg: l.weight_kg,
-              reps: l.reps,
+              ...toSetValues(l),
               isCompleted: l.is_completed,
-              previous: prev ? { weightKg: prev.weightKg, reps: prev.reps } : null,
+              previous: prev ? pickSetValues(prev) : null,
             };
           }),
         };

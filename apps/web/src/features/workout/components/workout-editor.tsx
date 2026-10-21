@@ -94,7 +94,8 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
         open={Boolean(editing.edit && editing.editSet)}
         title={editing.setEditTitle()}
         set={editing.editSet}
-        field={editing.edit?.field ?? "weightKg"}
+        metric={editing.editMetric}
+        field={editing.edit?.field ?? editing.editMetric.fields[0].key}
         unit={unit}
         onFieldChange={editing.changeEditField}
         onValueChange={editing.changeEditValue}

@@ -1,5 +1,6 @@
 import { recordSetIndex, sessionTotals, type SetType } from "@guf/core";
 import type { SummaryExercise, WorkoutSummaryRecord } from "./evolution";
+import { toSetValues } from "./workout";
 
 /* =====================================================================
  * Montagem do resumo de um treino (interno do pacote, fora do index):
@@ -12,6 +13,9 @@ export interface CompletedSetRow {
   set_type: string;
   weight_kg: number | null;
   reps: number | null;
+  /** Cardio (ausente em respostas de antes das colunas de cardio). */
+  distance_km?: number | null;
+  duration_seconds?: number | null;
 }
 
 /** Exercício do treino com as séries concluídas, na ordem. */
@@ -27,7 +31,7 @@ export interface SummaryExerciseInput {
 /** Melhor 1RM antes do treino e o dia em que foi feito (null = primeira vez). */
 export type PreviousBest = { oneRmKg: number; performedOn: string } | null;
 
-const toPerformed = (l: CompletedSetRow) => ({ setType: l.set_type as SetType, weightKg: l.weight_kg, reps: l.reps });
+const toPerformed = (l: CompletedSetRow) => ({ setType: l.set_type as SetType, ...toSetValues(l) });
 
 /**
  * Exercício do resumo com totais e a série do recorde marcada.

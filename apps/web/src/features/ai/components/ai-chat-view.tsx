@@ -72,7 +72,7 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
     <div
       // Espaço do teclado virtual (valor medido): o campo da pergunta sobe e fica acima dele.
       style={{ paddingBottom: keyboardInset }}
-      className="relative flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-enter"
+      className="relative flex min-w-0 flex-1 flex-col transition-[padding] duration-[280ms] ease-standard"
     >
       <header className="flex h-[60px] flex-none items-center gap-2.5 border-b border-border bg-background/90 pr-2 pl-1 backdrop-blur-[12px]">
         <IconButton icon={ChevronDown} label="Fechar GUF AI" variant="ghost" onClick={onClose} />

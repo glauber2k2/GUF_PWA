@@ -3,7 +3,7 @@ import type { GufClient } from "./client";
 import { exerciseHistories } from "./history";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { FREE_WORKOUT_NAME, sessionDurationSeconds, toWeightUnit } from "./shared";
-import { DEFAULT_REST_SECONDS, type NewWorkoutExercise, type WorkoutExercise } from "./workout";
+import { DEFAULT_REST_SECONDS, toSetValues, type NewWorkoutExercise, type WorkoutExercise } from "./workout";
 
 /* =====================================================================
  * Contrato — Editar um treino concluído (resumo → "Editar treino")
@@ -75,7 +75,7 @@ export const getEditableWorkout: WorkoutEditApi["getEditableWorkout"] = async (c
       client
         .from("workout_sessions")
         .select(
-          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, notes, session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group, equipment), set_logs(id, set_number, set_type, weight_kg, reps, is_completed))",
+          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, notes, session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group, equipment), set_logs(id, set_number, set_type, weight_kg, reps, distance_km, duration_seconds, is_completed))",
         )
         .eq("id", sessionId)
         .order("position", { referencedTable: "session_exercises", ascending: true })
@@ -117,8 +117,7 @@ export const getEditableWorkout: WorkoutEditApi["getEditableWorkout"] = async (c
               id: l.id,
               setNumber: l.set_number,
               setType: asSetType(l.set_type),
-              weightKg: l.weight_kg,
-              reps: l.reps,
+              ...toSetValues(l),
               isCompleted: true,
               previous: null,
             })),
@@ -157,7 +156,15 @@ export const saveWorkoutEdit: WorkoutEditApi["saveWorkoutEdit"] = async (client,
         // Só as concluídas ficam (mesma regra do finish_workout).
         sets: e.sets
           .filter((set) => set.isCompleted)
-          .map((set, index) => ({ id: set.id, set_number: index + 1, set_type: set.setType, weight_kg: set.weightKg, reps: set.reps })),
+          .map((set, index) => ({
+            id: set.id,
+            set_number: index + 1,
+            set_type: set.setType,
+            weight_kg: set.weightKg,
+            reps: set.reps,
+            distance_km: set.distanceKm,
+            duration_seconds: set.durationSeconds,
+          })),
       })),
     });
     return error ? { data: null, error: toApiError(error) } : { data: null, error: null };

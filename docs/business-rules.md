@@ -75,6 +75,8 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 
 ## 4. Treino
 
+- **Cardio** (grupo muscular `cardio`): cada série registra **distância (km)** e **tempo** em vez de carga e repetições. Tempo editado em minutos (ex.: 32,5 min = 32:30) e mostrado como 32:10; distância com até 2 casas. Atalhos: distância −0,5/+0,5/+1/+5 km, tempo −1/+1/+5/+10 min. "Anterior", série nova e início pela rotina copiam distância e tempo do último treino. Cardio não entra no volume, no 1RM nem nos recordes; no resumo o exercício mostra o total de distância e tempo.
+
 ### 4.1 Iniciar e retomar
 
 | Regra | Onde |
