@@ -38,7 +38,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import type { ExerciseSet } from "@/shared/components/ds/workout";
-import type { ReorderItem } from "@/shared/components/ds/navigation";
+import { BOTTOM_NAV_ITEMS, type NavItem, type ReorderItem } from "@/shared/components/ds/navigation";
 import type { SummaryStat } from "@/shared/components/ds/cards";
 import type { VolumeLevel } from "@/shared/components/ds/display";
 
@@ -301,3 +301,8 @@ export const START_SHEET = {
     { letter: "B", title: "Treino B – Costas e Bíceps", subtitle: "há 2 dias", highlighted: false },
   ],
 };
+
+/** Menu inferior com alerta na aba Perfil (ex.: pedidos para seguir). */
+export const NAV_ITEMS_WITH_BADGE: NavItem[] = BOTTOM_NAV_ITEMS.map((item) =>
+  item.label === "Perfil" ? { ...item, badge: { label: "2 solicitações para seguir" } } : item,
+);

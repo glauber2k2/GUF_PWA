@@ -43,13 +43,16 @@ function unwrap<T>(result: { data: T; error: null } | { data: null; error: ApiEr
   return result.data as T;
 }
 
-export function useMySocial() {
+/** Seu @, privacidade e contagens; `pollMs` reconsulta com o app visível e ao voltar para ele (ex.: alerta do menu). */
+export function useMySocial({ pollMs }: { pollMs?: number } = {}) {
   const { user } = useAuth();
   const { api, dev } = useSocialSource();
   return useQuery({
     queryKey: [SOCIAL_KEY, "me", user?.id, dev.scenario],
     enabled: Boolean(user) || dev.scenario !== null,
     queryFn: async () => unwrap(await api.getMySocial(getSupabaseClient())),
+    refetchInterval: pollMs,
+    refetchOnWindowFocus: pollMs !== undefined,
   });
 }
 

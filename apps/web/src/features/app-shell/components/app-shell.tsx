@@ -5,12 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { ListPlus, Play, Plus } from "lucide-react";
 import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BOTTOM_NAV_ITEMS, BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack, type NavItem } from "@/shared/components/ds";
+import { BOTTOM_NAV_ITEMS, BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack, type NavBadge, type NavItem } from "@/shared/components/ds";
 import { useDevHomeState } from "@/features/home";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { useHomeSummary, useStartWorkout } from "@/features/home";
 import { hasPendingFor, isClosedLocally } from "@/shared/offline/outbox";
 import { createToastStore, TOAST_DURATION_MS, type ToastOptions } from "@/store/global/toast.store";
+import { useNavAlerts, type NavAlert, type NavAlertTab } from "@/store/global/nav-alerts.store";
 import { cn } from "@/shared/helpers/class-names";
 import { MiniWorkoutCard } from "@/features/workout";
 import { newRoutinePathFor } from "@/features/projects";
@@ -42,6 +43,24 @@ function buildNavItems(): NavItem[] {
     Perfil: TOUR_TARGETS.profileTab,
   };
   return BOTTOM_NAV_ITEMS.map((item) => ({ ...item, tourTarget: targets[item.label] }));
+}
+
+/** Rótulo do item do menu de cada aba que pode ter alerta. */
+const ALERT_TAB_LABELS: Record<NavAlertTab, string> = { profile: "Perfil" };
+
+/** Junta os textos dos alertas de uma aba no indicador do item. */
+function toNavBadge(alerts: readonly NavAlert[]): NavBadge {
+  return { label: alerts.map((a) => a.label).join(", ") };
+}
+
+/** Itens do menu com a bolinha das abas que têm alerta publicado (quem publica são as features). */
+function useNavItemsWithAlerts(items: NavItem[]): NavItem[] {
+  const alerts = useNavAlerts();
+  return useMemo(() => {
+    const badges = new Map<string, NavBadge>();
+    for (const [tab, list] of alerts) badges.set(ALERT_TAB_LABELS[tab], toNavBadge(list));
+    return items.map((item) => ({ ...item, badge: badges.get(item.label) }));
+  }, [items, alerts]);
 }
 
 /** Limite do overlay "Iniciando treino" depois que a sessão foi criada (se a tela do treino não abrir). */
@@ -113,7 +132,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   // Contador: mais de uma barra pode pedir ao mesmo tempo (ex.: seletor aberto sobre o treino).
   const [raisedCount, setRaisedCount] = useState(0);
   const [startOpen, setStartOpen] = useState(false);
-  const [navItems] = useState(buildNavItems);
+  const [baseNavItems] = useState(buildNavItems);
+  const navItems = useNavItemsWithAlerts(baseNavItems);
 
   const showToast = toasts.show;
   // Treino encerrado pelo servidor (finalização automática): fecha no aparelho e mostra o resumo.
