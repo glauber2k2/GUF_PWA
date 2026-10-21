@@ -126,7 +126,15 @@ export function WorkoutExerciseCard({
             <Icon icon={Dumbbell} size={20} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
-            <span className="truncate text-[17px] leading-[22px] font-semibold">{e.name}</span>
+            {/* No modo de reordenar o card tem altura fixa (REORDER_CARD_PX): o nome fica em uma linha. */}
+            <span
+              className={cn(
+                "text-[17px] leading-[22px] font-semibold",
+                reorder ? "truncate" : "line-clamp-2 [overflow-wrap:anywhere]",
+              )}
+            >
+              {e.name}
+            </span>
             <span className={cn("flex items-center gap-1.5", reorder ? "flex-nowrap overflow-hidden" : "flex-wrap")}>
               <Tag size="sm">{muscleGroupLabel(e.muscleGroup)}</Tag>
               {/* No modo de reordenar, só grupo e progresso (ocultos, não removidos: ver `reorder`). */}
