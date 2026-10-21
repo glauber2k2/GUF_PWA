@@ -112,11 +112,42 @@ async function loadHistory(db: SupabaseClient, conversationId: string): Promise<
     .map((m) => ({ role: m.role, content: redactPersonalData(m.content) }));
 }
 
-/** Mensagem do erro do provedor para o app (sem detalhes internos). */
+// Uma nova tentativa só: no plano gratuito o provedor responde 429 pedindo para esperar quase um
+// minuto, e várias esperas estouravam o tempo da função com a tela parada em "pensando".
+const MAX_RETRIES = 1;
+const TIMEOUT = { totalMs: 60_000, firstChunkMs: 30_000 };
+
+interface ProviderError {
+  name?: string;
+  statusCode?: number;
+  message?: string;
+  lastError?: unknown;
+  cause?: unknown;
+}
+
+/** Erro do provedor por baixo dos invólucros do AI SDK (RetryError.lastError, cause). */
+function unwrapProviderError(error: unknown): ProviderError {
+  let current = (error ?? {}) as ProviderError;
+  for (let depth = 0; depth < 3 && current.statusCode === undefined; depth++) {
+    const inner = (current.lastError ?? current.cause) as ProviderError | undefined;
+    if (!inner) break;
+    current = inner;
+  }
+  return current;
+}
+
+/** Mensagem para o app, com o código do provedor para diagnóstico (nada da conversa). */
 function toChatErrorMessage(error: unknown): string {
-  const status = (error as { statusCode?: number } | null)?.statusCode;
-  if (status === 429) return "O GUF AI está muito procurado agora. Tente de novo em alguns minutos.";
-  return "O GUF AI não conseguiu responder agora. Tente de novo em instantes.";
+  const { statusCode, name } = unwrapProviderError(error);
+  if (statusCode === 429) return "O GUF AI está muito procurado agora. Tente de novo em alguns minutos. (código 429)";
+  const code = statusCode ?? name ?? "desconhecido";
+  return `O GUF AI não conseguiu responder agora. Tente de novo em instantes. (código ${code})`;
+}
+
+/** Log do erro sem conteúdo da conversa: tipo, status e o começo da mensagem do provedor. */
+function logProviderError(error: unknown) {
+  const { name, statusCode, message } = unwrapProviderError(error);
+  console.error("GUF AI: falha do provedor", { name, statusCode, message: message?.slice(0, 300) });
 }
 
 Deno.serve(async (req) => {
@@ -167,6 +198,9 @@ Deno.serve(async (req) => {
     tools: buildDataTools({ db, userId: user.id, unit, today }),
     stopWhen: isStepCount(MAX_STEPS),
     maxOutputTokens: MAX_OUTPUT_TOKENS,
+    maxRetries: MAX_RETRIES,
+    timeout: TIMEOUT,
+    onError: ({ error }) => logProviderError(error),
     temperature: 0.4,
     abortSignal: req.signal,
   });
@@ -176,6 +210,8 @@ Deno.serve(async (req) => {
     stream: toUIMessageStream({
       stream: result.stream,
       generateMessageId: () => crypto.randomUUID(),
+      // O raciocínio interno do modelo não vai para a tela (deixava a resposta parada em "pensando").
+      sendReasoning: false,
       onError: toChatErrorMessage,
       onEnd: async ({ responseMessage }) => {
         const text = responseMessage.parts
