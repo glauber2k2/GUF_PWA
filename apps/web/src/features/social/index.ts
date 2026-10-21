@@ -8,3 +8,4 @@ export { FollowRequestsScreen } from "./ui/follow-requests-screen";
 export { PeopleSearchScreen } from "./ui/people-search-screen";
 export { PersonScreen } from "./ui/person-screen";
 export { SocialProfileScreen } from "./ui/social-profile-screen";
+export { MemberWorkoutScreen } from "./ui/member-workout-screen";

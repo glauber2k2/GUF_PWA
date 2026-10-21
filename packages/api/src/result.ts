@@ -62,6 +62,7 @@ const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
   GS005: "follow_limit",
   GS006: "history_hidden",
   GS008: "handle_invalid",
+  GS009: "session_not_found", // get_member_workout: inexistente OU sem permissão (mesma resposta de propósito)
 };
 
 /** Converte erros do PostgREST/rede no ApiError do app. */

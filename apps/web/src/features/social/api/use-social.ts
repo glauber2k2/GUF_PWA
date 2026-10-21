@@ -2,7 +2,15 @@
 
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SOCIAL_SEARCH_MIN_LENGTH, normalizeHandle } from "@guf/core";
-import { socialApi, type ApiError, type ConnectionKind, type FollowStatus, type SocialApi, type SocialSettings } from "@guf/api";
+import {
+  socialApi,
+  type ApiError,
+  type ConnectionKind,
+  type FollowStatus,
+  type MemberWorkoutDetail,
+  type SocialApi,
+  type SocialSettings,
+} from "@guf/api";
 import { invalidateSocialData, SOCIAL_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { mockSocialApi, setSocialMockScenario } from "@/mocks/social";
@@ -78,6 +86,17 @@ export function useMemberWorkouts(userId: string | null, enabled: boolean) {
     queryFn: async ({ pageParam }) =>
       unwrap(await api.listMemberWorkouts(getSupabaseClient(), { userId, before: pageParam, limit: MEMBER_WORKOUTS_PAGE })),
     getNextPageParam: (page) => (page.length === MEMBER_WORKOUTS_PAGE ? (page.at(-1)?.finishedAt ?? null) : null),
+  });
+}
+
+/** Treino concluído de outra pessoa (só online; a permissão é conferida no banco). */
+export function useMemberWorkout(sessionId: string | null) {
+  const { user } = useAuth();
+  const { api, dev } = useSocialSource();
+  return useQuery<MemberWorkoutDetail, ApiError>({
+    queryKey: [SOCIAL_KEY, "workout", user?.id, sessionId, dev.scenario],
+    enabled: (Boolean(user) || dev.scenario !== null) && Boolean(sessionId),
+    queryFn: async () => unwrap(await api.getMemberWorkout(getSupabaseClient(), { sessionId: sessionId ?? "" })),
   });
 }
 

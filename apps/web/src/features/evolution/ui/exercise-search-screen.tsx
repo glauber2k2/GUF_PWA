@@ -7,7 +7,7 @@ import { filterTrainedExercises, formatDayMonth, fromLocalISODate, MUSCLE_GROUP_
 import { Banner, Chip, EmptyState, Icon, SearchField, Skeleton, Tag } from "@/shared/components/ds";
 import { useEvolutionSource, useTrainedExercises } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
-import { DetailHeader } from "@/features/evolution/components/detail-header";
+import { DetailHeader } from "@/shared/components/detail-header";
 import { exercisePath } from "@/features/evolution/helpers/paths";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 

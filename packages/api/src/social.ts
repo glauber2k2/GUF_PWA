@@ -1,7 +1,9 @@
-import type { SocialRelationship, SocialVisibility } from "@guf/core";
+import { durationSeconds, pauseStats, type SocialRelationship, type SocialVisibility, type WeightUnit } from "@guf/core";
 import type { GufClient } from "./client";
+import type { WorkoutSummaryBase, WorkoutSummaryRecord } from "./evolution";
 import { apiError, toApiError, type ApiResult } from "./result";
-import { resolveAvatarUrl } from "./shared";
+import { FREE_WORKOUT_NAME, resolveAvatarUrl, sessionDurationSeconds, toWeightUnit } from "./shared";
+import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals, type CompletedSetRow } from "./summary-builder";
 
 /* =====================================================================
  * Contrato — perfil social, seguidores e busca (SÓ ONLINE: quem chama trata network_error)
@@ -88,6 +90,11 @@ export interface MemberWorkout {
   records: number;
 }
 
+/** Treino concluído de outra pessoa (ou o seu): o resumo, sem observações, projeto nem rotina. */
+export interface MemberWorkoutDetail extends WorkoutSummaryBase {
+  owner: PersonCard;
+}
+
 type Result<T = null> = Promise<ApiResult<T>>;
 
 export interface SocialApi {
@@ -110,6 +117,8 @@ export interface SocialApi {
   getMemberProfile: (client: GufClient, userId: string | null) => Result<MemberProfile>;
   getMemberEvolution: (client: GufClient, input: { userId: string | null; weeks: number }) => Result<EvolutionWeek[]>;
   listMemberWorkouts: (client: GufClient, input: { userId: string | null; before?: string | null; limit?: number }) => Result<MemberWorkout[]>;
+  /** Detalhe de um treino do histórico (session_not_found = inexistente ou sem permissão; history_hidden). */
+  getMemberWorkout: (client: GufClient, input: { sessionId: string }) => Result<MemberWorkoutDetail>;
 }
 
 /* =====================================================================
@@ -320,6 +329,73 @@ export const listMemberWorkouts: SocialApi["listMemberWorkouts"] = async (client
   }
 };
 
+/** jsonb do get_member_workout (migration member_workout_detail). */
+interface MemberWorkoutRow {
+  session_id: string;
+  workout_name: string | null;
+  performed_on: string;
+  started_at: string;
+  finished_at: string | null;
+  active_seconds: number | null;
+  period_count: number;
+  owner: { user_id: string; handle: string | null; name: string | null; avatar_url: string | null };
+  day_session_ids: string[];
+  exercises: Array<{
+    id: string;
+    exercise_id: string;
+    name: string;
+    muscle_group: string;
+    record_e1rm: number | null;
+    previous_e1rm: number | null;
+    previous_on: string | null;
+    sets: CompletedSetRow[];
+  }>;
+}
+
+function toMemberWorkout(client: GufClient, row: MemberWorkoutRow, weightUnit: WeightUnit): MemberWorkoutDetail {
+  const records: WorkoutSummaryRecord[] = [];
+  const exercises = row.exercises.map((e) => {
+    const record1RmKg = e.record_e1rm === null ? null : Number(e.record_e1rm);
+    const previous = e.previous_e1rm === null || e.previous_on === null ? null : { oneRmKg: Number(e.previous_e1rm), performedOn: e.previous_on };
+    const exercise = buildSummaryExercise({ id: e.id, exerciseId: e.exercise_id, name: e.name, muscleGroup: e.muscle_group, note: null, sets: e.sets }, record1RmKg);
+    const record = buildSummaryRecord(exercise, record1RmKg, previous);
+    if (record) records.push(record);
+    return exercise;
+  });
+  const duration = sessionDurationSeconds(row);
+  return {
+    id: row.session_id,
+    name: row.workout_name ?? FREE_WORKOUT_NAME,
+    performedOn: row.performed_on,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at,
+    durationSeconds: duration,
+    ...pauseStats(row.period_count, durationSeconds(row.started_at, row.finished_at), duration),
+    ...buildSummaryTotals(exercises),
+    exercises,
+    records,
+    daySessionIds: row.day_session_ids.includes(row.session_id) ? row.day_session_ids : [row.session_id],
+    weightUnit,
+    owner: toCard(client, row.owner),
+  };
+}
+
+export const getMemberWorkout: SocialApi["getMemberWorkout"] = async (client, { sessionId }) => {
+  try {
+    const [workoutRes, profileRes] = await Promise.all([
+      client.rpc("get_member_workout", { p_session_id: sessionId }),
+      client.from("profiles").select("weight_unit").maybeSingle(),
+    ]);
+    if (workoutRes.error) return { data: null, error: toApiError(workoutRes.error) };
+    if (!workoutRes.data) return { data: null, error: apiError("session_not_found") };
+    // O jsonb não tem tipo gerado: o formato é o montado em get_member_workout.
+    const row = workoutRes.data as unknown as MemberWorkoutRow;
+    return { data: toMemberWorkout(client, row, toWeightUnit(profileRes.data?.weight_unit)), error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const socialApi = {
   getMySocial,
   updateHandle,
@@ -336,4 +412,5 @@ export const socialApi = {
   getMemberProfile,
   getMemberEvolution,
   listMemberWorkouts,
+  getMemberWorkout,
 } satisfies SocialApi;
