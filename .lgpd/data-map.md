@@ -31,6 +31,7 @@
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A019 | Competição e pontuação semanal | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A020 | Avisos no celular (Web Push): competição e seguidores | Não | Possível | **Avaliado (RIPD v0.4)** | Em produção (testado em 2026-10-20) |
+| A021 | GUF AI: perguntas sobre os próprios treinos (IA) | Não (medidas e observações ficam de fora) | Possível | **Avaliado (RIPD ripd-guf-ai v0.1)** | Beta (plano gratuito do provedor; só testadores) |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.

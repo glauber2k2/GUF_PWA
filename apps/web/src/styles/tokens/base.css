@@ -628,3 +628,26 @@
   0%, 100% { transform: rotate(-0.6deg); }
   50% { transform: rotate(0.6deg); }
 }
+
+/* GUF AI: estrela do símbolo pisca, anel do botão pulsa, cursor da resposta e ícone flutuando. */
+@keyframes guf-ai-twinkle {
+  0%, 82%, 100% { transform: scale(1) rotate(0); }
+  88% { transform: scale(0.7) rotate(45deg); }
+  94% { transform: scale(1.12) rotate(90deg); }
+}
+@keyframes guf-ai-halo {
+  0% { transform: scale(1); opacity: 0.45; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+@keyframes guf-ai-caret {
+  0%, 45% { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+@keyframes guf-ai-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes guf-ai-hint {
+  from { opacity: 0; transform: translateX(8px); }
+  to { opacity: 1; transform: none; }
+}

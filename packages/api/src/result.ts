@@ -15,6 +15,9 @@ export type ApiErrorCode =
   | "person_not_found"
   | "follow_limit"
   | "history_hidden"
+  | "ai_daily_limit"
+  | "ai_message_invalid"
+  | "ai_unavailable"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -43,6 +46,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   person_not_found: "Não encontramos essa pessoa. Confira o nome de usuário ou peça um novo link.",
   follow_limit: "Você atingiu o limite de pedidos para seguir de hoje. Tente de novo amanhã.",
   history_hidden: "Esta pessoa ocultou o histórico de treinos. As estatísticas e a pontuação continuam visíveis.",
+  ai_daily_limit: "Você chegou ao limite de perguntas ao GUF AI nas últimas 24 horas. Tente de novo mais tarde.",
+  ai_message_invalid: "Mensagem muito longa. Escreva até 2.000 caracteres e envie de novo.",
+  ai_unavailable: "O GUF AI não conseguiu responder agora. Tente de novo em instantes.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",

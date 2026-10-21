@@ -97,6 +97,10 @@
   --color-legal-note: color-mix(in oklab, var(--warning) 12%, var(--surface));
   --color-legal-changes: color-mix(in oklab, var(--info) 12%, var(--surface));
   --color-sheen: var(--sheen);
+  /* GUF AI: selos e bolha da pergunta em volt suave; contorno do campo em foco */
+  --color-ai-tint: color-mix(in oklab, var(--accent) 14%, transparent);
+  --color-ai-bubble: color-mix(in oklab, var(--accent) 16%, var(--surface));
+  --color-ai-focus-border: color-mix(in oklab, var(--accent) 55%, var(--border-strong));
 
   --color-google-surface: var(--google-surface);
   --color-google-surface-hover: var(--google-surface-hover);
@@ -169,6 +173,7 @@
   --shadow-thumb: var(--shadow-thumb);
   --shadow-focus: var(--focus-ring);
   --shadow-pr-glow: var(--shadow-pr-glow);
+  --shadow-ai-focus: 0 0 0 3px color-mix(in oklab, var(--accent) 14%, transparent);
   /* Brilho dourado do troféu nas telas cheias dos stories */
   /* Brilho dourado do cartão do recorde (story 12 · Selo dourado) */
   --shadow-story-pr: 0 0 64px color-mix(in oklab, var(--pr) 28%, transparent);
@@ -199,6 +204,12 @@
   --animate-guf-from-left: guf-from-left 0.25s var(--ease-enter) both;
   --animate-guf-from-right: guf-from-right 0.25s var(--ease-enter) both;
   --animate-guf-fade: guf-fade 0.15s var(--ease-standard) both;
+  /* GUF AI (ver base.css) */
+  --animate-guf-ai-twinkle: guf-ai-twinkle 5s var(--ease-standard) 1.4s infinite;
+  --animate-guf-ai-halo: guf-ai-halo 2.4s var(--ease-standard) 1s 3 both;
+  --animate-guf-ai-caret: guf-ai-caret 0.9s linear infinite;
+  --animate-guf-ai-float: guf-ai-float 3.6s var(--ease-standard) infinite;
+  --animate-guf-ai-hint: guf-ai-hint 0.3s var(--ease-enter) both;
   /* Leitor de documentos: seção destacada ao tocar no sumário (duas cópias para reiniciar) */
   --animate-guf-legal-flash-a: guf-legal-flash-a 1.4s var(--ease-standard) both;
   --animate-guf-legal-flash-b: guf-legal-flash-b 1.4s var(--ease-standard) both;

@@ -93,6 +93,8 @@ interface AppShellApi {
    * estiver no aparelho, avisa e leva ao resumo; devolve true. Em andamento ou sem internet: false.
    */
   resolveClosedWorkout: (sessionId: string) => Promise<boolean>;
+  /** Mini card do treino em andamento visível acima do menu (botões flutuantes sobem para não cobri-lo). */
+  isMiniCardVisible: boolean;
 }
 
 const AppShellContext = createContext<AppShellApi | null>(null);
@@ -189,6 +191,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     [router, setStartOpen],
   );
 
+  const showMiniCard = Boolean(active) && !immersive;
+
   const api = useMemo<AppShellApi>(
     () => ({
       showToast,
@@ -199,8 +203,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       startWorkout: startWorkoutFor,
       openWorkout,
       resolveClosedWorkout,
+      isMiniCardVisible: showMiniCard,
     }),
-    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout],
+    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout, showMiniCard],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
@@ -249,7 +254,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const inProgress = active
     ? { id: active.sessionId, name: active.name, startedAt: active.clock.startedAt }
     : (summary.data?.inProgress ?? null);
-  const showMiniCard = Boolean(active) && !immersive;
 
   const onNav = (index: number) => {
     // "Treinar": com treino aberto, retoma (um treino em andamento por vez); senão, escolhe o que iniciar.
