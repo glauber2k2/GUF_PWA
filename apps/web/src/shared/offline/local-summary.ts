@@ -58,6 +58,7 @@ export function summaryFromWorkout(w: ActiveWorkout, finishedAt: Date): WorkoutS
     routineId: w.routineId,
     performedOn: w.performedOn,
     startedAt: w.startedAt,
+    editedAt: null,
     finishedAt: finishedAt.toISOString(),
     durationSeconds: active,
     ...pauseStats(w.activePeriods.length, durationSeconds(w.startedAt, finishedAt.toISOString()), active),

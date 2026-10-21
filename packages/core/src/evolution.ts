@@ -1,6 +1,6 @@
 import { addMonths, differenceInCalendarDays, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { formatShortDate, fromLocalISODate, toLocalISODate } from "./dates";
+import { formatDayMonthYear, formatShortDate, fromLocalISODate, toLocalISODate } from "./dates";
 import { formatClock, formatNumber, MINUS_SIGN, plural } from "./format";
 import { searchFilter } from "./session";
 import { estimate1RM, type SetType } from "./training";
@@ -20,6 +20,12 @@ import { toDisplayWeight, type WeightUnit } from "./units";
 /** "Sex, 9 out · 18:42" (data local do treino + hora local de início). */
 export function workoutDateTimeLabel(performedOn: string, startedAt: string): string {
   return `${formatShortDate(fromLocalISODate(performedOn))} · ${format(new Date(startedAt), "HH:mm")}`;
+}
+
+/** "Editado pela última vez em 21 out 2026 · 14:32" (hora local do aparelho). */
+export function editedAtLabel(editedAt: string): string {
+  const date = new Date(editedAt);
+  return `Editado pela última vez em ${formatDayMonthYear(date)} · ${format(date, "HH:mm")}`;
 }
 
 /** "Tempo efetivo · 2 pausas · 6:30 parado"; sem pausa → null. */

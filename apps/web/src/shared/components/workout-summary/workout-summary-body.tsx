@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { CalendarDays } from "lucide-react";
-import { plural, workoutDateTimeLabel } from "@guf/core";
+import { CalendarDays, Pencil } from "lucide-react";
+import { editedAtLabel, plural, workoutDateTimeLabel } from "@guf/core";
 import type { WorkoutSummaryBase } from "@guf/api";
 import { Icon } from "@/shared/components/ds";
 import { SummaryExerciseCard } from "./summary-exercise-card";
@@ -30,6 +30,12 @@ export function WorkoutSummaryBody({ summary, notices, actions, onOpenExercise }
         <Icon icon={CalendarDays} size={16} className="text-fg-muted" />
         {workoutDateTimeLabel(summary.performedOn, summary.startedAt)}
       </span>
+      {summary.editedAt && (
+        <span className="-mt-2 flex animate-guf-rise items-center gap-2 text-[13px] leading-[18px] text-fg-muted tabular-nums">
+          <Icon icon={Pencil} size={14} />
+          {editedAtLabel(summary.editedAt)}
+        </span>
+      )}
 
       <SummaryStats summary={summary} />
       {actions}

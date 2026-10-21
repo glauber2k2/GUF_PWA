@@ -73,6 +73,8 @@ export interface WorkoutSummaryBase {
   setCount: number;
   exercises: SummaryExercise[];
   records: WorkoutSummaryRecord[];
+  /** Última edição salva ("Editado pela última vez em …"); null = nunca editado. */
+  editedAt: string | null;
   /** Treinos concluídos do mesmo dia, do primeiro ao último a terminar (inclui este): "1/2", "2/2". */
   daySessionIds: string[];
   /** Unidade de quem está vendo. */
@@ -136,7 +138,7 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
       client
         .from("workout_sessions")
         .select(
-          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, routines(projects(name)), workout_active_periods(id), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group), set_logs(set_number, set_type, weight_kg, reps, is_completed))",
+          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, edited_at, routines(projects(name)), workout_active_periods(id), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group), set_logs(set_number, set_type, weight_kg, reps, is_completed))",
         )
         .eq("id", sessionId)
         .order("position", { referencedTable: "session_exercises", ascending: true })
@@ -193,6 +195,7 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
         startedAt: s.started_at,
         finishedAt: s.finished_at,
         durationSeconds: duration,
+        editedAt: s.edited_at,
         ...pauses,
         volumeKg: totals.volumeKg,
         setCount: totals.setCount,

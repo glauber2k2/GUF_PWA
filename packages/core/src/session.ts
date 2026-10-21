@@ -252,18 +252,19 @@ export function toKeypadValue(value: number | null): string {
 export const EDITED_DURATION_MIN_SECONDS = 60;
 export const EDITED_DURATION_MAX_SECONDS = 24 * 3600;
 
-/** Horas e minutos inteiros de uma duração (os segundos ficam de fora). */
-export function toDurationParts(totalSeconds: number): { hours: number; minutes: number } {
-  const totalMinutes = Math.floor(Math.max(0, totalSeconds) / 60);
-  return { hours: Math.floor(totalMinutes / 60), minutes: totalMinutes % 60 };
+/** Horas, minutos e segundos de uma duração. */
+export function toDurationParts(totalSeconds: number): { hours: number; minutes: number; seconds: number } {
+  const total = Math.max(0, Math.round(totalSeconds));
+  return { hours: Math.floor(total / 3600), minutes: Math.floor((total % 3600) / 60), seconds: total % 60 };
 }
 
 /**
- * Duração em segundos a partir de horas e minutos digitados.
- * @returns null quando fica fora dos limites do tempo corrigido (1 min a 24 h)
+ * Duração em segundos a partir de horas, minutos e segundos digitados.
+ * @returns null quando algum campo é inválido (minutos e segundos de 0 a 59) ou o total fica fora
+ * dos limites do tempo corrigido (1 min a 24 h)
  */
-export function toEditedDurationSeconds(hours: number, minutes: number): number | null {
-  if (!Number.isInteger(hours) || !Number.isInteger(minutes) || hours < 0 || minutes < 0 || minutes > 59) return null;
-  const seconds = (hours * 60 + minutes) * 60;
-  return seconds >= EDITED_DURATION_MIN_SECONDS && seconds <= EDITED_DURATION_MAX_SECONDS ? seconds : null;
+export function toEditedDurationSeconds(hours: number, minutes: number, seconds: number): number | null {
+  if ([hours, minutes, seconds].some((n) => !Number.isInteger(n) || n < 0) || minutes > 59 || seconds > 59) return null;
+  const total = hours * 3600 + minutes * 60 + seconds;
+  return total >= EDITED_DURATION_MIN_SECONDS && total <= EDITED_DURATION_MAX_SECONDS ? total : null;
 }

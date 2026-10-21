@@ -13,7 +13,7 @@ export interface DevEvolutionState {
 }
 
 const NONE: DevEvolutionState = { scenario: null, forceLoading: false, forceOffline: false, openDelete: false };
-const SCENARIOS: EvolutionMockScenario[] = ["padrao", "sem-recordes", "livre", "pausas", "nao-encontrado", "primeira-vez", "um-treino", "erro"];
+const SCENARIOS: EvolutionMockScenario[] = ["padrao", "sem-recordes", "livre", "pausas", "editado", "nao-encontrado", "primeira-vez", "um-treino", "erro"];
 
 /**
  * ?estado= do Resumo, da Evolução e da busca — SÓ EM DESENVOLVIMENTO (eliminado do build de produção).
