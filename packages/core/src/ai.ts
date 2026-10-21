@@ -6,20 +6,51 @@ export const AI_MESSAGE_MAX_CHARS = 2000;
 /** Perguntas por pessoa em 24 horas (o servidor recusa acima disso). */
 export const AI_DAILY_MESSAGE_LIMIT = 40;
 
-/** Ferramenta de dados que o GUF AI está usando → texto do "pensando". */
-const TOOL_LABELS: Record<string, string> = {
-  resumo_da_conta: "Consultando sua conta",
-  treinos_recentes: "Analisando seus treinos",
-  detalhe_do_treino: "Analisando seus treinos",
-  exercicios_treinados: "Analisando seus treinos",
-  evolucao_do_exercicio: "Analisando sua evolução",
-  alternativas_de_exercicio: "Buscando alternativas",
-  rotinas: "Lendo suas rotinas",
+/** Tempo de cada frase do "pensando" na tela. */
+export const AI_THINKING_PHRASE_MS = 2200;
+
+/** Antes de buscar dados (ou em perguntas gerais de musculação). */
+const GENERAL_PHRASES = [
+  "Pensando na resposta",
+  "Entendendo sua pergunta",
+  "Consultando princípios de treino",
+  "Pesando volume e intensidade",
+  "Verificando a coerência",
+  "Revisando a resposta",
+];
+
+const WORKOUT_PHRASES = [
+  "Analisando seus treinos",
+  "Somando o volume das séries",
+  "Comparando com as últimas sessões",
+  "Conferindo cargas e repetições",
+];
+
+/** Ferramenta de dados que o GUF AI está usando → frases do que ela está fazendo. */
+const TOOL_PHRASES: Record<string, string[]> = {
+  resumo_da_conta: ["Consultando sua conta", "Conferindo sua sequência de semanas", "Olhando sua meta semanal"],
+  treinos_recentes: WORKOUT_PHRASES,
+  detalhe_do_treino: WORKOUT_PHRASES,
+  exercicios_treinados: ["Listando seus exercícios", "Contando quantas vezes você treinou cada um"],
+  evolucao_do_exercicio: [
+    "Analisando sua evolução",
+    "Calculando seu 1RM estimado",
+    "Procurando seus recordes",
+    "Medindo a tendência das cargas",
+    "Avaliando a progressão",
+  ],
+  alternativas_de_exercicio: [
+    "Buscando alternativas",
+    "Comparando grupos musculares",
+    "Conferindo os equipamentos",
+    "Escolhendo trocas equivalentes",
+  ],
+  rotinas: ["Lendo suas rotinas", "Conferindo séries e descanso", "Avaliando a divisão da semana"],
 };
 
-/** "Pensando" enquanto não há ferramenta; senão o que ela está fazendo. */
-export function aiThinkingLabel(toolName: string | null): string {
-  return (toolName && TOOL_LABELS[toolName]) || "Pensando";
+/** Frases que se alternam no "pensando": as da ferramenta em uso ou, sem ferramenta, as gerais. */
+export function aiThinkingPhrases(toolName: string | null): string[] {
+  return (toolName && TOOL_PHRASES[toolName]) || GENERAL_PHRASES;
 }
 
 /** "Oi, Glauber" (primeiro nome) ou "Oi" sem nome. */

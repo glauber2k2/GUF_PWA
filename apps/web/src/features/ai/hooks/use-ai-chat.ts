@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { AiChatRequest, AiConversation } from "@guf/api";
-import { aiThinkingLabel } from "@guf/core";
+import { aiThinkingPhrases } from "@guf/core";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { useAiSource } from "@/features/ai/api/use-ai";
 import { getAiPhase, getMessageText, getPendingToolName, toAiChatRequest, toUIMessages } from "@/features/ai/helpers/ai-messages";
@@ -63,7 +63,7 @@ export function useAiChat(conversation: AiConversation) {
   return {
     messages: chat.messages,
     phase,
-    thinkingLabel: aiThinkingLabel(phase === "thinking" && last?.role === "assistant" ? getPendingToolName(last) : null),
+    thinkingPhrases: aiThinkingPhrases(phase === "thinking" && last?.role === "assistant" ? getPendingToolName(last) : null),
     error: chat.error ?? null,
     send,
     stop: () => void chat.stop(),

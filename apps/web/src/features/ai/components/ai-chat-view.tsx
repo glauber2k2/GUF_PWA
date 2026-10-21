@@ -3,12 +3,13 @@
 import { useEffect, useRef } from "react";
 import { ArrowDown, ChevronDown, SquarePen } from "lucide-react";
 import type { AiConversation } from "@guf/api";
-import { Banner, GufLoader, Icon, IconButton } from "@/shared/components/ds";
+import { Banner, Icon, IconButton } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { useAppShell } from "@/features/app-shell";
 import { AiComposer } from "@/features/ai/components/ai-composer";
 import { AiEmptyState } from "@/features/ai/components/ai-empty-state";
 import { AiMark } from "@/features/ai/components/ai-mark";
+import { AiThinking } from "@/features/ai/components/ai-thinking";
 import { AiAnswer, AiUserMessage } from "@/features/ai/components/ai-message";
 import { useAiChat } from "@/features/ai/hooks/use-ai-chat";
 import { useAiMessageFeedback } from "@/features/ai/hooks/use-ai-message-feedback";
@@ -112,11 +113,7 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
           ),
         )}
 
-        {chat.phase === "thinking" && (
-          <div className="flex animate-guf-rise-fast items-center gap-2.5">
-            <GufLoader variant={8} size={18} tone="brand" text={chat.thinkingLabel} textSize={14} />
-          </div>
-        )}
+        {chat.phase === "thinking" && <AiThinking phrases={chat.thinkingPhrases} />}
 
         {chat.error && !isBusy && (
           <Banner tone="danger" actionLabel="Tentar de novo" onAction={chat.retry}>
