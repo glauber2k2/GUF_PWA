@@ -210,6 +210,7 @@
   --animate-guf-ai-caret: guf-ai-caret 0.9s linear infinite;
   --animate-guf-ai-float: guf-ai-float 3.6s var(--ease-standard) infinite;
   --animate-guf-ai-hint: guf-ai-hint 0.3s var(--ease-enter) both;
+  --animate-guf-ai-lift: guf-ai-lift 0.45s var(--ease-overshoot) both;
   /* Leitor de documentos: seção destacada ao tocar no sumário (duas cópias para reiniciar) */
   --animate-guf-legal-flash-a: guf-legal-flash-a 1.4s var(--ease-standard) both;
   --animate-guf-legal-flash-b: guf-legal-flash-b 1.4s var(--ease-standard) both;

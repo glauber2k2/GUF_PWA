@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ArrowDown, ChevronDown, SquarePen } from "lucide-react";
 import type { AiConversation } from "@guf/api";
 import { Banner, Icon, IconButton } from "@/shared/components/ds";
@@ -13,8 +13,12 @@ import { AiThinking } from "@/features/ai/components/ai-thinking";
 import { AiAnswer, AiUserMessage } from "@/features/ai/components/ai-message";
 import { useAiChat } from "@/features/ai/hooks/use-ai-chat";
 import { useAiMessageFeedback } from "@/features/ai/hooks/use-ai-message-feedback";
+import { useKeyboardInset } from "@/features/ai/hooks/use-keyboard-inset";
 import { useStickToBottom } from "@/features/ai/hooks/use-stick-to-bottom";
 import type { AiPhase } from "@/features/ai/type";
+
+/** Altura do campo da pergunta + aviso: o botão de ir ao fim fica logo acima. */
+const JUMP_BUTTON_BOTTOM_PX = 116;
 
 /** Espera a animação de abertura antes de focar o campo (o teclado não sobe no meio dela). */
 const FOCUS_DELAY_MS = 380;
@@ -35,7 +39,10 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
   const chat = useAiChat(conversation);
   const feedback = useAiMessageFeedback();
   const listRef = useRef<HTMLDivElement>(null);
-  const scroll = useStickToBottom(listRef, chat.messages);
+  const keyboardInset = useKeyboardInset();
+  // Teclado abrindo também conta como "a conversa mudou": a última mensagem continua visível.
+  const scrollContent = useMemo(() => [chat.messages, keyboardInset], [chat.messages, keyboardInset]);
+  const scroll = useStickToBottom(listRef, scrollContent);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isEmpty = chat.messages.length === 0 && chat.phase === "idle";
   const isBusy = chat.phase !== "idle";
@@ -62,7 +69,11 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
   const lastIndex = chat.messages.length - 1;
 
   return (
-    <div className="relative flex min-w-0 flex-1 flex-col">
+    <div
+      // Espaço do teclado virtual (valor medido): o campo da pergunta sobe e fica acima dele.
+      style={{ paddingBottom: keyboardInset }}
+      className="relative flex min-w-0 flex-1 flex-col transition-[padding] duration-300 ease-enter"
+    >
       <header className="flex h-[60px] flex-none items-center gap-2.5 border-b border-border bg-background/90 pr-2 pl-1 backdrop-blur-[12px]">
         <IconButton icon={ChevronDown} label="Fechar GUF AI" variant="ghost" onClick={onClose} />
         <span className="grid size-9 flex-none place-items-center rounded-[12px] bg-accent text-accent-foreground">
@@ -127,13 +138,21 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
           type="button"
           aria-label="Ir para a última mensagem"
           onClick={scroll.scrollToBottom}
-          className="absolute bottom-[116px] left-1/2 z-[2] -ml-5 grid size-10 animate-guf-pop-in cursor-pointer place-items-center rounded-pill border border-border bg-surface-elevated text-fg shadow-e3"
+          style={{ bottom: JUMP_BUTTON_BOTTOM_PX + keyboardInset }}
+          className="absolute left-1/2 z-[2] -ml-5 grid size-10 animate-guf-pop-in cursor-pointer place-items-center rounded-pill border border-border bg-surface-elevated text-fg shadow-e3"
         >
           <Icon icon={ArrowDown} size={18} />
         </button>
       )}
 
-      <AiComposer inputRef={inputRef} isBusy={isBusy} isDisabled={!isOnline} onSend={ask} onStop={chat.stop} />
+      <AiComposer
+        inputRef={inputRef}
+        isBusy={isBusy}
+        isDisabled={!isOnline}
+        isKeyboardOpen={keyboardInset > 0}
+        onSend={ask}
+        onStop={chat.stop}
+      />
     </div>
   );
 }
