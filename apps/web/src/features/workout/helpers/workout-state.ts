@@ -1,5 +1,5 @@
 import type { ActiveWorkout, WorkoutExercise, WorkoutSet } from "@guf/api";
-import type { SetType } from "@guf/core";
+import { pickSetValues, setMetricFor, type SetField, type SetType } from "@guf/core";
 
 /** Exercício do treino com o estado de tela (aberto/recolhido, destaque de recém-adicionado). */
 export interface ExerciseView extends WorkoutExercise {
@@ -13,7 +13,8 @@ export interface WorkoutViewState {
   note: string | null;
 }
 
-export type EditableField = "weightKg" | "reps";
+/** Medida da série aberta na folha de edição (carga/repetições ou distância/tempo). */
+export type EditableField = SetField;
 
 export type WorkoutAction =
   | { type: "toggleSet"; exerciseId: string; setIndex: number }
@@ -117,15 +118,15 @@ export function workoutReducer(state: WorkoutViewState, action: WorkoutAction): 
   }
 }
 
-/** Nova série no fim do exercício, copiando carga/reps da última. */
+/** Nova série no fim do exercício, copiando as medidas da última (sem nenhuma, os padrões do tipo). */
 export function newSetFrom(exercise: WorkoutExercise): WorkoutSet {
   const last = exercise.sets[exercise.sets.length - 1];
+  const values = last ? pickSetValues(last) : pickSetValues(setMetricFor(exercise.muscleGroup).defaults);
   return {
     id: crypto.randomUUID(),
     setNumber: exercise.sets.length + 1,
     setType: "normal",
-    weightKg: last?.weightKg ?? null,
-    reps: last?.reps ?? 10,
+    ...values,
     isCompleted: false,
     previous: null,
   };

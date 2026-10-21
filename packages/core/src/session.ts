@@ -1,5 +1,5 @@
 /** Regras do treino em andamento (puras, sem React). */
-import { formatLoadReps, formatNumber } from "./format";
+import { formatNumber } from "./format";
 import { estimate1RM, type SetType } from "./training";
 
 /** Ordem dos grupos musculares no seletor de exercícios (códigos de exercises.muscle_group). */
@@ -195,41 +195,6 @@ export function finishWorkoutMessage(pendingSets: number): string {
   if (pendingSets <= 0) return "Todas as séries foram concluídas.";
   if (pendingSets === 1) return "1 série não foi concluída e não entra no histórico.";
   return `${pendingSets} séries não foram concluídas e não entram no histórico.`;
-}
-
-export interface NextSetCandidate {
-  exerciseName: string;
-  sets: ReadonlyArray<{ weightKg: number | null; reps: number | null; isCompleted: boolean }>;
-}
-
-/**
- * Próxima série pendente depois de (exerciseIndex, setIndex), para a barra de descanso:
- * "Próx.: Puxada frontal 65 × 8" · "Última série do treino".
- */
-export function nextSetLabel(exercises: readonly NextSetCandidate[], exerciseIndex: number, setIndex: number): string {
-  for (let e = exerciseIndex; e < exercises.length; e++) {
-    const ex = exercises[e];
-    if (!ex) continue;
-    const start = e === exerciseIndex ? setIndex + 1 : 0;
-    for (let s = start; s < ex.sets.length; s++) {
-      const set = ex.sets[s];
-      if (!set || set.isCompleted) continue;
-      const load =
-        typeof set.weightKg === "number" && typeof set.reps === "number"
-          ? formatLoadReps(set.weightKg, set.reps)
-          : typeof set.reps === "number"
-            ? `${set.reps} reps`
-            : "";
-      return `Próx.: ${ex.exerciseName}${load ? ` ${load}` : ""}`;
-    }
-  }
-  return "Última série do treino";
-}
-
-/** Rótulo de um desempenho anterior ("80 × 10") ou "—". */
-export function previousLabel(previous: { weightKg: number | null; reps: number | null } | null | undefined): string {
-  if (!previous || previous.reps === null) return "—";
-  return previous.weightKg === null ? `${previous.reps} reps` : formatLoadReps(previous.weightKg, previous.reps);
 }
 
 /** Ajusta a carga por um delta (carga rápida), sem negativos e com 1 casa. */

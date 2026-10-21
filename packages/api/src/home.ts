@@ -307,6 +307,9 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
             setType: "normal" as SetType,
             weightKg: values.weightKg,
             reps: values.reps,
+            // Cardio: distância e tempo do último treino (não há planejado na rotina).
+            distanceKm: prev?.distance_km == null ? null : Number(prev.distance_km),
+            durationSeconds: prev?.duration_seconds ?? null,
             isCompleted: false,
           };
         }),

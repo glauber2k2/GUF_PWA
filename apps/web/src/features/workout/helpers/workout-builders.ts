@@ -1,6 +1,16 @@
 import type { ActiveWorkout, ExerciseContext, FinishedWorkoutSummary, LibraryExercise, NewWorkoutExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
 import { DEFAULT_REST_SECONDS } from "@guf/api";
-import { markRecordSets, pauseCount, sessionTotals, workoutElapsedSeconds, type SetType, type WorkoutClock } from "@guf/core";
+import {
+  EMPTY_SET_VALUES,
+  markRecordSets,
+  pauseCount,
+  pickSetValues,
+  sessionTotals,
+  setMetricFor,
+  workoutElapsedSeconds,
+  type SetType,
+  type WorkoutClock,
+} from "@guf/core";
 import type { WorkoutViewState } from "./workout-state";
 
 /* Montagem de exercícios/séries com ids gerados no aparelho (funciona offline). */
@@ -9,12 +19,12 @@ const DEFAULT_SETS = 3;
 
 function previousFor(context: ExerciseContext | undefined, setNumber: number) {
   const prev = context?.previous.find((p) => p.setNumber === setNumber);
-  return prev ? { weightKg: prev.weightKg, reps: prev.reps } : null;
+  return prev ? pickSetValues(prev) : null;
 }
 
 /**
- * Exercício novo no treino: séries do último desempenho (carga/reps preenchidas) ou,
- * sem histórico/sem internet, 3 séries vazias. `template` (troca) mantém nº e tipos das séries.
+ * Exercício novo no treino: séries do último desempenho (medidas preenchidas: carga/reps ou
+ * distância/tempo) ou, sem histórico/sem internet, 3 séries vazias. `template` (troca) mantém nº e tipos das séries.
  */
 export function buildWorkoutExercise(
   library: LibraryExercise,
@@ -22,6 +32,8 @@ export function buildWorkoutExercise(
   template?: Pick<WorkoutSet, "setType" | "reps">[],
 ): WorkoutExercise {
   const total = template?.length || context?.previous.length || DEFAULT_SETS;
+  // Na troca, as repetições do exercício antigo só servem se o novo também mede repetições (não no cardio).
+  const keepsTemplateReps = setMetricFor(library.muscleGroup).fields.some((f) => f.key === "reps");
   return {
     id: crypto.randomUUID(),
     exerciseId: library.id,
@@ -37,8 +49,8 @@ export function buildWorkoutExercise(
         id: crypto.randomUUID(),
         setNumber: i + 1,
         setType: (template?.[i]?.setType ?? "normal") as SetType,
-        weightKg: prev?.weightKg ?? null,
-        reps: prev?.reps ?? template?.[i]?.reps ?? null,
+        ...(prev ?? EMPTY_SET_VALUES),
+        reps: prev?.reps ?? (keepsTemplateReps ? template?.[i]?.reps : null) ?? null,
         isCompleted: false,
         previous: prev,
       };
@@ -56,8 +68,7 @@ export function toNewWorkoutExercise(exercise: WorkoutExercise, position: number
       id: s.id,
       setNumber: s.setNumber,
       setType: s.setType,
-      weightKg: s.weightKg,
-      reps: s.reps,
+      ...pickSetValues(s),
       isCompleted: s.isCompleted,
     })),
   };

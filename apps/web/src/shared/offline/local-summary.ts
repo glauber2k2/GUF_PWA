@@ -1,5 +1,5 @@
 import type { ActiveWorkout, SummaryExercise, WorkoutSummaryDetail, WorkoutSummaryRecord } from "@guf/api";
-import { durationSeconds, estimate1RM, markRecordSets, pauseStats, sessionTotals, workoutElapsedSeconds } from "@guf/core";
+import { durationSeconds, estimate1RM, markRecordSets, pauseStats, pickSetValues, sessionTotals, workoutElapsedSeconds } from "@guf/core";
 import { offlineDb } from "./db";
 import { isClosedLocally } from "./outbox";
 
@@ -42,7 +42,7 @@ export function summaryFromWorkout(w: ActiveWorkout, finishedAt: Date): WorkoutS
         name: e.name,
         muscleGroup: e.muscleGroup,
         note: e.note,
-        sets: done.map((s, i) => ({ setNumber: s.setNumber, setType: s.setType, weightKg: s.weightKg, reps: s.reps, isRecord: i === recordIndex })),
+        sets: done.map((s, i) => ({ setNumber: s.setNumber, setType: s.setType, ...pickSetValues(s), isRecord: i === recordIndex })),
         setCount: totals.setCount,
         volumeKg: totals.volumeKg,
       },

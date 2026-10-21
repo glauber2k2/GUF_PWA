@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ArrowUpRight, Dumbbell, Ellipsis, Play, Plus, NotepadText, Timer, Trash2 } from "lucide-react";
+import { EMPTY_SET_VALUES, SET_METRICS, type SetMetricKind, type SetValues } from "@guf/core";
 import {
   AppHeader,
   AppIcon,
@@ -38,6 +39,8 @@ import {
   SegmentedControl,
   SetRow,
   SetRowHeader,
+  metricCells,
+  metricColumns,
   SetTypeTag,
   SheetOption,
   Skeleton,
@@ -98,6 +101,11 @@ const SECTIONS = [
 ];
 
 
+
+/** Células de exemplo da vitrine (medidas de força ou cardio). */
+function showcaseCells(kind: SetMetricKind, values: Partial<SetValues>) {
+  return metricCells(SET_METRICS[kind], { ...EMPTY_SET_VALUES, ...values }, "kg");
+}
 export function DesignSystemShowcase() {
   return (
     <div className="min-h-screen bg-background font-sans text-fg">
@@ -492,12 +500,17 @@ function ComponentsSection({ id, theme }: { id?: string; theme: ThemeKey }) {
             best1RmKg={EXERCISE.best1RmKg}
           />
           <div className={cn(PANEL, "grid gap-1 py-3")}>
-            <SetRowHeader />
-            <SetRow type="warmup" previous="40 × 12" weightKg={40} reps={12} done />
-            <SetRow number={1} previous="80 × 10" weightKg={82.5} reps={8} done pr />
-            <SetRow number={2} previous="80 × 9" weightKg={80} reps={9} field={{ key: "kg", state: "editing" }} />
-            <SetRow type="dropset" previous="60 × 12" weightKg={60} reps={null} field={{ key: "reps", state: "error" }} />
-            <SetRow type="failure" previous="60 × 8" weightKg={60} reps={8} />
+            <SetRowHeader columns={metricColumns(SET_METRICS.strength, "kg")} />
+            <SetRow type="warmup" previous="40 × 12" cells={showcaseCells("strength", { weightKg: 40, reps: 12 })} done />
+            <SetRow number={1} previous="80 × 10" cells={showcaseCells("strength", { weightKg: 82.5, reps: 8 })} done pr />
+            <SetRow number={2} previous="80 × 9" cells={showcaseCells("strength", { weightKg: 80, reps: 9 })} field={{ key: "weightKg", state: "editing" }} />
+            <SetRow type="dropset" previous="60 × 12" cells={showcaseCells("strength", { weightKg: 60 })} field={{ key: "reps", state: "error" }} />
+            <SetRow type="failure" previous="60 × 8" cells={showcaseCells("strength", { weightKg: 60, reps: 8 })} />
+          </div>
+          <div className={cn(PANEL, "grid gap-1 py-3")}>
+            <SetRowHeader columns={metricColumns(SET_METRICS.cardio, "kg")} />
+            <SetRow number={1} previous="5 km · 30:00" cells={showcaseCells("cardio", { distanceKm: 5.2, durationSeconds: 1810 })} done />
+            <SetRow number={2} previous="2 km · 12:00" cells={showcaseCells("cardio", { distanceKm: 2, durationSeconds: null })} field={{ key: "durationSeconds", state: "editing" }} />
           </div>
           <div className={cn(PANEL, "grid gap-4 p-5")}>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">

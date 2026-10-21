@@ -9,6 +9,7 @@ import {
   type ExerciseSessionEvolution,
   type ExerciseSessionPoint,
   type SetType,
+  type SetValues,
   type WeightUnit,
 } from "@guf/core";
 import type { GufClient } from "./client";
@@ -22,11 +23,10 @@ import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals } from "./
  * Só séries concluídas; aquecimento não entra em volume, séries, 1RM nem recordes.
  * ===================================================================== */
 
-export interface SummarySet {
+/** Série do resumo: carga × repetições ou, no cardio, distância e tempo. */
+export interface SummarySet extends SetValues {
   setNumber: number;
   setType: SetType;
-  weightKg: number | null;
-  reps: number | null;
   /** Série que bateu o recorde do exercício (maior 1RM estimado) neste treino. */
   isRecord: boolean;
 }
@@ -138,7 +138,7 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
       client
         .from("workout_sessions")
         .select(
-          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, edited_at, routines(projects(name)), workout_active_periods(id), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group), set_logs(set_number, set_type, weight_kg, reps, is_completed))",
+          "id, name, status, routine_id, performed_on, started_at, finished_at, active_seconds, edited_at, routines(projects(name)), workout_active_periods(id), session_exercises(id, exercise_id, position, notes, exercises(name, muscle_group), set_logs(set_number, set_type, weight_kg, reps, distance_km, duration_seconds, is_completed))",
         )
         .eq("id", sessionId)
         .order("position", { referencedTable: "session_exercises", ascending: true })

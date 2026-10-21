@@ -126,9 +126,40 @@ const seedSet = ([setType, prev, weightKg, reps, isCompleted]: SeedSet, i: numbe
   setType,
   weightKg,
   reps,
+  distanceKm: null,
+  durationSeconds: null,
   isCompleted,
-  previous: prev ? { weightKg: prev[0], reps: prev[1] } : null,
+  previous: prev ? { weightKg: prev[0], reps: prev[1], distanceKm: null, durationSeconds: null } : null,
 });
+
+/** [distância km, tempo s] anterior, distância, tempo, concluída. */
+type SeedCardioSet = [[number, number] | null, number | null, number | null, boolean];
+const seedCardioSet = ([prev, distanceKm, durationSeconds, isCompleted]: SeedCardioSet, i: number): WorkoutSet => ({
+  id: nextId("set"),
+  setNumber: i + 1,
+  setType: "normal",
+  weightKg: null,
+  reps: null,
+  distanceKm,
+  durationSeconds,
+  isCompleted,
+  previous: prev ? { weightKg: null, reps: null, distanceKm: prev[0], durationSeconds: prev[1] } : null,
+});
+
+function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioSet[]): WorkoutExercise {
+  const ex = byName(name);
+  return {
+    id: nextId("se"),
+    exerciseId: ex.id,
+    name: ex.name,
+    muscleGroup: ex.muscleGroup,
+    equipment: ex.equipment,
+    restSeconds,
+    note: null,
+    best1RmKg: null,
+    sets: sets.map(seedCardioSet),
+  };
+}
 
 function seedExercise(name: string, restSeconds: number, note: string | null, sets: SeedSet[]): WorkoutExercise {
   const ex = byName(name);
@@ -186,6 +217,10 @@ function seedWorkout(sessionId: string): ActiveWorkout {
       seedExercise("Rosca de punho", 45, null, [
         ["normal", [20, 15], 20, 15, false],
         ["normal", [20, 15], 20, 15, false],
+      ]),
+      seedCardioExercise("Esteira", 60, [
+        [[3, 1200], 3.5, 1380, false],
+        [[1, 300], 1, 300, false],
       ]),
     ],
   };

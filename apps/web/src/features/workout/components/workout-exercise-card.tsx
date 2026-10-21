@@ -1,15 +1,16 @@
 "use client";
 
 import type { HTMLAttributes } from "react";
-import { ChevronDown, Dumbbell, Ellipsis, GripVertical, Plus, NotepadText, Timer } from "lucide-react";
+import { Activity, ChevronDown, Dumbbell, Ellipsis, GripVertical, Plus, NotepadText, Timer, type LucideIcon } from "lucide-react";
 import {
+  EMPTY_SET_VALUES,
   equipmentLabel,
   formatClock,
   markRecordSets,
   muscleGroupLabel,
-  previousLabel,
+  setMetricFor,
   setsProgressLabel,
-  toDisplayWeight,
+  type SetMetricKind,
   type WeightUnit,
 } from "@guf/core";
 import {
@@ -21,11 +22,16 @@ import {
   PresenceRow,
   SetRow,
   SetRowHeader,
+  metricCells,
+  metricColumns,
   SwipeToDelete,
   Tag,
 } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import type { EditableField, ExerciseView } from "@/features/workout/helpers/workout-state";
+
+/** Ícone do exercício pelo tipo de medida (o mesmo do seletor de exercícios para cardio). */
+const METRIC_ICONS: Record<SetMetricKind, LucideIcon> = { strength: Dumbbell, cardio: Activity };
 
 export interface WorkoutExerciseCardProps {
   exercise: ExerciseView;
@@ -79,6 +85,7 @@ export function WorkoutExerciseCard({
   holdProps,
   reorder,
 }: WorkoutExerciseCardProps) {
+  const metric = setMetricFor(e.muscleGroup);
   const records = markRecordSets(e.sets, e.best1RmKg);
   const done = e.sets.filter((s) => s.isCompleted).length;
   const allDone = e.sets.length > 0 && done === e.sets.length;
@@ -123,7 +130,7 @@ export function WorkoutExerciseCard({
           className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 rounded-lg bg-transparent pt-3.5 pb-3 pl-4 text-left text-fg"
         >
           <span className="grid size-11 flex-none place-items-center rounded-md bg-surface-3 text-fg-secondary">
-            <Icon icon={Dumbbell} size={20} />
+            <Icon icon={METRIC_ICONS[metric.kind]} size={20} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-1.5 pt-0.5">
             {/* No modo de reordenar o card tem altura fixa (REORDER_CARD_PX): o nome fica em uma linha. */}
@@ -187,7 +194,7 @@ export function WorkoutExerciseCard({
       )}
 
       <Collapse open={e.open && !reorder}>
-        <SetRowHeader unit={unit} />
+        <SetRowHeader columns={metricColumns(metric, unit)} />
         <AnimatePresence initial={false}>
           {e.sets.map((s, i) => {
             if (s.setType === "normal") normalCount++;
@@ -197,16 +204,15 @@ export function WorkoutExerciseCard({
                   <SetRow
                     type={s.setType}
                     number={normalCount}
-                    previous={previousLabel(s.previous && { weightKg: toDisplayWeight(s.previous.weightKg, unit), reps: s.previous.reps })}
-                    weightKg={toDisplayWeight(s.weightKg, unit)}
-                    reps={s.reps}
+                    previous={metric.formatCompact(s.previous ?? EMPTY_SET_VALUES, unit)}
+                    cells={metricCells(metric, s, unit)}
                     done={s.isCompleted}
                     pr={records[i]}
                     pop={poppedKey === `${e.id}:${i}`}
-                    field={editing?.setIndex === i ? { key: editing.field === "weightKg" ? "kg" : "reps", state: "editing" } : undefined}
+                    field={editing?.setIndex === i ? { key: editing.field, state: "editing" } : undefined}
                     onToggle={() => onToggleSet(i)}
                     onCycleType={() => onCycleType(i)}
-                    onEditField={(key) => onEditField(i, key === "kg" ? "weightKg" : "reps")}
+                    onEditField={(key) => onEditField(i, key as EditableField)}
                   />
                 </SwipeToDelete>
               </PresenceRow>

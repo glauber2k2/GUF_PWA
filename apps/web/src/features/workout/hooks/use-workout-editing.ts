@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { ArrowLeftRight, NotepadText, Plus, Trash2 } from "lucide-react";
 import type { ActiveWorkout, ExerciseContext, LibraryExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
-import { formatNumber, fromDisplayWeight, markRecordSets, toDisplayWeight, type WeightUnit } from "@guf/core";
+import { markRecordSets, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
 import type { ToastOptions } from "@/features/app-shell";
 import { buildWorkoutExercise } from "@/features/workout/helpers/workout-builders";
 import {
@@ -32,7 +32,7 @@ export interface WorkoutChangeSink {
   saveWorkoutNote: (note: string) => void;
 }
 
-/** Célula da série aberta na folha de edição de carga/repetições. */
+/** Célula da série aberta na folha de edição (carga/repetições ou distância/tempo). */
 export interface SetEditTarget {
   exerciseId: string;
   setIndex: number;
@@ -92,7 +92,6 @@ export function useWorkoutEditing({
   const [noteDraft, setNoteDraft] = useState("");
   const [popped, setPopped] = useState<string | null>(null);
   const pendingExerciseRemovals = useRef(new Set<string>());
-  const displayLoad = (kg: number | null) => toDisplayWeight(kg, unit);
 
   // Remove o destaque volt dos itens recém-adicionados.
   const hasFlash = state.exercises.some((e) => e.flash);
@@ -138,9 +137,8 @@ export function useWorkoutEditing({
       setIndex,
     );
     if (isRecord) {
-      const load = `${formatNumber(displayLoad(set.weightKg) ?? 0)} ${unit}`;
       // A conclusão da série já vibrou com o padrão de recorde.
-      showToast("Recorde pessoal", { tone: "pr", message: `${ex.name} – ${set.reps ? `${load} × ${set.reps}` : load}`, haptic: false });
+      showToast("Recorde pessoal", { tone: "pr", message: `${ex.name} – ${setMetricFor(ex.muscleGroup).formatFull(set, unit)}`, haptic: false });
     }
   };
 
@@ -178,10 +176,11 @@ export function useWorkoutEditing({
     });
   };
 
-  /* ---------- Carga/repetições (na unidade do usuário; estado em kg) ---------- */
+  /* ---------- Medidas da série (editadas na unidade exibida; estado como no banco) ---------- */
 
   const editExercise = edit ? state.exercises.find((e) => e.id === edit.exerciseId) : undefined;
   const editSet = edit && editExercise ? (editExercise.sets[edit.setIndex] ?? null) : null;
+  const editMetric = editExercise ? setMetricFor(editExercise.muscleGroup) : SET_METRICS.strength;
 
   const setEditTitle = (): string => {
     if (!edit || !editExercise || !editSet) return "";
@@ -194,8 +193,10 @@ export function useWorkoutEditing({
 
   const changeEditValue = (field: EditableField, value: number) => {
     if (!edit) return;
-    // Carga digitada na unidade do usuário; o estado (e o banco) guardam kg.
-    const stored = field === "weightKg" ? (fromDisplayWeight(value, unit) ?? 0) : value;
+    // Valor na unidade exibida (lb, minutos…); o estado (e o banco) guardam kg e segundos.
+    const definition = editMetric.fields.find((f) => f.key === field);
+    if (!definition) return;
+    const stored = definition.fromDisplay(value, unit);
     dispatch({ type: "setField", exerciseId: edit.exerciseId, setIndex: edit.setIndex, field, value: stored });
   };
 
@@ -300,6 +301,7 @@ export function useWorkoutEditing({
     removeSet,
     edit,
     editSet,
+    editMetric,
     setEditTitle,
     startEdit: (target: SetEditTarget) => setEdit(target),
     changeEditField,

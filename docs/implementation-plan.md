@@ -287,6 +287,16 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Cartão "Rotina sugerida" (salvar como rotina), gráfico na resposta, sugestões de continuação | Pendente (fora da 1ª versão, só texto) |
 | Plano pago do provedor, seção na Política, apagar conversa | Pendente antes do lançamento público (RIPD A021) |
 
+### Etapa 10 — Cardio com distância e tempo (`feat/treino-cardio`)
+
+| Item | Situação |
+|---|---|
+| Migration `20261021190000_cardio_sets` (`set_logs.distance_km`/`duration_seconds`, `get_last_performance`, `save_workout_edit`, `get_member_workout`) | Aplicada no banco em 2026-10-21 (testada antes numa transação desfeita) |
+| Regra por tipo de medida em `packages/core/src/set-metrics.ts` + linha da série e folha de edição genéricas | Feito |
+| Treino em andamento, edição de treino concluído, resumo (seu e de outra pessoa), resumo offline, fila offline | Feito (conferido por print numa prévia) |
+| Tipos do banco conferidos com o gerado depois de aplicar | Feito (iguais) |
+| Evolução por exercício (gráfico) para cardio | Pendente |
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.

@@ -255,7 +255,7 @@ function toSummary(s: MockSession): WorkoutSummaryDetail {
       name: exercise.name,
       muscleGroup: exercise.group,
       note: s.key === "B" && exercise.id === "mock-puxada" ? "Pegada aberta, segurar 1 s embaixo." : null,
-      sets: sets.map((x, n) => ({ setNumber: n + 1, ...x, isRecord: n === recordIndex })),
+      sets: sets.map((x, n) => ({ setNumber: n + 1, ...x, distanceKm: null, durationSeconds: null, isRecord: n === recordIndex })),
       setCount: totals.setCount,
       volumeKg: totals.volumeKg,
     };

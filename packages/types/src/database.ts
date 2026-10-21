@@ -807,6 +807,8 @@ export type Database = {
         Row: {
           completed_at: string | null
           created_at: string
+          distance_km: number | null
+          duration_seconds: number | null
           exercise_id: string
           id: string
           is_completed: boolean
@@ -822,6 +824,8 @@ export type Database = {
         Insert: {
           completed_at?: string | null
           created_at?: string
+          distance_km?: number | null
+          duration_seconds?: number | null
           exercise_id: string
           id?: string
           is_completed?: boolean
@@ -837,6 +841,8 @@ export type Database = {
         Update: {
           completed_at?: string | null
           created_at?: string
+          distance_km?: number | null
+          duration_seconds?: number | null
           exercise_id?: string
           id?: string
           is_completed?: boolean
@@ -1215,6 +1221,8 @@ export type Database = {
       get_last_performance: {
         Args: { p_exercise_ids: string[] }
         Returns: {
+          distance_km: number
+          duration_seconds: number
           exercise_id: string
           performed_on: string
           reps: number

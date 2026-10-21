@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight, NotepadText, TrendingUp } from "lucide-react";
-import { formatNumber, muscleGroupLabel, plural, setMarks, TIMES_SIGN, toDisplayWeight, type WeightUnit } from "@guf/core";
+import { muscleGroupLabel, plural, setMarks, setMetricFor, type WeightUnit } from "@guf/core";
 import type { SummaryExercise } from "@guf/api";
 import { Icon, PRBadge, SET_TYPE_META, Tag } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -17,6 +17,7 @@ export interface SummaryExerciseCardProps {
 /** Exercício do resumo: nome, grupo, séries concluídas e observação. */
 export function SummaryExerciseCard({ exercise, unit, index, onOpen }: SummaryExerciseCardProps) {
   const group = muscleGroupLabel(exercise.muscleGroup);
+  const metric = setMetricFor(exercise.muscleGroup);
   const marks = setMarks(exercise.sets.map((s) => s.setType));
 
   return (
@@ -49,13 +50,12 @@ export function SummaryExerciseCard({ exercise, unit, index, onOpen }: SummaryEx
           const meta = SET_TYPE_META[set.setType];
           const typed = set.setType !== "normal";
           const mark = marks[i] ?? "";
-          const load = `${formatNumber(toDisplayWeight(set.weightKg, unit) ?? 0)} ${unit}`;
-          const value = `${load} ${TIMES_SIGN} ${set.reps ?? 0}`;
+          const value = metric.formatFull(set, unit);
           return (
             <div
               key={i}
               role="listitem"
-              aria-label={`${typed ? meta.label : `Série ${mark}`}, ${load}, ${set.reps ?? 0} repetições${set.isRecord ? ", recorde pessoal" : ""}`}
+              aria-label={`${typed ? meta.label : `Série ${mark}`}, ${metric.describe(set, unit)}${set.isRecord ? ", recorde pessoal" : ""}`}
               className={cn("-mx-1.5 grid min-h-9 grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 rounded-[10px] px-1.5", set.isRecord && "bg-pr/10")}
             >
               <span aria-hidden="true" className={cn("grid size-7 place-items-center rounded-[8px] font-display text-base font-bold", meta.tint, meta.text)}>
@@ -90,13 +90,18 @@ export function SummaryExerciseCard({ exercise, unit, index, onOpen }: SummaryEx
 }
 
 function ExerciseHeading({ exercise, group, unit }: { exercise: SummaryExercise; group: string; unit: WeightUnit }) {
+  // Totais das séries que contam (sem aquecimento): volume na força, distância e tempo no cardio.
+  const totals = setMetricFor(exercise.muscleGroup).formatTotals(
+    exercise.sets.filter((s) => s.setType !== "warmup"),
+    unit,
+  );
   return (
     <span className="flex min-w-0 flex-1 flex-col gap-1.5">
       <span className="text-base leading-[21px] font-semibold">{exercise.name}</span>
       <span className="flex flex-wrap items-center gap-2">
         {group && <Tag size="sm">{group}</Tag>}
         <span className="text-[13px] text-fg-muted tabular-nums">
-          {plural(exercise.setCount, "série", "séries")} · {formatNumber(toDisplayWeight(exercise.volumeKg, unit) ?? 0, 0)} {unit}
+          {[plural(exercise.setCount, "série", "séries"), totals].filter(Boolean).join(" · ")}
         </span>
       </span>
     </span>
