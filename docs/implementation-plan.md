@@ -276,6 +276,17 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Critérios de aceite**: tour aparece uma vez na primeira entrada; pular e concluir não voltam a mostrar; rever por Configurações; nada quebra se um alvo não existir; lint e typecheck sem erros.
 
+### Etapa 9 — GUF AI (`feat/guf-ai`)
+
+| Item | Situação |
+|---|---|
+| Edge Function `guf-ai` (AI SDK 7 + Gemini) com ferramentas só de leitura presas ao usuário, anonimização e limite diário | Feito; publicada e com o secret configurado em 2026-10-21 (falta testar uma pergunta real logado) |
+| Migration `20261021180000_guf_ai` (conversas, RLS, retenção de 180 dias, `guf-export/5`) | Aplicada no banco em 2026-10-21 (testada antes em transação desfeita) |
+| Tela (botão na Início, painel, mensagens, copiar, útil/não ajudou, gerar de novo, parar, sem conexão) | Feito (conferido por print com o mock) |
+| Tipos do banco regenerados (`ai_conversations`, `ai_messages`, `purge_expired_ai_conversations`) | Feito |
+| Cartão "Rotina sugerida" (salvar como rotina), gráfico na resposta, sugestões de continuação | Pendente (fora da 1ª versão, só texto) |
+| Plano pago do provedor, seção na Política, apagar conversa | Pendente antes do lançamento público (RIPD A021) |
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.

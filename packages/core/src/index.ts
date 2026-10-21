@@ -23,3 +23,4 @@ export * from "./weight-comparison";
 export * from "./social";
 export * from "./competition";
 export * from "./competition-ranking";
+export * from "./ai";

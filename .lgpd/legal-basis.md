@@ -28,6 +28,7 @@
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Art. 7º, V (Art. 11, I se N1) ⚖ | Sim, na prática (perfil privado, ocultar histórico, remover seguidor, bloquear) |
 | A019 | Competição e pontuação | Art. 7º, V ⚖ | Sim, na prática (deixar de seguir ou remover o seguidor) |
 | A020 | Avisos no celular (competição e seguidores) | Art. 7º, V, ligado pelo titular no aparelho ⚖ | Sim (desligar no app ou nas configurações do celular, ou sair da conta) |
+| A021 | GUF AI (assistente sobre os próprios treinos) | Art. 7º, V — funcionalidade pedida pelo titular ⚖ | Sim (não usar o GUF AI; conversas saem em 180 dias ou na exclusão da conta) |
 
 **Totais**: 1 atividade com consentimento (A010) · 1 com legítimo interesse (A012, LIA em `.lgpd/lia/a012-seguranca.md`) · 10 com execução de contrato · 4 com obrigação legal (A003, A012, A013, A014; A015 parcial) · 1 com exercício regular de direitos (A003 após a exclusão).
 

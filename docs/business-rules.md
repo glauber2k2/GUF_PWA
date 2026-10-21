@@ -233,6 +233,13 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 | **Avisos de seguidores no celular** (mesma opção "Notificações"): "Novo seguidor" (alguém seguiu seu perfil aberto), "Pedido para seguir" (perfil privado; abre `/solicitacoes`) e "Pedido aceito" (para quem pediu; abre o perfil). Nome e @ de quem agiu; no máximo 1 aviso a cada 24 h por pessoa e tipo (conferido no banco antes de qualquer requisição); nada é enviado se o vínculo já mudou ou há bloqueio. Recusar, remover e bloquear não avisam ninguém. | Banco (`build_follow_alert`, `follow_alerts_sent`, gatilho `on_follow_push_alert`) + Edge Function `push-alerts` |
 | **Avisos no celular** (opcional, por aparelho, desligado por padrão): competidor a menos de 20 pontos de passar você na temporada atual ("está chegando"; diferença 0 = "empatou") ou que passou ("te ultrapassou"). Um aviso por mudança de posição e por competidor; quem tem 0 pontos não recebe. Verificado quando um competidor conclui um treino ou informa o esforço. | Banco (`compute_competition_alerts`, `competition_alert_states`) + Edge Function `push-alerts` + Core (`COMPETITION_ALERT_GAP`) |
 
+## 8.4 GUF AI
+
+- Responde só sobre os treinos, cargas, descanso, evolução e rotinas do próprio usuário e dúvidas gerais de musculação ligadas a isso; outros assuntos são recusados. Não dá orientação médica (dor ou lesão → profissional de saúde) e não altera nada no app.
+- Lê os dados só pelas ferramentas da Edge Function `guf-ai` (do próprio usuário); nunca medidas corporais, observações ou dados de outra pessoa. Substituição de exercício: só exercícios do catálogo do mesmo grupo muscular.
+- Limite: 40 perguntas em 24 h por pessoa; pergunta de até 2.000 caracteres. Só online.
+- Conversas guardadas por 180 dias depois da última mensagem; entram em "Exportar meus dados" e saem com a conta.
+
 ## 9. Mensagens ao usuário
 
 | Regra | Onde |
