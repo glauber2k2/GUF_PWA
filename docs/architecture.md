@@ -46,7 +46,7 @@ flowchart TD
 apps/web/src/
 ├── app/                 # rotas; providers.tsx compõe os providers globais
 ├── features/<feature>/  # api/ hooks/ helpers/ constants/ components/ providers/ ui/ type.ts index.ts
-├── shared/              # components/ds, components/ui, hooks, helpers, libs, offline, preferences, push, sound
+├── shared/              # components/ds, components/ui, components/workout-summary, hooks, helpers, libs, offline, preferences, push, sound
 ├── store/global/        # toast.store.ts, pwa.store.ts
 ├── mocks/               # espelho de packages/api para desenvolvimento
 └── styles/tokens/
@@ -59,6 +59,7 @@ Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (ev
 - `shared/` nunca importa `features/`. A composição entre features fica em `app/` (ex.: `app/providers.tsx`).
 - `packages/*` nunca importa `apps/*` nem React.
 - Usado por uma feature só → fica nela. Segundo uso em outra feature → sobe para `shared/` (ou para `packages/` se for regra ou consulta que o app mobile também vai usar).
+- Exemplo: o resumo do treino é usado pelo seu treino (`evolution`) e pelo de outra pessoa (`social`), então as partes ficam em `shared/components/workout-summary/` sem conhecer rotas nem a origem dos dados (recebem `WorkoutSummaryBase` e callbacks/slots); cada tela decide o que é tocável e quais ações aparecem. A montagem dos dados também é única (`packages/api/src/summary-builder.ts`, interno do pacote).
 
 ## 4. SOLID na prática
 

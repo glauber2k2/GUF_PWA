@@ -28,7 +28,7 @@ import { Banner, EmptyState, Icon } from "@/shared/components/ds";
 import { useEvolutionSource, useExerciseEvolution } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { cn } from "@/shared/helpers/class-names";
-import { DetailHeader } from "@/features/evolution/components/detail-header";
+import { DetailHeader } from "@/shared/components/detail-header";
 import { EvolutionChart } from "@/features/evolution/components/evolution-chart";
 import { EvolutionSkeleton } from "@/features/evolution/components/evolution-skeleton";
 import { exerciseSearchPath, summaryPath } from "@/features/evolution/helpers/paths";

@@ -249,6 +249,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Barra de solicitações pendentes no perfil privado + tela `/solicitacoes` (protótipo Perfil Social) | Feito; falta "Seguido por @…" (RPC de seguidores em comum) |
 | Notificações no celular (Web Push): competidor a menos de 20 pontos ou que ultrapassou; novo seguidor, pedido para seguir e pedido aceito (1 a cada 24 h por pessoa e tipo, conferido no gatilho); opção em Configurações; `docs/push-notifications.md` | Em produção e testado em 2026-10-20 (pedido para seguir recebido no Chrome/Android) |
 | Pontuação sem esforço (RPE): constância, sequência, recordes e volume (`20261020012117_competition_scoring_without_rpe`); Termos 0.3-dev e Política 0.5-dev sem o esforço (`20261020085455_legal_docs_competition_without_rpe`) | Aplicado no banco em 2026-10-20 (`feat/treino-rotina-competicao`); **publicar o app logo** (até lá, a tela de competição do app antigo falha e o `/aceite` mostra o texto anterior) |
+| Detalhe do treino de outra pessoa (`/pessoa/treino?id=…`, `get_member_workout`, migration `20261021120000_member_workout_detail`); partes do resumo em `shared/components/workout-summary/` (`feat/treino-de-outra-pessoa`) | Feito, conferido com mock no navegador; **aplicar a migration no banco** antes de publicar |
 | Conferir as telas logado, com dados reais | Pendente |
 | Histórico dentro da Início; menu com 5 abas (Início, Competir, Treinar, Projetos, Perfil); `/historico` redireciona (`feat/inicio-com-historico`) | Feito |
 

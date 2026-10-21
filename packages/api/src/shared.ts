@@ -1,4 +1,4 @@
-import { AVATAR_BUCKET, durationSeconds, pickAvatar, sizedAvatarUrl, type AvatarAuthUser, type LoggedSet, type SetType } from "@guf/core";
+import { AVATAR_BUCKET, durationSeconds, pickAvatar, sizedAvatarUrl, type AvatarAuthUser, type LoggedSet, type SetType, type WeightUnit } from "@guf/core";
 import type { Database } from "@guf/types";
 import type { GufClient } from "./client";
 
@@ -20,6 +20,9 @@ export interface StreakSummary {
 }
 
 export const FREE_WORKOUT_NAME = "Treino livre";
+
+/** Unidade de peso do perfil (qualquer valor que não seja "lb" vale kg). */
+export const toWeightUnit = (value: string | null | undefined): WeightUnit => (value === "lb" ? "lb" : "kg");
 
 /**
  * URL da foto a exibir (regra em @guf/core avatar.ts): foto enviada (Storage) > foto social atual

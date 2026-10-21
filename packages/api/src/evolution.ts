@@ -3,10 +3,8 @@ import {
   bestLoadSet,
   durationSeconds,
   pauseStats,
-  recordSetIndex,
   previousBest1Rm,
   sessionRecord1Rm,
-  sessionTotals,
   withRecords,
   type ExerciseSessionEvolution,
   type ExerciseSessionPoint,
@@ -16,7 +14,8 @@ import {
 import type { GufClient } from "./client";
 import { exerciseHistories } from "./history";
 import { apiError, toApiError, type ApiResult } from "./result";
-import { FREE_WORKOUT_NAME, sessionDurationSeconds } from "./shared";
+import { FREE_WORKOUT_NAME, sessionDurationSeconds, toWeightUnit } from "./shared";
+import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals } from "./summary-builder";
 
 /* =====================================================================
  * Contrato — Resumo do treino e Evolução por exercício
@@ -59,13 +58,10 @@ export interface WorkoutSummaryRecord {
   previousOn: string | null;
 }
 
-/** Treino concluído com tudo o que a tela de resumo mostra. */
-export interface WorkoutSummaryDetail {
+/** O que a tela de resumo mostra de qualquer treino concluído (seu ou de outra pessoa). */
+export interface WorkoutSummaryBase {
   id: string;
   name: string;
-  /** Projeto da rotina; null = treino livre (ou rotina que não existe mais). */
-  projectName: string | null;
-  routineId: string | null;
   performedOn: string;
   startedAt: string;
   finishedAt: string | null;
@@ -79,7 +75,15 @@ export interface WorkoutSummaryDetail {
   records: WorkoutSummaryRecord[];
   /** Treinos concluídos do mesmo dia, do primeiro ao último a terminar (inclui este): "1/2", "2/2". */
   daySessionIds: string[];
+  /** Unidade de quem está vendo. */
   weightUnit: WeightUnit;
+}
+
+/** Seu treino concluído: o resumo mais o planejamento (projeto e rotina). */
+export interface WorkoutSummaryDetail extends WorkoutSummaryBase {
+  /** Projeto da rotina; null = treino livre (ou rotina que não existe mais). */
+  projectName: string | null;
+  routineId: string | null;
 }
 
 export interface ExerciseInfo {
@@ -125,9 +129,6 @@ interface SetRow {
 }
 
 const toPerformed = (l: SetRow) => ({ setType: l.set_type as SetType, weightKg: l.weight_kg, reps: l.reps });
-const toCompleted = (l: SetRow) => ({ ...toPerformed(l), isCompleted: true });
-
-const toUnit = (value: string | null | undefined): WeightUnit => (value === "lb" ? "lb" : "kg");
 
 export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (client, { sessionId }) => {
   try {
@@ -168,38 +169,18 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
 
     const records: WorkoutSummaryRecord[] = [];
     const exercises = exerciseRows.map<SummaryExercise>(({ se, sets }) => {
-      const name = se.exercises?.name ?? "Exercício";
-      const performed = sets.map(toPerformed);
       const history = histories.data.get(se.exercise_id) ?? [];
       const record1RmKg = sessionRecord1Rm(history, s.id, s.performed_on, earlierSameDay);
-      const recordIndex = recordSetIndex(performed, record1RmKg);
-      const recordSet = performed[recordIndex ?? -1];
-      if (record1RmKg !== null && recordSet) {
-        const previous = previousBest1Rm(history, s.id, s.performed_on, earlierSameDay);
-        records.push({
-          exerciseId: se.exercise_id,
-          exerciseName: name,
-          weightKg: recordSet.weightKg ?? 0,
-          reps: recordSet.reps ?? null,
-          oneRmKg: record1RmKg,
-          previous1RmKg: previous?.oneRmKg ?? null,
-          previousOn: previous?.performedOn ?? null,
-        });
-      }
-      const totals = sessionTotals(sets.map(toCompleted));
-      return {
-        id: se.id,
-        exerciseId: se.exercise_id,
-        name,
-        muscleGroup: se.exercises?.muscle_group ?? "",
-        note: se.notes,
-        sets: sets.map((l, i) => ({ setNumber: l.set_number, setType: l.set_type as SetType, weightKg: l.weight_kg, reps: l.reps, isRecord: i === recordIndex })),
-        setCount: totals.setCount,
-        volumeKg: totals.volumeKg,
-      };
+      const exercise = buildSummaryExercise(
+        { id: se.id, exerciseId: se.exercise_id, name: se.exercises?.name ?? "Exercício", muscleGroup: se.exercises?.muscle_group ?? "", note: se.notes, sets },
+        record1RmKg,
+      );
+      const record = buildSummaryRecord(exercise, record1RmKg, previousBest1Rm(history, s.id, s.performed_on, earlierSameDay));
+      if (record) records.push(record);
+      return exercise;
     });
 
-    const totals = sessionTotals(exerciseRows.flatMap(({ sets }) => sets.map(toCompleted)));
+    const totals = buildSummaryTotals(exercises);
     const duration = sessionDurationSeconds(s);
     const pauses = pauseStats(s.workout_active_periods.length, durationSeconds(s.started_at, s.finished_at), duration);
     return {
@@ -218,7 +199,7 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
         exercises,
         records,
         daySessionIds: daySessionIds.includes(s.id) ? daySessionIds : [s.id],
-        weightUnit: toUnit(profileRes.data?.weight_unit),
+        weightUnit: toWeightUnit(profileRes.data?.weight_unit),
       },
       error: null,
     };
@@ -287,7 +268,7 @@ export const getExerciseEvolution: EvolutionApi["getExerciseEvolution"] = async 
     return {
       data: {
         exercise: { id: ex.id, name: ex.name, muscleGroup: ex.muscle_group, equipment: ex.equipment },
-        weightUnit: toUnit(profileRes.data?.weight_unit),
+        weightUnit: toWeightUnit(profileRes.data?.weight_unit),
         sessions: withRecords(points),
       },
       error: null,

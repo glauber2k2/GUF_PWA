@@ -13,9 +13,11 @@ import {
   type GufClient,
   type MemberProfile,
   type MemberWorkout,
+  type MemberWorkoutDetail,
   type MySocial,
   type SocialApi,
 } from "@guf/api";
+import { mockEvolutionApi } from "@/mocks/evolution";
 
 export type SocialMockScenario = "padrao" | "vazio" | "erro";
 
@@ -194,6 +196,28 @@ function workouts(p: MockPerson, limit: number): MemberWorkout[] {
   });
 }
 
+/** Dono do treino pelo id do mock (`<userId>-w<n>`, gerado em `workouts`). */
+function workoutOwner(sessionId: string): MockPerson | undefined {
+  const userId = sessionId.replace(/-w\d+$/, "");
+  return userId === sessionId ? undefined : find(userId);
+}
+
+/** Detalhe do treino: o exemplo do mock do Resumo, sem o que outra pessoa não vê (observações, projeto). */
+async function memberWorkout(client: GufClient, sessionId: string, p: MockPerson): Promise<MemberWorkoutDetail | null> {
+  const base = await mockEvolutionApi.getWorkoutSummary(client, { sessionId: "" });
+  if (!base.data) return null;
+  const { projectName, routineId, ...summary } = base.data;
+  void projectName;
+  void routineId;
+  return {
+    ...summary,
+    id: sessionId,
+    exercises: base.data.exercises.map((e) => ({ ...e, note: null })),
+    daySessionIds: [sessionId],
+    owner: { userId: p.userId, handle: p.handle, name: p.name, avatarUrl: null },
+  };
+}
+
 export const mockSocialApi = {
   async getMySocial(client) {
     ignoreClient(client);
@@ -348,5 +372,15 @@ export const mockSocialApi = {
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
     return { data: workouts(p, limit ?? 3), error: null };
+  },
+  async getMemberWorkout(client, { sessionId }) {
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    const p = workoutOwner(sessionId);
+    if (!p || !unlocked(p)) return { data: null, error: apiError("session_not_found") };
+    if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
+    const data = await memberWorkout(client, sessionId, p);
+    return data ? { data, error: null } : { data: null, error: apiError("session_not_found") };
   },
 } satisfies SocialApi;

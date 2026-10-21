@@ -1,16 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { ChevronRight, NotepadText, TrendingUp } from "lucide-react";
 import { formatNumber, muscleGroupLabel, plural, setMarks, TIMES_SIGN, toDisplayWeight, type WeightUnit } from "@guf/core";
 import type { SummaryExercise } from "@guf/api";
 import { Icon, PRBadge, SET_TYPE_META, Tag } from "@/shared/components/ds";
-import { exercisePath } from "@/features/evolution/helpers/paths";
 import { cn } from "@/shared/helpers/class-names";
 
-/** Exercício do resumo: nome (abre a evolução), grupo, séries concluídas e observação. */
-export function SummaryExerciseCard({ exercise, unit, index }: { exercise: SummaryExercise; unit: WeightUnit; index: number }) {
-  const router = useRouter();
+export interface SummaryExerciseCardProps {
+  exercise: SummaryExercise;
+  unit: WeightUnit;
+  index: number;
+  /** Abre a evolução do exercício; sem ele (treino de outra pessoa), o cabeçalho não é tocável. */
+  onOpen?: (exerciseId: string) => void;
+}
+
+/** Exercício do resumo: nome, grupo, séries concluídas e observação. */
+export function SummaryExerciseCard({ exercise, unit, index, onOpen }: SummaryExerciseCardProps) {
   const group = muscleGroupLabel(exercise.muscleGroup);
   const marks = setMarks(exercise.sets.map((s) => s.setType));
 
@@ -20,26 +25,24 @@ export function SummaryExerciseCard({ exercise, unit, index }: { exercise: Summa
       style={{ animationDelay: `${120 + index * 50}ms` }}
       className="flex animate-guf-rise flex-col gap-2.5 rounded-lg border border-border bg-surface px-4 pt-3 pb-3.5 shadow-e1"
     >
-      <button
-        type="button"
-        onClick={() => router.push(exercisePath(exercise.exerciseId))}
-        aria-label={`${exercise.name}${group ? `, ${group}` : ""}. Ver evolução do exercício`}
-        className="-mx-2 flex min-h-[52px] cursor-pointer items-center gap-2.5 rounded-md bg-transparent px-2 py-1 text-left text-fg transition-colors duration-150 ease-standard hover:bg-surface-3 active:scale-[.98] motion-reduce:active:scale-100"
-      >
-        <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <span className="text-base leading-[21px] font-semibold">{exercise.name}</span>
-          <span className="flex flex-wrap items-center gap-2">
-            {group && <Tag size="sm">{group}</Tag>}
-            <span className="text-[13px] text-fg-muted tabular-nums">
-              {plural(exercise.setCount, "série", "séries")} · {formatNumber(toDisplayWeight(exercise.volumeKg, unit) ?? 0, 0)} {unit}
-            </span>
+      {onOpen ? (
+        <button
+          type="button"
+          onClick={() => onOpen(exercise.exerciseId)}
+          aria-label={`${exercise.name}${group ? `, ${group}` : ""}. Ver evolução do exercício`}
+          className="-mx-2 flex min-h-[52px] cursor-pointer items-center gap-2.5 rounded-md bg-transparent px-2 py-1 text-left text-fg transition-colors duration-150 ease-standard hover:bg-surface-3 active:scale-[.98] motion-reduce:active:scale-100"
+        >
+          <ExerciseHeading exercise={exercise} group={group} unit={unit} />
+          <span className="flex items-center gap-1 text-accent-text">
+            <Icon icon={TrendingUp} size={16} />
+            <Icon icon={ChevronRight} size={16} className="text-fg-muted" />
           </span>
-        </span>
-        <span className="flex items-center gap-1 text-accent-text">
-          <Icon icon={TrendingUp} size={16} />
-          <Icon icon={ChevronRight} size={16} className="text-fg-muted" />
-        </span>
-      </button>
+        </button>
+      ) : (
+        <div className="flex min-h-[52px] items-center py-1">
+          <ExerciseHeading exercise={exercise} group={group} unit={unit} />
+        </div>
+      )}
 
       <div role="list" aria-label="Séries concluídas" className="flex flex-col gap-0.5">
         {exercise.sets.map((set, i) => {
@@ -83,5 +86,19 @@ export function SummaryExerciseCard({ exercise, unit, index }: { exercise: Summa
         </div>
       )}
     </article>
+  );
+}
+
+function ExerciseHeading({ exercise, group, unit }: { exercise: SummaryExercise; group: string; unit: WeightUnit }) {
+  return (
+    <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <span className="text-base leading-[21px] font-semibold">{exercise.name}</span>
+      <span className="flex flex-wrap items-center gap-2">
+        {group && <Tag size="sm">{group}</Tag>}
+        <span className="text-[13px] text-fg-muted tabular-nums">
+          {plural(exercise.setCount, "série", "séries")} · {formatNumber(toDisplayWeight(exercise.volumeKg, unit) ?? 0, 0)} {unit}
+        </span>
+      </span>
+    </span>
   );
 }

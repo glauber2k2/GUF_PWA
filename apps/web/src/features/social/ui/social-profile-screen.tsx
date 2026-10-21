@@ -27,6 +27,7 @@ import {
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
 import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
+import { memberWorkoutPath } from "@/features/social/helpers/paths";
 
 function ProfileSkeleton() {
   return (
@@ -132,7 +133,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
                 hasMore={Boolean(workouts.hasNextPage)}
                 loadingMore={workouts.isFetchingNextPage}
                 onMore={() => void workouts.fetchNextPage()}
-                onOpenWorkout={isSelf ? (id) => router.push(summaryPath(id)) : undefined}
+                onOpenWorkout={(id) => router.push(isSelf ? summaryPath(id) : memberWorkoutPath(id))}
                 unit={unit}
               />
             </>
