@@ -14,12 +14,14 @@ interface AiComposerProps {
   inputRef: RefObject<HTMLTextAreaElement | null>;
   isBusy: boolean;
   isDisabled: boolean;
+  /** Teclado virtual aberto: o campo sobe com uma animação e o rodapé dispensa a área segura. */
+  isKeyboardOpen: boolean;
   onSend: (text: string) => void;
   onStop: () => void;
 }
 
 /** Campo da pergunta: cresce até 5 linhas, Enter envia (Shift+Enter quebra linha), parar durante a resposta. */
-export function AiComposer({ inputRef, isBusy, isDisabled, onSend, onStop }: AiComposerProps) {
+export function AiComposer({ inputRef, isBusy, isDisabled, isKeyboardOpen, onSend, onStop }: AiComposerProps) {
   const [text, setText] = useState("");
   const canSend = text.trim().length > 0 && !isBusy && !isDisabled;
 
@@ -43,8 +45,20 @@ export function AiComposer({ inputRef, isBusy, isDisabled, onSend, onStop }: AiC
   };
 
   return (
-    <footer className="flex flex-none flex-col gap-2 bg-background px-3 pt-2 pb-[calc(12px+env(safe-area-inset-bottom))]">
-      <div className="flex items-end gap-2 rounded-[26px] border border-border bg-surface p-1.5 transition-[border-color,box-shadow,background] duration-150 ease-standard focus-within:border-ai-focus-border focus-within:bg-surface-elevated focus-within:shadow-ai-focus">
+    <footer
+      className={cn(
+        "flex flex-none flex-col gap-2 bg-background px-3 pt-2",
+        // Com o teclado aberto a barra de gestos fica atrás dele: sem a área segura embaixo.
+        isKeyboardOpen ? "pb-3" : "pb-[calc(12px+env(safe-area-inset-bottom))]",
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-end gap-2 rounded-[26px] border border-border bg-surface p-1.5 transition-[border-color,box-shadow,background] duration-150 ease-standard focus-within:border-ai-focus-border focus-within:bg-surface-elevated focus-within:shadow-ai-focus",
+          // Recolocar a classe reinicia a animação a cada abertura do teclado.
+          isKeyboardOpen && "animate-guf-ai-lift",
+        )}
+      >
         <textarea
           ref={inputRef}
           rows={1}
