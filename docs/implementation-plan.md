@@ -291,10 +291,10 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 | Item | Situação |
 |---|---|
-| Migration `20261021190000_cardio_sets` (`set_logs.distance_km`/`duration_seconds`, `get_last_performance`, `save_workout_edit`, `get_member_workout`) | Testada no banco numa transação desfeita; **falta aplicar** (o app novo lê as colunas: aplicar antes de publicar) |
+| Migration `20261021190000_cardio_sets` (`set_logs.distance_km`/`duration_seconds`, `get_last_performance`, `save_workout_edit`, `get_member_workout`) | Aplicada no banco em 2026-10-21 (testada antes numa transação desfeita) |
 | Regra por tipo de medida em `packages/core/src/set-metrics.ts` + linha da série e folha de edição genéricas | Feito |
 | Treino em andamento, edição de treino concluído, resumo (seu e de outra pessoa), resumo offline, fila offline | Feito (conferido por print numa prévia) |
-| Tipos do banco escritos à mão | Regenerar depois de aplicar a migration |
+| Tipos do banco conferidos com o gerado depois de aplicar | Feito (iguais) |
 | Evolução por exercício (gráfico) para cardio | Pendente |
 
 ### Futuro (fora do MVP)
