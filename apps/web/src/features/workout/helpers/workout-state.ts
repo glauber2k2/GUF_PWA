@@ -36,7 +36,7 @@ export type WorkoutAction =
 /** Ciclo do tipo de série ao tocar no número: normal → aquecimento → drop set → falha. */
 const SET_TYPE_CYCLE: SetType[] = ["normal", "warmup", "dropset", "failure"];
 
-export function initWorkoutView(workout: ActiveWorkout): WorkoutViewState {
+export function initWorkoutView(workout: Pick<ActiveWorkout, "note" | "exercises">): WorkoutViewState {
   return {
     note: workout.note,
     // Os dois primeiros abertos (como no design); os demais recolhidos para a lista caber na tela.

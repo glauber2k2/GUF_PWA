@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Share2, Trash2 } from "lucide-react";
+import { Pencil, Share2, Trash2 } from "lucide-react";
 import type { WorkoutSummaryDetail } from "@guf/api";
 import { useAppShell } from "@/features/app-shell";
-import { Banner, BottomSheet, Button, ConfirmDialog, Icon, SavingOverlay } from "@/shared/components/ds";
+import { Banner, BottomSheet, Button, ConfirmDialog, Icon, SavingOverlay, SheetOption } from "@/shared/components/ds";
 import { DetailHeader } from "@/shared/components/detail-header";
 import { SummaryFallback, type SummaryFallbackState } from "@/shared/components/workout-summary/summary-fallback";
 import { WorkoutSummaryBody } from "@/shared/components/workout-summary/workout-summary-body";
 import { exercisePath, summaryPath } from "@/features/evolution/helpers/paths";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
+import { workoutEditPath } from "@/features/workout";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { cn } from "@/shared/helpers/class-names";
@@ -58,7 +59,7 @@ export function SummaryScreen() {
 function OfflineBanner() {
   return (
     <Banner tone="warning" title="Sem conexão" className="animate-guf-rise-fast">
-      para excluir o treino, conecte-se à internet.
+      para editar ou excluir o treino, conecte-se à internet.
     </Banner>
   );
 }
@@ -84,8 +85,9 @@ function SummaryContent({
   const remove = useDeleteWorkout();
   const [overlay, setOverlay] = useState<"menu" | "confirm" | "share" | null>(openDelete ? "confirm" : null);
   const pending = source === "pending";
-  // Finalizado offline e ainda não enviado: o servidor ainda não tem o treino para excluir.
-  const canDelete = !offline && !pending;
+  // Finalizado offline e ainda não enviado: o servidor ainda não tem o treino para editar ou excluir.
+  const canChange = !offline && !pending;
+  const unavailableReason = pending ? "Aguarde o envio do treino" : "Conecte-se à internet";
   const overline = summary.projectName ?? (summary.routineId ? null : "Treino livre");
 
   const confirmDelete = () => {
@@ -142,14 +144,24 @@ function SummaryContent({
       />
 
       <BottomSheet placement="screen" open={overlay === "menu"} onClose={() => setOverlay(null)} title={summary.name}>
+        <SheetOption
+          icon={Pencil}
+          title="Editar treino"
+          subtitle={canChange ? "Séries, exercícios, observações e tempo" : `${unavailableReason} para editar`}
+          disabled={!canChange}
+          onClick={() => {
+            setOverlay(null);
+            router.push(workoutEditPath(summary.id));
+          }}
+        />
         <button
           type="button"
-          disabled={!canDelete}
-          aria-disabled={!canDelete}
+          disabled={!canChange}
+          aria-disabled={!canChange}
           onClick={() => setOverlay("confirm")}
           className={cn(
             "flex min-h-[60px] w-full items-center gap-3 rounded-[14px] border border-danger/40 bg-danger/12 px-3.5 py-2.5 text-left text-danger transition-colors duration-150 ease-standard",
-            canDelete ? "cursor-pointer hover:bg-danger/20" : "cursor-not-allowed opacity-55",
+            canChange ? "cursor-pointer hover:bg-danger/20" : "cursor-not-allowed opacity-55",
           )}
         >
           <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-danger/16">
@@ -157,9 +169,9 @@ function SummaryContent({
           </span>
           <span className="flex flex-1 flex-col gap-0.5">
             <span className="text-[15px] leading-5 font-semibold">Excluir treino</span>
-            {!canDelete && (
+            {!canChange && (
               <span className="text-[13px] leading-[18px] text-fg-secondary">
-                {pending ? "Aguarde o envio do treino para excluir" : "Conecte-se à internet para excluir"}
+                {`${unavailableReason} para excluir`}
               </span>
             )}
           </span>

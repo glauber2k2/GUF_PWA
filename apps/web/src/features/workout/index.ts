@@ -5,3 +5,5 @@ export { WorkoutProvider, clearActiveWorkoutCache, useActiveWorkout } from "./pr
 export { WorkoutScreen } from "./ui/workout-screen";
 export { AddExerciseButton } from "./components/add-exercise-button";
 export { WorkoutHeader } from "./components/workout-header";
+export { WorkoutEditScreen } from "./ui/workout-edit-screen";
+export { workoutEditPath } from "./helpers/paths";

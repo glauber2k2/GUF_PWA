@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Ellipsis, Pause, Play } from "lucide-react";
+import { ChevronDown, Ellipsis, Pause, Pencil, Play, type LucideIcon } from "lucide-react";
 import { Icon, IconButton } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 
@@ -14,11 +14,19 @@ export interface WorkoutHeaderProps {
   /** 0–100 */
   progressPct?: number;
   onMinimize: () => void;
+  /** Botão da esquerda: minimizar (padrão) ou sair (edição de um treino concluído). */
+  minimizeIcon?: LucideIcon;
+  minimizeLabel?: string;
   onTogglePause?: () => void;
   onOpenMenu?: () => void;
+  /**
+   * Treino concluído em edição: o tempo fica parado (sem o ponto "ao vivo") e tocar nele
+   * abre a correção do tempo.
+   */
+  onEditElapsed?: () => void;
 }
 
-/** Cabeçalho fixo do treino: ao vivo, tempo grande, progresso e ações. */
+/** Cabeçalho fixo do treino: ao vivo (ou em edição), tempo grande, progresso e ações. */
 export function WorkoutHeader({
   name,
   elapsedText,
@@ -26,29 +34,47 @@ export function WorkoutHeader({
   progressText,
   progressPct = 0,
   onMinimize,
+  minimizeIcon = ChevronDown,
+  minimizeLabel = "Minimizar treino",
   onTogglePause,
   onOpenMenu,
+  onEditElapsed,
 }: WorkoutHeaderProps) {
+  const editable = Boolean(onEditElapsed);
+  const timeClass = cn("font-display text-[36px] leading-9 font-semibold tabular-nums", paused ? "text-fg-muted" : "text-fg");
+
   return (
     <header className="sticky top-0 z-[5] -mx-4 border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
       <div className="flex h-[72px] items-center gap-1 pr-2 pl-1">
-        <IconButton icon={ChevronDown} variant="ghost" label="Minimizar treino" onClick={onMinimize} />
+        <IconButton icon={minimizeIcon} variant="ghost" label={minimizeLabel} onClick={onMinimize} />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="flex min-w-0 items-center gap-1.5 text-[13px] leading-[18px] font-medium text-fg-secondary">
-            <span
-              aria-hidden="true"
-              className={cn("size-2 flex-none rounded-pill", paused ? "bg-warning" : "animate-guf-live bg-accent-text")}
-            />
+            {!editable && (
+              <span
+                aria-hidden="true"
+                className={cn("size-2 flex-none rounded-pill", paused ? "bg-warning" : "animate-guf-live bg-accent-text")}
+              />
+            )}
             <span className="truncate">{name}</span>
           </span>
           <div className="flex items-center gap-2">
-            <span
-              role="timer"
-              aria-label={`Tempo decorrido ${elapsedText}${paused ? ", pausado" : ""}`}
-              className={cn("font-display text-[36px] leading-9 font-semibold tabular-nums", paused ? "text-fg-muted" : "text-fg")}
-            >
-              {elapsedText}
-            </span>
+            {editable ? (
+              <button
+                type="button"
+                aria-label={`Tempo do treino ${elapsedText}. Alterar tempo`}
+                onClick={onEditElapsed}
+                className="-ml-1 flex min-h-11 cursor-pointer items-center gap-1.5 rounded-md bg-transparent px-1 text-fg"
+              >
+                <span className={cn(timeClass, "underline decoration-fg-muted decoration-dotted decoration-2 underline-offset-[6px]")}>
+                  {elapsedText}
+                </span>
+                <Icon icon={Pencil} size={16} className="text-fg-muted" />
+              </button>
+            ) : (
+              <span role="timer" aria-label={`Tempo decorrido ${elapsedText}${paused ? ", pausado" : ""}`} className={timeClass}>
+                {elapsedText}
+              </span>
+            )}
             {paused ? (
               <span className="flex h-6 items-center gap-1 rounded-pill bg-warning/16 px-2 text-xs font-semibold text-warning">
                 <Icon icon={Pause} size={12} />

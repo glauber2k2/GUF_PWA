@@ -877,6 +877,7 @@ export type Database = {
           created_at: string
           finished_at: string | null
           id: string
+          measured_active_seconds: number | null
           name: string | null
           notes: string | null
           performed_on: string
@@ -893,6 +894,7 @@ export type Database = {
           created_at?: string
           finished_at?: string | null
           id?: string
+          measured_active_seconds?: number | null
           name?: string | null
           notes?: string | null
           performed_on?: string
@@ -909,6 +911,7 @@ export type Database = {
           created_at?: string
           finished_at?: string | null
           id?: string
+          measured_active_seconds?: number | null
           name?: string | null
           notes?: string | null
           performed_on?: string
@@ -1309,6 +1312,15 @@ export type Database = {
           p_weekdays: number[]
         }
         Returns: string
+      }
+      save_workout_edit: {
+        Args: {
+          p_active_seconds: number
+          p_exercises: Json
+          p_note: string
+          p_session_id: string
+        }
+        Returns: undefined
       }
       search_social_profiles: {
         Args: { p_query: string }
