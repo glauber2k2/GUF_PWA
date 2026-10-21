@@ -40,8 +40,7 @@ const SET_TYPE_CYCLE: SetType[] = ["normal", "warmup", "dropset", "failure"];
 export function initWorkoutView(workout: Pick<ActiveWorkout, "note" | "exercises">): WorkoutViewState {
   return {
     note: workout.note,
-    // Os dois primeiros abertos (como no design); os demais recolhidos para a lista caber na tela.
-    exercises: workout.exercises.map((e, i) => ({ ...e, open: i < 2, flash: false })),
+    exercises: workout.exercises.map((e) => ({ ...e, open: true, flash: false })),
   };
 }
 
