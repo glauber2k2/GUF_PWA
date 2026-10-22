@@ -23,6 +23,9 @@ export type ApiErrorCode =
   | "plan_import_empty"
   | "plan_limit"
   | "billing_unavailable"
+  | "health_consent_required"
+  | "measurement_date_invalid"
+  | "measurement_invalid"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -60,6 +63,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   plan_import_empty: "Não encontramos exercícios nesse texto. Cole a ficha com o nome dos exercícios, séries e repetições.",
   plan_limit: "Isso não está incluído no seu plano. Veja os planos para continuar.",
   billing_unavailable: "As assinaturas ainda não estão disponíveis. Avisaremos quando o Pro puder ser assinado.",
+  health_consent_required: "Para registrar medidas, autorize o uso dos dados de saúde em Perfil › Medidas corporais.",
+  measurement_date_invalid: "Escolha hoje ou um dia que já passou para a medição.",
+  measurement_invalid: "Confira as medidas: use centímetros, de 0,1 a 299,9 (ex.: 38,5).",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -107,6 +113,9 @@ export function toApiError(error: unknown): ApiError {
     if (code === "GW003") return apiError("exercise_not_found"); // save_workout_edit
     if (code === "GI001") return apiError("exercise_not_found"); // import_training_plan: nem do catálogo do guf nem da pessoa
     if (code === "GI002") return apiError("plan_import_invalid"); // import_training_plan: ficha fora dos limites
+    if (code === "GM001") return apiError("health_consent_required"); // save_body_measurement sem o consentimento vigente
+    if (code === "GM002") return apiError("measurement_date_invalid"); // save_body_measurement: data futura ou muito antiga
+    if (code === "GM003") return apiError("measurement_invalid"); // save_body_measurement: local ou valor fora dos limites
     const socialCode = SOCIAL_ERROR_CODES[code ?? ""];
     if (socialCode) return apiError(socialCode);
     if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");

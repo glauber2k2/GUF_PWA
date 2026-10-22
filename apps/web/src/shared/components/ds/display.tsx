@@ -157,6 +157,8 @@ export interface ProgressChartProps {
   unit?: string;
   showHeader?: boolean;
   showLegend?: boolean;
+  /** Ponto dourado no maior valor (recorde). Desligar onde "maior" não é conquista (ex.: medidas). */
+  highlightMax?: boolean;
   ariaLabel?: string;
   className?: string;
 }
@@ -176,6 +178,7 @@ export function ProgressChart({
   unit = "kg",
   showHeader = true,
   showLegend = true,
+  highlightMax = true,
   ariaLabel,
   className,
 }: ProgressChartProps) {
@@ -216,8 +219,8 @@ export function ProgressChart({
           strokeLinecap="round"
           className="fill-none stroke-data"
         />
-        <circle cx={x(maxIndex)} cy={y(max)} r="9" className="fill-pr/30" />
-        <circle cx={x(maxIndex)} cy={y(max)} r="4.5" strokeWidth="2" className="fill-pr stroke-surface" />
+        {highlightMax && <circle cx={x(maxIndex)} cy={y(max)} r="9" className="fill-pr/30" />}
+        {highlightMax && <circle cx={x(maxIndex)} cy={y(max)} r="4.5" strokeWidth="2" className="fill-pr stroke-surface" />}
         <text x="0" y="146" className="fill-fg-muted font-sans text-[10px]">
           {startLabel}
         </text>
@@ -225,7 +228,7 @@ export function ProgressChart({
           {endLabel}
         </text>
       </svg>
-      {showLegend && (
+      {showLegend && highlightMax && (
         <span className="flex items-center gap-1.5 text-xs text-fg-muted">
           <span className="size-2.5 rounded-pill bg-pr" />
           Ponto dourado = recorde pessoal no período

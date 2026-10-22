@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-21
+**Última atualização**: 2026-10-22
 **Encarregado**: pendente designação
 **Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
 
@@ -22,7 +22,7 @@
 - [x] F9 — Incident response — runbook, modelos e registro (2026-10-17); exercício simulado a agendar
 - [~] F10 — ROPA — ⏸ CHECKPOINT: rascunho 0.1 (2026-10-17); revisão jurídica no futuro
 - [ ] F11 — Encarregado — adiado para antes do lançamento (decisão de 2026-10-17; ver nota)
-- [~] F12 — RIPD: módulo social (`RIPD/ripd-social.md`, rascunho 2026-10-18, ⏸ CHECKPOINT aguardando aprovação); módulo de medidas — futuro, quando o módulo existir
+- [~] F12 — RIPD: módulo social (`RIPD/ripd-social.md`, rascunho 2026-10-18, ⏸ CHECKPOINT aguardando aprovação); módulo de medidas (`RIPD/ripd-medidas-corporais.md` v0.1, 2026-10-22, ⏸ CHECKPOINT aguardando aprovação)
 - [~] F13 — ECA Digital — avaliação em rascunho (2026-10-17); decisão sobre verificação de idade antes do lançamento ⚖
 - [ ] F14 — Vendors + DPA + transferência internacional — futuro (controlador formal); verificar DPAs gratuitos
 - [x] F15 — Relatório final — `.lgpd/REPORT.md` (2026-10-17)
@@ -170,3 +170,12 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Atualizados: `data-map.md`, `legal-basis.md`, `ROPA.md` (0.2), `retention.md`. Exportação `guf-export/6` inclui plano, direitos e assinaturas.
 - Antes de cobrar: escolher e avaliar o prestador de pagamento (`vendors/`, transferência internacional), preencher os marcadores dos Termos da Assinatura e da Política e definir com o contador a retenção fiscal ⚖.
 - Regra revista (`charts_window_and_member_month`): o histórico do titular é completo em qualquer plano; o plano limita só o período dos gráficos. O histórico de treinos de OUTRA pessoa passa a mostrar só o mês atual (menos exposição dos dados do titular a seguidores; Art. 6º, III, necessidade). Termos 0.5-dev e Termos da Assinatura 0.2-dev informam a mudança, publicados com `requires_reaccept = false` (não reduzem direitos).
+
+## Rodada 2026-10-22 — Medidas corporais (A010, F12)
+- Tela do módulo implementada: Perfil › "Medidas corporais" (só no próprio perfil, selo "Só você"); lista por músculo, evolução e nova medição. Migration `20261022140000_body_measurements_module` (uma medição por dia; RPC `save_body_measurement`, SECURITY INVOKER, consentimento vigente obrigatório — GM001) aplicada e testada em transação desfeita: sem consentimento bloqueia, outra conta lê 0 linhas, revogar apaga e audita.
+- Consentimento em camadas pedido só ao entrar no módulo (Art. 11, I; Art. 8º, § 4º): resumo de 5 itens, termo completo, caixa desmarcada, botões de mesmo peso. Configurações › Privacidade avisa onde fica o módulo.
+- Minimização: só circunferências; peso e % de gordura não são coletados; sem cópia offline; GUF AI sem acesso.
+- Textos: **Termo de Saúde 0.2-dev** (o que é coletado, "Quem vê suas medidas", sem GUF AI, sem cópia no aparelho; novo consentimento) e **Política 0.7-dev** (dado coletado e quem vê; `requires_reaccept = false`, só reduz). Migration `20261022140100_legal_docs_body_measurements` — ⏸ aplicar junto com o deploy do app.
+- RIPD `RIPD/ripd-medidas-corporais.md` v0.1 — ⏸ CHECKPOINT. Atualizados: `data-map.md` (A010, A011), `legal-basis.md`, `ROPA.md`, `gaps.md` (G17 verde), `RIPD/INDEX.md`.
+- Apagar um registro: arrastar a linha para o lado (como a série no treino), com "Desfazer".
+- Pendências (RIPD, seção 6): revisão jurídica, verificação de idade e Encarregado antes do lançamento público, remover colunas sem uso.

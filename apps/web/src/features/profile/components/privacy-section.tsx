@@ -87,6 +87,11 @@ export function PrivacySection({ consents, canEdit, socialPrivacy }: { consents:
             </span>
           )}
         </div>
+        {!health && (
+          <p className="m-0 pl-12 text-[13px] leading-[18px] text-pretty text-fg-muted">
+            Para registrar suas medidas, abra o seu Perfil › Medidas corporais. A autorização é pedida lá, só se você quiser.
+          </p>
+        )}
         {health && (
           <div className="pl-12">
             <Button variant="outline" disabled={!canEdit || revoke.isPending} loading={revoke.isPending} onClick={() => setOverlay("revoke")} className="text-sm">

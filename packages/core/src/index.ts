@@ -27,3 +27,4 @@ export * from "./ai";
 export * from "./set-metrics";
 export * from "./plans";
 export * from "./plan-import";
+export * from "./body-measurements";

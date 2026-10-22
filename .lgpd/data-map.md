@@ -20,7 +20,7 @@
 | A007 | Registro de treinos (sessões, séries, pausas, observações) | Não** | Possível | Não | Em produção (testes) |
 | A008 | Finalização automática de treino ocioso | Não | Possível | Não | Em produção (testes) |
 | A009 | Histórico, evolução e estatísticas | Não** | Possível | Não | Em produção (testes) |
-| A010 | Medidas corporais | **Sim (saúde)** | Possível | **Avaliar** | Backend pronto, tela futura |
+| A010 | Medidas corporais (só o titular vê) | **Sim (saúde)** | Possível | **Avaliado (RIPD ripd-medidas-corporais v0.1)** | Beta (tela em 2026-10-22) |
 | A011 | Dados guardados no aparelho (PWA offline) | Não | Possível | Não | Em produção (testes) |
 | A012 | Registros de acesso e segurança | Não | Possível | Não | Depende dos operadores |
 | A013 | Exportação de dados (direito do titular) | Sim, se houver medidas | Possível | Não | Em produção (testes) |
@@ -223,19 +223,19 @@
 | Campo | Valor |
 |---|---|
 | Slug | a010-medidas |
-| Finalidade | Acompanhar peso, % de gordura e circunferências ao longo do tempo |
+| Finalidade | Acompanhar as próprias circunferências ao longo do tempo (área privada do perfil) |
 | Base legal | Proposta: Art. 11, I — consentimento específico e destacado |
 | Categorias de titulares | Usuários que ativarem o módulo |
 | Sensíveis? | **Sim — dado referente à saúde (Art. 5º, II)** |
-| Dados | data, peso, % de gordura, 14 circunferências, observação |
+| Dados | data e circunferências em cm (8 músculos; braços e pernas com os dois lados). Peso, % de gordura e observação existem no banco mas **não são coletados** (sem tela) |
 | Fonte | Coletado do titular |
 | Sistemas | `body_measurements`, `measurement_values` |
 | Operadores | Supabase |
-| Transferência intl. | Provável (G8) |
+| Transferência intl. | Não (Supabase em `sa-east-1` desde 2026-10-16) |
 | Retenção | Até revogar o consentimento (apaga na hora) ou excluir a conta |
-| Segurança | RLS exige consentimento ativo para gravar; nunca em logs/analytics; revogação apaga tudo |
-| Alto risco? | **Avaliar (Res. 2/2022 Art. 4º)**: critério específico atendido (dado sensível); critério geral (larga escala / afetar significativamente) ainda não. **Recomendado RIPD antes de lançar o módulo** (G17) |
-| RIPD | Pendente — `ripd-medidas-corporais` |
+| Segurança | Só o dono lê (RLS); gravar exige o consentimento da versão vigente (RLS + RPC `save_body_measurement`, GM001); nunca no perfil social, competição, GUF AI, cópia offline, logs ou analytics; revogação apaga tudo |
+| Alto risco? | Critério específico atendido (dado sensível); critério geral (larga escala / afetar significativamente) ainda não (Res. 2/2022 Art. 4º) |
+| RIPD | `RIPD/ripd-medidas-corporais.md` v0.1 (2026-10-22) |
 | Owner | Pendente |
 
 ### A011 — Dados guardados no aparelho (PWA offline)
@@ -246,7 +246,7 @@
 | Finalidade | Permitir treinar sem internet e abrir o app rápido |
 | Base legal | Proposta: Art. 7º, V |
 | Categorias de titulares | Usuários |
-| Sensíveis? | Não (medidas não são guardadas offline hoje — confirmar quando a tela existir) |
+| Sensíveis? | Não (confirmado em 2026-10-22: as medidas não são guardadas no aparelho; só na memória da tela) |
 | Dados | sessão do Supabase, treino em andamento, fila de gravações, cópias de histórico/resumos/evolução, preferências (tema, alerta, tela ligada) |
 | Fonte | Gerado pelo app no aparelho do titular |
 | Sistemas | localStorage, IndexedDB (Dexie), cache do service worker (só arquivos do app) |

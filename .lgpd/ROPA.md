@@ -35,7 +35,7 @@
 | A007 | Registro de treinos | Registrar treinos feitos | Art. 7º, V ⚖ (N1) | Usuários | Datas, horários, pausas, cargas, reps, RPE, observações | Não ⚖ | Supabase | Enquanto a conta existir ou até apagar |
 | A008 | Finalização automática | Encerrar treino esquecido (opcional) | Art. 7º, V | Usuários que ligaram a opção | Horários das séries, status | Não | Supabase (pg_cron) | Igual a A007 |
 | A009 | Histórico e evolução | Calendário, sequência, volume, 1RM, recordes | Art. 7º, V | Usuários | Derivados de A007 | Não ⚖ | Supabase | Calculado sob demanda |
-| **A010** | **Medidas corporais** | Acompanhar medidas (opcional) | **Art. 11, I — consentimento específico** | Usuários que consentiram | Peso, % de gordura, circunferências | **Sim (saúde)** | Supabase | Até revogar (apaga na hora) ou excluir a conta |
+| **A010** | **Medidas corporais** | Acompanhar medidas (opcional) | **Art. 11, I — consentimento específico** | Usuários que consentiram | Data e circunferências (cm); só o titular vê | **Sim (saúde)** | Supabase | Até revogar (apaga na hora) ou excluir a conta |
 | A011 | Dados no aparelho | Treinar sem internet | Art. 7º, V | Usuários | Sessão, treino em andamento, fila, cópias, preferências | Não | Nenhum (aparelho) | Até sair da conta |
 | **A012** | **Registros de acesso e segurança** | Segurança e prevenção a fraude; guarda legal se aplicável | **Art. 7º, IX — legítimo interesse** (LIA) + Art. 7º, II ⚖ | Usuários e visitantes | IP, data/hora, user-agent, eventos de login | Não | Supabase, Vercel | Retenção do plano dos operadores (G9) |
 | A013 | Exportação de dados | Atender acesso e portabilidade | Art. 7º, II (Art. 18, II e V) | Usuários | Todo o conteúdo da conta (`guf-export/3`, com perfil social, vínculos e bloqueios) | Sim, se houver medidas | Nenhum (arquivo no aparelho) | Não guardado no servidor |
@@ -92,6 +92,6 @@ Ver `retention.md` (tabela completa). Resumo: tudo enquanto a conta existir, eli
 
 ## 8. Observações
 
-- **Avaliação de risco**: A010 (dados de saúde) exige RIPD antes do lançamento do módulo de medidas (F12; módulo ainda sem tela).
+- **Avaliação de risco**: A010 (dados de saúde) — RIPD `RIPD/ripd-medidas-corporais.md` v0.1 (2026-10-22), decisão: prosseguir em beta.
 - **Pendências jurídicas** ⚖ (futuro, sem orçamento agora): N1 (dados de treino como dado de saúde?), prazos de 5 anos, enquadramento como agente de pequeno porte, Marco Civil art. 15, ECA Digital.
 - **Revisão deste ROPA**: a cada nova atividade, operador ou mudança de finalidade, e no mínimo **a cada 6 meses** — próxima: **2027-04-17**.

@@ -68,7 +68,6 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Prazo de 5 anos da prova de consentimento após exclusão sem validação jurídica | `consent_proofs` | Médio (validar antes do lançamento) |
 | Migração do banco: confirmar variáveis da Vercel, testar o deploy, pausar e excluir o projeto antigo (`us-west-2`) | Painéis Vercel/Supabase | Médio |
 | Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `features/legal/providers/legal-reader-provider.tsx` | Baixo |
-| Tela de consentimento de saúde ainda não existe (chega com o módulo de medidas); o `LegalSummary` já está pronto para ela | Etapa 4 | Médio |
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `shared/components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `shared/hooks/use-sheet-drag.ts` | Baixo |
 | Pilha de toasts (arrastar para dispensar, tocar para expandir) ainda não foi testada em aparelho real | `shared/components/ds/toast.tsx` | Baixo |
@@ -199,7 +198,16 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 **Regras não negociáveis:** nunca enviar dados de medidas para logs, Sentry ou analytics.
 
-**Decisões pendentes:** quais medidas entram (peso, % de gordura, circunferências); design no Claude Design.
+**Decisões tomadas (2026-10-22, `feat/medidas-corporais`):** só circunferências (protótipo "Registro de Medidas"); entrada no próprio perfil.
+
+| Item | Situação |
+|---|---|
+| Migration `20261022140000_body_measurements_module` (uma medição por dia, RPC `save_body_measurement`) | Aplicada e testada (transação desfeita) |
+| Termo de Saúde 0.2-dev e Política 0.7-dev (`20261022140100_legal_docs_body_measurements`) | Escrita; aplicar junto com o deploy do app |
+| Regras (`core/body-measurements.ts`), schema, `BodyMeasurementsApi`, mock, telas `/medidas`, `/medidas/musculo`, `/medidas/registrar`, cartão no perfil, consentimento em camadas | Feito (conferido por print) |
+| RIPD `.lgpd/RIPD/ripd-medidas-corporais.md` v0.1 | Feito; aguardando aprovação |
+| Apagar um registro (arrastar para o lado, com "Desfazer") | Feito |
+| Remover `body_weight_kg`/`body_fat_pct` se continuarem sem uso | Pendente |
 
 ---
 

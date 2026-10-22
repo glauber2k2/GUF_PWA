@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { profileApi, type ApiError, type Profile, type ProfileApi, type ProfileUpdate } from "@guf/api";
-import { invalidateProfileData, PROFILE_KEY } from "@/shared/libs/query-keys";
+import { invalidateHealthConsentData, invalidateProfileData, PROFILE_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { mockProfileApi, setProfileMockScenario } from "@/mocks/profile";
 import { useAuth } from "@/features/auth";
@@ -92,6 +92,6 @@ export function useRevokeHealthConsent() {
       if (error) throw error;
       return null;
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] }),
+    onSettled: () => invalidateHealthConsentData(queryClient),
   });
 }

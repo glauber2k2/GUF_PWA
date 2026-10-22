@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ChevronLeft, ClipboardList } from "lucide-react";
+import { ChevronLeft, ClipboardList, type LucideIcon } from "lucide-react";
 import { Icon, IconButton } from "@/shared/components/ds";
 
 export interface EditorFrameProps {
@@ -7,6 +7,9 @@ export interface EditorFrameProps {
   /** Linha acima do título (ex.: o projeto da rotina). */
   projectName?: string;
   onBack: () => void;
+  /** Ícone e rótulo do botão de voltar (ex.: X "Fechar sem salvar" num formulário). */
+  backIcon?: LucideIcon;
+  backLabel?: string;
   /** Ação no canto direito do cabeçalho (ex.: "Salvar"). */
   action?: ReactNode;
   /** Barra fixa no rodapé, na zona do polegar. */
@@ -14,13 +17,13 @@ export interface EditorFrameProps {
   children: ReactNode;
 }
 
-/** Tela imersiva de edição (rotina, importar ficha): cabeçalho fixo com voltar, conteúdo e barra no rodapé. */
-export function EditorFrame({ title, projectName, onBack, action, bottomBar, children }: EditorFrameProps) {
+/** Tela imersiva de edição (rotina, importar ficha, medidas corporais): cabeçalho fixo com voltar, conteúdo e barra no rodapé. */
+export function EditorFrame({ title, projectName, onBack, backIcon = ChevronLeft, backLabel = "Voltar", action, bottomBar, children }: EditorFrameProps) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
       <header className="sticky top-0 z-[5] border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
         <div className="flex h-14 items-center gap-2 pr-3 pl-1.5">
-          <IconButton icon={ChevronLeft} variant="ghost" label="Voltar" onClick={onBack} />
+          <IconButton icon={backIcon} variant="ghost" label={backLabel} onClick={onBack} />
           <div className="flex min-w-0 flex-1 flex-col gap-px">
             {projectName && (
               <span className="flex items-center gap-1.5 overflow-hidden text-[11px] leading-4 font-semibold tracking-[0.08em] whitespace-nowrap text-accent-text uppercase">

@@ -137,13 +137,13 @@
 
 ## A010 — Medidas corporais <a id="a010"></a>
 
-- **Finalidade**: acompanhar peso, % de gordura e circunferências ao longo do tempo.
-- **Dados tratados**: data, peso, % de gordura, 14 circunferências e observação.
+- **Finalidade**: acompanhar as próprias circunferências ao longo do tempo, numa área privada do perfil.
+- **Dados tratados**: data e circunferências em cm (bíceps, antebraço, coxa e panturrilha dos dois lados; peitoral, ombros, abdômen e quadril). Peso e % de gordura não são coletados (minimização).
 - **Sensíveis?**: **Sim** — dado referente à saúde (Art. 5º, II).
 - **Base legal**: **Art. 11, I** — consentimento específico e destacado, para finalidade específica.
 - **Justificativa**: nenhuma das hipóteses do Art. 11, II se aplica (não há obrigação legal, tutela da saúde por profissional nem prevenção a fraude). O módulo é opcional e o restante do app funciona sem ele, então o consentimento é livre (o serviço não depende dele).
 - **Conformidade atual**: resumo em camadas sempre visível, termo completo, caixa desmarcada, botões "Agora não" / "Autorizar e continuar" com o mesmo peso, registro com versão e hash, RLS que bloqueia gravação sem consentimento ativo.
-- **Pendências**: G13 (impedir revogação gravada sem apagar as medidas) e G17 (RIPD antes de lançar a tela).
+- **Pendências**: G13 resolvido (2026-10-17); G17 resolvido com o RIPD v0.1 (2026-10-22). O consentimento é pedido só ao entrar em Perfil › Medidas corporais, na versão vigente do Termo de Saúde (0.2-dev).
 - **Retenção**: até revogar (apaga na hora) ou excluir a conta.
 - **Revogação possível?**: **Sim**, a qualquer momento pelo Perfil (Art. 8º, § 5º; Art. 18, IX).
 - **Última revisão**: 2026-10-16
