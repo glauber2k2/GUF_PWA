@@ -4,3 +4,4 @@ export { useEntitlements } from "./api/use-plans";
 export { plansPath } from "./helpers/paths";
 export { PlansScreen } from "./ui/plans-screen";
 export { PlanSettingsSection } from "./components/plan-settings-section";
+export { PlanBadge, type PlanBadgeUser } from "./components/plan-badge";

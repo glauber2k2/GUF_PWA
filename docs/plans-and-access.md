@@ -119,3 +119,115 @@ No app, os gráficos abrem no maior período que cabe no plano (Histórico: "4 s
 período novo) e escolher um período maior abre a tela do Pro; link antigo com período fora do plano
 volta ao que cabe.
 
+## Selo do plano
+
+`PlanBadge` (`features/plans`) mostra o plano ao lado do @ no seu perfil social. Recebe o usuário
+(`PlanBadgeUser`: `planName` e `isDefaultPlan`; os `Entitlements` do usuário logado servem) e usa o
+`Badge` do shadcn (`shared/components/ui/badge.tsx`) com as variantes do guf: `muted` para o plano
+padrão e `accent` com coroa para planos pagos. A aparência depende do nível, não do nome, então um plano
+novo não exige mudar o componente. O plano de outra pessoa não aparece: ele não sai do banco para
+terceiros, e mostrá-lo seria um dado novo exposto a outras pessoas (revisar o RIPD social e criar uma
+função no banco antes).
+
+## Experiência: "deixar tentar"
+
+Decisão de produto: a pessoa **nunca vê cadeado antes de tentar**. Botões, formulários e períodos
+aparecem normalmente; ela preenche tudo e, **na hora de usar**, aparece a tela
+"Isso faz parte do Pro" (`ProUpsellScreen`) com o texto da funcionalidade (`planUpsellCopy`) e o
+botão "Conhecer o Pro" (abre `/planos?recurso=<funcionalidade>`, com a linha em destaque). Fechar
+volta exatamente para onde estava, com o formulário preenchido.
+
+No código das telas:
+
+```ts
+const gate = usePlanGate();
+
+// Antes de gravar (pergunta ao plano já carregado; evita uma ida ao servidor):
+if (!gate.allowAnother("routines_per_project", routinesInProject)) return;
+
+// Depois de gravar (o banco é a palavra final; cobre app desatualizado):
+if (gate.handlePlanError(error, "routines_per_project")) return;
+
+// Gráfico (período que começa em `from`):
+if (!gate.allowChartFrom(from, today)) return;
+```
+
+`usePlanGate` (features/plans/hooks) expõe `allowFeature`, `allowAnother`, `allowChartFrom`,
+`handlePlanError` (abrem a tela do Pro e devolvem `false`/`true`) e as consultas sem efeito
+`isFeatureEnabled` e `isChartFromVisible` (para escolher o período padrão dos gráficos e corrigir links antigos).
+
+**Sem direitos carregados** (primeira abertura sem internet): nada é bloqueado no app; o banco
+continua barrando as gravações. Os direitos ficam no aparelho (`withDeviceCache`, chave
+`entitlements:<user>`) e saem ao sair da conta.
+
+## Aceites (LGPD e CDC): agrupados por momento
+
+Pedido do produto: não mostrar termos para aceitar toda hora. Os aceites ficam em dois momentos:
+
+| Momento | Documentos | Onde | `source` |
+|---|---|---|---|
+| **Cadastro** (e `/aceite` quando uma versão exige) | Termos de Uso, Política de Privacidade, declaração de idade | cadastro / portão `/aceite` | `signup_email`, `signup_google`, `reaccept` |
+| **Assinatura** | Termos da Assinatura **+ qualquer pendência do cadastro**, numa única caixa | tela `/planos` | `subscribe` |
+
+- O consentimento de saúde continua separado: precisa ser específico e destacado (LGPD art. 11, I).
+- `requires_reaccept` passou a valer: uma versão publicada com `false` (correção de texto, sem mudança
+  material) **não** pede aceite de novo a quem aceitou uma versão a partir da última que exigiu
+  (`pending_documents_of`).
+- Os planos entraram nos Termos 0.4-dev e na Política 0.6-dev **já descrevendo a assinatura futura**
+  (prestador de pagamento com marcador `[PRESTADOR DE PAGAMENTO]`): quando o pagamento for lançado,
+  preencher o nome do prestador pode sair com `requires_reaccept = false`, sem nova rodada de `/aceite`.
+- Bases legais: plano e assinatura = execução de contrato (art. 7º, V); registros de pagamento exigidos
+  pela lei fiscal = obrigação legal (art. 7º, II). Detalhes em `.lgpd/legal-basis.md` (A022).
+- O aceite da assinatura só é gravado quando a assinatura acontece de fato (`startSubscription`
+  recusa com `billing_unavailable` ANTES de registrar qualquer aceite enquanto não há pagamento).
+
+## Pagamento (preparado, ainda não implementado)
+
+O que já existe: `subscriptions`, `apply_subscription_event`, `startSubscription` no contrato,
+tela `/planos` com a caixa de aceite e o botão "Assinar". O que falta, em ordem:
+
+1. **Escolher o gateway** (web: Stripe ou Mercado Pago; app nativo: Apple/Google, que exigem a
+   compra pela loja). Para várias lojas, um agregador como o RevenueCat simplifica (é uma
+   biblioteca/serviço novo: aprovar antes).
+2. **Edge Function de checkout** (`create-checkout`): recebe o plano e os ids aceitos, registra os
+   aceites (`accept_documents` com `source = 'subscribe'`) e devolve a URL/sessão do gateway.
+   `startSubscription` passa a chamá-la.
+3. **Edge Function de webhook** (`billing-webhook`, `--no-verify-jwt`, assinatura do gateway
+   verificada): para cada evento, chama `apply_subscription_event(user, plan, provider, ref, status,
+   period_end)`. É a ÚNICA forma de um direito pago nascer.
+4. **Política e prestador**: preencher `[PRESTADOR DE PAGAMENTO]`, `[PREÇO]`, `[PERIODICIDADE]`,
+   `[PRAZO DE AVISO]` e `[CANAL DE CANCELAMENTO]`; avaliar o prestador em `.lgpd/vendors/` e a
+   transferência internacional, se houver.
+5. **App**: depois do retorno do checkout, `invalidateQueries([PLANS_KEY])` para o plano novo aparecer.
+
+## Como acrescentar
+
+**Uma funcionalidade nova com limite**
+
+1. Migration: `insert into features` + uma linha em `plan_features` para cada plano.
+2. `packages/core/src/plans.ts`: valor em `PlanFeature`/`PLAN_FEATURES`, rótulo em
+   `PLAN_FEATURE_LABELS` e texto em `planUpsellCopy` (o TypeScript aponta o que falta).
+3. Aplicar: gravação → gatilho ou checagem na RPC/Edge Function (erro `GL001` com `hint`); leitura →
+   `usePlanGate` na tela.
+4. Mock: `apps/web/src/mocks/plans.ts`.
+
+**Mudar um limite** (ex.: Free com 3 rotinas): só uma migration atualizando `plan_features`. Se o
+limite **diminuir**, avisar antes no app (os Termos prometem) e lembrar que quem já passou mantém o que tem.
+
+**Um plano novo** (ex.: `aluno`, `personal`)
+
+1. Migration: `insert into plans` (com `rank`) e as linhas em `plan_features`.
+2. Se o direito vier de outra conta (aluno ← personal): nova `source` em `plan_grants`
+   (ex.: `coach_seat`) e a tabela do vínculo (`coach_links`: personal, aluno, status, escopos), com
+   RLS liberando a leitura dos treinos do aluno só com vínculo ativo e escopo. O plano efetivo continua
+   sendo o de maior `rank`; quando o vínculo acaba, o direito ganha `revoked_at`.
+3. **LGPD antes de construir**: personal vendo treinos do aluno é compartilhamento com terceiro e
+   exige revisar o RIPD (`.lgpd/RIPD/`), o mapa de dados e a Política; chat entre os dois é item que
+   o projeto não permite sem nova avaliação (CLAUDE.md, "Compromisso de produto").
+
+## Desenvolvimento
+
+- `?estado=` (qualquer valor) usa o mock dos planos: **Free** por padrão; incluir `pro` simula o Pro
+  (ex.: `/planos?estado=pro`, `/projetos?estado=padrao,pro`).
+- GUF AI: `?estado=ia-plano` simula o fim das perguntas do plano Free (abre a tela do Pro).
+- Dar Pro a alguém do beta (SQL, como `service_role`): `select public.grant_plan('<user_id>', 'pro');`
