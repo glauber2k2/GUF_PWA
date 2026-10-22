@@ -25,7 +25,8 @@ const JUMP_BUTTON_BOTTOM_PX = 116;
 /** Espera a animação de abertura antes de focar o campo (o teclado não sobe no meio dela). */
 const FOCUS_DELAY_MS = 380;
 
-const STATUS_TEXT: Record<AiPhase, string> = { idle: "Online", thinking: "Pensando…", streaming: "Digitando…" };
+// Parado não mostra status: só o que o GUF AI está fazendo (ou a falta de conexão).
+const STATUS_TEXT: Record<AiPhase, string> = { idle: "", thinking: "Pensando…", streaming: "Digitando…" };
 
 interface AiChatViewProps {
   conversation: AiConversation;
@@ -83,9 +84,7 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
     >
       <header className="flex h-[60px] flex-none items-center gap-2.5 border-b border-border bg-background/90 pr-2 pl-1 backdrop-blur-[12px]">
         <IconButton icon={ChevronDown} label="Fechar GUF AI" variant="ghost" onClick={onClose} />
-        <span className="grid size-9 flex-none place-items-center rounded-[12px] bg-accent text-accent-foreground">
-          <AiMark size={22} />
-        </span>
+        <AiMark size={30} className="flex-none text-accent-text" />
         <div className="flex min-w-0 flex-1 flex-col">
           <strong className="text-base leading-5 font-semibold tracking-[-0.01em]">GUF AI</strong>
           <span
