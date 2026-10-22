@@ -3,6 +3,7 @@ import type { PlanImportRoutine } from "@guf/api";
 import { weekdaysLabel } from "@guf/core";
 import { Icon, IconButton, TextField } from "@/shared/components/ds";
 import { PlanImportExerciseRow } from "@/features/plan-import/components/plan-import-exercise-row";
+import type { PlanImportExercisePatch } from "@/features/plan-import/helpers/plan-import-draft";
 
 interface PlanImportRoutineCardProps {
   routine: PlanImportRoutine;
@@ -11,12 +12,13 @@ interface PlanImportRoutineCardProps {
   canRemove: boolean;
   onRename: (name: string) => void;
   onRemove: () => void;
+  onChangeExercise: (exerciseKey: string, patch: PlanImportExercisePatch) => void;
   onReplaceExercise: (exerciseKey: string) => void;
   onRemoveExercise: (exerciseKey: string) => void;
 }
 
 /** Rotina da ficha convertida: nome editável, dias e a lista de exercícios. */
-export function PlanImportRoutineCard({ routine, disabled, canRemove, onRename, onRemove, onReplaceExercise, onRemoveExercise }: PlanImportRoutineCardProps) {
+export function PlanImportRoutineCard({ routine, disabled, canRemove, onRename, onRemove, onChangeExercise, onReplaceExercise, onRemoveExercise }: PlanImportRoutineCardProps) {
   const nameError = routine.name.trim() ? undefined : "Dê um nome para a rotina.";
   return (
     <section aria-label={routine.name || "Rotina"} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-e1">
@@ -39,6 +41,7 @@ export function PlanImportRoutineCard({ routine, disabled, canRemove, onRename, 
               key={exercise.key}
               exercise={exercise}
               disabled={disabled}
+              onChange={(patch) => onChangeExercise(exercise.key, patch)}
               onReplace={() => onReplaceExercise(exercise.key)}
               onRemove={() => onRemoveExercise(exercise.key)}
             />

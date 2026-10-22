@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/shared/helpers/class-names";
 import { GufLoader, type GufLoaderVariant } from "./loader";
 import { ScreenPortal } from "./portal";
@@ -86,7 +86,8 @@ export function LoadingScreen({ message = "Preparando seu treino", placement = "
 export interface SavingOverlayProps {
   open?: boolean;
   title?: string;
-  message?: string;
+  /** Texto ou conteúdo que muda (ex.: frases que se alternam enquanto espera). */
+  message?: ReactNode;
   /** Animação do GufLoader (padrão 7, Ponto saltitante). */
   variant?: GufLoaderVariant;
   /** "screen": sobre a tela inteira, por portal no <body> · "container": dentro do pai (vitrine). */

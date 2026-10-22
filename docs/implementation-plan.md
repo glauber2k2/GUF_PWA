@@ -320,7 +320,8 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Contrato `PlanImportApi`, schema, regras puras, mock, tela `/projetos/importar` (colar e revisar), atalho em Projetos, cartão no chat | Feito |
 | RIPD do GUF AI v0.2 (§6) e retenção | Feito |
 | Cartão da ficha ao reabrir a conversa (hoje só aparece na resposta da sessão; o banco guarda só o texto) | Pendente |
-| Editar séries, repetições e descanso na revisão (hoje: depois, no editor da rotina) | Pendente |
+| Ajustar séries e repetições na revisão; frases que se alternam enquanto converte (`feat/melhorias-importar-ficha`) | Feito (conferido por print) |
+| Ajustar descanso na revisão (hoje: depois, no editor da rotina) | Pendente |
 
 ### Futuro (fora do MVP)
 

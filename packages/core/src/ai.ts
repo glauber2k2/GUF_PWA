@@ -27,7 +27,15 @@ const WORKOUT_PHRASES = [
 ];
 
 /** Conversão de ficha (chat e Projetos › Importar ficha). */
-const PLAN_IMPORT_PHRASES = ["Lendo a ficha", "Separando as rotinas", "Procurando os exercícios no catálogo", "Conferindo séries e repetições"];
+export const PLAN_IMPORT_PHRASES = [
+  "Lendo a ficha",
+  "Separando os treinos em rotinas",
+  "Procurando os exercícios no catálogo do guf",
+  "Conferindo séries e repetições",
+  "Ajustando os descansos",
+  "Organizando os dias da semana",
+  "Montando o seu projeto",
+];
 
 /** Ferramenta de dados que o GUF AI está usando → frases do que ela está fazendo. */
 const TOOL_PHRASES: Record<string, string[]> = {

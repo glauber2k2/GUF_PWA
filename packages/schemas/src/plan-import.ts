@@ -54,7 +54,7 @@ const planImportExerciseSchema = z.object({
   sourceName: z.string().max(EXERCISE_NAME_MAX_LENGTH * 2),
   match: planImportMatchSchema,
   targetSets: z.number().int().min(ROUTINE_SETS_MIN).max(ROUTINE_SETS_MAX),
-  targetReps: z.string().trim().min(1).max(TARGET_REPS_MAX_LENGTH),
+  targetReps: z.string().trim().min(1, "Informe as repetições de cada exercício.").max(TARGET_REPS_MAX_LENGTH, `Use até ${TARGET_REPS_MAX_LENGTH} caracteres nas repetições.`),
   restSeconds: z.number().int().min(0).max(REST_SECONDS_MAX),
   notes: z.string().trim().max(EXERCISE_NOTE_MAX_LENGTH),
 });
