@@ -206,7 +206,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Termo de Saúde 0.2-dev e Política 0.7-dev (`20261022140100_legal_docs_body_measurements`) | Escrita; aplicar junto com o deploy do app |
 | Regras (`core/body-measurements.ts`), schema, `BodyMeasurementsApi`, mock, telas `/medidas`, `/medidas/musculo`, `/medidas/registrar`, cartão no perfil, consentimento em camadas | Feito (conferido por print) |
 | RIPD `.lgpd/RIPD/ripd-medidas-corporais.md` v0.1 | Feito; aguardando aprovação |
-| Apagar um registro (arrastar para o lado, com "Desfazer") | Feito |
+| Editar e excluir um registro (menu de três pontinhos; excluir com confirmação e "Desfazer") | Feito |
 | Remover `body_weight_kg`/`body_fat_pct` se continuarem sem uso | Pendente |
 
 ---

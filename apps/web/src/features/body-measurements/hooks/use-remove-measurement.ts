@@ -6,8 +6,8 @@ import { useAppShell } from "@/features/app-shell";
 import { useRemoveMeasurementRecord, useUndoBodyMeasurement } from "@/features/body-measurements/api/use-body-measurements";
 
 /**
- * Arrastar um registro para o lado apaga o músculo naquele dia (como a série no treino): sem
- * confirmação, com "Desfazer" no aviso, que grava de volta os valores que o dia tinha.
+ * Excluir o registro do músculo num dia (menu do registro, depois da confirmação), com "Desfazer"
+ * no aviso, que grava de volta os valores que o dia tinha.
  */
 export function useRemoveMeasurement(part: MeasurementPart, days: BodyMeasurementDay[]): (measuredOn: string) => void {
   const { showToast } = useAppShell();

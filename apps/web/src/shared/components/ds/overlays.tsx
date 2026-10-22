@@ -178,6 +178,39 @@ export function SheetOption({
   );
 }
 
+export interface DangerSheetOptionProps {
+  icon: LucideIcon;
+  title: string;
+  /** Motivo de estar indisponível (ex.: "Sem conexão: conecte-se para excluir"). */
+  subtitle?: string;
+  disabled?: boolean;
+  onClick: () => void;
+}
+
+/** Opção destrutiva da folha (ex.: "Excluir treino"): em vermelho, separada das demais pelo tom. */
+export function DangerSheetOption({ icon, title, subtitle, disabled = false, onClick }: DangerSheetOptionProps) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        "flex min-h-[60px] w-full items-center gap-3 rounded-[14px] border border-danger/40 bg-danger/12 px-3.5 py-2.5 text-left text-danger transition-colors duration-150 ease-standard",
+        disabled ? "cursor-not-allowed opacity-55" : "cursor-pointer hover:bg-danger/20",
+      )}
+    >
+      <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-danger/16">
+        <Icon icon={icon} size={18} />
+      </span>
+      <span className="flex flex-1 flex-col gap-0.5">
+        <span className="text-[15px] leading-5 font-semibold">{title}</span>
+        {subtitle && <span className="text-[13px] leading-[18px] text-fg-secondary">{subtitle}</span>}
+      </span>
+    </button>
+  );
+}
+
 export interface ConfirmDialogProps {
   open?: boolean;
   title: string;

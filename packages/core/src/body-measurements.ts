@@ -328,6 +328,46 @@ export function withoutPartValues(days: readonly BodyMeasurementDay[], measuredO
 /** Campos digitados na nova medição (texto como a pessoa digitou). */
 export type MeasurementDraft = Partial<Record<MeasurementSite, string>>;
 
+/** Registro do músculo num dia para editar; null se o dia não tem esse músculo (vira nova medição). */
+export function measurementRecordFor(
+  days: readonly BodyMeasurementDay[],
+  part: MeasurementPart | null,
+  measuredOn: string | null,
+): { measuredOn: string; original: Partial<Record<MeasurementSite, number>> } | null {
+  if (!part || !measuredOn) return null;
+  const original = partDayValues(
+    days.find((day) => day.measuredOn === measuredOn),
+    part,
+  );
+  return Object.keys(original).length ? { measuredOn, original } : null;
+}
+
+/** Valores gravados → campos preenchidos (editar um registro). */
+export function toMeasurementDraft(values: Partial<Record<MeasurementSite, number>>): MeasurementDraft {
+  return Object.fromEntries(Object.entries(values).map(([site, value]) => [site, formatCentimeters(value)]));
+}
+
+/**
+ * O que gravar ao editar um registro: os campos válidos e, para o que o registro tinha e a pessoa
+ * apagou, null (some do dia).
+ */
+export function editedMeasurementValues(
+  draft: MeasurementDraft,
+  original: Partial<Record<MeasurementSite, number>>,
+): Partial<Record<MeasurementSite, number | null>> {
+  const values: Partial<Record<MeasurementSite, number | null>> = draftValues(draft);
+  for (const site of Object.keys(original) as MeasurementSite[]) {
+    if (values[site] === undefined) values[site] = null;
+  }
+  return values;
+}
+
+/** A edição mudou algo em relação ao registro (salvar fica liberado). */
+export function hasMeasurementChanges(draft: MeasurementDraft, original: Partial<Record<MeasurementSite, number>>): boolean {
+  // null só aparece para o que o registro tinha: é sempre uma mudança.
+  return Object.entries(editedMeasurementValues(draft, original)).some(([site, value]) => value !== original[site as MeasurementSite]);
+}
+
 /** Valor mais recente de cada local (referência nos campos da nova medição). */
 export function latestMeasurementValues(days: readonly BodyMeasurementDay[]): BodyMeasurementDay["values"] {
   return Object.assign({}, ...days.map((day) => day.values));

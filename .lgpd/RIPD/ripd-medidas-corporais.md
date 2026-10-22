@@ -37,13 +37,13 @@
 | R4 · Medidas no aparelho (perda, aparelho compartilhado) | Baixo | Sem cópia no IndexedDB; cache só em memória; "Sair" limpa o cache |
 | R5 · Envio a terceiros (IA, analytics, logs) | Baixo | GUF AI sem acesso (Termo 0.2-dev diz isso); sem analytics no app; regra "nunca enviar medidas para logs" (CLAUDE.md, `packages/api/src/profile.ts`) |
 | R6 · Público menor de idade (ECA Digital, Art. 14 LGPD) | Médio ⚖ | Público 18+ por autodeclaração; conta de menor identificada é excluída. A decisão sobre verificação de idade (eca-digital.md, seção 4) continua pré-requisito do lançamento público |
-| R7 · Dado incorreto (qualidade, Art. 6º, V) | Baixo | Validação no app e no banco (0 < cm < 300, uma casa); registrar de novo o mesmo dia corrige; arrastar o registro apaga; "Desfazer" logo após salvar ou apagar |
+| R7 · Dado incorreto (qualidade, Art. 6º, V) | Baixo | Validação no app e no banco (0 < cm < 300, uma casa); editar o registro (menu do registro) ou registrar de novo o mesmo dia corrige; excluir pede confirmação; "Desfazer" logo após salvar ou excluir |
 | R8 · Banco fora do Brasil | Baixo | Supabase em `sa-east-1` (São Paulo) desde 2026-10-16 |
 
 ## 5. Direitos do titular
 - **Acesso e portabilidade** (Art. 18, II e V): "Exportar meus dados" inclui `medidas` e `valores_das_medidas`.
-- **Correção** (III): registrar de novo o mesmo dia substitui os valores.
-- **Eliminação e revogação** (VI e IX): arrastar um registro para o lado (tela do músculo) apaga aquele músculo naquele dia, com "Desfazer" logo em seguida; Configurações › Privacidade › "Revogar consentimento" apaga tudo na hora; excluir a conta apaga em cascata.
+- **Correção** (III): menu do registro › Editar, ou registrar de novo o mesmo dia (substitui os valores).
+- **Eliminação e revogação** (VI e IX): menu do registro › Excluir (tela do músculo, com confirmação) apaga aquele músculo naquele dia, com "Desfazer" logo em seguida; Configurações › Privacidade › "Revogar consentimento" apaga tudo na hora; excluir a conta apaga em cascata.
 - **Informação** (Art. 9º): Termo de Saúde 0.2-dev (resumo em camadas) e Política 0.7-dev, seção "Dados de saúde".
 
 ## 6. Pendências

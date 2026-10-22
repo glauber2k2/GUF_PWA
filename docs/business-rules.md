@@ -276,7 +276,7 @@ Arquitetura completa em `docs/plans-and-access.md`.
 - **O que é medido:** circunferências em cm, uma casa (0,1 a 299,9). Braços e pernas com os dois lados (bíceps, antebraço, quadríceps → coxa, panturrilha); tronco com medida única (peitoral, ombros, abdômen, glúteos → quadril). Peso e % de gordura não são coletados.
 - **Uma medição por dia:** registrar de novo o mesmo dia substitui os valores preenchidos (aviso na tela); datas futuras não são aceitas. "Desfazer" logo depois de salvar volta cada valor ao que o dia tinha antes (ou apaga). Campos vazios não são gravados.
 - **Lista:** valor mais recente de cada músculo e a variação em 3 meses (último registro − primeiro registro da janela; nos dois lados, a média dos lados), sem cor de bom/ruim. **Evolução:** gráfico do lado escolhido (3M · 6M · Tudo), diferença entre os lados no último dia com os dois e os registros com a diferença para o anterior.
-- **Apagar:** arrastar um registro para o lado (como a série no treino) apaga aquele músculo naquele dia, nos dois lados; sem confirmação, com "Desfazer".
+- **Editar e excluir:** os três pontinhos de cada registro abrem Editar (data travada, campos preenchidos; apagar um campo remove o valor) e Excluir (com confirmação; apaga aquele músculo naquele dia, nos dois lados, com "Desfazer"). Sem deslizar para apagar: evita exclusão sem querer.
 - **Só online:** as medidas não ficam guardadas no aparelho.
 
 ## 9. Mensagens ao usuário

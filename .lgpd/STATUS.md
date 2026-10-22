@@ -177,5 +177,5 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Minimização: só circunferências; peso e % de gordura não são coletados; sem cópia offline; GUF AI sem acesso.
 - Textos: **Termo de Saúde 0.2-dev** (o que é coletado, "Quem vê suas medidas", sem GUF AI, sem cópia no aparelho; novo consentimento) e **Política 0.7-dev** (dado coletado e quem vê; `requires_reaccept = false`, só reduz). Migration `20261022140100_legal_docs_body_measurements` — ⏸ aplicar junto com o deploy do app.
 - RIPD `RIPD/ripd-medidas-corporais.md` v0.1 — ⏸ CHECKPOINT. Atualizados: `data-map.md` (A010, A011), `legal-basis.md`, `ROPA.md`, `gaps.md` (G17 verde), `RIPD/INDEX.md`.
-- Apagar um registro: arrastar a linha para o lado (como a série no treino), com "Desfazer".
+- Corrigir e apagar um registro: menu de três pontinhos (Editar · Excluir, com confirmação e "Desfazer").
 - Pendências (RIPD, seção 6): revisão jurídica, verificação de idade e Encarregado antes do lançamento público, remover colunas sem uso.

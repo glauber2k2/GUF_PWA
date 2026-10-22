@@ -78,7 +78,7 @@ export function useUndoBodyMeasurement(): (input: BodyMeasurementSave) => Promis
 }
 
 /**
- * Apaga o registro de um músculo num dia (arrastar a linha para o lado). Some da tela na hora
+ * Apaga o registro de um músculo num dia (menu do registro › Excluir). Some da tela na hora
  * (otimista); se falhar, a lista volta pelo recarregamento.
  */
 export function useRemoveMeasurementRecord() {

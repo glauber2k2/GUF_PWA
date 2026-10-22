@@ -22,10 +22,12 @@ interface MeasurementDateCardProps {
   /** O dia já tem medição: os valores preenchidos substituem os anteriores. */
   hasConflict: boolean;
   today: Date;
+  /** Editando um registro: a data é a dele e não muda (só o rótulo aparece). */
+  isLocked?: boolean;
 }
 
 /** Data da medição (protótipo 1f/1g): "Hoje" é o padrão; "Outro dia" abre o calendário sem dias futuros. */
-export function MeasurementDateCard({ mode, onMode, measuredOn, onSelect, dateLabel, hasConflict, today }: MeasurementDateCardProps) {
+export function MeasurementDateCard({ mode, onMode, measuredOn, onSelect, dateLabel, hasConflict, today, isLocked = false }: MeasurementDateCardProps) {
   const [month, setMonth] = useState(() => startOfMonthOf(fromLocalISODate(measuredOn)));
   const cells = monthGrid(month);
   const days = cells.filter((cell) => cell !== null);
@@ -44,9 +46,9 @@ export function MeasurementDateCard({ mode, onMode, measuredOn, onSelect, dateLa
         <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">Data</span>
         <span className="text-sm leading-5 font-semibold">{dateLabel}</span>
       </div>
-      <SegmentedControl options={DATE_OPTIONS} value={mode} onChange={(value) => onMode(value as MeasurementDateMode)} label="Data da medição" />
+      {!isLocked && <SegmentedControl options={DATE_OPTIONS} value={mode} onChange={(value) => onMode(value as MeasurementDateMode)} label="Data da medição" />}
 
-      {mode === "other" && (
+      {mode === "other" && !isLocked && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <IconButton icon={ChevronLeft} label="Mês anterior" variant="ghost" onClick={() => setMonth(shiftMonth(month, -1))} />
