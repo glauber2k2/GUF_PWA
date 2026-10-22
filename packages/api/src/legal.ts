@@ -81,7 +81,7 @@ export async function acceptDocuments(
 }
 
 /* =====================================================================
- * Leitor de documentos (/termos, /privacidade, /termo-de-saude) e central /documentos.
+ * Leitor de documentos (/termos, /privacidade, /termo-de-saude, /termos-da-assinatura) e central /documentos.
  * Versões vigentes são públicas (funciona sem login); o aceite só vem para quem está logado.
  * ===================================================================== */
 
@@ -104,7 +104,7 @@ export interface LegalOverview {
   accepted: Record<LegalReaderDocType, LegalAcceptedVersion | null> | null;
 }
 
-const READER_TYPES: LegalReaderDocType[] = ["terms", "privacy", "health_consent"];
+const READER_TYPES: LegalReaderDocType[] = ["terms", "privacy", "health_consent", "subscription_terms"];
 
 export async function getLegalOverview(client: GufClient): Promise<ApiResult<LegalOverview>> {
   try {
@@ -118,7 +118,7 @@ export async function getLegalOverview(client: GufClient): Promise<ApiResult<Leg
     ]);
     if (docsRes.error) return { data: null, error: toApiError(docsRes.error) };
 
-    const current: LegalOverview["current"] = { terms: null, privacy: null, health_consent: null };
+    const current: LegalOverview["current"] = { terms: null, privacy: null, health_consent: null, subscription_terms: null };
     for (const doc of docsRes.data) {
       const type = doc.doc_type as LegalReaderDocType;
       current[type] ??= { version: doc.version, publishedAt: doc.published_at, url: doc.url };
@@ -133,7 +133,7 @@ export async function getLegalOverview(client: GufClient): Promise<ApiResult<Leg
 
     // Registros só são incluídos (nunca editados): vale a ação mais recente de cada tipo
     // (revogar o consentimento de saúde = sem aceite).
-    const accepted: NonNullable<LegalOverview["accepted"]> = { terms: null, privacy: null, health_consent: null };
+    const accepted: NonNullable<LegalOverview["accepted"]> = { terms: null, privacy: null, health_consent: null, subscription_terms: null };
     const seen = new Set<string>();
     for (const record of recordsRes.data) {
       const type = record.legal_documents?.doc_type;
@@ -155,7 +155,7 @@ export async function getLegalOverview(client: GufClient): Promise<ApiResult<Leg
 
 export type CurrentLegalHashes = Partial<Record<LegalHashDocType, { contentHash: string; summaryHash: string | null }>>;
 
-const HASH_TYPES: LegalHashDocType[] = ["terms", "privacy", "age_declaration", "health_consent"];
+const HASH_TYPES: LegalHashDocType[] = ["terms", "privacy", "age_declaration", "health_consent", "subscription_terms"];
 
 export async function getCurrentLegalHashes(client: GufClient): Promise<ApiResult<CurrentLegalHashes>> {
   try {

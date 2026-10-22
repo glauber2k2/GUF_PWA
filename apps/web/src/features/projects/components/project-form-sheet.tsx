@@ -6,9 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { PROJECT_DESCRIPTION_MAX_LENGTH, PROJECT_NAME_MAX_LENGTH, projectFormSchema, type ProjectFormValues } from "@guf/schemas";
 import type { Project } from "@guf/api";
+import { countCustomProjects } from "@guf/core";
 import { useAppShell } from "@/features/app-shell";
 import { BottomSheet, Button, Switch, TextAreaField, TextField } from "@/shared/components/ds";
-import { useProjectsSource } from "@/features/projects/api/use-projects";
+import { useProjectsOverview, useProjectsSource } from "@/features/projects/api/use-projects";
+import { usePlanGate } from "@/features/plans";
 import { invalidatePlanningData } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { SaveErrorBanner, useSaveState } from "./save-state";
@@ -30,6 +32,8 @@ export function ProjectFormSheet({ open, project, activeProject, onClose, onSave
   const queryClient = useQueryClient();
   const shell = useAppShell();
   const save = useSaveState();
+  const gate = usePlanGate();
+  const overview = useProjectsOverview();
   const creating = !project;
   const [submitting, setSubmitting] = useState(false);
   const {
@@ -59,12 +63,14 @@ export function ProjectFormSheet({ open, project, activeProject, onClose, onSave
 
   const onSubmit = handleSubmit(async (values) => {
     if (!save.ensureOnline()) return;
+    if (creating && !gate.allowAnother("custom_projects", countCustomProjects(overview.data?.projects ?? []))) return;
     setSubmitting(true);
     const client = getSupabaseClient();
     const result = project
       ? await api.updateProject(client, { id: project.id, ...values }).then((r) => (r.error ? r : { data: { id: project.id }, error: null }))
       : await api.createProject(client, values);
     setSubmitting(false);
+    if (gate.handlePlanError(result.error, "custom_projects")) return;
     if (result.error) return save.fail(result.error);
     await invalidatePlanningData(queryClient);
     shell.showToast(creating ? (values.activate ? "Projeto criado e ativado" : "Projeto criado") : "Projeto salvo", { tone: "success" });

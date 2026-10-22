@@ -1,10 +1,10 @@
-/** GUF AI: limites e textos da conversa (os limites se repetem na Edge Function guf-ai). */
+/**
+ * GUF AI: limites e textos da conversa (os limites se repetem na Edge Function guf-ai).
+ * As perguntas por dia dependem do plano (funcionalidade guf_ai_daily_messages, ver plans.ts).
+ */
 
 /** Tamanho máximo de uma pergunta. */
 export const AI_MESSAGE_MAX_CHARS = 2000;
-
-/** Perguntas por pessoa em 24 horas (o servidor recusa acima disso). */
-export const AI_DAILY_MESSAGE_LIMIT = 40;
 
 /** Tempo de cada frase do "pensando" na tela. */
 export const AI_THINKING_PHRASE_MS = 2200;

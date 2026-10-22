@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChartLine, ChevronRight, Trophy } from "lucide-react";
 import {
   equipmentLabel,
+  evolutionPeriodStart,
   evolutionSeries,
   formatDayMonth,
   formatNumber,
@@ -33,8 +34,12 @@ import { EvolutionChart } from "@/features/evolution/components/evolution-chart"
 import { EvolutionSkeleton } from "@/features/evolution/components/evolution-skeleton";
 import { exerciseSearchPath, summaryPath } from "@/features/evolution/helpers/paths";
 import { useGoBack } from "@/shared/hooks/use-go-back";
+import { usePlanGate } from "@/features/plans";
 
 const RECENT_LIMIT = 8;
+/** Período ao abrir; quando o plano não mostra tanto histórico, o mais curto. */
+const PREFERRED_PERIOD: EvolutionPeriod = "3m";
+const SHORTEST_PERIOD: EvolutionPeriod = "1m";
 
 /** Evolução por exercício: /exercicio?id=<exercício>&metrica=carga|1rm|volume&periodo=3m|6m|1a|tudo. */
 export function EvolutionScreen() {
@@ -83,7 +88,11 @@ export function EvolutionScreen() {
 }
 
 /** Métrica e período ficam na URL (voltar/compartilhar mantém a escolha). */
-function useEvolutionParams(): { metric: EvolutionMetric; period: EvolutionPeriod; set: (key: "metrica" | "periodo", value: string) => void } {
+function useEvolutionParams(defaultPeriod: EvolutionPeriod): {
+  metric: EvolutionMetric;
+  period: EvolutionPeriod;
+  set: (key: "metrica" | "periodo", value: string) => void;
+} {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -91,7 +100,7 @@ function useEvolutionParams(): { metric: EvolutionMetric; period: EvolutionPerio
   const p = params.get("periodo");
   return {
     metric: isEvolutionMetric(m) ? m : "carga",
-    period: isEvolutionPeriod(p) ? p : "3m",
+    period: isEvolutionPeriod(p) ? p : defaultPeriod,
     set: (key, value) => {
       const next = new URLSearchParams(params.toString());
       next.set(key, value);
@@ -101,10 +110,23 @@ function useEvolutionParams(): { metric: EvolutionMetric; period: EvolutionPerio
 }
 
 function EvolutionContent({ evolution }: { evolution: ExerciseEvolution }) {
-  const { metric, period, set } = useEvolutionParams();
+  const gate = usePlanGate();
   const unit = evolution.weightUnit;
   const sessions = evolution.sessions;
   const todayIso = toLocalISODate(new Date());
+  const today = fromLocalISODate(todayIso);
+  const firstPerformedOn = sessions[0]?.performedOn ?? null;
+  // Recordes e últimos treinos usam o histórico inteiro; o plano limita só o período do gráfico.
+  const chartFrom = (p: EvolutionPeriod) => evolutionPeriodStart(p, today, firstPerformedOn);
+  const isPeriodVisible = (p: EvolutionPeriod) => gate.isChartFromVisible(chartFrom(p), today);
+  const defaultPeriod = isPeriodVisible(PREFERRED_PERIOD) ? PREFERRED_PERIOD : SHORTEST_PERIOD;
+  const params = useEvolutionParams(defaultPeriod);
+  const { metric, set } = params;
+  // Link antigo ou plano que mudou: período fora do plano volta ao que cabe.
+  const period = isPeriodVisible(params.period) ? params.period : defaultPeriod;
+  const changePeriod = (p: EvolutionPeriod) => {
+    if (gate.allowChartFrom(chartFrom(p), today)) set("periodo", p);
+  };
   const series = useMemo(() => evolutionSeries(sessions, metric, period, fromLocalISODate(todayIso), unit), [sessions, metric, period, todayIso, unit]);
   const bests = personalBests(sessions);
   const last = sessions.at(-1);
@@ -122,7 +144,7 @@ function EvolutionContent({ evolution }: { evolution: ExerciseEvolution }) {
         unit={unit}
         single={single}
         onMetricChange={(v) => set("metrica", v)}
-        onPeriodChange={(v) => set("periodo", v)}
+        onPeriodChange={changePeriod}
       />
       <RecentSessions sessions={sessions} unit={unit} />
     </>

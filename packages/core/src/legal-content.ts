@@ -20,8 +20,8 @@ export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
 export const DSAR_RESPONSE_DAYS = 15;
 
 /** Documento do leitor (rota do app) ↔ doc_type do banco. */
-export type LegalReaderDoc = "termos" | "privacidade" | "saude";
-export type LegalReaderDocType = "terms" | "privacy" | "health_consent";
+export type LegalReaderDoc = "termos" | "privacidade" | "saude" | "assinatura";
+export type LegalReaderDocType = "terms" | "privacy" | "health_consent" | "subscription_terms";
 
 /** Ícones por nome (o app mapeia para lucide-react). */
 export type LegalIcon =
@@ -183,6 +183,7 @@ const TERMS: LegalDocumentContent = {
         ),
         ul(
           "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
+          "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
           "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e volume), pelas mesmas regras para todos, publicadas no app.",
           "Medidas corporais e observações escritas por você nunca aparecem para outras pessoas.",
@@ -192,11 +193,19 @@ const TERMS: LegalDocumentContent = {
     },
     {
       id: "planos",
-      title: "Planos pagos (futuro)",
+      title: "Planos Free e Pro",
       blocks: [
         p(
-          "Hoje o guf é gratuito. Se forem criados planos pagos, preço, forma de cobrança e cancelamento serão apresentados antes da contratação, e nada será cobrado sem a sua confirmação.",
+          "O guf tem um plano gratuito (Free) e um plano pago (Pro). O Free tem limites, como a quantidade de projetos e de rotinas, as perguntas por dia ao GUF AI, o período mostrado nos gráficos e a competição além do mês atual. Seus treinos, recordes e evolução ficam completos em qualquer plano. A comparação atualizada fica na tela Planos, em Configurações.",
         ),
+        p(
+          "O Pro só é contratado na tela de assinatura. Lá aparecem o preço, a forma de cobrança, a renovação e o cancelamento, e você aceita os Termos da Assinatura antes de qualquer cobrança.",
+        ),
+        { kind: "link", doc: "assinatura", text: "Ler os Termos da Assinatura" },
+        p(
+          "Mudar de plano nunca apaga dados. Se o seu plano deixar de incluir algo, o que você já criou continua salvo e pode ser exportado a qualquer momento; só não é possível criar mais além do limite, e os gráficos voltam a mostrar o período do plano.",
+        ),
+        p("Se os limites de um plano diminuírem, você será avisado no app antes de a mudança valer."),
       ],
     },
     {
@@ -229,6 +238,15 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.5-dev": [
+      "Seus treinos, recordes e evolução ficam completos em qualquer plano; o Free limita só o período mostrado nos gráficos.",
+      "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual.",
+    ],
+    "0.4-dev": [
+      "Novo: planos Free e Pro. O Free tem limites de projetos, rotinas, perguntas ao GUF AI e período de histórico e de competição.",
+      "O Pro é contratado só na tela de assinatura, com preço, renovação e cancelamento informados antes de qualquer cobrança.",
+      "Mudar de plano nunca apaga seus dados.",
+    ],
     "0.3-dev": [
       "A pontuação da competição passa a ser calculada pela constância, pelos recordes de carga e pelo volume dos treinos.",
       "O esforço do treino (nota de 1 a 10) não é mais pedido nem usado.",
@@ -283,6 +301,11 @@ const PRIVACY: LegalDocumentContent = {
             ["Foto do perfil", "Imagem enviada ou vinda do Google", "Você, opcional"],
             ["Perfil social", "Nome de usuário (@), seguidores, pedidos e bloqueios", "Você"],
             ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
+            [
+              "Plano e assinatura",
+              "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, a situação da assinatura e o código dela no prestador de pagamento",
+              "O app e, se você assinar, o prestador de pagamento",
+            ],
             ["Medidas corporais", "Peso, % de gordura e circunferências", "Você, opcional e com consentimento"],
           ],
         },
@@ -304,6 +327,8 @@ const PRIVACY: LegalDocumentContent = {
             ["Mostrar seu perfil (@, nome e foto) na busca e receber pedidos para seguir", "Conta e perfil social", "Execução de contrato (art. 7º, V)"],
             ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
             ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
+            ["Liberar o que o seu plano inclui e gerir a assinatura do Pro", "Plano e assinatura", "Execução de contrato (art. 7º, V)"],
+            ["Guardar os registros de pagamento exigidos pela lei fiscal", "Assinatura e pagamentos", "Obrigação legal (art. 7º, II)"],
             ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
             ["Cumprir obrigações legais", "Registros de acesso", "Obrigação legal (art. 7º, II)"],
@@ -346,6 +371,7 @@ const PRIVACY: LegalDocumentContent = {
           "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
           "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
+          "[PRESTADOR DE PAGAMENTO], só se você assinar o Pro: recebe os dados de pagamento direto de você. O guf não vê nem guarda o número do cartão; recebe só a situação da assinatura.",
           "Serviço de notificações do seu navegador ou celular (Google, Apple ou Mozilla), se você ligar as notificações. O texto do aviso vai criptografado: só o seu aparelho consegue ler.",
           "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
@@ -374,6 +400,7 @@ const PRIVACY: LegalDocumentContent = {
             ["Medidas corporais", "Até você revogar o consentimento ou excluir a conta"],
             ["Perfil social, seguidores e bloqueios", "Enquanto a conta existir; seguidores até você remover; bloqueios até desbloquear"],
             ["Avisos no celular", "Até você desligar as notificações, sair da conta no aparelho ou o aparelho deixar de aceitar notificações; o registro dos avisos de seguidores enviados, por 1 dia"],
+            ["Plano e assinatura", "Enquanto a conta existir; os registros de pagamento exigidos pela lei fiscal ficam com o prestador de pagamento pelo prazo legal"],
             ["Registros de acesso", "[PRAZO DOS REGISTROS DE ACESSO]"],
             ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança do provedor somem em até [PRAZO DOS BACKUPS]"],
             [
@@ -442,6 +469,10 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.6-dev": [
+      "Novo: planos Free e Pro. Guardamos o seu plano, de onde ele vem e até quando vale, para liberar o que ele inclui.",
+      "Se você assinar o Pro, o pagamento é feito com um prestador de pagamento, que recebe os dados do cartão direto de você; o guf recebe só a situação da assinatura.",
+    ],
     "0.5-dev": [
       "O esforço do treino (nota de 1 a 10) não é mais coletado, e o ajuste automático do esforço na pontuação deixou de existir.",
       "A pontuação da competição passa a usar a constância, os recordes de carga e o volume dos treinos.",
@@ -538,14 +569,95 @@ const HEALTH: LegalDocumentContent = {
   changes: {},
 };
 
+/** Aceito só na tela de assinatura do Pro, junto com o que estiver pendente do cadastro. */
+const SUBSCRIPTION: LegalDocumentContent = {
+  doc: "assinatura",
+  docType: "subscription_terms",
+  route: "/termos-da-assinatura",
+  title: "Termos da Assinatura",
+  shortTitle: "Termos da Assinatura",
+  icon: "file-text",
+  summary: [
+    { icon: "target", text: "O Pro tira os limites do plano Free." },
+    { icon: "bell", text: "Preço, cobrança e renovação aparecem antes de você confirmar. Mudança de preço é avisada antes de valer." },
+    { icon: "circle-x", text: "Cancele quando quiser: o Pro continua até o fim do período já pago." },
+    { icon: "toggle-left", text: "Desistiu em até 7 dias da contratação? Você recebe o valor de volta." },
+    { icon: "folder-lock", text: "Quando o Pro termina, você volta ao Free sem perder nenhum dado." },
+  ],
+  sections: [
+    {
+      id: "objeto",
+      title: "O que é a assinatura",
+      blocks: [
+        p(
+          "A assinatura do plano Pro do guf, oferecido por [RAZÃO SOCIAL], CNPJ [CNPJ], libera as funcionalidades do Pro enquanto estiver ativa. A lista atualizada do que cada plano inclui fica na tela Planos do app.",
+        ),
+        p("Estes termos completam os Termos de Uso; em caso de conflito sobre a assinatura, valem estes."),
+      ],
+    },
+    {
+      id: "preco",
+      title: "Preço e cobrança",
+      blocks: [
+        p(
+          "O preço é de [PREÇO] por [PERIODICIDADE], cobrado por [PRESTADOR DE PAGAMENTO] na forma escolhida por você. O valor e a data da cobrança aparecem na tela de assinatura antes da confirmação.",
+        ),
+        p("Mudanças de preço são avisadas no app e por e-mail com pelo menos [PRAZO DE AVISO] de antecedência e só valem a partir da renovação seguinte."),
+      ],
+    },
+    {
+      id: "renovacao",
+      title: "Renovação e cancelamento",
+      blocks: [
+        p("A assinatura se renova automaticamente ao fim de cada período, até você cancelar."),
+        p(
+          "Você pode cancelar a qualquer momento, sem multa. O Pro continua até o fim do período já pago e não há nova cobrança. Se o pagamento falhar, o prestador tenta de novo por alguns dias; sem pagamento, o plano volta ao Free.",
+        ),
+      ],
+    },
+    {
+      id: "arrependimento",
+      title: "Direito de arrependimento",
+      blocks: [
+        p(
+          "Por ser uma contratação pela internet, você pode desistir em até 7 dias a contar da contratação e receber de volta o valor pago (art. 49 do Código de Defesa do Consumidor). O pedido é feito em [CANAL DE CANCELAMENTO].",
+        ),
+      ],
+    },
+    {
+      id: "fim",
+      title: "Quando o Pro termina",
+      blocks: [
+        p(
+          "Com o fim da assinatura, sua conta volta ao plano Free. Nenhum dado é apagado: projetos, rotinas e treinos continuam salvos e podem ser exportados. Só não é possível criar além dos limites do Free, e os gráficos voltam a mostrar o mês atual e o anterior.",
+        ),
+      ],
+    },
+    {
+      id: "dados",
+      title: "Seus dados na assinatura",
+      blocks: [
+        p(
+          "Os dados do cartão vão direto para o prestador de pagamento: o guf não os vê nem guarda. O guf recebe só a situação da assinatura (ativa, em atraso, cancelada) e o período pago. Detalhes na Política de Privacidade.",
+        ),
+        { kind: "link", doc: "privacidade", anchor: "compartilhamento", text: "Ler a Política de Privacidade" },
+      ],
+    },
+  ],
+  changes: {
+    "0.2-dev": ["Quando o Pro termina, seus treinos continuam completos; só os gráficos voltam a mostrar o período do plano Free."],
+  },
+};
+
 export const LEGAL_DOCUMENTS: Record<LegalReaderDoc, LegalDocumentContent> = {
   termos: TERMS,
   privacidade: PRIVACY,
   saude: HEALTH,
+  assinatura: SUBSCRIPTION,
 };
 
 /** Ordem na central "Documentos legais" e em "Outros documentos". */
-export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude"];
+export const LEGAL_READER_ORDER: LegalReaderDoc[] = ["termos", "privacidade", "saude", "assinatura"];
 
 /** Link "mailto:" já com o assunto do pedido. */
 export function privacyRequestMailto(): string {
@@ -582,6 +694,8 @@ export function legalReaderTarget(docType: string): { doc: LegalReaderDoc; ancho
       return { doc: "termos", anchor: "idade" };
     case "health_consent":
       return { doc: "saude" };
+    case "subscription_terms":
+      return { doc: "assinatura" };
     default:
       return null;
   }

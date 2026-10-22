@@ -4,9 +4,10 @@ import type { UIMessageChunk } from "ai";
 /**
  * Mock do GUF AI (mesma assinatura de packages/api/src/ai.ts). Responde em stream com textos do
  * protótipo, escolhidos por palavras da pergunta. Cenários (?estado=, só em dev):
- * ia-conversa (retoma uma conversa) · ia-limite (limite diário) · ia-erro (falha no meio da resposta).
+ * ia-conversa (retoma uma conversa) · ia-limite (limite diário) · ia-plano (perguntas do plano Free acabaram)
+ * · ia-erro (falha no meio da resposta).
  */
-export type AiMockScenario = "ia-conversa" | "ia-limite" | "ia-erro";
+export type AiMockScenario = "ia-conversa" | "ia-limite" | "ia-plano" | "ia-erro";
 
 interface MockReply {
   /** Ferramenta "usada" (mostra o "pensando" e o selo "Usou seu histórico"); null = conhecimento geral. */
@@ -61,7 +62,7 @@ let lastQuestion: Map<string, string> | null = null;
 function scenario(): AiMockScenario | null {
   if (typeof window === "undefined") return null;
   const values = new URLSearchParams(window.location.search).get("estado")?.split(",") ?? [];
-  return (["ia-conversa", "ia-limite", "ia-erro"] as const).find((s) => values.includes(s)) ?? null;
+  return (["ia-conversa", "ia-limite", "ia-plano", "ia-erro"] as const).find((s) => values.includes(s)) ?? null;
 }
 
 const wait = (ms: number, signal?: AbortSignal) =>
@@ -140,6 +141,9 @@ export const mockAiApi = {
   streamAiReply: async (_client, { request, signal }) => {
     const current = scenario();
     if (current === "ia-limite" && request.trigger === "submit-message") return { data: null, error: apiError("ai_daily_limit") };
+    if (current === "ia-plano" && request.trigger === "submit-message") {
+      return { data: null, error: { ...apiError("plan_limit"), feature: "guf_ai_daily_messages" } };
+    }
     const stream = toEventStream(replyChunks(pickReply(questionFor(request)), current === "ia-erro", signal));
     return { data: new Response(stream, { headers: { "Content-Type": "text/event-stream" } }), error: null };
   },

@@ -25,7 +25,7 @@
 | A012 | Registros de acesso e segurança | Não | Possível | Não | Depende dos operadores |
 | A013 | Exportação de dados (direito do titular) | Sim, se houver medidas | Possível | Não | Em produção (testes) |
 | A014 | Exclusão de conta | Sim, se houver medidas | Possível | Não | Em produção (testes) |
-| A015 | Planos e pagamentos | Não | Possível | Não | Futuro |
+| A015 | Planos (Free/Pro) e direitos de acesso; pagamento futuro | Não | Possível | Não | Planos implementados (2026-10-21); pagamento futuro |
 | A016 | Registro de auditoria | Não | Possível | Não | Em produção (testes) |
 | A017 | Perfil social e seguidores | Não | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
@@ -318,21 +318,22 @@
 | RIPD | N/A |
 | Owner | Pendente |
 
-### A015 — Planos e pagamentos (futuro)
+### A015 — Planos e direitos de acesso (pagamento futuro)
 
 | Campo | Valor |
 |---|---|
 | Slug | a015-planos |
-| Finalidade | Liberar recursos pagos |
-| Base legal | Proposta: Art. 7º, V; dados fiscais Art. 7º, II |
-| Categorias de titulares | Assinantes |
-| Sensíveis? | Não (dados financeiros ficam no gateway) |
-| Dados | plano, origem (stripe, mercadopago, apple, google, manual), validade |
-| Fonte | Gateway de pagamento (webhook) |
-| Sistemas | `entitlements` |
-| Operadores | Futuro gateway (a definir) |
-| Transferência intl. | A definir |
-| Retenção | **A definir antes de monetizar** (obrigações fiscais) ⚖ |
+| Finalidade | Liberar o que o plano do titular inclui (limites do Free, recursos do Pro) e, quando houver pagamento, gerir a assinatura |
+| Base legal | Art. 7º, V (plano e assinatura); registros de pagamento exigidos pela lei fiscal: Art. 7º, II ⚖ |
+| Categorias de titulares | Todos os usuários (plano Free é o padrão, sem linha no banco); assinantes no futuro |
+| Sensíveis? | Não (dados de cartão ficam no prestador de pagamento, nunca no banco do guf) |
+| Dados | `plan_grants`: plano, origem (assinatura, manual, teste), início, validade, revogação · `subscriptions` (futuro): situação, código no prestador, fim do período pago · aceite dos Termos da Assinatura (`consent_records`, source `subscribe`) |
+| Fonte | O app (plano padrão), o suporte (direito manual, `grant_plan`) e, no futuro, o webhook do prestador (`apply_subscription_event`) |
+| Sistemas | `plans`, `features`, `plan_features` (catálogo público, sem dado pessoal), `plan_grants`, `subscriptions`; cópia do plano no aparelho (IndexedDB) até sair da conta |
+| Operadores | Supabase; futuro prestador de pagamento ([PRESTADOR DE PAGAMENTO], avaliar em `vendors/` antes de lançar) |
+| Transferência intl. | Nenhuma hoje; avaliar a do prestador de pagamento |
+| Retenção | Enquanto a conta existir (cascata na exclusão); concessões e revogações no `audit_log` (5 anos, sem dado pessoal nos detalhes); registros fiscais ficam com o prestador pelo prazo legal ⚖ |
+| Exportação | `export_my_data` formato `guf-export/6` (bloco `plano`: plano atual, direitos e assinaturas) |
 | Segurança | Sem escrita pelo usuário (só servidor) |
 | Alto risco? | Não |
 | RIPD | N/A |

@@ -22,7 +22,7 @@
 | A012 | Registros de acesso e segurança | Art. 7º, II (Marco Civil, art. 15) + Art. 7º, IX (LIA) | Oposição limitada |
 | A013 | Exportação de dados | Art. 7º, II (Art. 18, II e V) | — |
 | A014 | Exclusão de conta | Art. 7º, II (Art. 18, VI) | — |
-| A015 | Planos e pagamentos (futuro) | Art. 7º, V; dados fiscais Art. 7º, II | Não |
+| A015 | Planos (Free/Pro) e direitos de acesso; pagamento futuro | Art. 7º, V; registros fiscais Art. 7º, II ⚖ | Não (é o contrato; o titular pode não assinar o Pro) |
 | A016 | Registro de auditoria | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Não |
 | A017 | Perfil social e seguidores | Art. 7º, V ⚖ | Em parte (bloquear, remover seguidor, perfil privado) |
 | A018 | Estatísticas e treinos visíveis a outras pessoas | Art. 7º, V (Art. 11, I se N1) ⚖ | Sim, na prática (perfil privado, ocultar histórico, remover seguidor, bloquear) |
@@ -186,13 +186,15 @@
 - **Retenção**: eliminação imediata no banco; backups e Storage pendentes (G15, G18).
 - **Última revisão**: 2026-10-16
 
-## A015 — Planos e pagamentos (futuro) <a id="a015"></a>
+## A015 — Planos e direitos de acesso (pagamento futuro) <a id="a015"></a>
 
-- **Finalidade**: liberar recursos pagos e cumprir obrigações fiscais.
-- **Base legal**: Art. 7º, V (assinatura); Art. 7º, II (documentos fiscais) ⚖.
-- **Sensíveis?**: Não. Dados de cartão ficam no gateway, nunca no banco do guf.
-- **Retenção**: definir antes de monetizar, com o contador e o jurídico ⚖.
-- **Última revisão**: 2026-10-16
+- **Finalidade**: liberar o que o plano inclui (limites do Free, recursos do Pro) e, quando houver pagamento, gerir a assinatura e cumprir obrigações fiscais.
+- **Base legal**: Art. 7º, V — o plano é parte do contrato (Termos de Uso 0.4-dev, seção `#planos`; Termos da Assinatura 0.1-dev para o Pro); Art. 7º, II para os registros de pagamento exigidos pela lei fiscal ⚖.
+- **Por que não consentimento**: os limites do plano e a assinatura são a própria prestação do serviço contratado; não dependem de uma autorização que o titular possa revogar sem encerrar o contrato.
+- **Aceites agrupados**: Termos e Política (com a seção de planos) uma vez no `/aceite`; Termos da Assinatura só na tela de assinatura, junto com qualquer pendência, numa única confirmação (`accept_documents`, source `subscribe`). Versões sem mudança material saem com `requires_reaccept = false` e não pedem novo aceite.
+- **Sensíveis?**: Não. Dados de cartão ficam no prestador de pagamento, nunca no banco do guf.
+- **Retenção**: enquanto a conta existir; registros fiscais com o prestador pelo prazo legal (definir com o contador antes de monetizar) ⚖.
+- **Última revisão**: 2026-10-21
 
 ## A016 — Registro de auditoria <a id="a016"></a>
 

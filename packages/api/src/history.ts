@@ -3,6 +3,7 @@ import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
   currentUserId,
+  fetchTrainingTotals,
   FREE_WORKOUT_NAME,
   sessionDurationSeconds,
   toLoggedSets,
@@ -87,13 +88,8 @@ export const getHistoryOverview: GetHistoryOverview = async (client, range) => {
       getTrainingDays(client, range),
       client.rpc("get_streak"),
       client.from("profiles").select("weekly_goal, weight_unit").eq("id", userId).maybeSingle(),
-      client
-        .from("workout_sessions")
-        .select("performed_on")
-        .eq("status", "completed")
-        .order("performed_on", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
+      // 1º treino do histórico inteiro: o calendário mostra até onde dá para voltar (o plano barra depois).
+      fetchTrainingTotals(client),
     ]);
     if (days.error) return { data: null, error: days.error };
     const firstError = [streakRes, profileRes, firstRes].find((r) => r.error)?.error;
@@ -105,7 +101,7 @@ export const getHistoryOverview: GetHistoryOverview = async (client, range) => {
         streak: toStreakSummary(streakRes.data?.[0]),
         weeklyGoal: profileRes.data?.weekly_goal ?? null,
         weightUnit: profileRes.data?.weight_unit === "lb" ? "lb" : "kg",
-        firstTrainedOn: firstRes.data?.performed_on ?? null,
+        firstTrainedOn: firstRes.data?.firstTrainedOn ?? null,
       },
       error: null,
     };

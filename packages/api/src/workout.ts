@@ -2,6 +2,7 @@ import { pickSetValues, type ActivePeriod, type SetType, type SetValues, type We
 import type { Database } from "@guf/types";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
+import { fetchBestE1rm } from "./shared";
 
 /**
  * Treino em andamento e biblioteca de exercícios (Supabase).
@@ -226,14 +227,11 @@ function sessionExerciseRow(sessionId: string, exercise: NewWorkoutExercise): Se
   return { id: exercise.id, session_id: sessionId, exercise_id: exercise.exerciseId, position: exercise.position } as SessionExerciseInsert;
 }
 
-/** Melhor 1RM estimado histórico (get_exercise_records → best_e1rm); sem histórico = null (sem PR). */
+/** Melhor 1RM estimado histórico (get_best_e1rm), igual ao do finish_workout; sem histórico = null (sem PR). */
 async function fetchBest1RmKg(client: GufClient, exerciseId: string): Promise<number | null> {
-  const { data, error } = await client.rpc("get_exercise_records", { p_exercise_id: exerciseId });
-  if (error || !data || typeof data !== "object") return null;
-  const records = data as { sessions?: number; best_e1rm?: { value?: number | null } | null };
-  if (!records.sessions) return null;
-  const value = records.best_e1rm?.value;
-  return typeof value === "number" ? value : value != null ? Number(value) : null;
+  const { data, error } = await fetchBestE1rm(client, [exerciseId]);
+  if (error || !data) return null;
+  return data.get(exerciseId) ?? null;
 }
 
 export const getExerciseContext: GetExerciseContext = async (client, { exerciseIds, routineId }) => {

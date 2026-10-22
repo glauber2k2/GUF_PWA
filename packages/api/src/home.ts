@@ -3,6 +3,7 @@ import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
   currentUserId,
+  fetchTrainingTotals,
   FREE_WORKOUT_NAME,
   resolveAvatarUrl,
   sessionDurationSeconds,
@@ -130,15 +131,8 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       client.from("profiles").select("name, avatar_url, weekly_goal").eq("id", userId).maybeSingle(),
       client.from("projects").select("id, name").eq("is_active", true).is("archived_at", null).maybeSingle(),
       client.from("routines").select("id", { count: "exact", head: true }).is("archived_at", null),
-      client
-        .from("workout_sessions")
-        .select("routine_id")
-        .eq("status", "completed")
-        .not("routine_id", "is", null)
-        .order("performed_on", { ascending: false })
-        .order("finished_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+      // Histórico inteiro: a próxima rotina sugerida não depende do que o plano mostra.
+      fetchTrainingTotals(client),
       client
         .from("workout_sessions")
         .select("id, routine_id, name, performed_on, started_at, finished_at, active_seconds, set_logs(set_type, weight_kg, reps, is_completed)")
@@ -217,7 +211,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       },
       activeProject,
       hasAnyRoutine: (anyRoutineRes.count ?? 0) > 0,
-      lastFinishedRoutineId: lastRes.data?.routine_id ?? null,
+      lastFinishedRoutineId: lastRes.data?.lastRoutine?.routineId ?? null,
       trainingDays: (daysRes.data ?? []).map(toTrainingDay),
       weekSessions,
       inProgress: inProgressRes.data

@@ -31,6 +31,7 @@ import { OfflineEditBanner } from "@/features/projects";
 import { PROJECTS_PATH, projectDetailPath } from "@/features/projects";
 import { usePointerReorder } from "@/shared/hooks/use-pointer-reorder";
 import { useCanEditPlanning, useProjectsOverview, useProjectsSource } from "@/features/projects";
+import { usePlanGate } from "@/features/plans";
 import { useRoutine, useRoutinesSource } from "@/features/routine/api/use-routine";
 import { flushOutbox } from "@/shared/offline/outbox";
 import { invalidatePlanningData } from "@/shared/libs/query-keys";
@@ -105,6 +106,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
   const queryClient = useQueryClient();
   const shell = useAppShell();
   const canEdit = useCanEditPlanning();
+  const gate = usePlanGate();
   const { api, mock } = useRoutinesSource();
   // Carga planejada na unidade do usuário (o banco guarda kg).
   const unit = useProfile().data?.weightUnit ?? "kg";
@@ -153,6 +155,10 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
       return;
     }
     if (!canEdit) return setSaveError(apiError("network_error"));
+    // Rotina nova ou que mudou de projeto ocupa uma vaga no projeto de destino.
+    const joinsProject = !draft.id || draft.projectId !== initial.projectId;
+    const routinesInProject = project?.routines.filter((r) => r.id !== draft.id).length ?? 0;
+    if (joinsProject && !gate.allowAnother("routines_per_project", routinesInProject)) return;
     setSaving(true);
     setSaveError(null);
     // Exercícios criados no seletor entram pela fila: enviar antes de gravar a rotina.
@@ -160,6 +166,7 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     const { error } = await api.saveRoutine(getSupabaseClient(), draft);
     if (error) {
       setSaving(false);
+      if (gate.handlePlanError(error, "routines_per_project")) return;
       return setSaveError(error);
     }
     await invalidatePlanningData(queryClient);

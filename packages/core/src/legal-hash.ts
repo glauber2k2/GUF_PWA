@@ -7,7 +7,7 @@
  *
  * Regra (não mudar sem nova versão de todos os documentos):
  * - SHA-256 em hexadecimal minúsculo do JSON.stringify do conteúdo estruturado;
- * - terms / privacy / health_consent → documento inteiro (resumo, seções e "o que mudou");
+ * - terms / privacy / health_consent / subscription_terms → documento inteiro (resumo, seções e "o que mudou");
  * - age_declaration → só a seção "idade" dos Termos (onde a declaração é lida);
  * - summary_hash (health_consent) → só o resumo visível (consentimento em camadas).
  *
@@ -15,7 +15,7 @@
  */
 import type { LegalDocumentContent, LegalReaderDoc } from "./legal-content";
 
-export type LegalHashDocType = "terms" | "privacy" | "age_declaration" | "health_consent";
+export type LegalHashDocType = "terms" | "privacy" | "age_declaration" | "health_consent" | "subscription_terms";
 
 export interface LegalHashes {
   content: string;
@@ -45,6 +45,7 @@ export function legalHashPayloads(
     privacy: { content: JSON.stringify(docs.privacidade), summary: null },
     age_declaration: { content: JSON.stringify(ageSection), summary: null },
     health_consent: { content: JSON.stringify(docs.saude), summary: JSON.stringify(docs.saude.summary) },
+    subscription_terms: { content: JSON.stringify(docs.assinatura), summary: null },
   };
 }
 

@@ -80,3 +80,36 @@ export function sessionDurationSeconds(row: FinishedSessionRow): number {
   return row.active_seconds ?? durationSeconds(row.started_at, row.finished_at);
 }
 
+
+/** 1º treino, total e última rotina numa chamada só (get_training_totals). */
+export interface TrainingTotals {
+  firstTrainedOn: string | null;
+  completedSessions: number;
+  /** Última rotina concluída (para sugerir a próxima). */
+  lastRoutine: { routineId: string; performedOn: string } | null;
+}
+
+/** 1º treino, total de concluídos (até `until`, se informado) e última rotina feita. */
+export async function fetchTrainingTotals(client: GufClient, until?: string): Promise<{ data: TrainingTotals | null; error: unknown }> {
+  const { data, error } = await client.rpc("get_training_totals", until ? { p_until: until } : {});
+  if (error) return { data: null, error };
+  const row = data?.[0];
+  return {
+    data: {
+      firstTrainedOn: row?.first_trained_on ?? null,
+      completedSessions: row?.completed_sessions ?? 0,
+      lastRoutine: row?.last_routine_id && row.last_routine_on ? { routineId: row.last_routine_id, performedOn: row.last_routine_on } : null,
+    },
+    error: null,
+  };
+}
+
+/** Melhor 1RM estimado de cada exercício em todo o histórico (get_best_e1rm). */
+export async function fetchBestE1rm(client: GufClient, exerciseIds: readonly string[]): Promise<{ data: Map<string, number> | null; error: unknown }> {
+  const { data, error } = await client.rpc("get_best_e1rm", { p_exercise_ids: [...exerciseIds] });
+  if (error) return { data: null, error };
+  return {
+    data: new Map((data ?? []).filter((row) => row.best_e1rm_kg !== null).map((row) => [row.exercise_id, Number(row.best_e1rm_kg)])),
+    error: null,
+  };
+}

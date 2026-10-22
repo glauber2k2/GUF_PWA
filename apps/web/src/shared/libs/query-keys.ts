@@ -56,3 +56,6 @@ export function invalidateSocialData(queryClient: QueryClient): Promise<unknown>
     queryClient.invalidateQueries({ queryKey: [LEGAL_OVERVIEW_KEY] }),
   ]);
 }
+
+/** Plano, direitos de acesso e catálogo de planos. */
+export const PLANS_KEY = "plans";

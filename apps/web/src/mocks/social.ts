@@ -5,7 +5,7 @@
  * via ?estado= (useDevSocialState): padrao · vazio · erro. Dados criados sob demanda (nada roda no
  * carregamento do módulo, senão o build de produção não descarta o mock).
  */
-import { addLocalDays, startOfLocalWeek, toLocalISODate, type SocialVisibility } from "@guf/core";
+import { addLocalDays, memberHistoryFrom, startOfLocalWeek, toLocalISODate, type SocialVisibility } from "@guf/core";
 import {
   apiError,
   type Connection,
@@ -371,7 +371,9 @@ export const mockSocialApi = {
     const p = find(userId);
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
-    return { data: workouts(p, limit ?? 3), error: null };
+    // Mesma regra do banco: de outra pessoa, só os treinos do mês atual.
+    const from = p.userId === MOCK_ME ? "" : memberHistoryFrom(new Date());
+    return { data: workouts(p, limit ?? 3).filter((w) => w.performedOn >= from), error: null };
   },
   async getMemberWorkout(client, { sessionId }) {
     await wait();

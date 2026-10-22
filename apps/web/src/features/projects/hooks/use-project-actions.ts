@@ -6,6 +6,7 @@ import { Archive, ArchiveRestore, Check, CircleCheck, CircleOff, Trash2, WifiOff
 import { changedPositions, OFFLINE_EDIT_MESSAGE } from "@guf/core";
 import type { ApiResult, GufClient, Project, ProjectRoutine } from "@guf/api";
 import { useAppShell, type ToastOptions } from "@/features/app-shell";
+import { usePlanGate } from "@/features/plans";
 import { useCanEditPlanning, useProjectsSource } from "@/features/projects/api/use-projects";
 import { invalidatePlanningData } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
@@ -35,6 +36,7 @@ export function useProjectActions() {
   const queryClient = useQueryClient();
   const shell = useAppShell();
   const canEdit = useCanEditPlanning();
+  const gate = usePlanGate();
   const [busy, setBusy] = useState(false);
 
   const run = async (operation: Operation, feedback?: Feedback): Promise<boolean> => {
@@ -46,6 +48,8 @@ export function useProjectActions() {
     const { error } = await operation(getSupabaseClient());
     setBusy(false);
     if (error) {
+      // Restaurar projeto ou rotina acima do limite do plano (ex.: "Desfazer" de um arquivamento).
+      if (gate.handlePlanError(error, "routines_per_project")) return false;
       if (error.code === "network_error") shell.showToast(...OFFLINE_TOAST);
       else shell.showToast(error.message, { tone: "error" });
       await invalidatePlanningData(queryClient);
