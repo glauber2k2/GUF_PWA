@@ -26,6 +26,21 @@ export type ApiErrorCode =
   | "health_consent_required"
   | "measurement_date_invalid"
   | "measurement_invalid"
+  | "staff_not_member"
+  | "staff_mfa_required"
+  | "staff_forbidden"
+  | "account_not_found"
+  | "plan_subscription_locked"
+  | "only_login_method"
+  | "announcement_not_found"
+  | "announcement_invalid"
+  | "announcement_health_product"
+  | "staff_change_blocked"
+  | "reason_required"
+  | "nothing_changed"
+  | "staff_already_member"
+  | "mfa_code_invalid"
+  | "invalid_credentials"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -66,6 +81,21 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   health_consent_required: "Para registrar medidas, autorize o uso dos dados de saúde em Perfil › Medidas corporais.",
   measurement_date_invalid: "Escolha hoje ou um dia que já passou para a medição.",
   measurement_invalid: "Confira as medidas: use centímetros, de 0,1 a 299,9 (ex.: 38,5).",
+  staff_not_member: "Sua conta não tem acesso ao painel. Peça para uma pessoa administradora liberar seu e-mail da equipe.",
+  staff_mfa_required: "Confirme o segundo fator para continuar. Entre de novo e digite o código do aplicativo autenticador.",
+  staff_forbidden: "Seu papel não permite esta ação. Peça para uma pessoa administradora.",
+  account_not_found: "Essa conta não existe mais ou foi excluída. Volte para a busca.",
+  plan_subscription_locked: "Esta pessoa tem uma assinatura paga ativa. O plano muda pelo cancelamento da assinatura, não pelo painel.",
+  only_login_method: "Esse é o único jeito de a pessoa entrar. Peça para ela criar uma senha antes de desvincular.",
+  announcement_not_found: "Esse comunicado não existe mais ou já foi publicado. Atualize a lista.",
+  announcement_invalid: "Confira o comunicado: título, texto, público e o fim (no futuro) são obrigatórios para publicar.",
+  announcement_health_product: "Com a regra de consentimento de saúde, use a finalidade Serviço ou Legal.",
+  staff_change_blocked: "Não é possível mudar o próprio acesso nem deixar a equipe sem nenhuma pessoa admin.",
+  reason_required: "Escolha um motivo (em \"Outro\", descreva em até 200 caracteres). Ele fica registrado na auditoria.",
+  nothing_changed: "Nada mudou: o valor novo é igual ao atual.",
+  staff_already_member: "Essa pessoa já faz parte da equipe.",
+  invalid_credentials: "E-mail ou senha não conferem. Confira os dois campos e tente de novo.",
+  mfa_code_invalid: "Código incorreto ou vencido. Digite o código que aparece agora no aplicativo.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -87,6 +117,23 @@ export function isNetworkError(error: ApiError | null | undefined): boolean {
 }
 
 /** Códigos próprios do módulo social e da competição (migration social_competition). */
+/** Códigos do painel de administração (migration admin_panel). */
+const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
+  GA001: "staff_not_member",
+  GA002: "staff_mfa_required",
+  GA003: "staff_forbidden",
+  GA004: "account_not_found",
+  GA005: "plan_subscription_locked",
+  GA006: "only_login_method",
+  GA007: "announcement_not_found",
+  GA008: "announcement_invalid",
+  GA009: "announcement_health_product",
+  GA010: "staff_change_blocked",
+  GA011: "reason_required",
+  GA012: "nothing_changed",
+  GA013: "staff_already_member",
+};
+
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
   GS002: "handle_taken",
   GS004: "person_not_found",
@@ -116,6 +163,8 @@ export function toApiError(error: unknown): ApiError {
     if (code === "GM001") return apiError("health_consent_required"); // save_body_measurement sem o consentimento vigente
     if (code === "GM002") return apiError("measurement_date_invalid"); // save_body_measurement: data futura ou muito antiga
     if (code === "GM003") return apiError("measurement_invalid"); // save_body_measurement: local ou valor fora dos limites
+    const adminCode = ADMIN_ERROR_CODES[code ?? ""];
+    if (adminCode) return apiError(adminCode);
     const socialCode = SOCIAL_ERROR_CODES[code ?? ""];
     if (socialCode) return apiError(socialCode);
     if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");

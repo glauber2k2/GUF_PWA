@@ -32,6 +32,8 @@
 | A019 | Competição e pontuação semanal | Não** ⚖ | Possível | **Avaliado (RIPD)** | Em produção (testes) |
 | A020 | Avisos no celular (Web Push): competição e seguidores | Não | Possível | **Avaliado (RIPD v0.4)** | Em produção (testado em 2026-10-20) |
 | A021 | GUF AI: perguntas sobre os próprios treinos (IA) | Não (medidas e observações ficam de fora) | Possível | **Avaliado (RIPD ripd-guf-ai v0.1)** | Beta (plano gratuito do provedor; só testadores) |
+| A022 | Administração e suporte da conta (painel da equipe) | Só o sim/não do consentimento de saúde (nunca medidas) | Possível | Não (sem larga escala nem decisão automatizada) | Implementado (2026-10-22); só o desenvolvedor até as medidas de `docs/admin-panel.md` §2.2 |
+| A023 | Comunicados no app (avisos da equipe ao abrir o app) | Não (público por consentimento de saúde só em comunicado legal ou de serviço) | Possível | Não | Implementado (2026-10-22); comunicado de produto só depois da LIA |
 
 \* O registro do consentimento de saúde revela que o titular usa o módulo de medidas, mas não contém a medida.
 \*\* Cargas, repetições e RPE são dados de desempenho esportivo. Tratados como dado comum neste mapa; **validar com o jurídico** se, combinados, podem ser considerados dado referente à saúde (Art. 5º, II) ⚖.
@@ -441,6 +443,45 @@
 | Owner | Pendente (controlador) |
 
 ---
+
+---
+
+### A022 — Administração e suporte da conta (painel `apps/admin`)
+
+| Campo | Valor |
+|---|---|
+| Slug | a022-administracao-conta |
+| Finalidade | Atender a pessoa (suporte), corrigir @ ou nome a pedido dela ou por violação dos Termos, liberar plano manual (cortesia, teste, correção) e desvincular login social a pedido |
+| Base legal | Art. 7º, V (execução do contrato); correção a pedido = Art. 18, III; desvincular = pedido do titular (Art. 18) |
+| Categorias de titulares | Usuários; colaboradores (a própria conta de trabalho) |
+| Sensíveis? | Só o status sim/não do consentimento de saúde, visível aos papéis Suporte e Admin (nunca as medidas) |
+| Dados | Resumo da conta: id, @, nome, e-mail **mascarado** (completo só por ação auditada), datas de criação e último acesso, logins vinculados, plano e direitos, visibilidade do perfil, seguidores/seguindo, total de treinos, versões aceitas dos documentos. **Nunca**: medidas, observações, conversas do GUF AI, séries e cargas, inscrições de push, IP |
+| Fonte | Banco (`auth.users`, `profiles`, `social_profiles`, `plan_grants`, `consent_records`) só por funções `admin_*` (SECURITY DEFINER) |
+| Sistemas | `staff_members` (papéis), `audit_log` (actor_type `staff`), Edge Function `admin-invite-staff` |
+| Operadores | Supabase |
+| Transferência intl. | Não (sa-east-1) |
+| Retenção | Auditoria 5 anos (igual ao `audit_log`); `staff_members` até desligar (`disabled_at`) ou excluir a conta de trabalho |
+| Segurança | Colaborador ativo + segundo fator (aal2) + papel mínimo conferidos no banco a cada chamada; leitura de conta e toda alteração auditadas com motivo; painel em domínio próprio, `noindex`, CSP; nada guardado no aparelho |
+| Alto risco? | Não (Res. 2/2022 Art. 4º: sem larga escala, sem decisão automatizada); revisar se a equipe crescer |
+| Owner | Desenvolvedor (controlador pendente — G22) |
+
+### A023 — Comunicados no app
+
+| Campo | Valor |
+|---|---|
+| Slug | a023-comunicados |
+| Finalidade | Avisar quem usa o app sobre serviço (manutenção, mudanças), documentos (legal) e, depois da LIA, novidades do próprio guf (produto) |
+| Base legal | Serviço: Art. 7º, V · Legal: Art. 7º, II e Art. 9º · Produto: Art. 7º, IX + Art. 10 (**LIA `lia/a023-comunicados.md` antes do primeiro**) ⚖ |
+| Categorias de titulares | Usuários no público escolhido |
+| Sensíveis? | Público por consentimento de saúde só com finalidade legal ou serviço (o banco recusa produto, GA009) |
+| Dados | Regra do público (plano, data de criação, visibilidade, consentimento de saúde ou lista de ids); por pessoa: visto, fechado, tocou no botão (datas) |
+| Fonte | Painel (equipe) e app (`my_announcements` avalia o público só para quem pergunta; `mark_announcement`) |
+| Sistemas | `announcements`, `announcement_targets`, `announcement_receipts` (sem acesso direto pelo app) |
+| Operadores | Supabase |
+| Retenção | Lista de ids: até o fim do comunicado; comunicado e recibos: 12 meses depois do fim (job `purge-expired-announcements`) |
+| Segurança | O app nunca recebe a regra nem dados de outras pessoas; métricas só em totais (sem lista de quem viu); push a partir do painel **não** existe (exige revisar o RIPD social) |
+| Alto risco? | Não |
+| Owner | Desenvolvedor (controlador pendente — G22) |
 
 ## Checklist de qualidade
 - [x] Toda tabela com FK para o usuário está coberta (14 tabelas + `auth.*`)

@@ -33,6 +33,7 @@ Qualquer evento, confirmado ou com suspeita fundada, que comprometa **confidenci
 | Envio de dados pessoais para logs ou ferramentas externas | Edge Function, console | Baixa |
 | Indisponibilidade prolongada com perda de dados (sem backup no Free) | Supabase | Baixa |
 | Incidente no próprio operador (Supabase, Vercel) ou no Google | Operador | Baixa |
+| Conta de colaborador do painel comprometida, ou colaborador abrindo contas sem necessidade | Painel `apps/admin` | Baixa (segundo fator obrigatório). Conter: Equipe › Desativar (vale na hora, o papel é lido a cada chamada); revisar a Auditoria e o `audit_log` com `actor_type = 'staff'` daquele colaborador |
 
 **Não é incidente do controlador** (mas oriente o titular): aparelho do usuário perdido ou com acesso de terceiros; senha do usuário reutilizada e vazada em outro serviço (avaliar se houve acesso à conta no guf).
 

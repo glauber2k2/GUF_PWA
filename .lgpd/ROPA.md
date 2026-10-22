@@ -1,7 +1,7 @@
 # Registro das Operações de Tratamento (ROPA) — Guf App
 
 **Versão**: 0.1 (rascunho) · **Data**: 2026-10-17 · **Base**: LGPD Art. 37 · modelo simplificado da ANPD para agentes de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022)
-**Fontes**: `data-map.md` (A001–A021), `legal-basis.md`, `vendors/`, `retention.md`, `audit-log.md`, `consent-ledger.md`
+**Fontes**: `data-map.md` (A001–A023), `legal-basis.md`, `vendors/`, `retention.md`, `audit-log.md`, `consent-ledger.md`
 **Situação**: ⏸ rascunho técnico, **sem revisão jurídica** (adiada por falta de orçamento — decisão de 2026-10-17). Não é parecer.
 
 **Histórico**
@@ -46,6 +46,8 @@
 | A018 | Compartilhamento de treinos | Mostrar estatísticas e treinos a seguidores aceitos ou, com o perfil aberto, a qualquer conta | Art. 7º, V (Art. 11, I se N1) ⚖ | Usuários com seguidores ou perfil aberto | Nome, foto, pontos, treinos (sem medidas, observações nem RPE) | Não ⚖ | Supabase | Sob demanda |
 | A019 | Competição e pontuação | Ranking por período entre seguidores mútuos | Art. 7º, V ⚖ | Seguidores mútuos | RPE da sessão, tempo efetivo, pontos | Não ⚖ | Supabase | RPE igual a A007; pontos não guardados |
 | A020 | Avisos no celular (competição e seguidores) | Avisar sobre novo seguidor, pedido para seguir, pedido aceito e competidor que chega a menos de 20 pontos ou ultrapassa | Art. 7º, V (opt-in no aparelho) ⚖ | Quem ligou as notificações, quem seguiu/pediu/aceitou e competidores | Endereço do aparelho no serviço de push, chaves públicas, posição relativa por temporada, último aviso de seguidor (1 dia) | Não | Supabase; serviço de push do navegador (EUA, conteúdo cifrado) ⚖ | Até desligar, sair ou excluir; estados da temporada atual e da anterior |
+| A022 | Administração e suporte da conta | Suporte, correção de @ e nome, plano manual e desvincular login social a pedido | Art. 7º, V; Art. 18, III | Usuários; colaboradores | Resumo da conta (e-mail mascarado; sem medidas, observações, conversas ou cargas), status do consentimento de saúde (sim/não), motivo das alterações | Status do consentimento | Supabase | Auditoria 5 anos; papéis até desligar |
+| A023 | Comunicados no app | Avisos de serviço, legais e (após a LIA) de produto ao abrir o app | Art. 7º, V; II; IX + Art. 10 (produto, LIA) ⚖ | Usuários no público | Regra do público, lista de ids, visto/fechado/clique | Não | Supabase | Ids até o fim; recibos 12 meses após o fim |
 | A021 | GUF AI | Responder perguntas do titular sobre os próprios treinos e sugerir ajustes (texto) | Art. 7º, V ⚖ | Quem usa o GUF AI | Perguntas (anonimizadas antes do provedor), treinos, séries, cargas, recordes, rotinas, avaliação das respostas | Não | Supabase; Google (API do Gemini, EUA) ⚖ | Conversas: 180 dias sem mensagem nova (job diário) ou até excluir a conta |
 
 \* O registro do consentimento de saúde indica que o titular usa o módulo de medidas, sem conter a medida.

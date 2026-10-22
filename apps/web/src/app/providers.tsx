@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { MotionProvider } from "@/shared/components/ds/motion";
+import { MotionProvider } from "@/shared/components/ds";
 import { LegalReaderProvider } from "@/features/legal";
 import { AuthProvider } from "@/features/auth";
 import { QueryProvider } from "@/shared/libs/query-provider";

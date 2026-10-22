@@ -15,6 +15,7 @@
     "@guf/core": "workspace:*",
     "@guf/schemas": "workspace:*",
     "@guf/types": "workspace:*",
+    "@guf/ui": "workspace:*",
     "@hookform/resolvers": "^5.9.1",
     "@tanstack/react-query": "^5.104.1",
     "ai": "7.0.131",

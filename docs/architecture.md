@@ -27,7 +27,7 @@ flowchart TD
     E --> D
     C --> F["packages/core — regras puras"]
     D --> G[("Supabase — RLS, RPCs, gatilhos")]
-    B --> H["shared/components/ds — design system"]
+    B --> H["packages/ui — design system (app e painel)"]
 ```
 
 | Camada | Onde | Responsabilidade |
@@ -39,6 +39,9 @@ flowchart TD
 | Validação | `packages/schemas` | Schemas Zod |
 | Acesso a dados | `packages/api` (+ `shared/offline`) | Supabase com contrato `{ data, error }`; fila e cópias locais |
 | Banco | `supabase/` | Tabelas, RLS, RPCs, gatilhos, migrations, Edge Functions |
+| Design system | `packages/ui` | Componentes React, tokens CSS e tema do Tailwind, iguais no app (`apps/web`) e no painel (`apps/admin`); o app reexporta em `shared/components/ds` |
+
+**Dois apps, os mesmos pacotes.** `apps/web` (PWA de quem treina) e `apps/admin` (painel da equipe, outro domínio) seguem as mesmas camadas e pastas e usam `packages/core`, `schemas`, `api` e `ui`. Os contratos do painel ficam numa entrada separada (`@guf/api/admin`), que o app não importa. No painel, quem decide o acesso é o banco: toda função `admin_*` confere colaborador, segundo fator e papel, e grava a auditoria (`docs/admin-panel.md`).
 
 ## 3. Pastas do app web
 

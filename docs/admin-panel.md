@@ -1,6 +1,6 @@
 # Painel de administração (guf admin)
 
-**Situação:** planejamento (2026-10-22). Nada implementado. Este documento define a arquitetura, as regras de segurança e de LGPD e o roteiro de entrega. Mudou a decisão → atualizar aqui antes de codar.
+**Situação:** implementado em 2026-10-22 (branch `feat/painel-admin`), seguindo o protótipo `Guf Admin.dc.html` do Claude Design. Migration `20261022160000_admin_panel` aplicada em 2026-10-22 (testada antes em transação desfeita); Edge Function `admin-invite-staff` publicada (`ADMIN_APP_URL` provisório: `http://localhost:3001`); primeiro admin: a conta do desenvolvedor. Antes de abrir a colaboradores além do desenvolvedor: itens da seção 2.2 (gap G24). O que mudou em relação ao plano está na seção 5.
 
 **O que o painel faz**
 1. **Contas:** buscar pessoas e ver conta (data de criação, logins vinculados, plano, @, nome, visibilidade do perfil, status dos consentimentos); editar plano, @ e nome; desvincular login social.
@@ -221,3 +221,32 @@ PADRÕES DE UX
 ENTREGA
 Um canvas com cada tela nos três tamanhos (celular, tablet, computador), tema escuro e claro do editor de comunicados e da prévia, e os estados principais (carregando, vazio, erro, sem permissão). Não inclua moldura de navegador nem dados reais: use pessoas fictícias.
 ```
+
+---
+
+## 5. Implementação (2026-10-22)
+
+### 5.1 O que mudou em relação ao plano
+| Plano | Implementado | Por quê |
+|---|---|---|
+| Custom Access Token Hook põe `staff_role` no JWT | O papel é lido de `staff_members` a cada chamada (`require_staff`); o painel pergunta por `admin_me()` | Desativar ou mudar o papel vale na hora (o token só mudaria na renovação) e não depende de configurar o hook no painel do Supabase |
+| `admin_grant_plan` / `admin_revoke_plan_grant` | `admin_set_plan(user, plano, validade, motivo)` | Uma ação = "o plano manual desta pessoa passa a ser X": revoga os direitos manuais ativos e cria o novo (ou só revoga, para o plano padrão). Assinatura paga ativa → GA005 |
+| Desvincular login pela Edge Function | Função SQL `admin_unlink_identity` (SECURITY DEFINER) | A Admin API do Supabase não desvincula identidade de outra pessoa; a função apaga a identidade e atualiza `providers`, recusando se for o único jeito de entrar (GA006) |
+| Imagem no comunicado | Fica para depois | Precisa de bucket no Storage com política de escrita só para admin; o editor avisa |
+| Convite de colaborador | Edge Function `admin-invite-staff` | Criar a conta de trabalho e mandar o link exige `service_role`, que nunca vai ao navegador |
+| Papéis (protótipo: Suporte muda plano e publica) | Plano, publicar/encerrar comunicado, auditoria e equipe = **Admin**; Suporte edita @/nome, desvincula, mostra e-mail e cria rascunhos; Leitura só consulta | Regra mais restrita do documento (seção 1.2); o painel esconde o que o papel não pode e o banco recusa (GA003) |
+
+### 5.2 Onde está cada parte
+- **Banco:** `supabase/migrations/20261022160000_admin_panel.sql` — `staff_members`, `require_staff`, `staff_audit`, `admin_*`, `announcements` (+ `announcement_targets`, `announcement_receipts`), avaliadores de público por regra, `my_announcements`, `mark_announcement`, job `purge-expired-announcements`. Erros GA001–GA013 → `packages/api/src/result.ts`.
+- **Contratos:** `packages/api/src/admin/` (`StaffSessionApi`, `AdminUsersApi`, `AnnouncementsAdminApi`, `StaffTeamApi`; entrada `@guf/api/admin`, só o painel importa) e `packages/api/src/announcements.ts` (`AnnouncementsApi`, do app).
+- **Regras:** `packages/core/src/staff.ts` (papéis, `canStaff`, motivos, textos da auditoria) e `packages/core/src/announcements.ts` (catálogos de formato, tom, finalidade e público `AUDIENCE_CRITERIA`, `nextAnnouncements`). Validação: `packages/schemas/src/admin.ts`.
+- **Design system compartilhado:** `packages/ui` (mudou de `apps/web/src/shared/components/ds`; o app reexporta pelo mesmo caminho). Os comunicados usam os mesmos componentes no app e na prévia do painel (`ds/announcement.tsx`).
+- **Painel:** `apps/admin` (Next export estático, porta 3001 no dev). Rotas: `/entrar`, `/entrar/codigo`, `/entrar/segundo-fator`, `/primeiro-acesso`, `/sem-acesso`, `/`, `/pessoas?q=&id=`, `/comunicados?aba=`, `/comunicados/editar?id=`, `/comunicados/resultado?id=`, `/auditoria`, `/equipe`. Estados de desenvolvimento: `?estado=` admin · suporte · leitura · entrar · sem-acesso · configurar · codigo · carregando · erro · vazio (mocks em `apps/admin/src/mocks`).
+- **App:** `features/announcements` (`AnnouncementsHost` no layout logado; `HomeAnnouncementBanner` no `topSlot` da Início). Não aparece com treino em andamento, em telas imersivas ou antes da abertura terminar (`useAppShell().isBusy`). Dev: `/?estado=padrao,aviso-modal` (aviso-tela-cheia · aviso-toast · aviso-faixa · aviso-todos).
+
+### 5.3 Colocar no ar
+1. Aplicar a migration (`npx supabase db push`) e regenerar os tipos.
+2. Primeiro admin (SQL Editor do Supabase, como `postgres`): `select public.register_staff_member('<user_id da conta de trabalho>', 'Nome', 'admin');`
+3. Secrets da Edge Function: `ADMIN_APP_URL` (ex.: `https://admin.<domínio>`), `STAFF_EMAIL_DOMAIN` (opcional), `ALLOWED_ORIGINS` incluindo o domínio do painel. Publicar: `npx supabase functions deploy admin-invite-staff --use-api`.
+4. Supabase Auth: TOTP ligado (padrão) e Redirect URL `https://admin.<domínio>/**`.
+5. Vercel: projeto novo com Root Directory `apps/admin` (o `vercel.json` traz `noindex`, CSP e cabeçalhos); variáveis `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `NEXT_PUBLIC_ADMIN_ENV` (`prod` ou `test`), `NEXT_PUBLIC_STAFF_EMAIL_DOMAIN`.

@@ -75,6 +75,10 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Não há testes automatizados no repositório (as regras foram testadas com scripts avulsos) | Monorepo | Médio: risco de regressão |
 | Dados de mock (Início, Projetos, Treino) ainda entram no bundle de produção: os mocks montam dados no carregamento do módulo e o build não consegue descartá-los (já acontecia antes da reorganização de pastas) | `apps/web/src/mocks/` | Baixo: só peso extra no download, nada é exibido |
 
+### Painel da equipe e comunicados (2026-10-22, `feat/painel-admin`)
+- Design system movido para `packages/ui`; novo app `apps/admin` (protótipo `Guf Admin.dc.html`), comunicados no app (`features/announcements`), migration `20261022160000_admin_panel` (testada em transação desfeita; aplicar com o deploy) e Edge Function `admin-invite-staff` (publicar). Passo a passo em `docs/admin-panel.md` §5.3.
+- Lacunas: imagem nos comunicados (bucket no Storage), opção de não receber comunicados de produto, recibos de comunicados na exportação (G25), itens LGPD antes de abrir a colaboradores (G24).
+
 ## 2. Próximas etapas (ordem recomendada)
 
 A ordem prioriza o que impede o uso real do app (criar rotinas), depois o que completa o ciclo de evolução

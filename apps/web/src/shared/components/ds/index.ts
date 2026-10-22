@@ -1,21 +1,2 @@
-/** Design system do Guf (Claude Design · "Guf Design System" v1.0). */
-export * from "./brand";
-export * from "./actions";
-export * from "./forms";
-export * from "./display";
-export * from "./cards";
-export * from "./workout";
-export * from "./navigation";
-export * from "./overlays";
-export * from "./toast";
-export * from "./feedback";
-export * from "./body-map";
-export * from "./swipe-to-delete";
-export * from "./portal";
-export * from "./loader";
-export * from "./loading";
-export * from "./muscle-icon";
-export * from "./avatar";
-export * from "./streak-flame";
-export * from "./motion";
-export * from "./guf-rat";
+/** Design system do guf: mora em packages/ui (compartilhado com o painel de administração). */
+export * from "@guf/ui";

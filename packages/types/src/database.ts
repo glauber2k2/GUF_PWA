@@ -122,6 +122,139 @@ export type Database = {
         }
         Relationships: []
       }
+      announcement_receipts: {
+        Row: {
+          announcement_id: string
+          cta_at: string | null
+          dismissed_at: string | null
+          seen_at: string | null
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          cta_at?: string | null
+          dismissed_at?: string | null
+          seen_at?: string | null
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          cta_at?: string | null
+          dismissed_at?: string | null
+          seen_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_receipts_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_targets: {
+        Row: {
+          announcement_id: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_targets_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          audience: Json
+          body: string
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_path: string | null
+          ended_at: string | null
+          ended_by: string | null
+          ends_at: string | null
+          format: string
+          frequency: string
+          id: string
+          is_account_notice: boolean
+          priority: number
+          published_at: string | null
+          published_by: string | null
+          purpose: string
+          reach_estimate: number | null
+          starts_at: string | null
+          status: string
+          title: string
+          tone: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: Json
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_path?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          ends_at?: string | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_account_notice?: boolean
+          priority?: number
+          published_at?: string | null
+          published_by?: string | null
+          purpose?: string
+          reach_estimate?: number | null
+          starts_at?: string | null
+          status?: string
+          title?: string
+          tone?: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: Json
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_path?: string | null
+          ended_at?: string | null
+          ended_by?: string | null
+          ends_at?: string | null
+          format?: string
+          frequency?: string
+          id?: string
+          is_account_notice?: boolean
+          priority?: number
+          published_at?: string | null
+          published_by?: string | null
+          purpose?: string
+          reach_estimate?: number | null
+          starts_at?: string | null
+          status?: string
+          title?: string
+          tone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -1029,6 +1162,36 @@ export type Database = {
         }
         Relationships: []
       }
+      staff_members: {
+        Row: {
+          created_at: string
+          disabled_at: string | null
+          display_name: string
+          invited_by: string | null
+          last_seen_at: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          disabled_at?: string | null
+          display_name: string
+          invited_by?: string | null
+          last_seen_at?: string | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          disabled_at?: string | null
+          display_name?: string
+          invited_by?: string | null
+          last_seen_at?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -1187,6 +1350,148 @@ export type Database = {
         Returns: undefined
       }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      admin_assert_role: { Args: { p_role: string }; Returns: undefined }
+      admin_audience_count: {
+        Args: { p_audience: Json; p_target_ids?: string[] }
+        Returns: number
+      }
+      admin_check_handle: {
+        Args: { p_handle: string; p_user_id: string }
+        Returns: string
+      }
+      admin_duplicate_announcement: { Args: { p_id: string }; Returns: string }
+      admin_end_announcement: { Args: { p_id: string }; Returns: undefined }
+      admin_get_announcement: { Args: { p_id: string }; Returns: Json }
+      admin_get_user: { Args: { p_user_id: string }; Returns: Json }
+      admin_list_announcements: {
+        Args: never
+        Returns: {
+          audience: Json
+          cta_count: number
+          dismissed_count: number
+          ends_at: string
+          format: string
+          id: string
+          purpose: string
+          reach_estimate: number
+          seen_count: number
+          starts_at: string
+          state: string
+          targets_count: number
+          title: string
+          tone: string
+          updated_at: string
+        }[]
+      }
+      admin_list_audit: {
+        Args: {
+          p_action?: string
+          p_actor_id?: string
+          p_before_id?: number
+          p_from?: string
+          p_limit?: number
+          p_subject?: string
+        }
+        Returns: {
+          action: string
+          actor_id: string
+          actor_name: string
+          details: Json
+          id: number
+          occurred_at: string
+          subject_id: string
+          subject_label: string
+        }[]
+      }
+      admin_list_staff: {
+        Args: never
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          has_verified_factor: boolean
+          is_me: boolean
+          last_seen_at: string
+          role: string
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_me: {
+        Args: never
+        Returns: {
+          aal: string
+          display_name: string
+          email: string
+          has_verified_factor: boolean
+          role: string
+          user_id: string
+        }[]
+      }
+      admin_publish_announcement: { Args: { p_id: string }; Returns: undefined }
+      admin_reveal_email: { Args: { p_user_id: string }; Returns: string }
+      admin_save_announcement: {
+        Args: { p_draft: Json; p_id: string; p_target_ids?: string[] }
+        Returns: Json
+      }
+      admin_search_users: {
+        Args: { p_limit?: number; p_query: string }
+        Returns: {
+          created_at: string
+          handle: string
+          masked_email: string
+          name: string
+          plan_code: string
+          plan_is_default: boolean
+          plan_name: string
+          user_id: string
+          visibility: string
+        }[]
+      }
+      admin_set_plan: {
+        Args: {
+          p_note?: string
+          p_plan_code: string
+          p_reason: string
+          p_user_id: string
+          p_valid_until: string
+        }
+        Returns: undefined
+      }
+      admin_set_staff_disabled: {
+        Args: { p_disabled: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      admin_set_staff_role: {
+        Args: { p_role: string; p_user_id: string }
+        Returns: undefined
+      }
+      admin_unlink_identity: {
+        Args: { p_note?: string; p_provider: string; p_user_id: string }
+        Returns: undefined
+      }
+      admin_update_handle: {
+        Args: {
+          p_handle: string
+          p_note?: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      admin_update_name: {
+        Args: {
+          p_name: string
+          p_note?: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      announcement_state: {
+        Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }
+        Returns: string
+      }
       apply_subscription_event: {
         Args: {
           p_current_period_end: string
@@ -1198,6 +1503,50 @@ export type Database = {
         }
         Returns: string
       }
+      assert_announcement_valid: {
+        Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }
+        Returns: undefined
+      }
+      assert_staff_change_allowed: {
+        Args: { p_losing_admin: boolean; p_user_id: string }
+        Returns: {
+          created_at: string
+          disabled_at: string | null
+          display_name: string
+          invited_by: string | null
+          last_seen_at: string | null
+          role: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "staff_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      audience_has_rule: {
+        Args: { p_audience: Json; p_type: string }
+        Returns: boolean
+      }
+      audience_match_created: {
+        Args: { p_rule: Json; p_user_id: string }
+        Returns: boolean
+      }
+      audience_match_plans: {
+        Args: { p_rule: Json; p_user_id: string }
+        Returns: boolean
+      }
+      audience_match_visibility: {
+        Args: { p_rule: Json; p_user_id: string }
+        Returns: boolean
+      }
+      audience_matches: {
+        Args: { p_audience: Json; p_in_targets: boolean; p_user_id: string }
+        Returns: boolean
+      }
+      audience_rule_valid: { Args: { p_rule: Json }; Returns: boolean }
+      audience_valid: { Args: { p_audience: Json }; Returns: boolean }
       audit_log_append: {
         Args: { p_action: string; p_details?: Json; p_subject_id: string }
         Returns: undefined
@@ -1559,6 +1908,7 @@ export type Database = {
         Returns: boolean
       }
       has_health_consent: { Args: never; Returns: boolean }
+      has_health_consent_of: { Args: { p_user_id: string }; Returns: boolean }
       import_training_plan: {
         Args: {
           p_activate: boolean
@@ -1613,9 +1963,33 @@ export type Database = {
         }[]
       }
       local_today: { Args: { p_user_id: string }; Returns: string }
+      mark_announcement: {
+        Args: { p_event: string; p_id: string }
+        Returns: undefined
+      }
+      mask_email: { Args: { p_email: string }; Returns: string }
       member_history_from: { Args: { p_owner: string }; Returns: string }
+      my_announcements: {
+        Args: never
+        Returns: {
+          body: string
+          cta_label: string
+          cta_path: string
+          format: string
+          frequency: string
+          id: string
+          priority: number
+          published_at: string
+          title: string
+          tone: string
+        }[]
+      }
       my_entitlements: { Args: never; Returns: Json }
       normalize_handle: { Args: { p_handle: string }; Returns: string }
+      notify_account_change: {
+        Args: { p_body: string; p_title: string; p_user_id: string }
+        Returns: undefined
+      }
       pause_workout: {
         Args: { p_at?: string; p_session_id: string }
         Returns: undefined
@@ -1681,11 +2055,39 @@ export type Database = {
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
       purge_expired_ai_plan_imports: { Args: never; Returns: number }
+      purge_expired_announcements: { Args: never; Returns: undefined }
       purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_consent_proofs: { Args: never; Returns: number }
       random_social_handle: { Args: never; Returns: string }
+      register_staff_member: {
+        Args: {
+          p_display_name: string
+          p_invited_by?: string
+          p_role: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       remove_follower: { Args: { p_user_id: string }; Returns: undefined }
       request_follow: { Args: { p_user_id: string }; Returns: string }
+      require_staff: {
+        Args: { p_min_role: string }
+        Returns: {
+          created_at: string
+          disabled_at: string | null
+          display_name: string
+          invited_by: string | null
+          last_seen_at: string | null
+          role: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "staff_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       respond_follow_request: {
         Args: { p_accept: boolean; p_user_id: string }
         Returns: undefined
@@ -1751,6 +2153,17 @@ export type Database = {
         Args: { p_other: string; p_viewer: string }
         Returns: string
       }
+      staff_audit: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_note: string
+          p_reason: string
+          p_subject_id: string
+        }
+        Returns: undefined
+      }
+      staff_role_rank: { Args: { p_role: string }; Returns: number }
       streak_for: {
         Args: { p_user_id: string }
         Returns: {

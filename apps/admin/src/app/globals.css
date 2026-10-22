@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Design system do guf (mesmos tokens e tema do app) */
+@import "@guf/ui/styles/tokens/colors.css";
+@import "@guf/ui/styles/tokens/typography.css";
+@import "@guf/ui/styles/tokens/spacing.css";
+@import "@guf/ui/styles/tokens/effects.css";
+@import "@guf/ui/styles/tokens/motion.css";
+@import "@guf/ui/styles/tokens/base.css";
+
+@import "@guf/ui/styles/theme.css";
+
+/* Componentes do design system ficam fora do app: o Tailwind precisa ler as classes deles */
+@source "../../../../packages/ui/src";

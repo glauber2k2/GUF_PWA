@@ -71,3 +71,6 @@ export function invalidateHealthConsentData(queryClient: QueryClient): Promise<u
     queryClient.invalidateQueries({ queryKey: [LEGAL_OVERVIEW_KEY] }),
   ]);
 }
+
+/** Comunicados do painel que valem para a pessoa logada (só em memória). */
+export const ANNOUNCEMENTS_KEY = "announcements";
