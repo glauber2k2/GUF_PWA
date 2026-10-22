@@ -16,8 +16,10 @@ banco e nos pacotes compartilhados).
 | **Contrato** (`PlansApi`) | `packages/api/src/plans.ts` | — |
 | **Tela** (portão, tela do Pro, /planos) | `apps/web/src/features/plans/` | — |
 
-Migrations: `20261021200000_plans_and_entitlements` (estrutura) e `20261021200100_legal_docs_plans`
-(Termos 0.4-dev, Política 0.6-dev, Termos da Assinatura 0.1-dev).
+Migrations (aplicadas em 2026-10-21): `20261021200000_plans_and_entitlements` (estrutura),
+`20261021200100_legal_docs_plans` (Termos 0.4-dev, Política 0.6-dev, Termos da Assinatura 0.1-dev),
+`20261021200200_plan_history_window` (histórico e competição devolvidos pelo plano) e
+`20261021200300_session_hidden_by_plan`.
 
 ## Por que não "papéis" (RBAC)
 
@@ -90,20 +92,44 @@ Auditoria: `plan_granted` e `plan_revoked` entram no `audit_log` (sem dados pess
 antes) **mantém o que tem**; só não cria nem reativa mais. Sem `auth.uid()` (servidor, jobs,
 cadastro) os limites não se aplicam.
 
-**Leituras do próprio histórico e da competição: no app.** Motivos:
+**Leituras do histórico e da competição: também no banco** (migrations
+`20261021200200_plan_history_window` e `20261021200300_session_hidden_by_plan`). O banco **guarda tudo**
+(quem assina depois vê o histórico inteiro na hora, sem migração de dados), mas **só devolve** ao app o
+que o plano libera.
 
-- são dados da própria pessoa (o direito de acesso da LGPD continua garantido por "Exportar meus dados");
-- recordes, sequência e pontuação precisam do histórico completo no servidor (cortar a consulta
-  quebraria os recordes de quem é Free);
-- não há risco de segurança, só de monetização.
+| Limite | Como o banco aplica |
+|---|---|
+| `history_months` | **RLS de leitura** em `workout_sessions`, `session_exercises`, `set_logs` e `workout_active_periods`: só treinos a partir de `history_visible_from()` (1º dia do mês mais antigo liberado, no fuso do perfil) ou em andamento. Vale para toda consulta do app, para `get_training_days`, `get_exercise_history` e `get_exercise_records` (rodam com os direitos de quem chama) e para o GUF AI (usa o token da pessoa). UPDATE e DELETE também passam pela leitura: treino fora da janela não é alterado pelo app. |
+| `history_months` (perfil e outras pessoas) | `list_member_workouts`, `get_member_evolution` e `get_member_workout` viraram invólucros que cortam pela janela de **quem consulta** (o histórico de um amigo segue o seu plano). |
+| `competition_full_history` | `get_competition_weeks` e `get_competition_days` viraram invólucros: sem a funcionalidade, `p_from` sobe para o início da temporada atual (`current_season_start_of`). |
+
+As funções originais SECURITY DEFINER foram renomeadas para `*_unrestricted` (sem acesso pelo app) e
+os invólucros mantêm nome, parâmetros e retorno: o app não mudou. **Ao alterar uma delas numa migration
+futura, alterar a `*_unrestricted`.**
+
+**O que continua usando o histórico inteiro, sem devolver treinos** (para o app funcionar igual para todos):
+
+| Função | Por quê |
+|---|---|
+| `finish_workout`, `session_load_records`, pontuação da competição, `get_streak` | Recordes oficiais, sequência e pontos não podem mudar com o plano |
+| `get_best_e1rm(ids, p_hidden_only)` | Só o número do melhor 1RM. `false`: recorde no treino em andamento (igual ao `finish_workout`). `true`: melhor 1RM dos treinos **fora** da janela, que o app junta ao histórico visível (`withHiddenHistoryBest` em core/history.ts) para os recordes da folha do dia, do resumo e da edição continuarem certos. A data desse recorde não é devolvida (`previousBest1Rm` vem com dia nulo). |
+| `get_training_totals(p_until)` | 1º treino, total de concluídos e última rotina feita: calendário (até onde dá para tentar voltar), Perfil, rotina sugerida na Início e em Projetos, marco dos stories |
+| `get_last_performance` | Coluna "Anterior" no treino |
+| `export_my_data` | Direito de acesso do titular (LGPD art. 18, II): a exportação é sempre completa |
+| `is_session_hidden_by_plan(id)` | Só sim/não: resumo antigo aberto por link mostra "Isso faz parte do Pro" em vez de "treino não encontrado" |
+
+Sem `auth.uid()` (servidor, jobs, Edge Functions com service_role) nada é limitado.
+
+**No app** continua o portão de experiência (`usePlanGate`): a tela do Pro aparece ANTES de pedir o que
+o banco não vai devolver, e os padrões abrem no que cabe no plano.
 
 | Limite | Onde no app |
 |---|---|
-| `history_months` | calendário (voltar além do mês anterior), gráfico do histórico (períodos maiores que a janela), evolução por exercício (períodos; novo período "1 mês"), resumo de treino antigo aberto por link (`PlanLockedNotice`) |
+| `history_months` | calendário (voltar além do mês anterior), gráfico do histórico (períodos maiores que a janela), evolução por exercício (períodos; novo período "1 mês"), resumo de treino antigo aberto por link (`PlanLockedNotice` + `useSessionHiddenByPlan`) |
 | `competition_full_history` | troca de período na competição e no duelo (`useCompetitionView`) |
 
-Se um dia for preciso aplicar no servidor, o caminho é cortar `p_from` nas RPCs com
-`feature_limit_of(auth.uid(), 'history_months')`, cuidando para não usar o corte no cálculo de recordes.
+Limitação conhecida: na evolução por exercício, as marcações de recorde de carga e volume (e o volume
+de projeto nos stories) consideram só o período visível; o recorde de 1RM usa a base escondida.
 
 ## Experiência: "deixar tentar"
 

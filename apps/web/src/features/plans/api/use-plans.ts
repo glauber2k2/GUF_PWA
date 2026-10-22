@@ -86,3 +86,17 @@ export function useStartSubscription() {
     },
   });
 }
+
+/** O treino (aberto por link) existe, mas está fora do histórico do plano? Só consulta quando `enabled`. */
+export function useSessionHiddenByPlan(sessionId: string | null, enabled: boolean) {
+  const { api, mock } = usePlansSource();
+  return useQuery({
+    queryKey: [PLANS_KEY, "hidden-session", sessionId, mock],
+    enabled: enabled && sessionId !== null,
+    queryFn: async () => {
+      const { data, error } = await api.isSessionHiddenByPlan(getSupabaseClient(), { sessionId: sessionId ?? "" });
+      if (error) throw error;
+      return data;
+    },
+  });
+}

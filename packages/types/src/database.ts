@@ -381,179 +381,6 @@ export type Database = {
           },
         ]
       }
-      features: {
-        Row: {
-          code: string
-          description: string
-          kind: string
-        }
-        Insert: {
-          code: string
-          description: string
-          kind: string
-        }
-        Update: {
-          code?: string
-          description?: string
-          kind?: string
-        }
-        Relationships: []
-      }
-      plan_features: {
-        Row: {
-          feature_code: string
-          limit_value: number | null
-          plan_code: string
-        }
-        Insert: {
-          feature_code: string
-          limit_value?: number | null
-          plan_code: string
-        }
-        Update: {
-          feature_code?: string
-          limit_value?: number | null
-          plan_code?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_features_feature_code_fkey"
-            columns: ["feature_code"]
-            isOneToOne: false
-            referencedRelation: "features"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "plan_features_plan_code_fkey"
-            columns: ["plan_code"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
-      plan_grants: {
-        Row: {
-          created_at: string
-          id: string
-          plan_code: string
-          revoked_at: string | null
-          source: string
-          subscription_id: string | null
-          user_id: string
-          valid_from: string
-          valid_until: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          plan_code: string
-          revoked_at?: string | null
-          source: string
-          subscription_id?: string | null
-          user_id: string
-          valid_from?: string
-          valid_until?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          plan_code?: string
-          revoked_at?: string | null
-          source?: string
-          subscription_id?: string | null
-          user_id?: string
-          valid_from?: string
-          valid_until?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "plan_grants_plan_code_fkey"
-            columns: ["plan_code"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["code"]
-          },
-          {
-            foreignKeyName: "plan_grants_subscription_id_fkey"
-            columns: ["subscription_id"]
-            isOneToOne: false
-            referencedRelation: "subscriptions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      plans: {
-        Row: {
-          code: string
-          created_at: string
-          is_default: boolean
-          is_purchasable: boolean
-          name: string
-          rank: number
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          is_default?: boolean
-          is_purchasable?: boolean
-          name: string
-          rank: number
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          is_default?: boolean
-          is_purchasable?: boolean
-          name?: string
-          rank?: number
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          created_at: string
-          current_period_end: string | null
-          id: string
-          plan_code: string
-          provider: string
-          provider_ref: string
-          status: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan_code: string
-          provider: string
-          provider_ref: string
-          status: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan_code?: string
-          provider?: string
-          provider_ref?: string
-          status?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "subscriptions_plan_code_fkey"
-            columns: ["plan_code"]
-            isOneToOne: false
-            referencedRelation: "plans"
-            referencedColumns: ["code"]
-          },
-        ]
-      }
       exercises: {
         Row: {
           archived_at: string | null
@@ -581,6 +408,24 @@ export type Database = {
           muscle_group?: string
           name?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      features: {
+        Row: {
+          code: string
+          description: string
+          kind: string
+        }
+        Insert: {
+          code: string
+          description: string
+          kind: string
+        }
+        Update: {
+          code?: string
+          description?: string
+          kind?: string
         }
         Relationships: []
       }
@@ -693,6 +538,117 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plan_features: {
+        Row: {
+          feature_code: string
+          limit_value: number | null
+          plan_code: string
+        }
+        Insert: {
+          feature_code: string
+          limit_value?: number | null
+          plan_code: string
+        }
+        Update: {
+          feature_code?: string
+          limit_value?: number | null
+          plan_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_features_feature_code_fkey"
+            columns: ["feature_code"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "plan_features_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      plan_grants: {
+        Row: {
+          created_at: string
+          id: string
+          plan_code: string
+          revoked_at: string | null
+          source: string
+          subscription_id: string | null
+          user_id: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_code: string
+          revoked_at?: string | null
+          source: string
+          subscription_id?: string | null
+          user_id: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_code?: string
+          revoked_at?: string | null
+          source?: string
+          subscription_id?: string | null
+          user_id?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_grants_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "plan_grants_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          code: string
+          created_at: string
+          is_default: boolean
+          is_purchasable: boolean
+          name: string
+          rank: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          is_default?: boolean
+          is_purchasable?: boolean
+          name: string
+          rank: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          is_default?: boolean
+          is_purchasable?: boolean
+          name?: string
+          rank?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -1055,6 +1011,50 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan_code: string
+          provider: string
+          provider_ref: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_code: string
+          provider: string
+          provider_ref: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_code?: string
+          provider?: string
+          provider_ref?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       workout_active_periods: {
         Row: {
           created_at: string
@@ -1169,6 +1169,17 @@ export type Database = {
         Returns: undefined
       }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      apply_subscription_event: {
+        Args: {
+          p_current_period_end: string
+          p_plan_code: string
+          p_provider: string
+          p_provider_ref: string
+          p_status: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       audit_log_append: {
         Args: { p_action: string; p_details?: Json; p_subject_id: string }
         Returns: undefined
@@ -1262,6 +1273,7 @@ export type Database = {
           week_start: string
         }[]
       }
+      competition_visible_from: { Args: { p_from: string }; Returns: string }
       competition_week_scores: {
         Args: { p_to: string; p_user_id: string }
         Returns: {
@@ -1313,34 +1325,35 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
+      current_season_start_of: { Args: { p_user_id: string }; Returns: string }
       effective_plan: { Args: never; Returns: string }
-      feature_limit: { Args: { p_feature: string }; Returns: number }
-      has_feature: { Args: { p_feature: string }; Returns: boolean }
-      my_entitlements: { Args: never; Returns: Json }
-      pending_subscription_documents: {
-        Args: never
-        Returns: {
-          content_hash: string
-          doc_type: string
-          id: string
-          published_at: string
-          requires_reaccept: boolean
-          summary_hash: string | null
-          url: string
-          version: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "legal_documents"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
+      ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
       export_my_data: { Args: never; Returns: Json }
+      feature_limit: { Args: { p_feature: string }; Returns: number }
+      feature_limit_of: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: number
+      }
       find_social_profile: { Args: { p_handle: string }; Returns: string }
       finish_workout: { Args: { p_session_id: string }; Returns: Json }
+      get_best_e1rm: {
+        Args: { p_exercise_ids: string[]; p_hidden_only?: boolean }
+        Returns: {
+          best_e1rm_kg: number
+          exercise_id: string
+        }[]
+      }
       get_competition_days: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          day: string
+          records: number
+          user_id: string
+          volume_kg: number
+          workouts: number
+        }[]
+      }
+      get_competition_days_unrestricted: {
         Args: { p_from: string; p_to: string }
         Returns: {
           day: string
@@ -1362,6 +1375,22 @@ export type Database = {
         }[]
       }
       get_competition_weeks: {
+        Args: { p_from: string; p_to: string }
+        Returns: {
+          bonus_points: number
+          constancy_points: number
+          fulfilled: boolean
+          points: number
+          record_points: number
+          records: number
+          user_id: string
+          valid_sessions: number
+          volume_points: number
+          week_start: string
+          weekly_volume: number
+        }[]
+      }
+      get_competition_weeks_unrestricted: {
         Args: { p_from: string; p_to: string }
         Returns: {
           bonus_points: number
@@ -1413,6 +1442,16 @@ export type Database = {
           week_start: string
         }[]
       }
+      get_member_evolution_unrestricted: {
+        Args: { p_user_id?: string; p_weeks?: number }
+        Returns: {
+          active_seconds: number
+          max_weight_kg: number
+          sessions: number
+          volume_kg: number
+          week_start: string
+        }[]
+      }
       get_member_profile: {
         Args: { p_user_id?: string }
         Returns: {
@@ -1438,6 +1477,10 @@ export type Database = {
         }[]
       }
       get_member_workout: { Args: { p_session_id: string }; Returns: Json }
+      get_member_workout_unrestricted: {
+        Args: { p_session_id: string }
+        Returns: Json
+      }
       get_my_social: {
         Args: never
         Returns: {
@@ -1468,17 +1511,60 @@ export type Database = {
           total_volume_kg: number
         }[]
       }
+      get_training_totals: {
+        Args: { p_until?: string }
+        Returns: {
+          completed_sessions: number
+          first_trained_on: string
+          last_routine_id: string
+          last_routine_on: string
+        }[]
+      }
       grant_health_consent: {
         Args: { p_platform?: string }
         Returns: undefined
       }
+      grant_plan: {
+        Args: {
+          p_plan_code: string
+          p_source?: string
+          p_user_id: string
+          p_valid_until?: string
+        }
+        Returns: string
+      }
+      has_feature: { Args: { p_feature: string }; Returns: boolean }
+      has_feature_of: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: boolean
+      }
       has_health_consent: { Args: never; Returns: boolean }
+      history_visible_from: { Args: never; Returns: string }
+      history_visible_from_of: { Args: { p_user_id: string }; Returns: string }
       is_blocked_between: {
         Args: { p_a: string; p_b: string }
         Returns: boolean
       }
       is_premium: { Args: never; Returns: boolean }
+      is_session_hidden_by_plan: {
+        Args: { p_session_id: string }
+        Returns: boolean
+      }
+      is_session_visible: { Args: { p_session_id: string }; Returns: boolean }
       list_member_workouts: {
+        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
+        Returns: {
+          duration_seconds: number
+          finished_at: string
+          name: string
+          performed_on: string
+          records: number
+          session_id: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
+      list_member_workouts_unrestricted: {
         Args: { p_before?: string; p_limit?: number; p_user_id?: string }
         Returns: {
           duration_seconds: number
@@ -1504,6 +1590,7 @@ export type Database = {
         }[]
       }
       local_today: { Args: { p_user_id: string }; Returns: string }
+      my_entitlements: { Args: never; Returns: Json }
       normalize_handle: { Args: { p_handle: string }; Returns: string }
       pause_workout: {
         Args: { p_at?: string; p_session_id: string }
@@ -1528,6 +1615,45 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      pending_documents_of: {
+        Args: { p_doc_types: string[] }
+        Returns: {
+          content_hash: string
+          doc_type: string
+          id: string
+          published_at: string
+          requires_reaccept: boolean
+          summary_hash: string | null
+          url: string
+          version: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "legal_documents"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      pending_subscription_documents: {
+        Args: never
+        Returns: {
+          content_hash: string
+          doc_type: string
+          id: string
+          published_at: string
+          requires_reaccept: boolean
+          summary_hash: string | null
+          url: string
+          version: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "legal_documents"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      plan_of: { Args: { p_user_id: string }; Returns: string }
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
       purge_expired_audit_log: { Args: never; Returns: number }
@@ -1547,6 +1673,7 @@ export type Database = {
         Args: { p_platform?: string }
         Returns: undefined
       }
+      revoke_plan_grant: { Args: { p_grant_id: string }; Returns: undefined }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined

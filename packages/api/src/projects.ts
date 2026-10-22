@@ -1,6 +1,6 @@
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
-import { currentUserId } from "./shared";
+import { currentUserId, fetchTrainingTotals } from "./shared";
 
 /* =====================================================================
  * Contrato
@@ -98,15 +98,8 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
         )
         .order("created_at", { ascending: false })
         .order("position", { referencedTable: "routines", ascending: true }),
-      client
-        .from("workout_sessions")
-        .select("routine_id, performed_on")
-        .eq("status", "completed")
-        .not("routine_id", "is", null)
-        .order("performed_on", { ascending: false })
-        .order("finished_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+      // Histórico inteiro: a rotina sugerida não depende do que o plano mostra.
+      fetchTrainingTotals(client),
     ]);
     if (projectsRes.error) return { data: null, error: toApiError(projectsRes.error) };
     if (lastRes.error) return { data: null, error: toApiError(lastRes.error) };
@@ -133,7 +126,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
             })),
         })),
         lastFinished:
-          lastRes.data?.routine_id ? { routineId: lastRes.data.routine_id, performedOn: lastRes.data.performed_on } : null,
+          lastRes.data?.lastRoutine ?? null,
       },
       error: null,
     };

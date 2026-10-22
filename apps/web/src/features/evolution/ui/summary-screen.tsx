@@ -15,7 +15,7 @@ import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { workoutEditPath } from "@/features/workout";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
-import { PlanLockedNotice, usePlanGate } from "@/features/plans";
+import { PlanLockedNotice, usePlanGate, useSessionHiddenByPlan } from "@/features/plans";
 import { cn } from "@/shared/helpers/class-names";
 
 /** Resumo de um treino concluído: /treino/resumo?id=<sessão>. */
@@ -32,8 +32,10 @@ export function SummaryScreen() {
   const missing = !loading && (!sessionId && !dev.scenario ? true : summary.error?.code === "session_not_found");
   const offline = dev.forceOffline || !online || summary.data?.source === "device";
   const fallback: SummaryFallbackState | null = loading ? "loading" : missing ? "missing" : !data ? "error" : null;
-  // Treino aberto por link (perfil, evolução) de antes do histórico do plano: o dado continua guardado.
-  const locked = data !== undefined && !gate.isHistoryDateVisible(data.performedOn, new Date());
+  // Treino aberto por link (perfil, evolução) de antes do histórico do plano: o banco não devolve o
+  // treino (só confirma que ele existe) e o app mostra a tela do Pro; o dado continua guardado.
+  const hidden = useSessionHiddenByPlan(sessionId, missing);
+  const locked = hidden.data === true || (data !== undefined && !gate.isHistoryDateVisible(data.performedOn, new Date()));
 
   return (
     <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">

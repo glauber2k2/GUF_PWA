@@ -92,4 +92,9 @@ export const mockPlansApi = {
     await wait();
     return { data: null, error: apiError("billing_unavailable") };
   },
+  async isSessionHiddenByPlan(client) {
+    ignoreClient(client);
+    await wait();
+    return { data: false, error: null };
+  },
 } satisfies PlansApi;

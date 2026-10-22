@@ -301,11 +301,13 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 | Item | Situação |
 |---|---|
-| Migrations `20261021200000_plans_and_entitlements` (catálogo, direitos, assinaturas, limites no banco, aceites agrupados, `guf-export/6`) e `20261021200100_legal_docs_plans` (Termos 0.4-dev, Política 0.6-dev, Termos da Assinatura 0.1-dev) | Escritas; **aplicar no banco junto com o deploy do app** e depois regenerar os tipos |
+| Migrations `20261021200000_plans_and_entitlements` (catálogo, direitos, assinaturas, limites no banco, aceites agrupados, `guf-export/6`) e `20261021200100_legal_docs_plans` (Termos 0.4-dev, Política 0.6-dev, Termos da Assinatura 0.1-dev) | Aplicadas no banco em 2026-10-21 |
+| Migrations `20261021200200_plan_history_window` (RLS de leitura pela janela do plano, invólucros `*_unrestricted`, `get_best_e1rm`, `get_training_totals`) e `20261021200300_session_hidden_by_plan` | Aplicadas em 2026-10-21; conferido no banco com um usuário Free (21 de 99 treinos visíveis, 1º treino e total corretos, competição só na temporada atual) |
 | `packages/core/src/plans.ts`, `packages/api/src/plans.ts` (`PlansApi`), erros `plan_limit`/`billing_unavailable` | Feito |
 | Portão nas telas (projetos, rotina, GUF AI, histórico, evolução, resumo, competição), tela do Pro, `/planos`, seção Plano nas Configurações, `/termos-da-assinatura` | Feito (tela do Pro e `/planos` conferidas por print com o mock) |
-| Edge Function `guf-ai` com o limite do plano | Feito no código; **publicar depois de aplicar a migration** (ela chama `my_entitlements`) |
-| Tipos do banco | Escritos à mão para as tabelas e funções novas; regenerar com o gen types depois de aplicar |
+| Edge Function `guf-ai` com o limite do plano | Publicada em 2026-10-21 |
+| Tipos do banco | Regenerados com o gen types depois de aplicar |
+| **Publicar o app** (Vercel) logo: o banco já aplica os limites e os textos novos estão publicados; até o deploy, o /aceite mostra o texto antigo e o app antigo não abre a tela do Pro |
 | Pagamento (gateway, checkout, webhook) e marcadores dos textos | Pendente (próxima etapa) |
 
 ### Futuro (fora do MVP)

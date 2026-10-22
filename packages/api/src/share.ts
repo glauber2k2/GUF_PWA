@@ -1,7 +1,7 @@
 import { buildStoryData, storyContextRange, storyFeaturedFrom, type SetType, type StoryData, type StoryInput } from "@guf/core";
 import type { GufClient } from "./client";
 import { getWorkoutSummary } from "./evolution";
-import { currentUserId, toStreakSummary, toTrainingDay } from "./shared";
+import { currentUserId, fetchTrainingTotals, toStreakSummary, toTrainingDay } from "./shared";
 import { apiError, toApiError, type ApiResult } from "./result";
 
 /* =====================================================================
@@ -118,10 +118,10 @@ async function loadStoryExtras(client: GufClient, s: Summary): Promise<StoryExtr
   const monthFrom = `${s.performedOn.slice(0, 7)}-01`;
   const featuredExercise =
     s.records[0]?.exerciseId ?? [...s.exercises].sort((a, b) => b.volumeKg - a.volumeKg).find((e) => e.volumeKg > 0)?.exerciseId ?? null;
-  const [timesRes, countRes, firstRes, monthRes, featuredRes, routineRes] = await Promise.all([
+  const [timesRes, totalsRes, monthRes, featuredRes, routineRes] = await Promise.all([
     client.from("set_logs").select("session_exercise_id, set_number, completed_at").eq("session_id", s.id).eq("is_completed", true),
-    client.from("workout_sessions").select("id", { count: "exact", head: true }).eq("status", "completed").lte("performed_on", s.performedOn),
-    client.from("workout_sessions").select("performed_on").eq("status", "completed").order("performed_on").limit(1),
+    // Marco de treinos pelo histórico inteiro (não depende do que o plano mostra).
+    fetchTrainingTotals(client, s.performedOn),
     client
       .from("workout_sessions")
       .select("active_seconds, started_at, finished_at")
@@ -133,7 +133,7 @@ async function loadStoryExtras(client: GufClient, s: Summary): Promise<StoryExtr
       : Promise.resolve({ data: [], error: null }),
     s.routineId ? client.from("routines").select("project_id").eq("id", s.routineId).maybeSingle() : Promise.resolve({ data: null, error: null }),
   ]);
-  const failed = [timesRes, countRes, firstRes, monthRes, featuredRes, routineRes].find((r) => r.error)?.error;
+  const failed = [timesRes, totalsRes, monthRes, featuredRes, routineRes].find((r) => r.error)?.error;
   const empty: StoryExtras = {
     error: failed ?? null,
     completedAt: new Map(),
@@ -189,7 +189,7 @@ async function loadStoryExtras(client: GufClient, s: Summary): Promise<StoryExtr
   return {
     error: null,
     completedAt,
-    history: { totalWorkouts: countRes.count ?? 0, firstWorkoutOn: firstRes.data?.[0]?.performed_on ?? null },
+    history: { totalWorkouts: totalsRes.data?.completedSessions ?? 0, firstWorkoutOn: totalsRes.data?.firstTrainedOn ?? null },
     featured: exerciseName ? { exerciseName, points } : null,
     monthActiveSeconds,
     project,

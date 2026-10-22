@@ -29,7 +29,7 @@ export interface SummaryExerciseInput {
 }
 
 /** Melhor 1RM antes do treino e o dia em que foi feito (null = primeira vez). */
-export type PreviousBest = { oneRmKg: number; performedOn: string } | null;
+export type PreviousBest = { oneRmKg: number; performedOn: string | null } | null;
 
 const toPerformed = (l: CompletedSetRow) => ({ setType: l.set_type as SetType, ...toSetValues(l) });
 

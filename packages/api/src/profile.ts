@@ -2,7 +2,7 @@ import type { LegalDocType, WeightUnit } from "@guf/core";
 import type { Json } from "@guf/types";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiError, type ApiResult } from "./result";
-import { currentUserId, resolveAvatarUrl } from "./shared";
+import { currentUserId, fetchTrainingTotals, resolveAvatarUrl } from "./shared";
 
 /* =====================================================================
  * Contrato — tela Perfil (edições SÓ ONLINE: quem chama trata network_error)
@@ -68,19 +68,13 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
   try {
     const userId = await currentUserId(client);
     if (!userId) return { data: null, error: apiError("not_authenticated") };
-    const [session, profileRes, firstRes, countRes] = await Promise.all([
+    const [session, profileRes, totalsRes] = await Promise.all([
       client.auth.getSession(),
       client.from("profiles").select("name, avatar_url, weight_unit, weekly_goal, auto_finish_workout").eq("id", userId).maybeSingle(),
-      client
-        .from("workout_sessions")
-        .select("performed_on")
-        .eq("status", "completed")
-        .order("performed_on", { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      client.from("workout_sessions").select("id", { count: "exact", head: true }).eq("status", "completed"),
+      // Histórico inteiro (o 1º treino e o total não dependem do plano).
+      fetchTrainingTotals(client),
     ]);
-    const failed = [profileRes, firstRes, countRes].find((r) => r.error)?.error;
+    const failed = [profileRes, totalsRes].find((r) => r.error)?.error;
     if (failed) return { data: null, error: toApiError(failed) };
     return {
       data: {
@@ -90,8 +84,8 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
         weightUnit: profileRes.data?.weight_unit === "lb" ? "lb" : "kg",
         weeklyGoal: profileRes.data?.weekly_goal ?? 3,
         autoFinishWorkout: profileRes.data?.auto_finish_workout ?? false,
-        firstTrainedOn: firstRes.data?.performed_on ?? null,
-        completedSessions: countRes.count ?? 0,
+        firstTrainedOn: totalsRes.data?.firstTrainedOn ?? null,
+        completedSessions: totalsRes.data?.completedSessions ?? 0,
       },
       error: null,
     };
