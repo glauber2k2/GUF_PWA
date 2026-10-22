@@ -12,11 +12,8 @@ export const TARGET_WEIGHT_MAX_KG = 1000;
 export const plannedExerciseSchema = z.object({
   id: z.string(),
   targetSets: z.number().int().min(ROUTINE_SETS_MIN).max(ROUTINE_SETS_MAX),
-  targetReps: z
-    .string()
-    .trim()
-    .min(1, "Informe as repetições.")
-    .max(TARGET_REPS_MAX_LENGTH, `Use até ${TARGET_REPS_MAX_LENGTH} caracteres.`),
+  // Opcional: vazio = a rotina não define repetições (o treino começa sem repetições planejadas).
+  targetReps: z.string().trim().max(TARGET_REPS_MAX_LENGTH, `Use até ${TARGET_REPS_MAX_LENGTH} caracteres.`),
   targetWeightKg: z.number().min(0).max(TARGET_WEIGHT_MAX_KG, `Use até ${TARGET_WEIGHT_MAX_KG} kg.`).nullable(),
   restSeconds: z.number().int().min(0).max(900),
   notes: z.string().trim().max(EXERCISE_NOTE_MAX_LENGTH, `Use até ${EXERCISE_NOTE_MAX_LENGTH} caracteres na observação.`),

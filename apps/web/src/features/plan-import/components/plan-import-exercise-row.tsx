@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowLeftRight, ChevronDown, Trash2 } from "lucide-react";
 import type { PlanImportExercise, PlanImportMatch } from "@guf/api";
-import { formatClock, formatTargetReps, muscleGroupLabel, normalizeSearch, TIMES_SIGN } from "@guf/core";
+import { formatClock, formatPlannedSets, muscleGroupLabel, normalizeSearch } from "@guf/core";
 import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN, TARGET_REPS_MAX_LENGTH } from "@guf/schemas";
 import { Icon, IconButton, Stepper, TextField } from "@/shared/components/ds";
 import { Badge } from "@/shared/components/ui/badge";
@@ -31,8 +31,6 @@ interface PlanImportExerciseRowProps {
 export function PlanImportExerciseRow({ exercise, disabled, onChange, onReplace, onRemove }: PlanImportExerciseRowProps) {
   const [isOpen, setIsOpen] = useState(false);
   const badge = MATCH_BADGES[exercise.match.kind];
-  const reps = exercise.targetReps.trim();
-  const repsError = reps ? undefined : "Informe as repetições.";
   const showSource = exercise.sourceName && normalizeSearch(exercise.sourceName) !== normalizeSearch(exercise.match.name);
 
   return (
@@ -49,8 +47,8 @@ export function PlanImportExerciseRow({ exercise, disabled, onChange, onReplace,
             <span className="text-[15px] leading-5 font-semibold [overflow-wrap:anywhere]">{exercise.match.name}</span>
             <Badge variant={badge.variant}>{badge.label}</Badge>
           </span>
-          <span className={cn("flex items-center gap-1 text-[13px] leading-[18px] tabular-nums", repsError ? "text-danger" : "text-fg-secondary")}>
-            {exercise.targetSets} {TIMES_SIGN} {formatTargetReps(reps) ?? "—"} · descanso {formatClock(exercise.restSeconds)} · {muscleGroupLabel(exercise.match.muscleGroup)}
+          <span className="flex items-center gap-1 text-[13px] leading-[18px] text-fg-secondary tabular-nums">
+            {formatPlannedSets(exercise.targetSets, exercise.targetReps)} · descanso {formatClock(exercise.restSeconds)} · {muscleGroupLabel(exercise.match.muscleGroup)}
             <span className="ml-1 inline-flex flex-none items-center gap-0.5 font-medium text-accent-text">
               Ajustar
               <Icon icon={ChevronDown} size={14} className={cn("transition-transform duration-150", isOpen && "rotate-180")} />
@@ -79,8 +77,7 @@ export function PlanImportExerciseRow({ exercise, disabled, onChange, onReplace,
             value={exercise.targetReps}
             maxLength={TARGET_REPS_MAX_LENGTH}
             disabled={disabled}
-            hint="Ex.: 10, 8–12 ou falha"
-            error={repsError}
+            hint="Opcional. Ex.: 10, 8–12 ou falha"
             onChange={(event) => onChange({ targetReps: event.target.value })}
           />
         </div>
