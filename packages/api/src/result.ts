@@ -101,6 +101,7 @@ export function toApiError(error: unknown): ApiError {
     if (code === "GP002") return apiError("project_locked"); // Favoritos protegido
     if (code === "GP003") return apiError("routine_empty"); // save_routine sem exercícios
     if (code === "GP004") return apiError("routine_not_found"); // save_routine
+    if (code === "GE001") return apiError("exercise_not_found"); // gatilho: exercício de outra pessoa na rotina ou no treino
     if (code === "GW001") return apiError("session_not_found"); // save_workout_edit: treino concluído inexistente
     if (code === "GW002") return apiError("workout_empty"); // save_workout_edit sem séries concluídas
     if (code === "GW003") return apiError("exercise_not_found"); // save_workout_edit
