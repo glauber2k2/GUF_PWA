@@ -33,7 +33,7 @@ export function useLegalBack() {
 }
 
 /**
- * Rotas /termos, /privacidade e /termo-de-saude: o leitor como página (públicas, sem login,
+ * Rotas /termos, /privacidade, /termo-de-saude e /termos-da-assinatura: o leitor como página (públicas, sem login,
  * pré-cacheadas pelo service worker — abrem sem internet).
  */
 export function LegalDocumentPage({ doc }: { doc: LegalReaderDoc }) {

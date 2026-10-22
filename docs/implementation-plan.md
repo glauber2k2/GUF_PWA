@@ -297,11 +297,23 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Tipos do banco conferidos com o gerado depois de aplicar | Feito (iguais) |
 | Evolução por exercício (gráfico) para cardio | Pendente |
 
+### Etapa 11 — Planos, permissões e assinaturas (`feat/planos-permissoes`)
+
+| Item | Situação |
+|---|---|
+| Migrations `20261021200000_plans_and_entitlements` (catálogo, direitos, assinaturas, limites no banco, aceites agrupados, `guf-export/6`) e `20261021200100_legal_docs_plans` (Termos 0.4-dev, Política 0.6-dev, Termos da Assinatura 0.1-dev) | Escritas; **aplicar no banco junto com o deploy do app** e depois regenerar os tipos |
+| `packages/core/src/plans.ts`, `packages/api/src/plans.ts` (`PlansApi`), erros `plan_limit`/`billing_unavailable` | Feito |
+| Portão nas telas (projetos, rotina, GUF AI, histórico, evolução, resumo, competição), tela do Pro, `/planos`, seção Plano nas Configurações, `/termos-da-assinatura` | Feito (tela do Pro e `/planos` conferidas por print com o mock) |
+| Edge Function `guf-ai` com o limite do plano | Feito no código; **publicar depois de aplicar a migration** (ela chama `my_entitlements`) |
+| Tipos do banco | Escritos à mão para as tabelas e funções novas; regenerar com o gen types depois de aplicar |
+| Pagamento (gateway, checkout, webhook) e marcadores dos textos | Pendente (próxima etapa) |
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.
 - Login com Apple (junto com o app iOS).
-- Planos pagos (`entitlements`, `is_premium()` já existem no banco).
+- Pagamento das assinaturas (gateway, checkout e webhook): estrutura pronta na Etapa 11; passos em `docs/plans-and-access.md`.
+- Planos Personal e Aluno (vínculo personal → aluno): previstos no desenho dos planos; exigem revisão do RIPD antes.
 - Esforço percebido (RPE): fora da competição desde 2026-10-20; as colunas `set_logs.rpe` e `workout_sessions.session_rpe` seguem sem uso.
 - Animações com Anime.js, Motion e React Bits (previstas na stack, ainda não instaladas).
 - Iniciar treino sem internet (exigiria criar a sessão no aparelho e sincronizar depois).

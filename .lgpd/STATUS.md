@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-18
+**Última atualização**: 2026-10-21
 **Encarregado**: pendente designação
 **Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
 
@@ -162,3 +162,10 @@ Ver `.lgpd/gaps.md`.
 
 ## Próximo passo
 Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do `REPORT.md`. Próxima rodada: quando houver orçamento/empresa (F4 final, F11, F12, F14) ou na revisão semestral (2027-04-17).
+
+## Rodada 2026-10-21 — Planos Free/Pro (A015)
+- Planos e direitos de acesso implementados (migrations `plans_and_entitlements` e `legal_docs_plans`); pagamento ainda não existe.
+- Base legal: Art. 7º, V (contrato); fiscal Art. 7º, II quando houver cobrança ⚖. Sem dado sensível; sem RIPD (não é alto risco: Res. 2/2022 Art. 4º).
+- Aceites agrupados por momento: Termos 0.4-dev + Política 0.6-dev uma vez no `/aceite` (já descrevendo a assinatura futura); Termos da Assinatura 0.1-dev só na tela de assinatura, com as pendências numa única confirmação. `requires_reaccept = false` passa a evitar novo aceite em versões sem mudança material.
+- Atualizados: `data-map.md`, `legal-basis.md`, `ROPA.md` (0.2), `retention.md`. Exportação `guf-export/6` inclui plano, direitos e assinaturas.
+- Antes de cobrar: escolher e avaliar o prestador de pagamento (`vendors/`, transferência internacional), preencher os marcadores dos Termos da Assinatura e da Política e definir com o contador a retenção fiscal ⚖.

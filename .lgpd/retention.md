@@ -15,7 +15,7 @@ O guf **não tem obrigação fiscal, trabalhista ou bancária** hoje (não cobra
 | Dado | Prazo | Gatilho do fim | Como é eliminado | Base / observação |
 |---|---|---|---|---|
 | Conta (`auth.users`, identidades, sessões) | Enquanto a conta existir | Excluir conta | Supabase Auth apaga; cascata nas tabelas `auth.*` | Art. 7º, V |
-| Perfil, preferências, projetos, rotinas, exercícios próprios, treinos, séries, períodos ativos, plano | Enquanto a conta existir | Excluir conta (ou o titular apaga o item) | **Cascata** `on delete cascade` de `auth.users` em todas as tabelas com `user_id` (conferido no banco em 2026-10-17) | Art. 7º, V |
+| Perfil, preferências, projetos, rotinas, exercícios próprios, treinos, séries, períodos ativos, direitos de plano (`plan_grants`) e assinaturas (`subscriptions`) | Enquanto a conta existir | Excluir conta (ou o titular apaga o item) | **Cascata** `on delete cascade` de `auth.users` em todas as tabelas com `user_id` (conferido no banco em 2026-10-17) | Art. 7º, V |
 | Medidas corporais | Até revogar o consentimento ou excluir a conta | Revogar / excluir | `revoke_health_consent` apaga na hora; cascata na exclusão | Art. 11, I; Art. 16 |
 | Registros de consentimento (`consent_records`) | Enquanto a conta existir | Excluir conta | Cascata (antes disso, a cópia mínima vai para `consent_proofs`) | Art. 7º, II |
 | **Prova mínima dos aceites** (`consent_proofs`) | **5 anos** após a exclusão ⚖ | `purge_after` vencido | Job diário `purge-expired-consent-proofs` (03:17 UTC) | Art. 16, I; Art. 7º, VI — e-mail só em SHA-256 |

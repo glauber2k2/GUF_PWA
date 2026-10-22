@@ -8,6 +8,7 @@ import { aiThinkingPhrases } from "@guf/core";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { useAiSource } from "@/features/ai/api/use-ai";
 import { getAiPhase, getMessageText, getPendingToolName, toAiChatRequest, toUIMessages } from "@/features/ai/helpers/ai-messages";
+import { AiRequestError } from "@/features/ai/helpers/ai-request-error";
 import type { AiUIMessage } from "@/features/ai/type";
 
 /** Atualiza a tela no máximo a cada 50 ms durante o stream (menos renderizações no celular). */
@@ -29,7 +30,7 @@ export function useAiChat(conversation: AiConversation) {
         fetch: async (_url, init) => {
           const request = JSON.parse(String(init?.body)) as AiChatRequest;
           const { data, error } = await api.streamAiReply(getSupabaseClient(), { request, signal: init?.signal ?? undefined });
-          if (error) throw new Error(error.message);
+          if (error) throw new AiRequestError(error);
           return data;
         },
       }),
@@ -65,6 +66,8 @@ export function useAiChat(conversation: AiConversation) {
     phase,
     thinkingPhrases: aiThinkingPhrases(phase === "thinking" && last?.role === "assistant" ? getPendingToolName(last) : null),
     error: chat.error ?? null,
+    /** As perguntas do plano acabaram (outro plano libera mais): a tela oferece o Pro. */
+    isPlanLimited: chat.error instanceof AiRequestError && chat.error.apiError.code === "plan_limit",
     send,
     stop: () => void chat.stop(),
     regenerate: () => void chat.regenerate(),

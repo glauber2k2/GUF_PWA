@@ -16,11 +16,11 @@ import { ProfileSkeleton } from "@/features/profile/components/profile-skeleton"
 import { UserCard } from "@/features/profile/components/user-card";
 
 /**
- * Configurações (protótipo "Configurações"; abre pelos três pontinhos do Perfil): dados da conta,
+ * Configurações (protótipo "Configurações"; abre pelos três pontinhos do Perfil): dados da conta, plano,
  * instalar o app, preferências, privacidade (perfil social e LGPD), sobre e sair.
  * Alterações só com internet; instalar, tema e sair funcionam sem conexão.
  */
-export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode }) {
+export function SettingsScreen({ socialPrivacy, plan }: { socialPrivacy?: ReactNode; plan?: ReactNode }) {
   const goBack = useGoBack("/perfil");
   const tour = useTour();
   const { dev } = useProfileSource();
@@ -65,6 +65,7 @@ export function SettingsScreen({ socialPrivacy }: { socialPrivacy?: ReactNode })
         ) : (
           <>
             <UserCard profile={profile.data} canEdit={canEdit} />
+            {plan}
             <InstallCard platform={platform} />
             <PreferencesSection profile={profile.data} canEdit={canEdit} platform={platform} />
             <PrivacySection consents={consents.data} canEdit={canEdit} socialPrivacy={socialPrivacy} />

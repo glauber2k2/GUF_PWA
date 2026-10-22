@@ -6,6 +6,7 @@
 
 **Histórico**
 - 0.1 (2026-10-17): primeira versão, a partir do mapa de dados v1 e das etapas F3–F8.
+- 0.2 (2026-10-21): A015 atualizada (planos Free/Pro implementados; pagamento ainda futuro).
 
 ---
 
@@ -39,7 +40,7 @@
 | **A012** | **Registros de acesso e segurança** | Segurança e prevenção a fraude; guarda legal se aplicável | **Art. 7º, IX — legítimo interesse** (LIA) + Art. 7º, II ⚖ | Usuários e visitantes | IP, data/hora, user-agent, eventos de login | Não | Supabase, Vercel | Retenção do plano dos operadores (G9) |
 | A013 | Exportação de dados | Atender acesso e portabilidade | Art. 7º, II (Art. 18, II e V) | Usuários | Todo o conteúdo da conta (`guf-export/3`, com perfil social, vínculos e bloqueios) | Sim, se houver medidas | Nenhum (arquivo no aparelho) | Não guardado no servidor |
 | A014 | Exclusão de conta | Atender eliminação | Art. 7º, II (Art. 18, VI) | Usuários | Id da conta | Sim, se houver medidas | Supabase | Eliminação imediata; exceções A003 e A016 |
-| A015 | Planos e pagamentos | Recursos pagos | Art. 7º, V; fiscal Art. 7º, II | Assinantes | Plano, validade | Não | Gateway (futuro) | **Futuro** — definir antes de monetizar |
+| A015 | Planos e direitos de acesso | Liberar o que o plano inclui; gerir a assinatura do Pro (futuro) | Art. 7º, V; fiscal Art. 7º, II ⚖ | Todos os usuários; assinantes (futuro) | Plano, origem e validade do direito; situação da assinatura e código no prestador (futuro); aceite dos Termos da Assinatura | Não | Supabase; prestador de pagamento (futuro) | Enquanto a conta existir; fiscal com o prestador pelo prazo legal ⚖ |
 | A016 | Registro de auditoria | Prestação de contas e apuração de incidentes | Art. 7º, II; após a exclusão, Art. 7º, VI ⚖ | Usuários e ex-usuários | Id interno, evento, data, contagens | Não | Supabase | 5 anos, eliminação mensal ⚖ |
 | A017 | Perfil social e seguidores | Perfil encontrável e escolher quem acompanha o progresso | Art. 7º, V ⚖ | Todos os usuários | @usuário, nome, foto, visibilidade, vínculos, bloqueios | Não | Supabase | Enquanto a conta existir |
 | A018 | Compartilhamento de treinos | Mostrar estatísticas e treinos a seguidores aceitos ou, com o perfil aberto, a qualquer conta | Art. 7º, V (Art. 11, I se N1) ⚖ | Usuários com seguidores ou perfil aberto | Nome, foto, pontos, treinos (sem medidas, observações nem RPE) | Não ⚖ | Supabase | Sob demanda |

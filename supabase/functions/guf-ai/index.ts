@@ -24,8 +24,9 @@ import { buildLanguageModel } from "./model.ts";
 import { redactPersonalData } from "./privacy.ts";
 
 // Mantidos iguais a packages/core/src/ai.ts (a Edge Function não importa os pacotes do monorepo).
-const AI_DAILY_MESSAGE_LIMIT = 40;
 const AI_MESSAGE_MAX_CHARS = 2000;
+/** Funcionalidade do catálogo de planos (tabela features) com as perguntas por 24 horas. */
+const DAILY_MESSAGES_FEATURE = "guf_ai_daily_messages";
 const HISTORY_MESSAGES = 20;
 const TITLE_MAX_CHARS = 80;
 const MAX_STEPS = 6;
@@ -104,6 +105,21 @@ async function recordTurn(db: SupabaseClient, userId: string, request: ChatReque
   return true;
 }
 
+interface DailyQuota {
+  /** Perguntas em 24 horas; null = sem limite. */
+  limit: number | null;
+  /** Algum plano à venda libera mais perguntas. */
+  upgradable: boolean;
+}
+
+/** Limite de perguntas do plano de quem chama (my_entitlements, com o token do usuário); null = falhou. */
+async function loadDailyQuota(db: SupabaseClient): Promise<DailyQuota | null> {
+  const { data, error } = await db.rpc("my_entitlements");
+  if (error || !data) return null;
+  const feature = (data as { features: Record<string, { limit: number | null; upgradable: boolean }> }).features[DAILY_MESSAGES_FEATURE];
+  return feature ? { limit: feature.limit, upgradable: feature.upgradable } : { limit: 0, upgradable: false };
+}
+
 async function loadHistory(db: SupabaseClient, conversationId: string): Promise<ModelMessage[]> {
   const { data } = await db.from("ai_messages").select("role, content")
     .eq("conversation_id", conversationId).order("created_at", { ascending: false }).limit(HISTORY_MESSAGES);
@@ -177,12 +193,17 @@ Deno.serve(async (req) => {
   const request = parseChatRequest(await req.json().catch(() => null));
   if (!request) return fail(`Mensagem inválida. Escreva até ${AI_MESSAGE_MAX_CHARS} caracteres.`, 400);
 
+  const quota = await loadDailyQuota(db);
+  if (!quota) return fail("Não foi possível conferir seu plano. Tente de novo.", 500);
   const since = new Date(Date.now() - DAY_MS).toISOString();
   const { count } = await db.from("ai_messages").select("id", { count: "exact", head: true })
     .eq("user_id", user.id).eq("role", "user").gte("created_at", since);
   // Vale também para "gerar de novo" (cada nova resposta custa uma chamada ao provedor).
-  if ((count ?? 0) >= AI_DAILY_MESSAGE_LIMIT) {
-    return fail(`Você chegou ao limite de ${AI_DAILY_MESSAGE_LIMIT} perguntas em 24 horas. Tente de novo mais tarde.`, 429);
+  if (quota.limit !== null && (count ?? 0) >= quota.limit) {
+    // 402 = outro plano libera mais perguntas (o app mostra a tela do Pro); 429 = limite máximo.
+    return quota.upgradable
+      ? fail(`Você usou as ${quota.limit} perguntas do seu plano nas últimas 24 horas.`, 402)
+      : fail(`Você chegou ao limite de ${quota.limit} perguntas em 24 horas. Tente de novo mais tarde.`, 429);
   }
 
   if (!(await recordTurn(db, user.id, request))) return fail("Não foi possível salvar a conversa. Tente de novo.", 500);

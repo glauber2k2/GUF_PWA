@@ -1,4 +1,5 @@
 /** Resultado e erros das funções de dados (todas seguem `{ data, error }`, como o supabase-js). */
+import { isPlanFeature, type PlanFeature } from "@guf/core";
 
 export type ApiErrorCode =
   | "workout_in_progress"
@@ -18,6 +19,8 @@ export type ApiErrorCode =
   | "ai_daily_limit"
   | "ai_message_invalid"
   | "ai_unavailable"
+  | "plan_limit"
+  | "billing_unavailable"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -26,6 +29,8 @@ export interface ApiError {
   code: ApiErrorCode;
   /** Mensagem pronta para o usuário: diz o que aconteceu e como resolver. */
   message: string;
+  /** Em `plan_limit`: a funcionalidade do plano que barrou (a tela do Pro mostra o texto dela). */
+  feature?: PlanFeature;
 }
 
 /** Mesmo formato do supabase-js: sucesso com `data` ou falha com `error`, nunca os dois. */
@@ -49,6 +54,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   ai_daily_limit: "Você chegou ao limite de perguntas ao GUF AI nas últimas 24 horas. Tente de novo mais tarde.",
   ai_message_invalid: "Mensagem muito longa. Escreva até 2.000 caracteres e envie de novo.",
   ai_unavailable: "O GUF AI não conseguiu responder agora. Tente de novo em instantes.",
+  plan_limit: "Isso não está incluído no seu plano. Veja os planos para continuar.",
+  billing_unavailable: "As assinaturas ainda não estão disponíveis. Avisaremos quando o Pro puder ser assinado.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -56,6 +63,12 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
 
 export function apiError(code: ApiErrorCode): ApiError {
   return { code, message: API_ERROR_MESSAGES[code] };
+}
+
+/** Limite do plano; o banco manda a funcionalidade no `hint` do erro GL001. */
+function planLimitError(hint: string | undefined): ApiError {
+  const error = apiError("plan_limit");
+  return hint && isPlanFeature(hint) ? { ...error, feature: hint } : error;
 }
 
 /** Erro de rede (sem conexão / servidor inalcançável) — a fila offline reenvia depois. */
@@ -76,7 +89,8 @@ const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
 /** Converte erros do PostgREST/rede no ApiError do app. */
 export function toApiError(error: unknown): ApiError {
   if (error && typeof error === "object") {
-    const { code, message } = error as { code?: string; message?: string };
+    const { code, message, hint } = error as { code?: string; message?: string; hint?: string };
+    if (code === "GL001") return planLimitError(hint); // gatilhos de limite do plano (projects, routines)
     if (code === "23505") return apiError("workout_in_progress"); // índice único: 1 treino em andamento
     if (code === "P0002") return apiError("workout_not_found"); // "Treino em andamento não encontrado"
     if (code === "GP001") return apiError("project_not_found"); // activate_project, save_routine

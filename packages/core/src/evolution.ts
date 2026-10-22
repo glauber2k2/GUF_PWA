@@ -163,7 +163,7 @@ export function personalBests(sessions: readonly ExerciseSessionEvolution[]): Pe
 }
 
 export type EvolutionMetric = "carga" | "1rm" | "volume";
-export type EvolutionPeriod = "3m" | "6m" | "1a" | "tudo";
+export type EvolutionPeriod = "1m" | "3m" | "6m" | "1a" | "tudo";
 
 export const EVOLUTION_METRICS: ReadonlyArray<{ value: EvolutionMetric; label: string; name: string; footnote: string }> = [
   { value: "carga", label: "Carga máx.", name: "Carga máxima", footnote: "Maior carga de cada treino. Só séries concluídas, sem aquecimento." },
@@ -172,6 +172,7 @@ export const EVOLUTION_METRICS: ReadonlyArray<{ value: EvolutionMetric; label: s
 ];
 
 export const EVOLUTION_PERIODS: ReadonlyArray<{ value: EvolutionPeriod; label: string; months: number | null }> = [
+  { value: "1m", label: "1 mês", months: 1 },
   { value: "3m", label: "3 meses", months: 3 },
   { value: "6m", label: "6 meses", months: 6 },
   { value: "1a", label: "1 ano", months: 12 },

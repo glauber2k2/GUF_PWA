@@ -6,6 +6,7 @@ import type { AiConversation } from "@guf/api";
 import { Banner, Icon, IconButton } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { useAppShell } from "@/features/app-shell";
+import { usePlanGate } from "@/features/plans";
 import { AiComposer } from "@/features/ai/components/ai-composer";
 import { AiEmptyState } from "@/features/ai/components/ai-empty-state";
 import { AiMark } from "@/features/ai/components/ai-mark";
@@ -36,6 +37,7 @@ interface AiChatViewProps {
 /** Conversa do GUF AI: cabeçalho, mensagens com rolagem que acompanha a resposta e o campo da pergunta. */
 export function AiChatView({ conversation, greeting, isOnline, onClose, onNewChat }: AiChatViewProps) {
   const { showToast } = useAppShell();
+  const { showUpsell } = usePlanGate();
   const chat = useAiChat(conversation);
   const feedback = useAiMessageFeedback();
   const listRef = useRef<HTMLDivElement>(null);
@@ -46,6 +48,10 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isEmpty = chat.messages.length === 0 && chat.phase === "idle";
   const isBusy = chat.phase !== "idle";
+
+  useEffect(() => {
+    if (chat.isPlanLimited) showUpsell("guf_ai_daily_messages");
+  }, [chat.isPlanLimited, showUpsell]);
 
   useEffect(() => {
     const timer = setTimeout(() => inputRef.current?.focus({ preventScroll: true }), FOCUS_DELAY_MS);
@@ -127,7 +133,11 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
         {chat.phase === "thinking" && <AiThinking phrases={chat.thinkingPhrases} />}
 
         {chat.error && !isBusy && (
-          <Banner tone="danger" actionLabel="Tentar de novo" onAction={chat.retry}>
+          <Banner
+            tone={chat.isPlanLimited ? "info" : "danger"}
+            actionLabel={chat.isPlanLimited ? "Conhecer o Pro" : "Tentar de novo"}
+            onAction={chat.isPlanLimited ? () => showUpsell("guf_ai_daily_messages") : chat.retry}
+          >
             {chat.error.message}
           </Banner>
         )}

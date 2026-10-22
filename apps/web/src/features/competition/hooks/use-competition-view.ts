@@ -15,6 +15,7 @@ import {
   type RankedCompetitor,
 } from "@guf/core";
 import { useProfile } from "@/features/profile";
+import { usePlanGate } from "@/features/plans";
 import { useCompetitionBoard } from "@/features/competition/api/use-competition";
 import { METRICS } from "@/features/competition/constants/competition-labels";
 import type { RaceLine } from "@/features/competition/components/race-chart";
@@ -45,6 +46,7 @@ export function useCompetitionView(rivalId: string | null = null) {
   const range = period === "custom" ? custom : competitionRange(period, today);
   const board = useCompetitionBoard(range);
   const unit = useProfile().data?.weightUnit ?? "kg";
+  const gate = usePlanGate();
 
   const ranking = useMemo(
     () => (board.data ? rankCompetitors(headToHeadParticipants(board.data.participants, rivalId), board.data.weeks, board.data.days, metric, range) : []),
@@ -72,6 +74,8 @@ export function useCompetitionView(rivalId: string | null = null) {
       : null;
 
   const changePeriod = (next: CompetitionPeriod, nextCustom?: CompetitionRange) => {
+    // Fora do mês atual é do plano: a pessoa escolhe normalmente e a tela do Pro aparece.
+    if (next !== "month" && !gate.allowFeature("competition_full_history")) return;
     if (nextCustom) setCustom(nextCustom);
     setPeriod(next);
   };

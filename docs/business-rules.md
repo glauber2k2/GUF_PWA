@@ -240,8 +240,23 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 - Responde só sobre os treinos, cargas, descanso, evolução e rotinas do próprio usuário e dúvidas gerais de musculação ligadas a isso; outros assuntos são recusados. Não dá orientação médica (dor ou lesão → profissional de saúde) e não altera nada no app.
 - Explica a competição (quem compete, temporada, métricas e pontuação). Os valores da pontuação vêm da ferramenta `regras_da_competicao` (tabela pública `competition_parameters`, mesma temporada do app); não vê pontos, posição nem ranking de ninguém, nem do próprio usuário (indica a aba Competir).
 - Lê os dados só pelas ferramentas da Edge Function `guf-ai` (do próprio usuário); nunca medidas corporais, observações ou dados de outra pessoa. Substituição de exercício: só exercícios do catálogo do mesmo grupo muscular.
-- Limite: 40 perguntas em 24 h por pessoa; pergunta de até 2.000 caracteres. Só online.
+- Limite em 24 h pelo plano (Free 3, Pro 40); acabou no Free → tela do Pro. Pergunta de até 2.000 caracteres. Só online.
 - Conversas guardadas por 180 dias depois da última mensagem; entram em "Exportar meus dados" e saem com a conta.
+
+## 8.5 Planos (Free e Pro)
+
+Arquitetura completa em `docs/plans-and-access.md`.
+
+| Regra | Onde |
+|---|---|
+| O plano efetivo é o de maior `rank` entre os direitos válidos (`plan_grants`); sem nenhum, o plano padrão (Free). | Banco (`plan_of`, `my_entitlements`) |
+| **Free:** só o projeto Favoritos (não cria projetos), até 5 rotinas ativas por projeto, 3 perguntas ao GUF AI em 24 h, histórico do mês atual e do anterior (calendário, gráfico, evolução e resumos), competição só no mês atual. **Pro:** sem esses limites (GUF AI: 40 em 24 h). | Catálogo `plan_features` (muda por migration) |
+| Criar projeto, criar/desarquivar/mover rotina e perguntar ao GUF AI acima do limite são recusados pelo servidor. Quem já passou do limite mantém o que tem; só não cria nem reativa mais. | Gatilhos `projects_enforce_plan_limit`, `routines_enforce_plan_limit`; Edge Function `guf-ai` |
+| A pessoa sempre consegue tentar: o formulário e os períodos funcionam e, na hora de usar algo além do plano, aparece "Isso faz parte do Pro" com "Conhecer o Pro". Fechar volta para onde estava, sem perder o que foi preenchido. | Web (`usePlanGate`, `ProUpsellScreen`) |
+| Telas que abrem com período (gráfico do histórico, evolução) escolhem o maior padrão que cabe no plano ("4 sem" e "1 mês" no Free). Link antigo com período ou mês fora do plano volta ao que cabe. | Web |
+| Mudar de plano nunca apaga dados; o histórico antigo continua guardado e na exportação. | Banco + Termos 0.4-dev |
+| Assinar: os Termos da Assinatura (e qualquer documento pendente) são aceitos juntos, numa única caixa desmarcada, na tela de planos. Enquanto o pagamento não existe, "Assinar" avisa que a assinatura chega em breve e nada é gravado. | Web (`/planos`) + Banco (`accept_documents`, source `subscribe`) |
+| Versão de documento publicada com `requires_reaccept = false` (sem mudança material) não pede novo aceite. | Banco (`pending_documents_of`) |
 
 ## 9. Mensagens ao usuário
 

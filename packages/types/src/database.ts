@@ -381,29 +381,178 @@ export type Database = {
           },
         ]
       }
-      entitlements: {
+      features: {
         Row: {
-          plan: string
-          source: string | null
-          updated_at: string
+          code: string
+          description: string
+          kind: string
+        }
+        Insert: {
+          code: string
+          description: string
+          kind: string
+        }
+        Update: {
+          code?: string
+          description?: string
+          kind?: string
+        }
+        Relationships: []
+      }
+      plan_features: {
+        Row: {
+          feature_code: string
+          limit_value: number | null
+          plan_code: string
+        }
+        Insert: {
+          feature_code: string
+          limit_value?: number | null
+          plan_code: string
+        }
+        Update: {
+          feature_code?: string
+          limit_value?: number | null
+          plan_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_features_feature_code_fkey"
+            columns: ["feature_code"]
+            isOneToOne: false
+            referencedRelation: "features"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "plan_features_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      plan_grants: {
+        Row: {
+          created_at: string
+          id: string
+          plan_code: string
+          revoked_at: string | null
+          source: string
+          subscription_id: string | null
           user_id: string
+          valid_from: string
           valid_until: string | null
         }
         Insert: {
-          plan?: string
-          source?: string | null
-          updated_at?: string
+          created_at?: string
+          id?: string
+          plan_code: string
+          revoked_at?: string | null
+          source: string
+          subscription_id?: string | null
           user_id: string
+          valid_from?: string
           valid_until?: string | null
         }
         Update: {
-          plan?: string
-          source?: string | null
-          updated_at?: string
+          created_at?: string
+          id?: string
+          plan_code?: string
+          revoked_at?: string | null
+          source?: string
+          subscription_id?: string | null
           user_id?: string
+          valid_from?: string
           valid_until?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "plan_grants_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "plan_grants_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          code: string
+          created_at: string
+          is_default: boolean
+          is_purchasable: boolean
+          name: string
+          rank: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          is_default?: boolean
+          is_purchasable?: boolean
+          name: string
+          rank: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          is_default?: boolean
+          is_purchasable?: boolean
+          name?: string
+          rank?: number
+        }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan_code: string
+          provider: string
+          provider_ref: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_code: string
+          provider: string
+          provider_ref: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan_code?: string
+          provider?: string
+          provider_ref?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       exercises: {
         Row: {
@@ -1165,6 +1314,29 @@ export type Database = {
         }
       }
       ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
+      effective_plan: { Args: never; Returns: string }
+      feature_limit: { Args: { p_feature: string }; Returns: number }
+      has_feature: { Args: { p_feature: string }; Returns: boolean }
+      my_entitlements: { Args: never; Returns: Json }
+      pending_subscription_documents: {
+        Args: never
+        Returns: {
+          content_hash: string
+          doc_type: string
+          id: string
+          published_at: string
+          requires_reaccept: boolean
+          summary_hash: string | null
+          url: string
+          version: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "legal_documents"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       export_my_data: { Args: never; Returns: Json }
       find_social_profile: { Args: { p_handle: string }; Returns: string }
       finish_workout: { Args: { p_session_id: string }; Returns: Json }

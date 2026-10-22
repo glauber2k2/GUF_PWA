@@ -50,6 +50,7 @@ const AI_FUNCTION = "guf-ai";
 /** Status da Edge Function → erro do app. */
 function toAiError(status: number): ApiError {
   if (status === 401) return apiError("not_authenticated");
+  if (status === 402) return { ...apiError("plan_limit"), feature: "guf_ai_daily_messages" };
   if (status === 429) return apiError("ai_daily_limit");
   if (status === 400) return apiError("ai_message_invalid");
   return apiError("ai_unavailable");

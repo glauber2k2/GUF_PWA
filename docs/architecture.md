@@ -52,13 +52,14 @@ apps/web/src/
 └── styles/tokens/
 ```
 
-Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (evolução por exercício e resumo do treino), `exercise-picker`, `history`, `home`, `legal`, `not-found`, `onboarding` (tour de onboarding), `profile`, `projects`, `pwa`, `routine`, `share`, `workout`.
+Features atuais: `app-shell`, `auth`, `design-system` (só dev), `evolution` (evolução por exercício e resumo do treino), `exercise-picker`, `history`, `home`, `legal`, `not-found`, `onboarding` (tour de onboarding), `plans` (planos e portão do Pro), `profile`, `projects`, `pwa`, `routine`, `share`, `workout`.
 
 **Regras de dependência**
 - `app/` e outras features importam uma feature só pelo barrel (`@/features/<f>`); dentro da feature, pelo caminho.
 - `shared/` nunca importa `features/`. A composição entre features fica em `app/` (ex.: `app/providers.tsx`).
 - `packages/*` nunca importa `apps/*` nem React.
 - Usado por uma feature só → fica nela. Segundo uso em outra feature → sobe para `shared/` (ou para `packages/` se for regra ou consulta que o app mobile também vai usar).
+- Permissões por plano: as telas perguntam "pode usar X?" ao `usePlanGate()` (`features/plans`), nunca o nome do plano; o catálogo e os limites de gravação ficam no banco. Detalhes em `docs/plans-and-access.md`.
 - Exemplo de inversão de dependência: alertas do menu inferior. As features publicam em `store/global/nav-alerts.store.ts` e o AppShell só lê; as fontes são montadas em `app/(app)/layout.tsx` (o AppShell não importa as features que o importam).
 - Exemplo: o resumo do treino é usado pelo seu treino (`evolution`) e pelo de outra pessoa (`social`), então as partes ficam em `shared/components/workout-summary/` sem conhecer rotas nem a origem dos dados (recebem `WorkoutSummaryBase` e callbacks/slots); cada tela decide o que é tocável e quais ações aparecem. A montagem dos dados também é única (`packages/api/src/summary-builder.ts`, interno do pacote).
 - Exemplo de inversão de dependência na tela do treino: `useWorkoutEditing` (lista de exercícios, séries, observações, troca e reordenação) recebe um `WorkoutChangeSink` que diz para onde vai cada alteração. O treino em andamento passa a fila offline (`outboxSink`); a edição de um treino concluído passa um destino vazio e grava tudo de uma vez no fim (`save_workout_edit`). O `WorkoutEditor` desenha a lista e as folhas sem saber qual dos dois está em uso; cada tela só compõe cabeçalho, rodapé e as próprias ações.

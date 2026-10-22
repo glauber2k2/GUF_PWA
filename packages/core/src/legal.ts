@@ -1,7 +1,7 @@
 /** Regras de aceite dos documentos legais (LGPD). Puras, sem React. */
 
 /** Origem gravada em consent_records.source. */
-export type ConsentSource = "signup_email" | "signup_google" | "reaccept";
+export type ConsentSource = "signup_email" | "signup_google" | "reaccept" | "subscribe";
 
 /**
  * Origem do aceite no portão /aceite:
@@ -39,9 +39,17 @@ const DOC_LABELS: Record<string, string> = {
   privacy: "Política de Privacidade",
   age_declaration: "Declaração de idade",
   health_consent: "Termo de consentimento de saúde",
+  subscription_terms: "Termos da Assinatura",
 };
 
 /** Nome do documento em pt-BR. */
 export function legalDocumentLabel(docType: string): string {
   return DOC_LABELS[docType] ?? docType;
+}
+
+const DOC_ARTICLES: Record<string, string> = { terms: "os", subscription_terms: "os" };
+
+/** Artigo antes do nome ("Li e aceito OS Termos…", "…e A Política…"). */
+export function legalDocumentArticle(docType: string): string {
+  return DOC_ARTICLES[docType] ?? "a";
 }

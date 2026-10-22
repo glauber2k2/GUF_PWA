@@ -15,6 +15,7 @@ import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { workoutEditPath } from "@/features/workout";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
+import { PlanLockedNotice, usePlanGate } from "@/features/plans";
 import { cn } from "@/shared/helpers/class-names";
 
 /** Resumo de um treino concluído: /treino/resumo?id=<sessão>. */
@@ -24,16 +25,28 @@ export function SummaryScreen() {
   const summary = useWorkoutSummary(sessionId);
   const online = useOnlineStatus();
   const goBack = useGoBack();
+  const gate = usePlanGate();
 
   const loading = dev.forceLoading || (summary.isPending && summary.fetchStatus !== "idle");
   const data = summary.data?.value;
   const missing = !loading && (!sessionId && !dev.scenario ? true : summary.error?.code === "session_not_found");
   const offline = dev.forceOffline || !online || summary.data?.source === "device";
   const fallback: SummaryFallbackState | null = loading ? "loading" : missing ? "missing" : !data ? "error" : null;
+  // Treino aberto por link (perfil, evolução) de antes do histórico do plano: o dado continua guardado.
+  const locked = data !== undefined && !gate.isHistoryDateVisible(data.performedOn, new Date());
 
   return (
     <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
-      {fallback || !data ? (
+      {locked ? (
+        <>
+          <DetailHeader title="Resumo do treino" onBack={goBack} />
+          <PlanLockedNotice
+            feature="history_months"
+            title="Treino fora do seu histórico"
+            message="Este treino é de antes do período que o seu plano mostra. Ele continua guardado e aparece de novo com o Pro."
+          />
+        </>
+      ) : fallback || !data ? (
         <SummaryFallback
           state={fallback ?? "error"}
           onBack={goBack}

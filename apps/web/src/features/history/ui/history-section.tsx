@@ -3,12 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   calendarTertiles,
+  CHART_PERIOD_WEEKS,
   fromLocalISODate,
   monthsBack,
   recentWeeksStrip,
   shiftMonth,
   startOfMonthOf,
   toLocalISODate,
+  weeksRange,
   weeksWithVolume,
   type ChartPeriod,
 } from "@guf/core";
@@ -28,6 +30,11 @@ import { useHistoryParams } from "@/features/history/hooks/use-history-params";
 import { VolumeChart } from "@/features/history/components/volume-chart";
 import { HISTORY_ANCHOR } from "@/features/history/helpers/paths";
 import { TOUR_TARGETS } from "@/features/onboarding";
+import { usePlanGate } from "@/features/plans";
+
+/** Período do gráfico ao abrir; quando o plano não mostra tanto histórico, o mais curto. */
+const PREFERRED_PERIOD: ChartPeriod = "3m";
+const SHORTEST_PERIOD: ChartPeriod = "4s";
 
 export interface HistorySectionProps {
   /** Dia aberto na folha ("yyyy-MM-dd"); a Início também abre pelos dias de "Esta semana". */
@@ -100,7 +107,15 @@ function HistoryContent({
   onOpenDayChange,
 }: HistorySectionProps & { overview: HistoryOverview; today: Date; openLatestDay: boolean }) {
   const router = useRouter();
-  const { month, period, setMonth, setPeriod } = useHistoryParams(today);
+  const gate = usePlanGate();
+  const isPeriodVisible = (p: ChartPeriod) => gate.isHistoryDateVisible(weeksRange(today, CHART_PERIOD_WEEKS[p]).from, today);
+  const defaultPeriod: ChartPeriod = isPeriodVisible(PREFERRED_PERIOD) ? PREFERRED_PERIOD : SHORTEST_PERIOD;
+  const params = useHistoryParams(today, defaultPeriod);
+  // Link antigo ou plano que mudou: mês e período fora do histórico liberado voltam ao que cabe.
+  const historyStart = gate.historyStart(today);
+  const month = gate.isHistoryMonthVisible(params.month, today) || !historyStart ? params.month : historyStart;
+  const period = isPeriodVisible(params.period) ? params.period : defaultPeriod;
+  const { setMonth, setPeriod } = params;
   const monthDays = useMonthTrainingDays(month);
   const [direction, setDirection] = useState<"back" | "forward" | null>(null);
 
@@ -118,8 +133,14 @@ function HistoryContent({
   // Calendário vai do mês do primeiro treino até o mês atual.
   const firstMonth = firstTrainedOn ? startOfMonthOf(fromLocalISODate(firstTrainedOn)) : startOfMonthOf(today);
   const changeMonth = (delta: -1 | 1) => {
+    const next = shiftMonth(month, delta);
+    if (delta === -1 && !gate.allowHistoryMonth(next, today)) return;
     setDirection(delta === -1 ? "back" : "forward");
-    setMonth(shiftMonth(month, delta));
+    setMonth(next);
+  };
+  const changePeriod = (p: ChartPeriod) => {
+    if (!isPeriodVisible(p)) return gate.showUpsell("history_months");
+    setPeriod(p);
   };
 
   return (
@@ -158,7 +179,7 @@ function HistoryContent({
           today={today}
           unit={weightUnit}
           period={period}
-          onPeriodChange={(p: ChartPeriod) => setPeriod(p)}
+          onPeriodChange={changePeriod}
           fewData={fewData}
         />
       </div>

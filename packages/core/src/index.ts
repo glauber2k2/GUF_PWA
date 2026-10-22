@@ -25,3 +25,4 @@ export * from "./competition";
 export * from "./competition-ranking";
 export * from "./ai";
 export * from "./set-metrics";
+export * from "./plans";
