@@ -16,7 +16,6 @@ export const PLAN_IMPORT_MAX_CHARS = 6000;
 const MAX_ROUTINES = 10;
 const MAX_EXERCISES_PER_ROUTINE = 25;
 const DEFAULT_SETS = 3;
-const DEFAULT_REPS = "10";
 const DEFAULT_REST_SECONDS = 90;
 const REST_OPTIONS = [45, 60, 90, 120, 180];
 const SETS_MIN = 1;
@@ -135,7 +134,8 @@ function toDraftExercise(exercise: ExtractedExercise, catalog: CatalogExercise[]
       ? { kind: "catalog" as const, exerciseId: found.id, name: found.name, muscleGroup: found.muscle_group }
       : { kind: "new" as const, name: newName || "Exercício", muscleGroup: exercise.grupo_muscular, equipment: exercise.equipamento },
     targetSets: clampInt(exercise.series, SETS_MIN, SETS_MAX, DEFAULT_SETS),
-    targetReps: cleanText(exercise.repeticoes, REPS_MAX_LENGTH) || DEFAULT_REPS,
+    // Repetições são opcionais na rotina: o que a ficha não diz fica em branco para a pessoa preencher.
+    targetReps: cleanText(exercise.repeticoes, REPS_MAX_LENGTH),
     restSeconds: nearestRest(exercise.descanso_segundos),
     notes: cleanText(exercise.observacao, NOTE_MAX_LENGTH),
   };

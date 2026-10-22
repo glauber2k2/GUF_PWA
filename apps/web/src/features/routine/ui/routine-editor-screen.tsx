@@ -150,8 +150,6 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
     if (!parsed.success) {
       setShowErrors(true);
       if (draft.exercises.length === 0) shell.showToast("Adicione pelo menos 1 exercício", { tone: "warning" });
-      const invalid = draft.exercises.find((e) => !e.targetReps.trim());
-      if (invalid) setOpenId(invalid.id);
       return;
     }
     if (!canEdit) return setSaveError(apiError("network_error"));
@@ -311,7 +309,6 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
                   open={openId === exercise.id}
                   dragging={reorder.draggingId === exercise.id}
                   disabled={disabled}
-                  showErrors={showErrors}
                   unit={unit}
                   showTargetWeight={!draft.autoProgress}
                   itemRef={reorder.itemRef(exercise.id)}

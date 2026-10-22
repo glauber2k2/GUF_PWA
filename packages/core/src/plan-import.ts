@@ -7,7 +7,7 @@ export const PLAN_IMPORT_MAX_CHARS = 6000;
 export const PLAN_IMPORT_MAX_ROUTINES = 10;
 export const PLAN_IMPORT_MAX_EXERCISES_PER_ROUTINE = 25;
 
-/** Descanso quando a ficha não diz (mesmo do exercício novo na rotina; a Edge Function usa o mesmo, com 3 × 10). */
+/** Descanso quando a ficha não diz (mesmo do exercício novo na rotina; a Edge Function usa o mesmo, com 3 séries e repetições em branco). */
 export const PLAN_IMPORT_DEFAULT_REST_SECONDS = 90;
 
 export interface PlanImportCounts {

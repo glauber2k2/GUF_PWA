@@ -6,12 +6,11 @@ import {
   equipmentLabel,
   formatClock,
   formatNumber,
-  formatTargetReps,
+  formatPlannedSets,
   fromDisplayWeight,
   muscleGroupLabel,
   parseKeypadValue,
   ROUTINE_REST_OPTIONS,
-  TIMES_SIGN,
   toDisplayWeight,
   toKeypadValue,
   type WeightUnit,
@@ -29,8 +28,6 @@ export interface RoutineExerciseCardProps {
   open: boolean;
   dragging: boolean;
   disabled: boolean;
-  /** Mostrar o erro de repetições (depois de tentar salvar). */
-  showErrors: boolean;
   /** Unidade de exibição da carga planejada (o rascunho guarda kg). */
   unit: WeightUnit;
   /** Carga planejada só importa quando a rotina não atualiza carga automaticamente. */
@@ -48,7 +45,6 @@ export function RoutineExerciseCard({
   open,
   dragging,
   disabled,
-  showErrors,
   unit,
   showTargetWeight,
   itemRef,
@@ -58,8 +54,6 @@ export function RoutineExerciseCard({
   dispatch,
 }: RoutineExerciseCardProps) {
   const targetWeight = showTargetWeight ? toDisplayWeight(exercise.targetWeightKg, unit) : null;
-  const reps = exercise.targetReps.trim();
-  const repsError = showErrors && !reps ? "Informe as repetições." : undefined;
   const update = (patch: Extract<DraftAction, { type: "updateExercise" }>["patch"]) =>
     dispatch({ type: "updateExercise", id: exercise.id, patch });
 
@@ -69,7 +63,7 @@ export function RoutineExerciseCard({
       ref={itemRef}
       className={cn(
         "flex-none overflow-hidden rounded-lg bg-surface-elevated transition-[scale,box-shadow] duration-150 ease-standard",
-        dragging ? "scale-[1.02] border-[1.5px] border-accent-text shadow-e3" : repsError ? "border-[1.5px] border-danger" : "border border-border",
+        dragging ? "scale-[1.02] border-[1.5px] border-accent-text shadow-e3" : "border border-border",
       )}
     >
       <div className="flex min-h-[72px] items-center gap-0.5 py-1.5 pr-1">
@@ -101,7 +95,7 @@ export function RoutineExerciseCard({
           </span>
           <span className="flex flex-none flex-col items-end gap-1">
             <span className="font-display text-xl leading-5 font-semibold tabular-nums">
-              {exercise.targetSets} {TIMES_SIGN} {formatTargetReps(reps) ?? "—"}
+              {formatPlannedSets(exercise.targetSets, exercise.targetReps)}
             </span>
             <span className="flex items-center gap-1 text-xs text-fg-muted tabular-nums">
               {targetWeight !== null && <span>{formatNumber(targetWeight)} {unit} ·</span>}
@@ -137,8 +131,7 @@ export function RoutineExerciseCard({
             value={exercise.targetReps}
             maxLength={TARGET_REPS_MAX_LENGTH}
             disabled={disabled}
-            hint="Ex.: 10, 8–12 ou falha"
-            error={repsError}
+            hint="Opcional. Ex.: 10, 8–12 ou falha"
             onChange={(e) => update({ targetReps: e.target.value })}
           />
           {showTargetWeight && (
