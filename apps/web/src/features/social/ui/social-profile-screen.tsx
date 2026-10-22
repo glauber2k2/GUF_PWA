@@ -28,6 +28,7 @@ import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/soc
 import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
 import { memberWorkoutPath } from "@/features/social/helpers/paths";
+import { PlanBadge, usePlanGate } from "@/features/plans";
 
 function ProfileSkeleton() {
   return (
@@ -67,6 +68,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const workouts = useMemberWorkouts(userId, unlocked && Boolean(data?.historyVisible));
   const isSelf = userId === null || data?.isSelf;
   const loading = dev.forceLoading || profile.isPending;
+  const { entitlements } = usePlanGate();
 
   return (
     <main className="flex flex-col gap-5 px-4">
@@ -74,6 +76,8 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
         {!isSelf && <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />}
         <span className="flex min-w-0 flex-1 items-center gap-1.5 pl-2 text-base leading-[22px] font-semibold">
           <span className="truncate">{data ? `@${data.handle}` : ""}</span>
+          {/* Só o seu plano: o de outra pessoa não é compartilhado (revisar o RIPD social antes de mostrar). */}
+          {isSelf && entitlements && <PlanBadge user={entitlements} className="flex-none" />}
           {data?.visibility === "private" && <Icon icon={Lock} size={14} label="Perfil privado" className="flex-none text-fg-muted" />}
         </span>
         <IconButton

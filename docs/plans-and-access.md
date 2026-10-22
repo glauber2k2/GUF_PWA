@@ -119,6 +119,16 @@ No app, os gráficos abrem no maior período que cabe no plano (Histórico: "4 s
 período novo) e escolher um período maior abre a tela do Pro; link antigo com período fora do plano
 volta ao que cabe.
 
+## Selo do plano
+
+`PlanBadge` (`features/plans`) mostra o plano ao lado do @ no seu perfil social. Recebe o usuário
+(`PlanBadgeUser`: `planName` e `isDefaultPlan`; os `Entitlements` do usuário logado servem) e usa o
+`Badge` do shadcn (`shared/components/ui/badge.tsx`) com as variantes do guf: `muted` para o plano
+padrão e `accent` com coroa para planos pagos. A aparência depende do nível, não do nome, então um plano
+novo não exige mudar o componente. O plano de outra pessoa não aparece: ele não sai do banco para
+terceiros, e mostrá-lo seria um dado novo exposto a outras pessoas (revisar o RIPD social e criar uma
+função no banco antes).
+
 ## Experiência: "deixar tentar"
 
 Decisão de produto: a pessoa **nunca vê cadeado antes de tentar**. Botões, formulários e períodos
