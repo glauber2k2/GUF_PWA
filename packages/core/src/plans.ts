@@ -14,14 +14,14 @@ export type PlanFeature =
   | "custom_projects"
   | "routines_per_project"
   | "guf_ai_daily_messages"
-  | "history_months"
+  | "chart_months"
   | "competition_full_history";
 
 export const PLAN_FEATURES: readonly PlanFeature[] = [
   "custom_projects",
   "routines_per_project",
   "guf_ai_daily_messages",
-  "history_months",
+  "chart_months",
   "competition_full_history",
 ];
 
@@ -84,25 +84,20 @@ export function countCustomProjects(projects: ReadonlyArray<{ isFavorites: boole
 }
 
 /**
- * Primeiro dia visível do histórico (1º dia do mês mais antigo liberado); null = sem limite.
- * history_months conta o mês atual: 2 = o mês atual e o anterior.
+ * Primeiro dia que os GRÁFICOS mostram (1º dia do mês mais antigo liberado); null = sem limite.
+ * chart_months conta o mês atual: 2 = o mês atual e o anterior. O histórico de treinos, os
+ * recordes e a evolução usam sempre o histórico inteiro; só o que o gráfico desenha é limitado.
  */
-export function historyWindowStart(entitlements: Entitlements | null, today: Date): Date | null {
-  const months = featureLimit(entitlements, "history_months");
+export function chartWindowStart(entitlements: Entitlements | null, today: Date): Date | null {
+  const months = featureLimit(entitlements, "chart_months");
   if (months === null) return null;
   return shiftMonth(startOfMonthOf(today), -(Math.max(months, 1) - 1));
 }
 
-/** A data ("yyyy-MM-dd") está dentro do histórico liberado? */
-export function isDateInHistoryWindow(entitlements: Entitlements | null, isoDate: string, today: Date): boolean {
-  const start = historyWindowStart(entitlements, today);
+/** Um gráfico que começa nesta data ("yyyy-MM-dd") cabe no plano? */
+export function isDateInChartWindow(entitlements: Entitlements | null, isoDate: string, today: Date): boolean {
+  const start = chartWindowStart(entitlements, today);
   return start === null || isoDate >= toLocalISODate(start);
-}
-
-/** O mês (1º dia) está dentro do histórico liberado? */
-export function isMonthInHistoryWindow(entitlements: Entitlements | null, month: Date, today: Date): boolean {
-  const start = historyWindowStart(entitlements, today);
-  return start === null || month >= start;
 }
 
 export interface UpsellCopy {
@@ -130,10 +125,10 @@ export function planUpsellCopy(feature: PlanFeature, entitlements: Entitlements 
         title: "Converse mais com o GUF AI",
         message: `No plano ${plan} são ${formatNumber(limit ?? 0, 0)} perguntas por dia. Com o Pro, o GUF AI analisa seus treinos muitas vezes por dia.`,
       };
-    case "history_months":
+    case "chart_months":
       return {
-        title: "Todo o seu histórico",
-        message: `No plano ${plan} você vê ${historyWindowText(limit)}. Com o Pro, veja todos os seus treinos e a evolução desde o primeiro.`,
+        title: "Gráficos completos",
+        message: `No plano ${plan} os gráficos mostram ${chartWindowText(limit)}. Seus treinos e recordes continuam completos; com o Pro, os gráficos mostram toda a sua evolução, desde o primeiro treino.`,
       };
     case "competition_full_history":
       return {
@@ -144,8 +139,8 @@ export function planUpsellCopy(feature: PlanFeature, entitlements: Entitlements 
 }
 
 /** "o mês atual e o anterior" · "o mês atual" · "os últimos 3 meses" */
-function historyWindowText(months: number | null): string {
-  if (months === null) return "todo o histórico";
+function chartWindowText(months: number | null): string {
+  if (months === null) return "todo o período";
   if (months <= 1) return "o mês atual";
   if (months === 2) return "o mês atual e o anterior";
   return `os últimos ${formatNumber(months, 0)} meses`;
@@ -156,7 +151,7 @@ export const PLAN_FEATURE_LABELS: Record<PlanFeature, string> = {
   custom_projects: "Projetos além do Favoritos",
   routines_per_project: "Rotinas por projeto",
   guf_ai_daily_messages: "Perguntas ao GUF AI por dia",
-  history_months: "Histórico e evolução",
+  chart_months: "Período dos gráficos",
   competition_full_history: "Competição além do mês atual",
 };
 
@@ -164,7 +159,7 @@ export const PLAN_FEATURE_LABELS: Record<PlanFeature, string> = {
 export function formatFeatureAccess(feature: PlanFeature, access: FeatureAccess): string {
   if (!access.enabled) return "Não incluído";
   if (access.kind === "flag") return "Incluído";
-  if (feature === "history_months") return capitalize(historyWindowText(access.limit));
+  if (feature === "chart_months") return capitalize(chartWindowText(access.limit));
   if (access.limit === null) return "Sem limite";
   return `Até ${formatNumber(access.limit, 0)}`;
 }

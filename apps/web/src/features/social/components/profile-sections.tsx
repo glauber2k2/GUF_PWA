@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EyeOff, Lock } from "lucide-react";
-import { formatElapsed, formatNumber, fromLocalISODate, formatShortDate, toDisplayWeight, type WeightUnit } from "@guf/core";
+import { formatElapsed, formatNumber, fromLocalISODate, formatShortDate, MEMBER_HISTORY_SCOPE_NOTE, toDisplayWeight, type WeightUnit } from "@guf/core";
 import type { EvolutionWeek, MemberProfile, MemberWorkout } from "@guf/api";
 import { Button, Icon, ProgressChart, SegmentedControl, Skeleton, StreakFlame, WorkoutSummaryCard } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -153,7 +153,7 @@ export function ProfileEvolution({
   );
 }
 
-/** Histórico de treinos: cartões; oculto para visitantes quando a pessoa escondeu. */
+/** Histórico de treinos: cartões; oculto para visitantes quando a pessoa escondeu. De outra pessoa, só o mês atual. */
 export function ProfileHistory({
   profile,
   workouts,
@@ -188,6 +188,7 @@ export function ProfileHistory({
           </Link>
         )}
       </div>
+      {!profile.isSelf && profile.historyVisible && <p className="-mt-2 mb-0 text-[13px] leading-[18px] text-fg-secondary">{MEMBER_HISTORY_SCOPE_NOTE}</p>}
 
       {!profile.historyVisible ? (
         <div className="flex items-center gap-3.5 rounded-lg border border-dashed border-border-strong px-5 py-[18px]">
@@ -207,7 +208,7 @@ export function ProfileHistory({
           <Skeleton className="h-[132px] w-full rounded-lg" />
         </div>
       ) : workouts.length === 0 ? (
-        <p className="m-0 text-sm text-fg-secondary">Nenhum treino concluído ainda.</p>
+        <p className="m-0 text-sm text-fg-secondary">{profile.isSelf ? "Nenhum treino concluído ainda." : "Nenhum treino concluído neste mês."}</p>
       ) : (
         <div className="flex flex-col gap-2.5">
           {workouts.map((w) => (

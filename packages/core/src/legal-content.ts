@@ -183,6 +183,7 @@ const TERMS: LegalDocumentContent = {
         ),
         ul(
           "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
+          "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
           "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e volume), pelas mesmas regras para todos, publicadas no app.",
           "Medidas corporais e observações escritas por você nunca aparecem para outras pessoas.",
@@ -195,14 +196,14 @@ const TERMS: LegalDocumentContent = {
       title: "Planos Free e Pro",
       blocks: [
         p(
-          "O guf tem um plano gratuito (Free) e um plano pago (Pro). O Free tem limites, como a quantidade de projetos e de rotinas, as perguntas por dia ao GUF AI e o período de histórico e de competição que aparece no app. A comparação atualizada fica na tela Planos, em Configurações.",
+          "O guf tem um plano gratuito (Free) e um plano pago (Pro). O Free tem limites, como a quantidade de projetos e de rotinas, as perguntas por dia ao GUF AI, o período mostrado nos gráficos e a competição além do mês atual. Seus treinos, recordes e evolução ficam completos em qualquer plano. A comparação atualizada fica na tela Planos, em Configurações.",
         ),
         p(
           "O Pro só é contratado na tela de assinatura. Lá aparecem o preço, a forma de cobrança, a renovação e o cancelamento, e você aceita os Termos da Assinatura antes de qualquer cobrança.",
         ),
         { kind: "link", doc: "assinatura", text: "Ler os Termos da Assinatura" },
         p(
-          "Mudar de plano nunca apaga dados. Se o seu plano deixar de incluir algo, o que você já criou continua salvo e pode ser exportado a qualquer momento; só não é possível criar mais além do limite, e o histórico antigo fica guardado até você voltar ao Pro.",
+          "Mudar de plano nunca apaga dados. Se o seu plano deixar de incluir algo, o que você já criou continua salvo e pode ser exportado a qualquer momento; só não é possível criar mais além do limite, e os gráficos voltam a mostrar o período do plano.",
         ),
         p("Se os limites de um plano diminuírem, você será avisado no app antes de a mudança valer."),
       ],
@@ -237,6 +238,10 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.5-dev": [
+      "Seus treinos, recordes e evolução ficam completos em qualquer plano; o Free limita só o período mostrado nos gráficos.",
+      "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual.",
+    ],
     "0.4-dev": [
       "Novo: planos Free e Pro. O Free tem limites de projetos, rotinas, perguntas ao GUF AI e período de histórico e de competição.",
       "O Pro é contratado só na tela de assinatura, com preço, renovação e cancelamento informados antes de qualquer cobrança.",
@@ -624,7 +629,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
       title: "Quando o Pro termina",
       blocks: [
         p(
-          "Com o fim da assinatura, sua conta volta ao plano Free. Nenhum dado é apagado: projetos, rotinas e treinos continuam salvos e podem ser exportados. Só não é possível criar além dos limites do Free, e o histórico mais antigo fica guardado até você voltar ao Pro.",
+          "Com o fim da assinatura, sua conta volta ao plano Free. Nenhum dado é apagado: projetos, rotinas e treinos continuam salvos e podem ser exportados. Só não é possível criar além dos limites do Free, e os gráficos voltam a mostrar o mês atual e o anterior.",
         ),
       ],
     },
@@ -639,7 +644,9 @@ const SUBSCRIPTION: LegalDocumentContent = {
       ],
     },
   ],
-  changes: {},
+  changes: {
+    "0.2-dev": ["Quando o Pro termina, seus treinos continuam completos; só os gráficos voltam a mostrar o período do plano Free."],
+  },
 };
 
 export const LEGAL_DOCUMENTS: Record<LegalReaderDoc, LegalDocumentContent> = {

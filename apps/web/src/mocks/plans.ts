@@ -30,14 +30,14 @@ function buildCatalog(): CatalogPlan[] {
     custom_projects: limit(0),
     routines_per_project: limit(5),
     guf_ai_daily_messages: limit(3),
-    history_months: limit(2),
+    chart_months: limit(2),
     competition_full_history: flag(false),
   };
   const pro: Record<PlanFeature, FeatureAccess> = {
     custom_projects: limit(null),
     routines_per_project: limit(null),
     guf_ai_daily_messages: limit(40),
-    history_months: limit(null),
+    chart_months: limit(null),
     competition_full_history: flag(true),
   };
   return [
@@ -91,10 +91,5 @@ export const mockPlansApi = {
     ignoreClient(client);
     await wait();
     return { data: null, error: apiError("billing_unavailable") };
-  },
-  async isSessionHiddenByPlan(client) {
-    ignoreClient(client);
-    await wait();
-    return { data: false, error: null };
   },
 } satisfies PlansApi;

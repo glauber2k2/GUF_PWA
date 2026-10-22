@@ -116,13 +116,17 @@ function EvolutionContent({ evolution }: { evolution: ExerciseEvolution }) {
   const todayIso = toLocalISODate(new Date());
   const today = fromLocalISODate(todayIso);
   const firstPerformedOn = sessions[0]?.performedOn ?? null;
-  const isPeriodVisible = (p: EvolutionPeriod) => gate.isHistoryDateVisible(evolutionPeriodStart(p, today, firstPerformedOn), today);
+  // Recordes e últimos treinos usam o histórico inteiro; o plano limita só o período do gráfico.
+  const chartFrom = (p: EvolutionPeriod) => evolutionPeriodStart(p, today, firstPerformedOn);
+  const isPeriodVisible = (p: EvolutionPeriod) => gate.isChartFromVisible(chartFrom(p), today);
   const defaultPeriod = isPeriodVisible(PREFERRED_PERIOD) ? PREFERRED_PERIOD : SHORTEST_PERIOD;
   const params = useEvolutionParams(defaultPeriod);
   const { metric, set } = params;
-  // Link antigo ou plano que mudou: período fora do histórico liberado volta ao que cabe.
+  // Link antigo ou plano que mudou: período fora do plano volta ao que cabe.
   const period = isPeriodVisible(params.period) ? params.period : defaultPeriod;
-  const changePeriod = (p: EvolutionPeriod) => (isPeriodVisible(p) ? set("periodo", p) : gate.showUpsell("history_months"));
+  const changePeriod = (p: EvolutionPeriod) => {
+    if (gate.allowChartFrom(chartFrom(p), today)) set("periodo", p);
+  };
   const series = useMemo(() => evolutionSeries(sessions, metric, period, fromLocalISODate(todayIso), unit), [sessions, metric, period, todayIso, unit]);
   const bests = personalBests(sessions);
   const last = sessions.at(-1);

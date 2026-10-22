@@ -276,38 +276,21 @@ export function sessionRecord1Rm(
   return current > Math.max(...previous) ? current : null;
 }
 
-/**
- * Melhor 1RM ANTES do treino (mesma janela do sessionRecord1Rm) e o dia em que foi feito; null = primeira vez.
- * Dia null = o melhor está nos treinos fora do histórico do plano (o banco não devolve a data deles).
- */
+/** Melhor 1RM ANTES do treino (mesma janela do sessionRecord1Rm) e o dia em que foi feito; null = primeira vez. */
 export function previousBest1Rm(
   history: readonly ExerciseSessionBest[],
   sessionId: string,
   performedOn: string,
   earlierSameDay: ReadonlySet<string>,
-): { oneRmKg: number; performedOn: string | null } | null {
-  let best: (ExerciseSessionBest & { best1RmKg: number }) | null = null;
+): { oneRmKg: number; performedOn: string } | null {
+  let best: { oneRmKg: number; performedOn: string } | null = null;
   for (const h of sessionsBefore(history, sessionId, performedOn, earlierSameDay)) {
     if (h.best1RmKg === null) continue;
-    if (!best || h.best1RmKg > best.best1RmKg || (h.best1RmKg === best.best1RmKg && h.performedOn > best.performedOn)) {
-      best = { ...h, best1RmKg: h.best1RmKg };
+    if (!best || h.best1RmKg > best.oneRmKg || (h.best1RmKg === best.oneRmKg && h.performedOn > best.performedOn)) {
+      best = { oneRmKg: h.best1RmKg, performedOn: h.performedOn };
     }
   }
-  if (!best) return null;
-  return { oneRmKg: best.best1RmKg, performedOn: best.sessionId === HIDDEN_HISTORY_SESSION_ID ? null : best.performedOn };
-}
-
-/** Ponto que representa os treinos fora do histórico do plano (antes de todos os que aparecem). */
-export const HIDDEN_HISTORY_SESSION_ID = "fora-do-historico-do-plano";
-const HIDDEN_HISTORY_DATE = "0000-01-01";
-
-/**
- * Junta ao histórico visível o melhor 1RM dos treinos fora do plano (get_best_e1rm com p_hidden_only),
- * para os recordes continuarem certos sem o banco devolver esses treinos. null = nada escondido.
- */
-export function withHiddenHistoryBest(history: readonly ExerciseSessionBest[], hiddenBest1RmKg: number | null): ExerciseSessionBest[] {
-  if (hiddenBest1RmKg === null) return [...history];
-  return [{ sessionId: HIDDEN_HISTORY_SESSION_ID, performedOn: HIDDEN_HISTORY_DATE, maxWeightKg: 0, best1RmKg: hiddenBest1RmKg }, ...history];
+  return best;
 }
 
 /* ---------------------------------------------------------------------

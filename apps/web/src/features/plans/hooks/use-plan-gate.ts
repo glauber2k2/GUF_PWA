@@ -2,19 +2,13 @@
 
 import { useCallback, useMemo } from "react";
 import type { ApiError } from "@guf/api";
-import {
-  canUseFeature,
-  hasRoomFor,
-  historyWindowStart,
-  isDateInHistoryWindow,
-  isMonthInHistoryWindow,
-  type PlanFeature,
-} from "@guf/core";
+import { canUseFeature, hasRoomFor, isDateInChartWindow, type PlanFeature } from "@guf/core";
 import { usePlanGateContext } from "@/features/plans/providers/plan-gate-provider";
 
 /**
  * Portão de plano para as telas. A pessoa sempre consegue tentar (botões e formulários aparecem
  * normalmente); na hora de usar algo além do plano, `allow…` abre a tela do Pro e devolve false.
+ * O histórico de treinos é completo em qualquer plano; dele, o plano só limita o que os gráficos mostram.
  * Gravações também são barradas no banco: `handlePlanError` cobre o caso de o app estar desatualizado.
  */
 export function usePlanGate() {
@@ -40,21 +34,11 @@ export function usePlanGate() {
     [entitlements, showUpsell],
   );
 
-  /** O dia ("yyyy-MM-dd") está no histórico liberado? Senão, mostra a tela do Pro. */
-  const allowHistoryDate = useCallback(
+  /** Um gráfico que começa no dia ("yyyy-MM-dd") cabe no plano? Senão, mostra a tela do Pro. */
+  const allowChartFrom = useCallback(
     (isoDate: string, today: Date): boolean => {
-      if (isDateInHistoryWindow(entitlements, isoDate, today)) return true;
-      showUpsell("history_months");
-      return false;
-    },
-    [entitlements, showUpsell],
-  );
-
-  /** O mês (1º dia) está no histórico liberado? Senão, mostra a tela do Pro. */
-  const allowHistoryMonth = useCallback(
-    (month: Date, today: Date): boolean => {
-      if (isMonthInHistoryWindow(entitlements, month, today)) return true;
-      showUpsell("history_months");
+      if (isDateInChartWindow(entitlements, isoDate, today)) return true;
+      showUpsell("chart_months");
       return false;
     },
     [entitlements, showUpsell],
@@ -73,19 +57,15 @@ export function usePlanGate() {
   return useMemo(
     () => ({
       entitlements,
-      /** Primeiro dia visível do histórico (null = sem limite), para escolher padrões que cabem no plano. */
-      historyStart: (today: Date) => historyWindowStart(entitlements, today),
       isFeatureEnabled: (feature: PlanFeature) => canUseFeature(entitlements, feature),
-      /** Só consulta (sem abrir a tela do Pro): para padrões e para corrigir links antigos. */
-      isHistoryDateVisible: (isoDate: string, today: Date) => isDateInHistoryWindow(entitlements, isoDate, today),
-      isHistoryMonthVisible: (month: Date, today: Date) => isMonthInHistoryWindow(entitlements, month, today),
+      /** Só consulta (sem abrir a tela do Pro): para escolher o período padrão e corrigir links antigos. */
+      isChartFromVisible: (isoDate: string, today: Date) => isDateInChartWindow(entitlements, isoDate, today),
       allowFeature,
       allowAnother,
-      allowHistoryDate,
-      allowHistoryMonth,
+      allowChartFrom,
       handlePlanError,
       showUpsell,
     }),
-    [entitlements, allowFeature, allowAnother, allowHistoryDate, allowHistoryMonth, handlePlanError, showUpsell],
+    [entitlements, allowFeature, allowAnother, allowChartFrom, handlePlanError, showUpsell],
   );
 }

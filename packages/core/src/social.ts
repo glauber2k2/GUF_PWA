@@ -1,6 +1,6 @@
 import { differenceInCalendarDays, differenceInCalendarMonths, differenceInMinutes, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { fromLocalISODate } from "./dates";
+import { fromLocalISODate, toLocalISODate } from "./dates";
 import { plural } from "./format";
 
 /** Regras do módulo de seguidores (puras, sem React). As permissões são do banco; aqui só formato e textos. */
@@ -111,4 +111,12 @@ export function requestedAgoLabel(since: string, now: Date): string {
   if (days < 1) return `há ${Math.floor(minutes / 60)} h`;
   if (days === 1) return "ontem";
   return `há ${days} dias`;
+}
+
+/** Histórico de OUTRA pessoa: em qualquer plano, só os treinos do mês atual (regra do banco, list_member_workouts). */
+export const MEMBER_HISTORY_SCOPE_NOTE = "Você vê os treinos deste mês.";
+
+/** 1º dia do mês de `today` ("yyyy-MM-dd"): de onde o histórico de outra pessoa aparece. */
+export function memberHistoryFrom(today: Date): string {
+  return toLocalISODate(new Date(today.getFullYear(), today.getMonth(), 1));
 }

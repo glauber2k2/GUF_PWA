@@ -81,7 +81,7 @@ export function sessionDurationSeconds(row: FinishedSessionRow): number {
 }
 
 
-/** Números que usam o histórico inteiro, mesmo o que o plano não mostra (get_training_totals). */
+/** 1º treino, total e última rotina numa chamada só (get_training_totals). */
 export interface TrainingTotals {
   firstTrainedOn: string | null;
   completedSessions: number;
@@ -104,13 +104,9 @@ export async function fetchTrainingTotals(client: GufClient, until?: string): Pr
   };
 }
 
-/** Melhor 1RM estimado por exercício (get_best_e1rm). `hiddenOnly`: só dos treinos fora do plano. */
-export async function fetchBestE1rm(
-  client: GufClient,
-  exerciseIds: readonly string[],
-  hiddenOnly: boolean,
-): Promise<{ data: Map<string, number> | null; error: unknown }> {
-  const { data, error } = await client.rpc("get_best_e1rm", { p_exercise_ids: [...exerciseIds], p_hidden_only: hiddenOnly });
+/** Melhor 1RM estimado de cada exercício em todo o histórico (get_best_e1rm). */
+export async function fetchBestE1rm(client: GufClient, exerciseIds: readonly string[]): Promise<{ data: Map<string, number> | null; error: unknown }> {
+  const { data, error } = await client.rpc("get_best_e1rm", { p_exercise_ids: [...exerciseIds] });
   if (error) return { data: null, error };
   return {
     data: new Map((data ?? []).filter((row) => row.best_e1rm_kg !== null).map((row) => [row.exercise_id, Number(row.best_e1rm_kg)])),

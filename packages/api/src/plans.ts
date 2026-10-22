@@ -35,8 +35,6 @@ export interface PlansApi {
   getSubscriptionDocuments: (client: GufClient, input: null) => Result<LegalDocument[]>;
   /** Inicia a assinatura (aceites + pagamento). Enquanto não houver pagamento: billing_unavailable. */
   startSubscription: (client: GufClient, input: StartSubscriptionInput) => Result<null>;
-  /** O treino da própria pessoa existe, mas está fora do histórico do plano? (só sim/não) */
-  isSessionHiddenByPlan: (client: GufClient, input: { sessionId: string }) => Result<boolean>;
 }
 
 /* =====================================================================
@@ -137,20 +135,9 @@ export const startSubscription: PlansApi["startSubscription"] = async () => ({
 });
 
 
-export const isSessionHiddenByPlan: PlansApi["isSessionHiddenByPlan"] = async (client, { sessionId }) => {
-  try {
-    const { data, error } = await client.rpc("is_session_hidden_by_plan", { p_session_id: sessionId });
-    if (error) return { data: null, error: toApiError(error) };
-    return { data: data === true, error: null };
-  } catch (e) {
-    return { data: null, error: toApiError(e) };
-  }
-};
-
 export const plansApi = {
   getEntitlements,
   getPlanCatalog,
   getSubscriptionDocuments,
   startSubscription,
-  isSessionHiddenByPlan,
 } satisfies PlansApi;

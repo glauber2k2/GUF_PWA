@@ -1,9 +1,8 @@
-import { sessionRecord1Rm, sessionTotals, withHiddenHistoryBest, type ExerciseSessionBest, type LoggedSet, type WeightUnit } from "@guf/core";
+import { sessionRecord1Rm, sessionTotals, type ExerciseSessionBest, type LoggedSet, type WeightUnit } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
   currentUserId,
-  fetchBestE1rm,
   fetchTrainingTotals,
   FREE_WORKOUT_NAME,
   sessionDurationSeconds,
@@ -125,32 +124,21 @@ function repsAtLoad(sets: readonly LoggedSet[], weightKg: number): number | null
   return reps.length ? Math.max(...reps) : null;
 }
 
-/**
- * Histórico por treino de cada exercício (get_exercise_history, só o que o plano mostra) mais o melhor
- * 1RM dos treinos fora do plano (get_best_e1rm), para achar os recordes do dia sem erro.
- */
+/** Histórico por treino de cada exercício (get_exercise_history), para achar os recordes do dia. */
 export async function exerciseHistories(client: GufClient, exerciseIds: readonly string[]): Promise<ApiResult<Map<string, ExerciseSessionBest[]>>> {
-  const [results, hidden] = await Promise.all([
-    Promise.all(exerciseIds.map((id) => client.rpc("get_exercise_history", { p_exercise_id: id }))),
-    fetchBestE1rm(client, exerciseIds, true),
-  ]);
+  const results = await Promise.all(exerciseIds.map((id) => client.rpc("get_exercise_history", { p_exercise_id: id })));
   const failed = results.find((r) => r.error);
   if (failed?.error) return { data: null, error: toApiError(failed.error) };
-  if (hidden.error || !hidden.data) return { data: null, error: toApiError(hidden.error) };
-  const hiddenBest = hidden.data;
   return {
     data: new Map(
       exerciseIds.map((id, i) => [
         id,
-        withHiddenHistoryBest(
-          (results[i]?.data ?? []).map((h) => ({
-            sessionId: h.session_id,
-            performedOn: h.performed_on,
-            maxWeightKg: Number(h.max_weight_kg),
-            best1RmKg: h.best_e1rm_kg === null ? null : Number(h.best_e1rm_kg),
-          })),
-          hiddenBest.get(id) ?? null,
-        ),
+        (results[i]?.data ?? []).map((h) => ({
+          sessionId: h.session_id,
+          performedOn: h.performed_on,
+          maxWeightKg: Number(h.max_weight_kg),
+          best1RmKg: h.best_e1rm_kg === null ? null : Number(h.best_e1rm_kg),
+        })),
       ]),
     ),
     error: null,

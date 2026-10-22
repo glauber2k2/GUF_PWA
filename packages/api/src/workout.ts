@@ -227,12 +227,9 @@ function sessionExerciseRow(sessionId: string, exercise: NewWorkoutExercise): Se
   return { id: exercise.id, session_id: sessionId, exercise_id: exercise.exerciseId, position: exercise.position } as SessionExerciseInsert;
 }
 
-/**
- * Melhor 1RM estimado de TODO o histórico (get_best_e1rm), inclusive o que o plano não mostra:
- * o recorde do treino precisa ser o mesmo do finish_workout. Sem histórico = null (sem PR).
- */
+/** Melhor 1RM estimado histórico (get_best_e1rm), igual ao do finish_workout; sem histórico = null (sem PR). */
 async function fetchBest1RmKg(client: GufClient, exerciseId: string): Promise<number | null> {
-  const { data, error } = await fetchBestE1rm(client, [exerciseId], false);
+  const { data, error } = await fetchBestE1rm(client, [exerciseId]);
   if (error || !data) return null;
   return data.get(exerciseId) ?? null;
 }

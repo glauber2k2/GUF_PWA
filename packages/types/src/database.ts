@@ -1221,6 +1221,8 @@ export type Database = {
         Args: { p_owner: string; p_viewer: string }
         Returns: boolean
       }
+      chart_visible_from: { Args: never; Returns: string }
+      chart_visible_from_of: { Args: { p_user_id: string }; Returns: string }
       competition_alert_state: {
         Args: { p_rival_points: number; p_watcher_points: number }
         Returns: string
@@ -1337,7 +1339,7 @@ export type Database = {
       find_social_profile: { Args: { p_handle: string }; Returns: string }
       finish_workout: { Args: { p_session_id: string }; Returns: Json }
       get_best_e1rm: {
-        Args: { p_exercise_ids: string[]; p_hidden_only?: boolean }
+        Args: { p_exercise_ids: string[] }
         Returns: {
           best_e1rm_kg: number
           exercise_id: string
@@ -1539,18 +1541,11 @@ export type Database = {
         Returns: boolean
       }
       has_health_consent: { Args: never; Returns: boolean }
-      history_visible_from: { Args: never; Returns: string }
-      history_visible_from_of: { Args: { p_user_id: string }; Returns: string }
       is_blocked_between: {
         Args: { p_a: string; p_b: string }
         Returns: boolean
       }
       is_premium: { Args: never; Returns: boolean }
-      is_session_hidden_by_plan: {
-        Args: { p_session_id: string }
-        Returns: boolean
-      }
-      is_session_visible: { Args: { p_session_id: string }; Returns: boolean }
       list_member_workouts: {
         Args: { p_before?: string; p_limit?: number; p_user_id?: string }
         Returns: {
@@ -1590,6 +1585,7 @@ export type Database = {
         }[]
       }
       local_today: { Args: { p_user_id: string }; Returns: string }
+      member_history_from: { Args: { p_owner: string }; Returns: string }
       my_entitlements: { Args: never; Returns: Json }
       normalize_handle: { Args: { p_handle: string }; Returns: string }
       pause_workout: {

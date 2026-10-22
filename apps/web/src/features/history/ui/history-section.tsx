@@ -108,14 +108,13 @@ function HistoryContent({
 }: HistorySectionProps & { overview: HistoryOverview; today: Date; openLatestDay: boolean }) {
   const router = useRouter();
   const gate = usePlanGate();
-  const isPeriodVisible = (p: ChartPeriod) => gate.isHistoryDateVisible(weeksRange(today, CHART_PERIOD_WEEKS[p]).from, today);
+  // O calendário e os dias são completos em qualquer plano; o plano limita só o período do gráfico.
+  const chartFrom = (p: ChartPeriod) => weeksRange(today, CHART_PERIOD_WEEKS[p]).from;
+  const isPeriodVisible = (p: ChartPeriod) => gate.isChartFromVisible(chartFrom(p), today);
   const defaultPeriod: ChartPeriod = isPeriodVisible(PREFERRED_PERIOD) ? PREFERRED_PERIOD : SHORTEST_PERIOD;
-  const params = useHistoryParams(today, defaultPeriod);
-  // Link antigo ou plano que mudou: mês e período fora do histórico liberado voltam ao que cabe.
-  const historyStart = gate.historyStart(today);
-  const month = gate.isHistoryMonthVisible(params.month, today) || !historyStart ? params.month : historyStart;
+  const { month, setMonth, setPeriod, ...params } = useHistoryParams(today, defaultPeriod);
+  // Link antigo ou plano que mudou: período fora do plano volta ao que cabe.
   const period = isPeriodVisible(params.period) ? params.period : defaultPeriod;
-  const { setMonth, setPeriod } = params;
   const monthDays = useMonthTrainingDays(month);
   const [direction, setDirection] = useState<"back" | "forward" | null>(null);
 
@@ -133,14 +132,11 @@ function HistoryContent({
   // Calendário vai do mês do primeiro treino até o mês atual.
   const firstMonth = firstTrainedOn ? startOfMonthOf(fromLocalISODate(firstTrainedOn)) : startOfMonthOf(today);
   const changeMonth = (delta: -1 | 1) => {
-    const next = shiftMonth(month, delta);
-    if (delta === -1 && !gate.allowHistoryMonth(next, today)) return;
     setDirection(delta === -1 ? "back" : "forward");
-    setMonth(next);
+    setMonth(shiftMonth(month, delta));
   };
   const changePeriod = (p: ChartPeriod) => {
-    if (!isPeriodVisible(p)) return gate.showUpsell("history_months");
-    setPeriod(p);
+    if (gate.allowChartFrom(chartFrom(p), today)) setPeriod(p);
   };
 
   return (
