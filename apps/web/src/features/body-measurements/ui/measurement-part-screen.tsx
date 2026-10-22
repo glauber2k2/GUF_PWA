@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { findMeasurementPart, measurementRecordRows, type BodyMeasurementDay, type MeasurementPart, type MeasurementPeriod, type MeasurementSide } from "@guf/core";
+import { findMeasurementPart, measurementRecordRows, type BodyMeasurementDay, type MeasurementPart, type MeasurementPeriod, type MeasurementRecordRow, type MeasurementSide } from "@guf/core";
 import { Banner, Button, MuscleIcon, SegmentedControl, Skeleton } from "@/shared/components/ds";
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
@@ -12,7 +12,8 @@ import { useRaisedToast } from "@/features/app-shell";
 import { useBodyMeasurements, useCanUseMeasurements, useMeasurementsSource } from "@/features/body-measurements/api/use-body-measurements";
 import { MeasurementChartCard } from "@/features/body-measurements/components/measurement-chart-card";
 import { MeasurementRecords } from "@/features/body-measurements/components/measurement-records";
-import { measurementRegisterPath, measurementsPath, MEASUREMENTS_PATH } from "@/features/body-measurements/helpers/paths";
+import { MeasurementRecordMenu } from "@/features/body-measurements/components/measurement-record-menu";
+import { measurementEditPath, measurementRegisterPath, measurementsPath, MEASUREMENTS_PATH } from "@/features/body-measurements/helpers/paths";
 import { useRemoveMeasurement } from "@/features/body-measurements/hooks/use-remove-measurement";
 
 const SIDE_OPTIONS = [
@@ -77,6 +78,7 @@ function MeasurementPartDetail({ part, days, canUse, onBack }: { part: Measureme
   const [side, setSide] = useState<MeasurementSide>("right");
   const [period, setPeriod] = useState<MeasurementPeriod>("6M");
   const [today] = useState(() => new Date());
+  const [menuRecord, setMenuRecord] = useState<MeasurementRecordRow | null>(null);
   const isBilateral = part.sites.kind === "bilateral";
   return (
     <EditorFrame
@@ -104,7 +106,18 @@ function MeasurementPartDetail({ part, days, canUse, onBack }: { part: Measureme
       {isBilateral && <SegmentedControl options={SIDE_OPTIONS} value={side} onChange={(value) => setSide(value as MeasurementSide)} label="Lado do corpo" />}
 
       <MeasurementChartCard part={part} side={side} days={days} period={period} onPeriod={setPeriod} today={today} />
-      <MeasurementRecords rows={measurementRecordRows(days, part, side)} onRemove={canUse ? removeRecord : undefined} />
+      <MeasurementRecords rows={measurementRecordRows(days, part, side)} onOpenMenu={setMenuRecord} />
+      <MeasurementRecordMenu
+        part={part}
+        record={menuRecord}
+        canUse={canUse}
+        onClose={() => setMenuRecord(null)}
+        onEdit={(measuredOn) => {
+          setMenuRecord(null);
+          router.push(measurementEditPath(part.key, measuredOn));
+        }}
+        onDelete={removeRecord}
+      />
     </EditorFrame>
   );
 }

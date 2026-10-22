@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Pencil, Share2, Trash2 } from "lucide-react";
 import type { WorkoutSummaryDetail } from "@guf/api";
 import { useAppShell } from "@/features/app-shell";
-import { Banner, BottomSheet, Button, ConfirmDialog, Icon, SavingOverlay, SheetOption } from "@/shared/components/ds";
+import { Banner, BottomSheet, Button, ConfirmDialog, DangerSheetOption, SavingOverlay, SheetOption } from "@/shared/components/ds";
 import { DetailHeader } from "@/shared/components/detail-header";
 import { SummaryFallback, type SummaryFallbackState } from "@/shared/components/workout-summary/summary-fallback";
 import { WorkoutSummaryBody } from "@/shared/components/workout-summary/workout-summary-body";
@@ -15,7 +15,6 @@ import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { workoutEditPath } from "@/features/workout";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
-import { cn } from "@/shared/helpers/class-names";
 
 /** Resumo de um treino concluído: /treino/resumo?id=<sessão>. */
 export function SummaryScreen() {
@@ -154,28 +153,13 @@ function SummaryContent({
             router.push(workoutEditPath(summary.id));
           }}
         />
-        <button
-          type="button"
+        <DangerSheetOption
+          icon={Trash2}
+          title="Excluir treino"
+          subtitle={canChange ? undefined : `${unavailableReason} para excluir`}
           disabled={!canChange}
-          aria-disabled={!canChange}
           onClick={() => setOverlay("confirm")}
-          className={cn(
-            "flex min-h-[60px] w-full items-center gap-3 rounded-[14px] border border-danger/40 bg-danger/12 px-3.5 py-2.5 text-left text-danger transition-colors duration-150 ease-standard",
-            canChange ? "cursor-pointer hover:bg-danger/20" : "cursor-not-allowed opacity-55",
-          )}
-        >
-          <span className="grid size-9 flex-none place-items-center rounded-[10px] bg-danger/16">
-            <Icon icon={Trash2} size={18} />
-          </span>
-          <span className="flex flex-1 flex-col gap-0.5">
-            <span className="text-[15px] leading-5 font-semibold">Excluir treino</span>
-            {!canChange && (
-              <span className="text-[13px] leading-[18px] text-fg-secondary">
-                {`${unavailableReason} para excluir`}
-              </span>
-            )}
-          </span>
-        </button>
+        />
       </BottomSheet>
 
       <ConfirmDialog
