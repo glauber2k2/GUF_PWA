@@ -39,6 +39,7 @@
 | R6 · Público menor de idade (ECA Digital, Art. 14 LGPD) | Médio ⚖ | Público 18+ por autodeclaração; conta de menor identificada é excluída. A decisão sobre verificação de idade (eca-digital.md, seção 4) continua pré-requisito do lançamento público |
 | R7 · Dado incorreto (qualidade, Art. 6º, V) | Baixo | Validação no app e no banco (0 < cm < 300, uma casa); editar o registro (menu do registro) ou registrar de novo o mesmo dia corrige; excluir pede confirmação; "Desfazer" logo após salvar ou excluir |
 | R8 · Banco fora do Brasil | Baixo | Supabase em `sa-east-1` (São Paulo) desde 2026-10-16 |
+| R9 · Equipe ver ou usar o status do consentimento (painel, 2026-10-22) | Baixo | O painel mostra só sim/não, e só aos papéis Suporte e Admin; nenhuma função `admin_*` lê as tabelas de medidas. Público de comunicado por consentimento só com finalidade legal ou serviço: o banco recusa "produto" (GA009), porque usar o status para oferta seria finalidade nova (Art. 6º, I) |
 
 ## 5. Direitos do titular
 - **Acesso e portabilidade** (Art. 18, II e V): "Exportar meus dados" inclui `medidas` e `valores_das_medidas`.

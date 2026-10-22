@@ -26,7 +26,7 @@ export default function config(phase: string): NextConfig {
     pageExtensions: isDevServer
       ? ["dev.tsx", ...DEFAULT_PAGE_EXTENSIONS]
       : DEFAULT_PAGE_EXTENSIONS,
-    transpilePackages: ["@guf/api", "@guf/core", "@guf/schemas", "@guf/types"],
+    transpilePackages: ["@guf/api", "@guf/core", "@guf/schemas", "@guf/types", "@guf/ui"],
     turbopack: {
       rules: {
         "*.css": {

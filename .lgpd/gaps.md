@@ -36,6 +36,8 @@
 | G21 | Treinamento e governança | RED | inexistente | baixa | médio | Art. 50 |
 | G22 | Controlador não constituído | RED | sem empresa; app desenvolvido por uma pessoa (Glauber), em beta. Enquanto houver usuários externos, quem decide o tratamento é o controlador, inclusive pessoa natural com fins econômicos (Art. 5º, VI; Res. 2/2022 — ATPP) | crítica | médio | Art. 5º, VI; Art. 9º, III ⚖ |
 | G23 | Infra de desenvolvimento usada com dados reais | YELLOW | Supabase **Free** (logs curtos, backups limitados), **SMTP padrão** (só para testes), Vercel **Hobby** (uso não comercial) | alta | baixo | Art. 46 |
+| G24 | Painel da equipe: medidas antes de abrir a colaboradores (termo de confidencialidade, Política nova, LIA de produto) | YELLOW | **2026-10-22**: painel com papéis, segundo fator obrigatório, e-mail mascarado e auditoria de leitura e alteração; falta o termo de confidencialidade (Art. 47) de cada colaborador, a Política com a seção do suporte e dos comunicados, a LIA de comunicado de produto (`lia/a023-comunicados.md`, rascunho) e a opção de não receber comunicados de produto no app | alta | baixo | Arts. 6º, X; 46; 47; 9º; 10 ⚖ |
+| G25 | Exportação de dados sem os registros de comunicados vistos | YELLOW | **2026-10-22**: `announcement_receipts` (visto/fechado/clique) ainda não entra em `export_my_data` | baixa | baixo | Art. 18, II e V |
 
 > **Atualização L4 (2026-10-16)**: Supabase confirmado em `us-west-2` (EUA), plano Free, SMTP padrão; hospedagem só na Vercel (Hobby); nenhum DPA aceito ou arquivado. Fichas em `.lgpd/vendors/`.
 

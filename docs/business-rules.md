@@ -279,6 +279,15 @@ Arquitetura completa em `docs/plans-and-access.md`.
 - **Editar e excluir:** os três pontinhos de cada registro abrem Editar (data travada, campos preenchidos; apagar um campo remove o valor) e Excluir (com confirmação; apaga aquele músculo naquele dia, nos dois lados, com "Desfazer"). Sem deslizar para apagar: evita exclusão sem querer.
 - **Só online:** as medidas não ficam guardadas no aparelho.
 
+## 8.7 Painel da equipe e comunicados no app
+
+- **Quem entra no painel:** só contas de trabalho liberadas por uma pessoa admin (convite por e-mail), com segundo fator (aplicativo autenticador) obrigatório. Papéis: Leitura (consulta), Suporte (+ @, nome, desvincular login, mostrar e-mail, rascunhos), Admin (+ plano, publicar, auditoria e equipe). Desativar tira o acesso na hora.
+- **O que a equipe vê de uma conta:** resumo (id, @, nome, e-mail mascarado, datas, logins, plano, perfil, seguidores, total de treinos, documentos aceitos, consentimento de saúde sim/não). Nunca medidas, observações, conversas do GUF AI, séries ou cargas. Mostrar o e-mail completo fica na auditoria.
+- **Alterar uma conta:** sempre com motivo (pedido da pessoa · violação dos Termos · cortesia/teste · outro, descrito) e resumo antes de confirmar. Mudar @ ou nome manda um aviso à pessoa no app. Plano manual não mexe em assinatura paga. Desvincular login social só a pedido da pessoa e nunca se for o único jeito de entrar.
+- **Comunicados:** tela cheia, modal, toast ou faixa (no topo da Início), com tom, título (até 60), texto (até 160) e botão opcional para uma tela do app. Público por regras que se somam: todos, lista de ids, plano, data de criação da conta (antes, no dia, depois; horário de Brasília), perfil privado ou aberto, consentimento de saúde (este só em comunicado legal ou de serviço). Agendar começo e fim; frequência "uma vez" ou "até a pessoa fechar"; prioridade. Publicado não se edita: encerre e duplique.
+- **No app:** no máximo 1 tela cheia ou modal e 2 avisos que não interrompem por abertura, por prioridade e depois o mais recente. Nunca durante o treino, nas telas imersivas ou enquanto o app abre. "Agora não" fecha; o botão marca o clique e abre a tela.
+- **Números:** alcance (pessoas no público ao publicar), vistos, fechados e cliques contam pessoas, não vezes. Sem lista de quem viu.
+
 ## 9. Mensagens ao usuário
 
 | Regra | Onde |

@@ -179,3 +179,12 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - RIPD `RIPD/ripd-medidas-corporais.md` v0.1 — ⏸ CHECKPOINT. Atualizados: `data-map.md` (A010, A011), `legal-basis.md`, `ROPA.md`, `gaps.md` (G17 verde), `RIPD/INDEX.md`.
 - Corrigir e apagar um registro: menu de três pontinhos (Editar · Excluir, com confirmação e "Desfazer").
 - Pendências (RIPD, seção 6): revisão jurídica, verificação de idade e Encarregado antes do lançamento público, remover colunas sem uso.
+
+## Rodada 2026-10-22 — Painel da equipe e comunicados no app (A022, A023)
+- Implementados `apps/admin` (painel em domínio próprio) e os comunicados no app. Migration `20261022160000_admin_panel` testada em transação desfeita (30 casos: sem segundo fator → GA002; quem não é da equipe → GA001; papel insuficiente → GA003; motivo obrigatório; consentimento de saúde em comunicado de produto → GA009; último login → GA006; cadeia da auditoria íntegra); aplicada em 2026-10-22, com a Edge Function `admin-invite-staff` publicada e o primeiro admin (o desenvolvedor) cadastrado.
+- Segurança (Art. 46): nenhuma tabela nova com política para o app; leitura e escrita só por funções `admin_*` que conferem colaborador ativo, segundo fator (aal2) e papel **a cada chamada** (desligar vale na hora); `service_role` só na Edge Function de convite.
+- Necessidade (Art. 6º, III): resumo da conta sem medidas, observações, conversas ou cargas; e-mail mascarado (completo só por ação auditada); consentimento de saúde só sim/não e só para Suporte/Admin.
+- Responsabilização (Art. 6º, X): `audit_log` com `actor_type = 'staff'`; abrir conta, mostrar e-mail e toda alteração (com motivo) registradas; tela de Auditoria só para Admin.
+- Transparência (Art. 6º, VI): mudar @ ou nome manda um aviso dirigido à pessoa no app.
+- Atualizados: `data-map.md` (A022, A023), `legal-basis.md`, `ROPA.md`, `retention.md` (comunicados 12 meses; lista de ids até o fim; colaboradores), `incidents/runbook.md` (conta de colaborador comprometida), `RIPD/ripd-medidas-corporais.md` (R9), `gaps.md` (G24, G25). LIA de produto em rascunho: `lia/a023-comunicados.md`.
+- ⏸ Antes de abrir o painel a colaboradores além do desenvolvedor (G24): termo de confidencialidade (Art. 47), Política com a seção do suporte e dos comunicados ⚖, LIA aprovada e opção de não receber comunicados de produto.

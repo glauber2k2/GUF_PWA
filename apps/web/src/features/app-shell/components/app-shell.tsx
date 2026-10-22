@@ -95,6 +95,11 @@ interface AppShellApi {
   resolveClosedWorkout: (sessionId: string) => Promise<boolean>;
   /** Mini card do treino em andamento visível acima do menu (botões flutuantes sobem para não cobri-lo). */
   isMiniCardVisible: boolean;
+  /**
+   * Hora de não interromper: tela imersiva (treino, edição, resumo…), treino em andamento ou a
+   * abertura ainda carregando. Avisos que cobrem a tela (comunicados) esperam.
+   */
+  isBusy: boolean;
 }
 
 const AppShellContext = createContext<AppShellApi | null>(null);
@@ -192,6 +197,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 
   const showMiniCard = Boolean(active) && !immersive;
+  const isBusy = immersive || !booted || Boolean(active) || Boolean(summary.data?.inProgress);
 
   const api = useMemo<AppShellApi>(
     () => ({
@@ -204,8 +210,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       openWorkout,
       resolveClosedWorkout,
       isMiniCardVisible: showMiniCard,
+      isBusy,
     }),
-    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout, showMiniCard],
+    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout, showMiniCard, isBusy],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).

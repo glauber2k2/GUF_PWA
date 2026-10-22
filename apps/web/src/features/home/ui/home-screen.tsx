@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   currentWeek,
@@ -54,7 +54,8 @@ function scrollToHistory() {
   document.getElementById(HISTORY_ANCHOR)?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
 }
 
-export function HomeScreen() {
+/** `topSlot`: conteúdo de outra feature logo abaixo da saudação (ex.: faixa de comunicado), composto na rota. */
+export function HomeScreen({ topSlot }: { topSlot?: ReactNode }) {
   const { user } = useAuth();
   const shell = useAppShell();
   const dev = useDevHomeState();
@@ -101,6 +102,7 @@ export function HomeScreen() {
           userEmail={user?.email ?? null}
           onOpenSheet={setSheet}
           onSelectDay={setOpenDay}
+          topSlot={topSlot}
         />
       )}
 
@@ -119,6 +121,7 @@ function HomeContent({
   userEmail,
   onOpenSheet,
   onSelectDay,
+  topSlot,
 }: {
   data: HomeSummary;
   today: string;
@@ -127,6 +130,7 @@ function HomeContent({
   userEmail: string | null;
   onOpenSheet: (sheet: Sheet) => void;
   onSelectDay: (iso: string) => void;
+  topSlot?: ReactNode;
 }) {
   const shell = useAppShell();
   const router = useRouter();
@@ -149,6 +153,8 @@ function HomeContent({
           <Avatar src={data.profile.avatarUrl} name={data.profile.name} email={userEmail} />
         </button>
       </header>
+
+      {topSlot}
 
       <div data-tour={TOUR_TARGETS.todayCard} className="animate-guf-rise [animation-delay:80ms]">
         <TodayCard

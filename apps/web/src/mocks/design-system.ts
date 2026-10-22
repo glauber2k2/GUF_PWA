@@ -37,10 +37,10 @@ import {
   WifiOff,
   type LucideIcon,
 } from "lucide-react";
-import type { ExerciseSet } from "@/shared/components/ds/workout";
-import { BOTTOM_NAV_ITEMS, type NavItem, type ReorderItem } from "@/shared/components/ds/navigation";
-import type { SummaryStat } from "@/shared/components/ds/cards";
-import type { VolumeLevel } from "@/shared/components/ds/display";
+import type { ExerciseSet } from "@/shared/components/ds";
+import { BOTTOM_NAV_ITEMS, type NavItem, type ReorderItem } from "@/shared/components/ds";
+import type { SummaryStat } from "@/shared/components/ds";
+import type { VolumeLevel } from "@/shared/components/ds";
 
 /* ---------- Fundamentos ---------- */
 

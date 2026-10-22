@@ -1,0 +1,44 @@
+import { House, Megaphone, ScrollText, UserCog, Users, type LucideIcon } from "lucide-react";
+import type { StaffPermission } from "@guf/core";
+
+export interface AdminNavItem {
+  label: string;
+  icon: LucideIcon;
+  path: string;
+  /** Sem a permissão, o item nem aparece (a tela também confere). */
+  permission?: StaffPermission;
+  /** Atalho "/" no computador (busca de pessoas). */
+  hasShortcut?: boolean;
+}
+
+/** Menu do painel. Área nova = item novo aqui. */
+export const ADMIN_NAV: AdminNavItem[] = [
+  { label: "Início", icon: House, path: "/" },
+  { label: "Pessoas", icon: Users, path: "/pessoas", hasShortcut: true },
+  { label: "Comunicados", icon: Megaphone, path: "/comunicados" },
+  { label: "Auditoria", icon: ScrollText, path: "/auditoria", permission: "view_audit" },
+  { label: "Equipe", icon: UserCog, path: "/equipe", permission: "manage_team" },
+];
+
+/** Título da barra do celular por rota. */
+export const PAGE_TITLES: Record<string, string> = {
+  "/": "Início",
+  "/pessoas": "Pessoas",
+  "/comunicados": "Comunicados",
+  "/comunicados/editar": "Comunicado",
+  "/comunicados/resultado": "Resultado",
+  "/auditoria": "Auditoria",
+  "/equipe": "Equipe",
+};
+
+/** Telas internas: no celular a barra mostra "Voltar" para a lista. */
+export const BACK_PATHS: Record<string, string> = {
+  "/comunicados/editar": "/comunicados",
+  "/comunicados/resultado": "/comunicados",
+};
+
+export function isNavActive(item: AdminNavItem, pathname: string): boolean {
+  return item.path === "/" ? pathname === "/" : pathname === item.path || pathname.startsWith(`${item.path}/`);
+}
+
+export const PEOPLE_SEARCH_INPUT_ID = "busca-pessoa";
