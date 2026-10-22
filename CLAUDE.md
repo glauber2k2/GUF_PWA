@@ -271,6 +271,9 @@ Dependências: `app → features → shared / packages`. Dentro da feature, impo
 - **Pagamento: ainda não existe.** `startSubscription` devolve `billing_unavailable` ANTES de gravar qualquer aceite. Passos (gateway, Edge Functions de checkout e webhook, marcadores dos textos) em `docs/plans-and-access.md`. Personal e aluno: previstos no desenho (nova `source` + vínculo), exigem revisar o RIPD antes.
 - **Desenvolvimento:** qualquer `?estado=` usa o mock (Free); com `pro` simula o Pro (ex.: `/projetos?estado=padrao,pro`). Dar Pro a um testador: `select public.grant_plan('<user_id>', 'pro');` (service_role).
 
+## Painel de administração (planejado, ainda não implementado)
+- Documento: `docs/admin-panel.md` (arquitetura, LGPD e roteiro). Decisões: app separado `apps/admin` (export estático, outro domínio), mesmo Supabase; colaboradores em `staff_members` (viewer · support · admin) com MFA obrigatório; leitura e escrita só por funções `admin_*` que conferem papel + `aal2` e gravam `audit_log` (`actor_type = 'staff'`); nunca medidas, observações ou conversas no painel. Comunicados no app avaliados por usuário em `my_announcements()` (sem fan-out); público por consentimento de saúde só para comunicados legais ou do módulo.
+
 ## Mascote (GufRat)
 - `shared/components/ds/guf-rat.tsx` (Claude Design "Guf Rat Forte v2"): `<GufRat occasion="workoutDone" animated badge size />`, 34 ocasiões (`GUF_RAT_SPECS`, grupos em `GUF_RAT_GROUPS`; as 4 do grupo "Comparações de peso" — `liftLight`, `lift`, `liftHeavy`, `liftImpossible` — vêm do canvas Comparacoes de Peso). Animações = keyframes `guf-rat-*` (base.css); origem/duração por parte vêm dos dados da pose (estilo inline). Rato sempre branco; contorno no tema claro e braço da frente por tokens `--rat-*` (colors.css), então funciona dentro de seções com outro `data-theme`. Movimento reduzido: parado. Vitrine: `/design-system#mascote`.
 
