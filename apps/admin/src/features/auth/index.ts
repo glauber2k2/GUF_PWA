@@ -3,6 +3,7 @@ export { MfaCodeScreen } from "./ui/mfa-code-screen";
 export { MfaSetupScreen } from "./ui/mfa-setup-screen";
 export { NoAccessScreen } from "./ui/no-access-screen";
 export { FirstAccessScreen } from "./ui/first-access-screen";
+export { ForgotPasswordScreen } from "./ui/forgot-password-screen";
 export { StaffGate } from "./components/staff-gate";
 export { StaffProvider, useStaff } from "./providers/staff-provider";
 export { useSignOut } from "./api/use-staff-session";

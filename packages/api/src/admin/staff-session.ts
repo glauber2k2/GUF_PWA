@@ -1,5 +1,5 @@
 import { isStaffRole, type StaffRole } from "@guf/core";
-import { signInWithEmail, signOut as signOutSession } from "../auth";
+import { signInWithEmail, signInWithGoogle as startGoogleSignIn, signOut as signOutSession, type AuthError } from "../auth";
 import type { GufClient } from "../client";
 import { apiError, toApiError, type ApiResult } from "../result";
 
@@ -35,15 +35,25 @@ type Result<T = null> = Promise<ApiResult<T>>;
 
 export interface StaffSessionApi {
   signIn: (client: GufClient, input: { email: string; password: string }) => Result;
+  /** Google (PKCE): devolve a URL do Google; na volta, o código é trocado pela sessão ao carregar a página. */
+  signInWithGoogle: (client: GufClient, input: { redirectTo: string }) => Result<{ url: string }>;
+  /**
+   * Link para criar uma senha nova. Sempre responde sucesso para e-mail válido (não revela se a
+   * conta existe); o link abre `redirectTo` no mesmo navegador (PKCE).
+   */
+  requestPasswordReset: (client: GufClient, input: { email: string; redirectTo: string }) => Result;
   signOut: (client: GufClient) => Result;
   getStaffAccess: (client: GufClient) => Result<StaffAccess>;
   /** Novo segundo fator (apaga tentativas anteriores não confirmadas). */
   enrollTotp: (client: GufClient) => Result<TotpEnrollment>;
   /** Confirma o código; sem `factorId`, usa o fator já ativo. A sessão passa a aal2. */
   verifyTotp: (client: GufClient, input: { code: string; factorId?: string }) => Result;
-  /** Link do convite (#access_token=…&refresh_token=…): abre a sessão para definir a senha. */
+  /**
+   * Link do convite (#access_token=…&refresh_token=…) ou de "Esqueci a senha" (?code=…, trocado
+   * pelo cliente ao carregar): deixa a sessão aberta para definir a senha.
+   */
   setSessionFromLink: (client: GufClient, hash: string) => Result;
-  /** Senha do primeiro acesso (convite). */
+  /** Senha nova (primeiro acesso pelo convite ou "Esqueci a senha"). */
   setPassword: (client: GufClient, password: string) => Result;
 }
 
@@ -53,16 +63,41 @@ export interface StaffSessionApi {
 
 const MFA_FRIENDLY_NAME = "guf admin";
 
+/** Erros do Supabase Auth com a mensagem pronta (rede continua sendo rede). */
+function fromAuthError(error: AuthError) {
+  return { ...apiError(error.code === "network_error" ? "network_error" : "unknown"), message: error.message };
+}
+
 export const signIn: StaffSessionApi["signIn"] = async (client, input) => {
   const { error } = await signInWithEmail(client, input);
   if (!error) return { data: null, error: null };
-  if (error.code === "invalid_credentials") return { data: null, error: apiError("invalid_credentials") };
-  return { data: null, error: { ...apiError(error.code === "network_error" ? "network_error" : "unknown"), message: error.message } };
+  return { data: null, error: error.code === "invalid_credentials" ? apiError("invalid_credentials") : fromAuthError(error) };
+};
+
+export const signInWithGoogle: StaffSessionApi["signInWithGoogle"] = async (client, input) => {
+  const { data, error } = await startGoogleSignIn(client, input);
+  return error ? { data: null, error: fromAuthError(error) } : { data, error: null };
+};
+
+export const requestPasswordReset: StaffSessionApi["requestPasswordReset"] = async (client, { email, redirectTo }) => {
+  try {
+    const { error } = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+    if (!error) return { data: null, error: null };
+    const tooMany = (error as { status?: number }).status === 429;
+    return {
+      data: null,
+      error: tooMany
+        ? { ...apiError("unknown"), message: "Muitos pedidos seguidos. Espere alguns minutos e tente de novo." }
+        : toApiError(error),
+    };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
 };
 
 export const signOut: StaffSessionApi["signOut"] = async (client) => {
   const { error } = await signOutSession(client);
-  return error ? { data: null, error: { ...apiError("unknown"), message: error.message } } : { data: null, error: null };
+  return error ? { data: null, error: fromAuthError(error) } : { data: null, error: null };
 };
 
 export const getStaffAccess: StaffSessionApi["getStaffAccess"] = async (client) => {
@@ -124,7 +159,11 @@ export const setSessionFromLink: StaffSessionApi["setSessionFromLink"] = async (
     const params = new URLSearchParams(hash.replace(/^#/, ""));
     const accessToken = params.get("access_token");
     const refreshToken = params.get("refresh_token");
-    if (!accessToken || !refreshToken) return { data: null, error: apiError("not_authenticated") };
+    if (!accessToken || !refreshToken) {
+      // "Esqueci a senha" volta com ?code= (PKCE), que o cliente já trocou pela sessão ao carregar.
+      const { data } = await client.auth.getSession();
+      return data.session ? { data: null, error: null } : { data: null, error: apiError("not_authenticated") };
+    }
     const { error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
     return error ? { data: null, error: toApiError(error) } : { data: null, error: null };
   } catch (e) {
@@ -143,6 +182,8 @@ export const setPassword: StaffSessionApi["setPassword"] = async (client, passwo
 
 export const staffSessionApi = {
   signIn,
+  signInWithGoogle,
+  requestPasswordReset,
   signOut,
   getStaffAccess,
   enrollTotp,
