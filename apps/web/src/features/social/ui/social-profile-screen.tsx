@@ -15,15 +15,9 @@ import {
   useMemberWorkouts,
   useSocialSource,
 } from "@/features/social/api/use-social";
-import {
-  EVOLUTION_WEEKS,
-  LockedProfile,
-  ProfileCounts,
-  ProfileEvolution,
-  ProfileHistory,
-  ProfileStreak,
-  type EvolutionPeriod,
-} from "@/features/social/components/profile-sections";
+import { LockedProfile, ProfileCounts, ProfileEvolution, ProfileHistory, ProfileStreak } from "@/features/social/components/profile-sections";
+import { EVOLUTION_WEEKS } from "@/features/social/constants/profile-evolution";
+import { useProfileEvolutionPeriod } from "@/features/social/hooks/use-profile-evolution-period";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
 import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
@@ -58,15 +52,15 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const own = useProfile();
   const canUse = useCanUseSocial();
   const unit = own.data?.weightUnit ?? "kg";
-  const [period, setPeriod] = useState<EvolutionPeriod>("3M");
   const [editOpen, setEditOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   const data = profile.data;
   const unlocked = Boolean(data?.unlocked);
-  const evolution = useMemberEvolution(userId, EVOLUTION_WEEKS[period], unlocked);
-  const workouts = useMemberWorkouts(userId, unlocked && Boolean(data?.historyVisible));
   const isSelf = userId === null || data?.isSelf;
+  const evolutionPeriod = useProfileEvolutionPeriod(Boolean(isSelf));
+  const evolution = useMemberEvolution(userId, EVOLUTION_WEEKS[evolutionPeriod.period], unlocked);
+  const workouts = useMemberWorkouts(userId, unlocked && Boolean(data?.historyVisible));
   const loading = dev.forceLoading || profile.isPending;
   const { entitlements } = usePlanGate();
 
@@ -129,7 +123,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
           ) : (
             <>
               <ProfileStreak profile={data} />
-              <ProfileEvolution weeks={evolution.data} loading={evolution.isPending} period={period} onPeriod={setPeriod} unit={unit} />
+              <ProfileEvolution weeks={evolution.data} loading={evolution.isPending} periods={evolutionPeriod.periods} period={evolutionPeriod.period} onPeriod={evolutionPeriod.changePeriod} unit={unit} />
               <ProfileHistory
                 profile={data}
                 workouts={workouts.data?.pages.flat() ?? []}

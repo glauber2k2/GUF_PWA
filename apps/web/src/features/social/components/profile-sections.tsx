@@ -7,6 +7,7 @@ import { formatElapsed, formatNumber, fromLocalISODate, formatShortDate, MEMBER_
 import type { EvolutionWeek, MemberProfile, MemberWorkout } from "@guf/api";
 import { Button, Icon, ProgressChart, SegmentedControl, Skeleton, StreakFlame, WorkoutSummaryCard } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
+import type { EvolutionPeriod } from "@/features/social/constants/profile-evolution";
 
 /** Seguidores e seguindo levam à lista; Treinos só mostra o número (traço se o perfil está fechado). */
 export function ProfileCounts({ profile }: { profile: MemberProfile }) {
@@ -92,10 +93,6 @@ export function ProfileStreak({ profile }: { profile: MemberProfile }) {
 }
 
 export type EvolutionMetric = "volume" | "carga" | "horas";
-export type EvolutionPeriod = "1M" | "3M" | "6M";
-
-export const EVOLUTION_WEEKS: Record<EvolutionPeriod, number> = { "1M": 5, "3M": 13, "6M": 26 };
-
 const METRIC_OPTIONS = [
   { value: "volume", label: "Volume" },
   { value: "carga", label: "Carga" },
@@ -114,16 +111,18 @@ function evolutionValue(week: EvolutionWeek, metric: EvolutionMetric, unit: Weig
   return Math.round(toDisplayWeight(week.volumeKg, unit) ?? 0);
 }
 
-/** Evolução semanal (volume, carga máxima ou horas) em 1, 3 ou 6 meses. */
+/** Evolução semanal (volume, carga máxima ou horas) nos períodos oferecidos (`periods`). */
 export function ProfileEvolution({
   weeks,
   loading,
+  periods,
   period,
   onPeriod,
   unit,
 }: {
   weeks: EvolutionWeek[] | undefined;
   loading: boolean;
+  periods: readonly EvolutionPeriod[];
   period: EvolutionPeriod;
   onPeriod: (period: EvolutionPeriod) => void;
   unit: WeightUnit;
@@ -135,7 +134,7 @@ export function ProfileEvolution({
     <section aria-label="Evolução" className="flex flex-col gap-3.5 rounded-lg border border-border bg-surface p-5 shadow-e1">
       <div className="flex items-center justify-between gap-3">
         <h2 className="m-0 text-lg leading-6 font-bold tracking-[-0.01em]">Evolução</h2>
-        <SegmentedControl options={["1M", "3M", "6M"]} value={period} onChange={(v) => onPeriod(v as EvolutionPeriod)} variant="solid" size="sm" label="Período" />
+        <SegmentedControl options={[...periods]} value={period} onChange={(v) => onPeriod(v as EvolutionPeriod)} variant="solid" size="sm" label="Período" />
       </div>
       <SegmentedControl options={METRIC_OPTIONS} value={metric} onChange={(v) => setMetric(v as EvolutionMetric)} shape="rounded" label="Métrica" />
       {loading || !weeks ? (
