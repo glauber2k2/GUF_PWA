@@ -9,6 +9,7 @@ import { AppHeader, Banner, Button, EmptyState, LargeTitle } from "@/shared/comp
 import { useProjectsOverview, useProjectsSource } from "@/features/projects/api/use-projects";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { OfflineEditBanner } from "@/features/projects/components/offline-edit-banner";
+import { PlanImportEntry } from "@/features/projects/components/plan-import-entry";
 import { projectDetailPath } from "@/features/projects/helpers/paths";
 import { ActiveProjectCard, ArchivedProjects, NoActiveProjectCard, ProjectListItem, SectionLabel } from "@/features/projects/components/project-cards";
 import { useProjectFlows } from "@/features/projects/components/project-flows";
@@ -46,7 +47,7 @@ export function ProjectsScreen() {
   );
 }
 
-/** Título + "Novo projeto" + aviso sem conexão, comum a todos os estados da lista. */
+/** Título + "Novo projeto" + aviso sem conexão + importar ficha, comum a todos os estados da lista. */
 function ListLayout({ canEdit, onNew, children }: { canEdit: boolean; onNew: (() => void) | null; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
@@ -59,6 +60,7 @@ function ListLayout({ canEdit, onNew, children }: { canEdit: boolean; onNew: (()
         )}
       </div>
       {!canEdit && <OfflineEditBanner />}
+      <PlanImportEntry disabled={!canEdit} />
       {children}
     </div>
   );

@@ -30,6 +30,16 @@ export function buildLanguageModel() {
           return fallback.doStream(params);
         }
       },
+      // Conversão de ficha (generateText): mesma troca para o reserva.
+      wrapGenerate: async ({ doGenerate, params }) => {
+        try {
+          return await doGenerate();
+        } catch (error) {
+          if (!FALLBACK_STATUS.has(statusOf(error) ?? 0)) throw error;
+          console.warn("GUF AI: modelo principal indisponível, usando o reserva", { statusCode: statusOf(error) });
+          return fallback.doGenerate(params);
+        }
+      },
     },
   });
 }

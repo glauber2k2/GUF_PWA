@@ -45,10 +45,10 @@ export interface AiApi {
  * Implementação (Supabase)
  * ===================================================================== */
 
-const AI_FUNCTION = "guf-ai";
+export const AI_FUNCTION = "guf-ai";
 
-/** Status da Edge Function → erro do app. */
-function toAiError(status: number): ApiError {
+/** Status da Edge Function guf-ai → erro do app (também usado na importação de ficha). */
+export function toAiError(status: number): ApiError {
   if (status === 401) return apiError("not_authenticated");
   if (status === 402) return { ...apiError("plan_limit"), feature: "guf_ai_daily_messages" };
   if (status === 429) return apiError("ai_daily_limit");

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@guf/core": "workspace:*",
+    "@guf/schemas": "workspace:*",
     "@guf/types": "workspace:*",
     "@supabase/supabase-js": "^2"
   },

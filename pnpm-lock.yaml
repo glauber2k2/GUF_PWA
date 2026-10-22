@@ -129,6 +129,9 @@ importers:
       '@guf/core':
         specifier: workspace:*
         version: link:../core
+      '@guf/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       '@guf/types':
         specifier: workspace:*
         version: link:../types

@@ -1,6 +1,6 @@
 import { Icon } from "@/shared/components/ds";
 import { AI_SUGGESTIONS } from "@/features/ai/constants/suggestions";
-import { AiMark } from "@/features/ai/components/ai-mark";
+import { AiMark } from "@/shared/components/ai-mark";
 
 interface AiEmptyStateProps {
   greeting: string;

@@ -26,6 +26,9 @@ const WORKOUT_PHRASES = [
   "Conferindo cargas e repetições",
 ];
 
+/** Conversão de ficha (chat e Projetos › Importar ficha). */
+const PLAN_IMPORT_PHRASES = ["Lendo a ficha", "Separando as rotinas", "Procurando os exercícios no catálogo", "Conferindo séries e repetições"];
+
 /** Ferramenta de dados que o GUF AI está usando → frases do que ela está fazendo. */
 const TOOL_PHRASES: Record<string, string[]> = {
   resumo_da_conta: ["Consultando sua conta", "Conferindo sua sequência de semanas", "Olhando sua meta semanal"],
@@ -47,6 +50,7 @@ const TOOL_PHRASES: Record<string, string[]> = {
   ],
   rotinas: ["Lendo suas rotinas", "Conferindo séries e descanso", "Avaliando a divisão da semana"],
   regras_da_competicao: ["Lendo as regras da competição", "Conferindo como os pontos são somados"],
+  converter_ficha_de_treino: PLAN_IMPORT_PHRASES,
 };
 
 /** Frases que se alternam no "pensando": as da ferramenta em uso ou, sem ferramenta, as gerais. */

@@ -243,6 +243,13 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 - Limite em 24 h pelo plano (Free 3, Pro 40); acabou no Free → tela do Pro. Pergunta de até 2.000 caracteres. Só online.
 - Conversas guardadas por 180 dias depois da última mensagem; entram em "Exportar meus dados" e saem com a conta.
 
+### Importar ficha de treino
+- A pessoa cola a ficha (Projetos › "Importar ficha com o GUF AI", até 6.000 caracteres, ou no chat) e o GUF AI monta um rascunho de projeto e rotinas. Nada é criado sem a revisão.
+- Cada exercício usa o do **catálogo do guf** quando é exatamente o mesmo (mesmo movimento, variação e equipamento); o que não for vira um exercício novo da própria pessoa. Exercícios criados por outras pessoas nunca entram. Um "novo" com o mesmo nome de um exercício existente (do catálogo ou da pessoa) reaproveita o existente.
+- Sem séries, repetições ou descanso na ficha: 3 × 10 e 90 s; descanso vai para a opção mais próxima (45 s a 3 min). Os dias da semana citados na ficha entram na rotina. A carga não é importada (a rotina fica com carga e repetições automáticas).
+- Destino: projeto novo (padrão quando o plano permite; pode virar o projeto ativo) ou um projeto existente (padrão no Free: Favoritos). Projeto novo no Free e rotinas além do limite abrem a tela do Pro.
+- Cada conversão conta como uma pergunta do limite diário do GUF AI.
+
 ## 8.5 Planos (Free e Pro)
 
 Arquitetura completa em `docs/plans-and-access.md`.

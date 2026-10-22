@@ -311,6 +311,17 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | **Publicar o app** (Vercel) logo: o banco já aplica os limites e os textos novos estão publicados; até o deploy, o /aceite mostra o texto antigo e o app antigo não abre a tela do Pro |
 | Pagamento (gateway, checkout, webhook) e marcadores dos textos | Pendente (próxima etapa) |
 
+### Etapa 12 — Importar ficha com o GUF AI (`feat/importar-ficha-ia`)
+
+| Item | Situação |
+|---|---|
+| Migration `20261022120000_plan_import` (`ai_plan_imports` com retenção de 2 dias, RPC `import_training_plan`) | Escrita; aplicar no banco e regenerar os tipos |
+| Edge Function `guf-ai`: conversão (`plan-import.ts`), pedido `{ kind: "plan-import" }`, ferramenta do chat `converter_ficha_de_treino`, limite diário somando as conversões; `index.ts` dividido em módulos | Escrita; publicar |
+| Contrato `PlanImportApi`, schema, regras puras, mock, tela `/projetos/importar` (colar e revisar), atalho em Projetos, cartão no chat | Feito |
+| RIPD do GUF AI v0.2 (§6) e retenção | Feito |
+| Cartão da ficha ao reabrir a conversa (hoje só aparece na resposta da sessão; o banco guarda só o texto) | Pendente |
+| Editar séries, repetições e descanso na revisão (hoje: depois, no editor da rotina) | Pendente |
+
 ### Futuro (fora do MVP)
 
 - App React Native (Expo) reaproveitando `packages/core`, `packages/api`, `packages/schemas` e `packages/types`.

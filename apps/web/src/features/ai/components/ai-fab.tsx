@@ -2,7 +2,7 @@
 
 import type { Ref } from "react";
 import { cn } from "@/shared/helpers/class-names";
-import { AiMark } from "@/features/ai/components/ai-mark";
+import { AiMark } from "@/shared/components/ai-mark";
 
 interface AiFabProps {
   /** Botão principal (o foco volta para ele quando o painel fecha). */
