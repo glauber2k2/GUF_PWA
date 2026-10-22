@@ -137,6 +137,13 @@ aparecem normalmente; ela preenche tudo e, **na hora de usar**, aparece a tela
 botão "Conhecer o Pro" (abre `/planos?recurso=<funcionalidade>`, com a linha em destaque). Fechar
 volta exatamente para onde estava, com o formulário preenchido.
 
+**Padrão dos textos da tela do Pro** (`planUpsellCopy`): título curto com o benefício e mensagem em duas
+frases, "No plano X, … (o que o plano atual inclui). Com o Pro, … (o que o Pro libera)." O nome do plano
+e os limites vêm dos direitos, nunca escritos no texto. Funcionalidade nova segue o mesmo padrão.
+
+**GUF AI:** quando as perguntas do dia acabam, além da tela do Pro, a conversa mostra o aviso
+"Você usou as 3 perguntas de hoje do plano Free." (`aiDailyLimitReachedText`) com o botão "Conhecer o Pro".
+
 No código das telas:
 
 ```ts
@@ -206,7 +213,7 @@ tela `/planos` com a caixa de aceite e o botão "Assinar". O que falta, em ordem
 
 1. Migration: `insert into features` + uma linha em `plan_features` para cada plano.
 2. `packages/core/src/plans.ts`: valor em `PlanFeature`/`PLAN_FEATURES`, rótulo em
-   `PLAN_FEATURE_LABELS` e texto em `planUpsellCopy` (o TypeScript aponta o que falta).
+   `PLAN_FEATURE_LABELS` e texto em `planUpsellCopy`, no padrão acima (o TypeScript aponta o que falta).
 3. Aplicar: gravação → gatilho ou checagem na RPC/Edge Function (erro `GL001` com `hint`); leitura →
    `usePlanGate` na tela.
 4. Mock: `apps/web/src/mocks/plans.ts`.

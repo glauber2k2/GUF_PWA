@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { ArrowDown, ChevronDown, SquarePen } from "lucide-react";
 import type { AiConversation } from "@guf/api";
+import { aiDailyLimitReachedText } from "@guf/core";
 import { Banner, Icon, IconButton } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { useAppShell } from "@/features/app-shell";
@@ -37,7 +38,7 @@ interface AiChatViewProps {
 /** Conversa do GUF AI: cabeçalho, mensagens com rolagem que acompanha a resposta e o campo da pergunta. */
 export function AiChatView({ conversation, greeting, isOnline, onClose, onNewChat }: AiChatViewProps) {
   const { showToast } = useAppShell();
-  const { showUpsell } = usePlanGate();
+  const { entitlements, showUpsell } = usePlanGate();
   const chat = useAiChat(conversation);
   const feedback = useAiMessageFeedback();
   const listRef = useRef<HTMLDivElement>(null);
@@ -138,7 +139,7 @@ export function AiChatView({ conversation, greeting, isOnline, onClose, onNewCha
             actionLabel={chat.isPlanLimited ? "Conhecer o Pro" : "Tentar de novo"}
             onAction={chat.isPlanLimited ? () => showUpsell("guf_ai_daily_messages") : chat.retry}
           >
-            {chat.error.message}
+            {chat.isPlanLimited ? aiDailyLimitReachedText(entitlements) : chat.error.message}
           </Banner>
         )}
       </div>

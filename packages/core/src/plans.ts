@@ -105,37 +105,50 @@ export interface UpsellCopy {
   message: string;
 }
 
-/** Texto da tela "Isso faz parte do Pro" para a funcionalidade que a pessoa tentou usar. */
+/**
+ * Texto da tela "Isso faz parte do Pro" para a funcionalidade que a pessoa tentou usar.
+ * Mesmo padrão em todas: título curto com o benefício; a mensagem diz o que o plano atual inclui e,
+ * depois, o que o Pro libera ("No plano X, …. Com o Pro, ….").
+ */
 export function planUpsellCopy(feature: PlanFeature, entitlements: Entitlements | null): UpsellCopy {
   const limit = featureLimit(entitlements, feature);
-  const plan = entitlements?.planName ?? "Free";
+  const current = `No plano ${entitlements?.planName ?? "Free"},`;
   switch (feature) {
     case "custom_projects":
       return {
-        title: "Crie quantos projetos quiser",
-        message: `No plano ${plan} seus treinos ficam no projeto Favoritos. Com o Pro, separe fases e objetivos em projetos próprios, como Hipertrofia e Força.`,
+        title: "Organize seus treinos em projetos",
+        message: `${current} seus treinos ficam no projeto Favoritos. Com o Pro, você cria um projeto para cada fase, como Hipertrofia e Força.`,
       };
     case "routines_per_project":
       return {
         title: "Mais rotinas em cada projeto",
-        message: `No plano ${plan} cada projeto tem até ${formatNumber(limit ?? 0, 0)} rotinas ativas. Com o Pro, monte todas as rotinas de que precisar.`,
+        message: `${current} cada projeto tem até ${formatNumber(limit ?? 0, 0)} rotinas ativas. Com o Pro, você monta quantas rotinas quiser.`,
       };
     case "guf_ai_daily_messages":
       return {
-        title: "Converse mais com o GUF AI",
-        message: `No plano ${plan} são ${formatNumber(limit ?? 0, 0)} perguntas por dia. Com o Pro, o GUF AI analisa seus treinos muitas vezes por dia.`,
+        title: "Mais conversas com o GUF AI",
+        message: `${current} são ${formatNumber(limit ?? 0, 0)} perguntas por dia. Com o Pro, você pergunta muito mais e tira dúvidas sobre seus treinos sempre que precisar.`,
       };
     case "chart_months":
       return {
-        title: "Gráficos completos",
-        message: `No plano ${plan} os gráficos mostram ${chartWindowText(limit)}. Seus treinos e recordes continuam completos; com o Pro, os gráficos mostram toda a sua evolução, desde o primeiro treino.`,
+        title: "Toda a sua evolução nos gráficos",
+        message: `${current} os gráficos mostram ${chartWindowText(limit)}. Com o Pro, eles mostram sua evolução desde o primeiro treino.`,
       };
     case "competition_full_history":
       return {
         title: "A competição completa",
-        message: `No plano ${plan} você acompanha o mês atual. Com o Pro, veja temporadas passadas e os períodos de 3 meses, 6 meses, 1 ano e personalizado.`,
+        message: `${current} você acompanha o mês atual. Com o Pro, você vê as temporadas anteriores e os períodos de 3 meses, 6 meses, 1 ano e personalizado.`,
       };
   }
+}
+
+/** Aviso no GUF AI quando as perguntas do dia acabaram: "Você usou as 3 perguntas de hoje do plano Free." */
+export function aiDailyLimitReachedText(entitlements: Entitlements | null): string {
+  const limit = featureLimit(entitlements, "guf_ai_daily_messages");
+  const plan = entitlements?.planName ?? "Free";
+  return limit === null || limit === 0
+    ? `Você usou as perguntas de hoje do plano ${plan}.`
+    : `Você usou as ${formatNumber(limit, 0)} perguntas de hoje do plano ${plan}.`;
 }
 
 /** "o mês atual e o anterior" · "o mês atual" · "os últimos 3 meses" */
