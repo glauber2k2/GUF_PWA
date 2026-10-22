@@ -6,7 +6,12 @@ export const AUTH_PATHS = {
   setup: "/entrar/segundo-fator",
   noAccess: "/sem-acesso",
   firstAccess: "/primeiro-acesso",
+  forgotPassword: "/entrar/esqueci",
 } as const;
+
+/** "Esqueci a senha" volta para a tela de criar senha com este marcador (muda só o texto). */
+export const PASSWORD_RESET_PARAM = "motivo";
+export const PASSWORD_RESET_VALUE = "senha";
 
 export const HOME_PATH = "/";
 

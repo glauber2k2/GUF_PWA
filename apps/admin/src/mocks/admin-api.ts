@@ -47,6 +47,17 @@ export const mockStaffSessionApi = {
     await wait();
     return password.length < 8 ? fail(apiError("invalid_credentials")) : { data: null, error: null };
   },
+  async signInWithGoogle(client) {
+    ignoreClient(client);
+    await wait();
+    // Na demonstração não sai para o Google: volta para o passo do código.
+    return { data: { url: "/entrar/codigo/?estado=admin,codigo" }, error: null };
+  },
+  async requestPasswordReset(client) {
+    ignoreClient(client);
+    await wait();
+    return { data: null, error: null };
+  },
   async signOut(client) {
     ignoreClient(client);
     return { data: null, error: null };

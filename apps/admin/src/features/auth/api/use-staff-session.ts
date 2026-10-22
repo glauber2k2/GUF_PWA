@@ -38,6 +38,30 @@ export function useSignIn() {
   return useAccessMutation((input: { email: string; password: string }) => apis.session.signIn(getSupabaseClient(), input));
 }
 
+/** Vai para o Google (a volta cai em /entrar, onde o código vira sessão). */
+export function useGoogleSignIn() {
+  const { apis } = useAdminApi();
+  return useMutation<null, ApiError, string>({
+    mutationFn: async (redirectTo) => {
+      const { data, error } = await apis.session.signInWithGoogle(getSupabaseClient(), { redirectTo });
+      if (error) throw error;
+      window.location.assign(data.url);
+      return null;
+    },
+  });
+}
+
+export function useRequestPasswordReset() {
+  const { apis } = useAdminApi();
+  return useMutation<null, ApiError, { email: string; redirectTo: string }>({
+    mutationFn: async (input) => {
+      const { error } = await apis.session.requestPasswordReset(getSupabaseClient(), input);
+      if (error) throw error;
+      return null;
+    },
+  });
+}
+
 export function useVerifyTotp() {
   const { apis } = useAdminApi();
   return useAccessMutation((input: { code: string; factorId?: string }) => apis.session.verifyTotp(getSupabaseClient(), input));
