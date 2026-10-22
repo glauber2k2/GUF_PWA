@@ -2,7 +2,7 @@
 
 import { AI_THINKING_PHRASE_MS } from "@guf/core";
 import { GufLoader } from "@/shared/components/ds";
-import { useRotatingPhrase } from "@/features/ai/hooks/use-rotating-phrase";
+import { useRotatingPhrase } from "@/shared/hooks/use-rotating-phrase";
 
 /**
  * "Pensando" do GUF AI: frases que se alternam enquanto a resposta não começa.

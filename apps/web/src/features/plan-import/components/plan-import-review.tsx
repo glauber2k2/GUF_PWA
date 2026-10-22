@@ -55,11 +55,10 @@ export function PlanImportReview({ initial, projects, onDiscard }: PlanImportRev
           <span className="text-[13px] leading-[18px] text-fg-secondary tabular-nums">{planImportSummary(review.counts)}</span>
         </div>
       </div>
-      {review.counts.newExercises > 0 && (
-        <p className="m-0 text-[13px] leading-[18px] text-pretty text-fg-secondary">
-          Os marcados como Novo não estão no catálogo do guf e serão criados como exercícios seus. Toque em trocar para usar outro.
-        </p>
-      )}
+      <p className="m-0 text-[13px] leading-[18px] text-pretty text-fg-secondary">
+        Toque num exercício para ajustar séries e repetições.
+        {review.counts.newExercises > 0 && " Os marcados como Novo não estão no catálogo do guf e serão criados como exercícios seus; toque em trocar para usar outro."}
+      </p>
 
       <PlanImportDestinationPicker
         projects={projects}
@@ -79,6 +78,7 @@ export function PlanImportReview({ initial, projects, onDiscard }: PlanImportRev
           canRemove={draft.routines.length > 1}
           onRename={(name) => dispatch({ type: "renameRoutine", routineKey: routine.key, name })}
           onRemove={() => dispatch({ type: "removeRoutine", routineKey: routine.key })}
+          onChangeExercise={(exerciseKey, patch) => dispatch({ type: "updateExercise", routineKey: routine.key, exerciseKey, patch })}
           onReplaceExercise={(exerciseKey) => setPicker({ routineKey: routine.key, exerciseKey })}
           onRemoveExercise={(exerciseKey) => dispatch({ type: "removeExercise", routineKey: routine.key, exerciseKey })}
         />

@@ -5,12 +5,13 @@ import { ShieldAlert, Sparkles } from "lucide-react";
 import type { PlanImportDraft } from "@guf/api";
 import { formatNumber, PLAN_IMPORT_MAX_CHARS } from "@guf/core";
 import { planImportTextSchema } from "@guf/schemas";
-import { Banner, Button, SavingOverlay, TextAreaField } from "@/shared/components/ds";
+import { Banner, Button, TextAreaField } from "@/shared/components/ds";
 import { AiMark } from "@/shared/components/ai-mark";
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { usePlanGate } from "@/features/plans";
 import { OfflineEditBanner, useCanEditPlanning } from "@/features/projects";
 import { useConvertTrainingPlan } from "@/features/plan-import/api/use-plan-import";
+import { PlanImportProgress } from "@/features/plan-import/components/plan-import-progress";
 
 const PASTE_ROWS = 10;
 
@@ -75,7 +76,7 @@ export function PlanImportPasteStep({ onBack, onConverted }: PlanImportPasteStep
           {convertError.message}
         </Banner>
       )}
-      <SavingOverlay open={convert.isPending} title="Convertendo a ficha" message="O GUF AI está lendo os exercícios." variant={8} />
+      {convert.isPending && <PlanImportProgress />}
     </EditorFrame>
   );
 }

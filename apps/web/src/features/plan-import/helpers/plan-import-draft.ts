@@ -1,4 +1,7 @@
-import type { LibraryExercise, PlanImportDraft, PlanImportMatch } from "@guf/api";
+import type { LibraryExercise, PlanImportDraft, PlanImportExercise, PlanImportMatch } from "@guf/api";
+
+/** O que a revisão deixa ajustar no exercício da ficha. */
+export type PlanImportExercisePatch = Partial<Pick<PlanImportExercise, "targetSets" | "targetReps">>;
 
 /** Edições da revisão: nada vai para o banco até "Criar". */
 export type PlanImportDraftAction =
@@ -6,7 +9,8 @@ export type PlanImportDraftAction =
   | { type: "renameRoutine"; routineKey: string; name: string }
   | { type: "removeRoutine"; routineKey: string }
   | { type: "removeExercise"; routineKey: string; exerciseKey: string }
-  | { type: "replaceExercise"; routineKey: string; exerciseKey: string; exercise: LibraryExercise };
+  | { type: "replaceExercise"; routineKey: string; exerciseKey: string; exercise: LibraryExercise }
+  | { type: "updateExercise"; routineKey: string; exerciseKey: string; patch: PlanImportExercisePatch };
 
 /** Exercício escolhido no seletor → vínculo do rascunho (do catálogo do guf ou próprio da pessoa). */
 export function toLibraryMatch(exercise: LibraryExercise): PlanImportMatch {
@@ -38,6 +42,11 @@ export function planImportDraftReducer(draft: PlanImportDraft, action: PlanImpor
         exercises: routine.exercises.map((exercise) =>
           exercise.key === action.exerciseKey ? { ...exercise, match: toLibraryMatch(action.exercise) } : exercise,
         ),
+      }));
+    case "updateExercise":
+      return updateRoutine(draft, action.routineKey, (routine) => ({
+        ...routine,
+        exercises: routine.exercises.map((exercise) => (exercise.key === action.exerciseKey ? { ...exercise, ...action.patch } : exercise)),
       }));
   }
 }
