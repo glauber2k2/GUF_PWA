@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Check } from "lucide-react";
+import { Check, type LucideIcon } from "lucide-react";
 import { cn } from "@/shared/helpers/class-names";
 import { Icon } from "./brand";
 
@@ -150,8 +150,10 @@ export function MuscleIcon({ muscle, size = 48, zoom = false, animate = "loop", 
   );
 }
 
-export interface MuscleFilterTileProps {
-  muscle: MuscleIconKey;
+/** O tile mostra o músculo OU, para grupos sem silhueta (ex.: cardio), um ícone do lucide. */
+type MuscleFilterTileFigure = { muscle: MuscleIconKey; icon?: never } | { icon: LucideIcon; muscle?: never };
+
+export type MuscleFilterTileProps = MuscleFilterTileFigure & {
   selected: boolean;
   onToggle: () => void;
   /** Nome curto no tile (padrão: nome do grupo; "Posterior de coxa" → "Posterior"). */
@@ -159,12 +161,12 @@ export interface MuscleFilterTileProps {
   /** "md" (padrão, ícone 72px) ou "sm" (ícone 56px, tile de 83px do seletor de exercícios). */
   size?: "md" | "sm";
   className?: string;
-}
+};
 
 /** Tile quadrado do filtro por músculo: selecionado ganha borda volt, check e ícone animado. */
-export function MuscleFilterTile({ muscle, selected, onToggle, children, size = "md", className }: MuscleFilterTileProps) {
+export function MuscleFilterTile({ muscle, icon, selected, onToggle, children, size = "md", className }: MuscleFilterTileProps) {
   const sm = size === "sm";
-  const name = children ?? (muscle === "posterior" ? "Posterior" : MUSCLE_ICONS[muscle].name);
+  const name = children ?? (muscle === "posterior" ? "Posterior" : muscle ? MUSCLE_ICONS[muscle].name : null);
   return (
     <button
       type="button"
@@ -183,7 +185,11 @@ export function MuscleFilterTile({ muscle, selected, onToggle, children, size = 
         </span>
       )}
       <span className={cn("grid place-items-center overflow-hidden", sm ? "size-14 rounded-[10px]" : "size-[72px] rounded-md")}>
-        <MuscleIcon muscle={muscle} zoom size={sm ? 56 : 72} animate={selected ? "loop" : "none"} label="" />
+        {muscle ? (
+          <MuscleIcon muscle={muscle} zoom size={sm ? 56 : 72} animate={selected ? "loop" : "none"} label="" />
+        ) : (
+          <Icon icon={icon} size={sm ? 28 : 34} className={selected ? "text-accent-text" : "text-fg-secondary"} />
+        )}
       </span>
       <span className={cn("text-center whitespace-nowrap", sm ? "text-xs leading-[15px]" : "text-[13px] leading-4", selected ? "font-bold text-accent-text" : "font-semibold text-fg-secondary")}>{name}</span>
     </button>

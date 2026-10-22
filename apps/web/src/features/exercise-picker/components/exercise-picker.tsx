@@ -57,10 +57,11 @@ export type ExercisePickerMode = "rotina" | "treino" | "troca";
 export const EXERCISE_LIBRARY_KEY = "exercise-library";
 
 
-/** Grupos com cartão no filtro (ordem do protótipo); corpo inteiro e cardio não têm ícone de músculo. */
-const FILTER_GROUPS = ["peito", "ombros", "costas", "abdomen", "biceps", "triceps", "antebraco", "gluteos", "quadriceps", "posterior", "panturrilha"].filter(
-  (g) => muscleIconKey(g) !== null,
-);
+/** Grupos com cartão no filtro (ordem do protótipo, cardio no fim); corpo inteiro fica de fora. */
+const FILTER_GROUPS = ["peito", "ombros", "costas", "abdomen", "biceps", "triceps", "antebraco", "gluteos", "quadriceps", "posterior", "panturrilha", "cardio"];
+
+/** Grupos sem silhueta de músculo mostram um ícone no tile e no cabeçalho da seção. */
+const GROUP_ICONS: Partial<Record<string, LucideIcon>> = { cardio: Activity, corpo_inteiro: PersonStanding };
 
 /** Ícone do equipamento no selo do exercício. */
 const EQUIPMENT_ICONS: Record<string, LucideIcon> = {
@@ -143,7 +144,7 @@ function SectionIcon({ group }: { group: string }) {
   const key = muscleIconKey(group);
   return (
     <span className="grid size-11 flex-none place-items-center overflow-hidden rounded-md border border-border bg-surface text-fg-secondary">
-      {key ? <MuscleIcon muscle={key} zoom size={42} animate="none" label="" /> : <Icon icon={group === "cardio" ? Activity : PersonStanding} size={22} />}
+      {key ? <MuscleIcon muscle={key} zoom size={42} animate="none" label="" /> : <Icon icon={GROUP_ICONS[group] ?? PersonStanding} size={22} />}
     </span>
   );
 }
@@ -313,12 +314,14 @@ export function ExercisePicker({
               <div ref={filterTrackRef} className="flex w-max gap-2 px-4">
                 {FILTER_GROUPS.map((g) => {
                   const key = muscleIconKey(g);
-                  if (!key) return null;
+                  const icon = GROUP_ICONS[g];
+                  const figure = key ? { muscle: key } : icon ? { icon } : null;
+                  if (!figure) return null;
                   const on = groups.includes(g);
                   return (
                     <MuscleFilterTile
                       key={g}
-                      muscle={key}
+                      {...figure}
                       size="sm"
                       selected={on}
                       onToggle={() => setGroups(on ? groups.filter((x) => x !== g) : [...groups, g])}
