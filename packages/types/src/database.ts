@@ -104,6 +104,24 @@ export type Database = {
           },
         ]
       }
+      ai_plan_imports: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -1541,6 +1559,16 @@ export type Database = {
         Returns: boolean
       }
       has_health_consent: { Args: never; Returns: boolean }
+      import_training_plan: {
+        Args: {
+          p_activate: boolean
+          p_new_exercises: Json
+          p_project_id: string
+          p_project_name: string
+          p_routines: Json
+        }
+        Returns: string
+      }
       is_blocked_between: {
         Args: { p_a: string; p_b: string }
         Returns: boolean
@@ -1652,6 +1680,7 @@ export type Database = {
       plan_of: { Args: { p_user_id: string }; Returns: string }
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
+      purge_expired_ai_plan_imports: { Args: never; Returns: number }
       purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_consent_proofs: { Args: never; Returns: number }
       random_social_handle: { Args: never; Returns: string }

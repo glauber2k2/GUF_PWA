@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useReducer, useState, type ReactNode } from "react";
+import { useMemo, useReducer, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftRight, Check, ChevronDown, ChevronLeft, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
+import { ArrowLeftRight, Check, ChevronDown, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
 import { routineDraftSummary, routineLetter, routineShortName, type IsoWeekday } from "@guf/core";
 import { routineDraftSchema } from "@guf/schemas";
 import { apiError, type ApiError, type LibraryExercise, type Project, type RoutineDraft } from "@guf/api";
@@ -16,7 +16,6 @@ import {
   ConfirmDialog,
   EmptyState,
   Icon,
-  IconButton,
   LAYOUT_ITEM_PROPS,
   LayoutItem,
   SavingOverlay,
@@ -38,6 +37,7 @@ import { invalidatePlanningData } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { cn } from "@/shared/helpers/class-names";
 import { draftReducer, isDraftDirty, toPlannedExercise } from "@/features/routine/helpers/routine-draft";
+import { EditorFrame } from "@/shared/components/editor-frame";
 import { RoutineExerciseCard } from "@/features/routine/components/routine-exercise-card";
 import { WeekdayPicker } from "@/features/routine/components/weekday-picker";
 
@@ -418,48 +418,5 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
         />
       )}
     </EditorFrame>
-  );
-}
-
-/** Moldura da tela: header (voltar, projeto, nome e "Salvar"), conteúdo e barra fixa "Adicionar exercício". */
-function EditorFrame({
-  title,
-  projectName,
-  onBack,
-  action,
-  bottomBar,
-  children,
-}: {
-  title: string;
-  projectName?: string;
-  onBack: () => void;
-  action?: ReactNode;
-  bottomBar?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col pb-[calc(112px+env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-[5] border-b border-border bg-background/90 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
-        <div className="flex h-14 items-center gap-2 pr-3 pl-1.5">
-          <IconButton icon={ChevronLeft} variant="ghost" label="Voltar" onClick={onBack} />
-          <div className="flex min-w-0 flex-1 flex-col gap-px">
-            {projectName && (
-              <span className="flex items-center gap-1.5 overflow-hidden text-[11px] leading-4 font-semibold tracking-[0.08em] whitespace-nowrap text-accent-text uppercase">
-                <Icon icon={ClipboardList} size={12} />
-                <span className="truncate">{projectName}</span>
-              </span>
-            )}
-            <h1 className="m-0 truncate text-lg leading-6 font-semibold tracking-[-0.015em]">{title}</h1>
-          </div>
-          {action}
-        </div>
-      </header>
-      <div className="flex animate-guf-rise flex-col gap-4 px-4 pt-4">{children}</div>
-      {bottomBar && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
-          <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">{bottomBar}</div>
-        </div>
-      )}
-    </main>
   );
 }

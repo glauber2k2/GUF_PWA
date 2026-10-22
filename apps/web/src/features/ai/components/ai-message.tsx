@@ -5,7 +5,8 @@ import { Check, Copy, History, RefreshCw, ThumbsDown, ThumbsUp } from "lucide-re
 import type { AiFeedback } from "@guf/api";
 import { toAnswerParagraphs } from "@guf/core";
 import { Icon, IconButton } from "@/shared/components/ds";
-import { getMessageText, hasUsedHistory } from "@/features/ai/helpers/ai-messages";
+import { PlanImportCard } from "@/features/plan-import";
+import { getMessageText, getPlanImportDrafts, hasUsedHistory } from "@/features/ai/helpers/ai-messages";
 import type { AiUIMessage } from "@/features/ai/type";
 
 /** Tempo do "copiado" no botão de copiar. */
@@ -32,12 +33,13 @@ interface AiAnswerProps {
   onRegenerate: () => void;
 }
 
-/** Resposta do GUF AI: selo de histórico, parágrafos, cursor enquanto escreve e ações no fim. */
+/** Resposta do GUF AI: selo de histórico, parágrafos, ficha convertida, cursor enquanto escreve e ações no fim. */
 export function AiAnswer({ message, isStreaming, isLast, feedback, onCopy, onFeedback, onRegenerate }: AiAnswerProps) {
   const [isCopied, setIsCopied] = useState(false);
   const text = getMessageText(message);
   const paragraphs = toAnswerParagraphs(text);
-  if (paragraphs.length === 0 && !isStreaming) return null;
+  const drafts = getPlanImportDrafts(message);
+  if (paragraphs.length === 0 && drafts.length === 0 && !isStreaming) return null;
 
   const copy = () => {
     onCopy(paragraphs.join("\n\n"));
@@ -58,6 +60,9 @@ export function AiAnswer({ message, isStreaming, isLast, feedback, onCopy, onFee
           <p key={index}>{paragraph}</p>
         ))}
       </div>
+      {drafts.map((draft, index) => (
+        <PlanImportCard key={index} draft={draft} />
+      ))}
       {isStreaming && <span aria-hidden="true" className="-mt-1.5 block h-4 w-2 animate-guf-ai-caret rounded-[2px] bg-accent-text" />}
       {!isStreaming && (
         <div className="-mt-1.5 -ml-3 flex animate-guf-rise-fast items-center">

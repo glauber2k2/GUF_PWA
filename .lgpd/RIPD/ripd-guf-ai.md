@@ -1,6 +1,6 @@
 # RIPD — GUF AI (assistente sobre os próprios treinos) · A021
 
-**Versão**: 0.1 (rascunho técnico, **sem revisão jurídica** ⚖) · **Data**: 2026-10-21 · **Branch**: `feat/guf-ai`
+**Versão**: 0.2 (rascunho técnico, **sem revisão jurídica** ⚖) · **Data**: 2026-10-22 (0.1: 2026-10-21) · **Branch**: `feat/guf-ai`, `feat/importar-ficha-ia`
 **Metodologia**: mesma do `ripd-social.md` (descrição → necessidade → riscos → medidas → decisão).
 
 ## 1. O que é
@@ -40,3 +40,23 @@ Chat na Início. A pessoa pergunta sobre os próprios treinos ("posso subir a ca
 
 ## 5. Decisão
 **Prosseguir em beta com modificações** (as medidas acima já implementadas). Não liberar ao público sem os itens da seção 4. Próxima revisão: antes do lançamento público.
+
+## 6. Revisão 0.2 — Importar ficha de treino (2026-10-22)
+**O que muda**: além de ler os dados do próprio usuário, o GUF AI converte uma ficha de treino colada pela pessoa (ex.: a que o personal mandou no WhatsApp) num rascunho de projeto e rotinas. Entradas: Projetos › "Importar ficha com o GUF AI" (texto de até 6.000 caracteres) e o chat (ferramenta `converter_ficha_de_treino`, sobre a última mensagem).
+
+**Fluxo**: app → Edge Function `guf-ai` (token do usuário) → texto anonimizado (`redactPersonalData`) + lista numerada do **catálogo do guf** (exercícios do sistema, sem dado pessoal) → modelo → rascunho validado no servidor e no app (schema) → **a pessoa revisa** → RPC `import_training_plan` (SECURITY INVOKER, RLS e limites do plano) cria projeto, exercícios novos e rotinas numa transação. O modelo não grava nada.
+
+| Dado | Vai para o provedor? | Guarda |
+|---|---|---|
+| Texto da ficha | Sim, **anonimizado** (e-mail, telefone, CPF/CNPJ, links, números longos) | Pela tela de Projetos: **não é guardado** (só o horário em `ai_plan_imports`, 2 dias, para o limite diário). Pelo chat: fica como a mensagem do usuário (180 dias, como as outras) |
+| Catálogo do guf | Sim (nome, grupo, equipamento; o modelo escolhe pelo número e nunca vê ids) | — |
+| Exercícios criados por outras pessoas | **Nunca**: nem para o modelo nem na gravação (a RPC aceita só o catálogo do guf ou exercícios da própria pessoa, erro GI001) | — |
+| Rascunho convertido | Só para o app da pessoa | Em memória até "Criar" ou descartar |
+
+| Risco | Nível | Medidas |
+|---|---|---|
+| R8 · Ficha com dados de terceiros (nome ou telefone do personal) ou de saúde ("cuidado com o joelho") | Médio | Aviso na tela para apagar nomes, telefones e dados de saúde antes de colar; anonimização do texto e das observações devolvidas; instruções para ignorar nomes e contatos e pôr na observação só método ou técnica; o texto colado em Projetos não é guardado |
+| R9 · Injeção de instruções escondida na ficha | Baixo | Instruções tratam a ficha como dado; saída presa a um schema; números e textos ajustados aos limites do app; ids conferidos no servidor (número da lista) e no banco (só catálogo do guf ou da própria pessoa); nada é criado sem a revisão |
+| R10 · Uso para fugir do limite diário | Baixo | Cada conversão conta no mesmo limite do plano (`guf_ai_daily_messages`); o registro é gravado antes da chamada ao provedor e o app não pode apagá-lo |
+
+**Base legal**: a mesma (Art. 7º, V ⚖) — funcionalidade pedida pelo titular; dados de terceiros eventualmente colados não são o objetivo do tratamento e são minimizados. **Decisão**: prosseguir em beta; as pendências da seção 4 continuam valendo (a nova seção da Política precisa citar a importação).

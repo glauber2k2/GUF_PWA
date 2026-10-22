@@ -10,7 +10,7 @@ import { useAppShell } from "@/features/app-shell";
 import { usePlanGate } from "@/features/plans";
 import { AiComposer } from "@/features/ai/components/ai-composer";
 import { AiEmptyState } from "@/features/ai/components/ai-empty-state";
-import { AiMark } from "@/features/ai/components/ai-mark";
+import { AiMark } from "@/shared/components/ai-mark";
 import { AiThinking } from "@/features/ai/components/ai-thinking";
 import { AiAnswer, AiUserMessage } from "@/features/ai/components/ai-message";
 import { useAiChat } from "@/features/ai/hooks/use-ai-chat";

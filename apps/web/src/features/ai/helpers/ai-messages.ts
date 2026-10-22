@@ -1,4 +1,5 @@
-import type { AiChatRequest, AiMessage } from "@guf/api";
+import type { AiChatRequest, AiMessage, PlanImportDraft } from "@guf/api";
+import { planImportDraftSchema } from "@guf/schemas";
 import { isToolUIPart } from "ai";
 import type { AiPhase, AiUIMessage } from "@/features/ai/type";
 
@@ -20,6 +21,18 @@ export function getMessageText(message: AiUIMessage): string {
 /** A resposta consultou os dados de treino: veio do banco marcada ou usou uma ferramenta no stream. */
 export function hasUsedHistory(message: AiUIMessage): boolean {
   return Boolean(message.metadata?.usedHistory) || message.parts.some(isToolUIPart);
+}
+
+/** Parte da resposta com a ficha convertida (ferramenta converter_ficha_de_treino da Edge Function). */
+const PLAN_IMPORT_PART = "tool-converter_ficha_de_treino";
+
+/** Fichas convertidas na resposta, validadas (saída de um modelo a partir de texto colado). */
+export function getPlanImportDrafts(message: AiUIMessage): PlanImportDraft[] {
+  return message.parts.flatMap((part) => {
+    if (part.type !== PLAN_IMPORT_PART || !isToolUIPart(part) || part.state !== "output-available") return [];
+    const parsed = planImportDraftSchema.safeParse(part.output);
+    return parsed.success ? [parsed.data] : [];
+  });
 }
 
 /** Ferramenta ainda sem resultado na resposta em andamento (para o texto do "pensando"). */

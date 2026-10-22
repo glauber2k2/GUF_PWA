@@ -41,6 +41,9 @@ export const EQUIPMENT_LABELS: Record<string, string> = {
   outro: "Outro",
 };
 
+/** Códigos válidos de exercises.equipment (check do banco). */
+export const EQUIPMENT_CODES = ["barra", "halter", "maquina", "polia", "peso_corporal", "kettlebell", "smith", "elastico", "outro"] as const;
+
 export function equipmentLabel(code: string): string {
   return EQUIPMENT_LABELS[code] ?? code;
 }

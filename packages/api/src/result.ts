@@ -19,6 +19,8 @@ export type ApiErrorCode =
   | "ai_daily_limit"
   | "ai_message_invalid"
   | "ai_unavailable"
+  | "plan_import_invalid"
+  | "plan_import_empty"
   | "plan_limit"
   | "billing_unavailable"
   | "not_authenticated"
@@ -54,6 +56,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   ai_daily_limit: "Você chegou ao limite de perguntas ao GUF AI nas últimas 24 horas. Tente de novo mais tarde.",
   ai_message_invalid: "Mensagem muito longa. Escreva até 2.000 caracteres e envie de novo.",
   ai_unavailable: "O GUF AI não conseguiu responder agora. Tente de novo em instantes.",
+  plan_import_invalid: "Não foi possível ler essa ficha. Confira o texto (até 6.000 caracteres) e tente de novo.",
+  plan_import_empty: "Não encontramos exercícios nesse texto. Cole a ficha com o nome dos exercícios, séries e repetições.",
   plan_limit: "Isso não está incluído no seu plano. Veja os planos para continuar.",
   billing_unavailable: "As assinaturas ainda não estão disponíveis. Avisaremos quando o Pro puder ser assinado.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
@@ -100,6 +104,8 @@ export function toApiError(error: unknown): ApiError {
     if (code === "GW001") return apiError("session_not_found"); // save_workout_edit: treino concluído inexistente
     if (code === "GW002") return apiError("workout_empty"); // save_workout_edit sem séries concluídas
     if (code === "GW003") return apiError("exercise_not_found"); // save_workout_edit
+    if (code === "GI001") return apiError("exercise_not_found"); // import_training_plan: nem do catálogo do guf nem da pessoa
+    if (code === "GI002") return apiError("plan_import_invalid"); // import_training_plan: ficha fora dos limites
     const socialCode = SOCIAL_ERROR_CODES[code ?? ""];
     if (socialCode) return apiError(socialCode);
     if (code === "PGRST301" || code === "42501") return apiError("not_authenticated");
