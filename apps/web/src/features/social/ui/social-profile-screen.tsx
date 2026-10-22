@@ -23,6 +23,7 @@ import { EditProfileSheet } from "@/features/social/components/edit-profile-shee
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
 import { memberWorkoutPath } from "@/features/social/helpers/paths";
 import { PlanBadge, usePlanGate } from "@/features/plans";
+import { MeasurementsEntry } from "@/features/body-measurements";
 
 function ProfileSkeleton() {
   return (
@@ -117,6 +118,9 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
             </div>
             {isSelf ? <SelfActions handle={data.handle} onEdit={() => setEditOpen(true)} /> : <VisitorActions profile={data} />}
           </section>
+
+          {/* Medidas são só suas: no perfil de outra pessoa o botão não existe (nem aviso de conteúdo oculto). */}
+          {isSelf && <MeasurementsEntry />}
 
           {!data.unlocked ? (
             <LockedProfile profile={data} />

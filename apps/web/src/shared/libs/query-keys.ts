@@ -59,3 +59,15 @@ export function invalidateSocialData(queryClient: QueryClient): Promise<unknown>
 
 /** Plano, direitos de acesso e catálogo de planos. */
 export const PLANS_KEY = "plans";
+
+/** Medidas corporais e o consentimento de saúde (dado sensível: só em memória, nunca na cópia do aparelho). */
+export const BODY_MEASUREMENTS_KEY = "body-measurements";
+
+/** Consentimento de saúde mudou (autorizar ou revogar): medidas, Configurações e o leitor de documentos recarregam. */
+export function invalidateHealthConsentData(queryClient: QueryClient): Promise<unknown> {
+  return Promise.all([
+    queryClient.invalidateQueries({ queryKey: [BODY_MEASUREMENTS_KEY] }),
+    queryClient.invalidateQueries({ queryKey: [PROFILE_KEY] }),
+    queryClient.invalidateQueries({ queryKey: [LEGAL_OVERVIEW_KEY] }),
+  ]);
+}

@@ -112,7 +112,6 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 ### 2.5 Depende de funcionalidade que ainda não existe
 | Falta | Por que ainda falta |
 |---|---|
-| Relatório de impacto (RIPD) do módulo de medidas | O módulo ainda não tem tela; o relatório deve ser feito antes de lançá-lo |
 | Apagar foto antiga ao trocar/remover | O upload de foto ainda não existe (a exclusão da conta já apaga a pasta) |
 | Publicar a política final no app | Depende da revisão jurídica; o caminho já está pronto (nova versão + hash + `/aceite`) |
 
@@ -137,6 +136,8 @@ Manter o beta **só com convidados que sabem que é um teste**. Antes de abrir p
 **Avisos no celular — competição e seguidores (2026-10-19):** atividade A020, avaliada na revisão v0.4 do RIPD social (riscos R010–R013). Avisos de seguidores (novo seguidor, pedido, pedido aceito) limitados a 1 por dia por pessoa e tipo. Opt-in por aparelho, desligado por padrão, competição só entre competidores mútuos e só na mudança de posição; conteúdo cifrado para o aparelho (o serviço de push vê só metadados, `.lgpd/vendors/push-services.md`). Inscrição apagada ao desligar, sair da conta, excluir a conta ou quando o serviço de push a recusa; estados só da temporada atual e da anterior. Exportação passa a `guf-export/4`. Política 0.4-dev (rascunho) publicada no banco em 2026-10-19 (`20261019230418_legal_privacy_push_alerts`); quem já tem conta passa pelo /aceite. Avisos de seguidores limitados a 1 a cada 24 h por pessoa e tipo, conferido no gatilho (`20261019232551_push_alerts_follow_cooldown`). ⚖ Pendente: confirmar com o jurídico o papel dos serviços de push e a base da transferência internacional (G8).
 
 **GUF AI (2026-10-21, beta):** atividade A021, RIPD `.lgpd/RIPD/ripd-guf-ai.md` v0.1. As ferramentas só leem os dados do próprio usuário (RLS + filtro), sem medidas nem observações; a pergunta é anonimizada antes do provedor (Google Gemini, EUA, plano gratuito → só beta). Conversas por 180 dias (job diário); exportação passa a `guf-export/5`. ⚖ Pendente antes do público: plano pago, nova versão da Política com o GUF AI e botão de apagar conversa.
+
+**Medidas corporais (2026-10-22, beta):** atividade A010 com tela (Perfil › Medidas corporais, só o titular vê). RIPD `.lgpd/RIPD/ripd-medidas-corporais.md` v0.1. Consentimento em camadas pedido só ao entrar no módulo (Art. 11, I); só circunferências (peso e % de gordura não são coletados); sem cópia no aparelho; GUF AI sem acesso. Termo de Saúde 0.2-dev e Política 0.7-dev (`requires_reaccept = false`). Apagar um registro: arrastar para o lado, com "Desfazer". ⚖ Pendente antes do público: verificação de idade, Encarregado, revisão jurídica.
 
 **Planos Free e Pro (2026-10-21):** atividade A015 atualizada (base Art. 7º, V; fiscal Art. 7º, II quando houver cobrança ⚖). Direitos de plano e assinaturas só gravados pelo servidor e auditados (`plan_granted`/`plan_revoked`); exportação passa a `guf-export/6`. Aceites agrupados: Termos 0.4-dev e Política 0.6-dev (já descrevendo a assinatura futura) uma vez no /aceite; Termos da Assinatura 0.1-dev só ao assinar, junto com as pendências. `requires_reaccept = false` passa a evitar novo aceite em versões sem mudança material. ⚖ Antes de cobrar: avaliar o prestador de pagamento, preencher os marcadores e definir a retenção fiscal. Detalhes em `docs/plans-and-access.md`.
 

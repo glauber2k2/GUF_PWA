@@ -306,7 +306,7 @@ const PRIVACY: LegalDocumentContent = {
               "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, a situação da assinatura e o código dela no prestador de pagamento",
               "O app e, se você assinar, o prestador de pagamento",
             ],
-            ["Medidas corporais", "Peso, % de gordura e circunferências", "Você, opcional e com consentimento"],
+            ["Medidas corporais", "Circunferências do corpo, em centímetros", "Você, opcional e com consentimento"],
           ],
         },
         p("Não são coletados localização, contatos nem dados de outros apps."),
@@ -342,6 +342,9 @@ const PRIVACY: LegalDocumentContent = {
       blocks: [
         p(
           "Medidas corporais são dados pessoais sensíveis (art. 5º, II, e art. 11 da LGPD). Só são tratadas se você ativar o módulo de medidas e der um consentimento específico, registrado com data e versão do termo.",
+        ),
+        p(
+          "Só você vê suas medidas: elas não aparecem para outras pessoas, nem para seguidores, e não são enviadas ao GUF AI. Para registrar e consultar é preciso estar conectado; elas não ficam salvas no aparelho.",
         ),
         { kind: "link", doc: "saude", text: "Ler o Termo de Consentimento para Dados de Saúde" },
       ],
@@ -469,6 +472,9 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "0.7-dev": [
+      "Medidas corporais: o módulo registra só circunferências, em centímetros. Só você vê, e elas não vão para o GUF AI.",
+    ],
     "0.6-dev": [
       "Novo: planos Free e Pro. Guardamos o seu plano, de onde ele vem e até quando vale, para liberar o que ele inclui.",
       "Se você assinar o Pro, o pagamento é feito com um prestador de pagamento, que recebe os dados do cartão direto de você; o guf recebe só a situação da assinatura.",
@@ -503,18 +509,21 @@ const HEALTH: LegalDocumentContent = {
   shortTitle: "Termo de Saúde",
   icon: "heart-pulse",
   summary: [
-    { icon: "ruler", text: "Peso, % de gordura e circunferências são dados de saúde, considerados sensíveis pela LGPD." },
-    { icon: "target", text: "São usados só para acompanhar a sua evolução." },
+    { icon: "ruler", text: "Circunferências do corpo, como braço, coxa e abdômen, são dados de saúde, considerados sensíveis pela LGPD." },
+    { icon: "shield", text: "Só você vê suas medidas. Elas não aparecem para quem visita seu perfil, nem para seguidores." },
     { icon: "toggle-left", text: "O módulo é opcional. O resto do app funciona sem ele." },
     { icon: "trash-2", text: "Revogar o consentimento apaga todas as medidas registradas." },
-    { icon: "ban", text: "As medidas não são usadas para publicidade nem enviadas a ferramentas de análise." },
+    { icon: "ban", text: "As medidas não são usadas para publicidade e não vão para ferramentas de análise nem para o GUF AI." },
   ],
   sections: [
     {
       id: "medidas",
       title: "O que são as medidas corporais",
       blocks: [
-        p("O módulo de medidas permite registrar peso, percentual de gordura e circunferências, como cintura, braço e coxa, com data."),
+        p(
+          "O módulo de medidas permite registrar, com data, circunferências em centímetros: bíceps, antebraço, coxa e panturrilha (lado esquerdo e direito), peitoral, ombros, abdômen e quadril.",
+        ),
+        p("Você preenche só o que mediu. Nada é medido ou calculado automaticamente."),
         p(
           "Pela LGPD, dados referentes à saúde são dados pessoais sensíveis (art. 5º, II) e só podem ser tratados com consentimento específico e destacado (art. 11, I).",
         ),
@@ -523,7 +532,20 @@ const HEALTH: LegalDocumentContent = {
     {
       id: "finalidade",
       title: "Finalidade única",
-      blocks: [p("As medidas são usadas só para acompanhar a sua evolução: gráficos, comparação entre datas e histórico no seu perfil.")],
+      blocks: [p("As medidas são usadas só para acompanhar a sua evolução: gráficos, comparação entre datas e registros, numa área privada do seu perfil.")],
+    },
+    {
+      id: "quem-ve",
+      title: "Quem vê suas medidas",
+      blocks: [
+        p(
+          "Só você. A área fica em Perfil › Medidas corporais e não existe para outras pessoas: quem visita seu perfil, inclusive seguidores, não vê o botão nem as medidas, e elas não entram na competição.",
+        ),
+        p("O GUF AI não tem acesso às medidas: elas nunca são enviadas ao provedor de inteligência artificial."),
+        p(
+          "As medidas ficam guardadas no servidor do guf, no Brasil, e não são salvas no aparelho para uso sem internet. Para registrar e consultar, é preciso estar conectado.",
+        ),
+      ],
     },
     {
       id: "opcional",
@@ -550,9 +572,10 @@ const HEALTH: LegalDocumentContent = {
       title: "O que não fazemos com as medidas",
       blocks: [
         ul(
+          "Não mostramos para outras pessoas.",
           "Não usamos para publicidade nem para criar perfis de consumo.",
           "Não vendemos nem compartilhamos com terceiros para fins comerciais.",
-          "Não enviamos para ferramentas de análise.",
+          "Não enviamos para ferramentas de análise nem para o GUF AI.",
           "Não usamos para decisões automatizadas sobre você.",
         ),
       ],
@@ -566,7 +589,13 @@ const HEALTH: LegalDocumentContent = {
       ],
     },
   ],
-  changes: {},
+  changes: {
+    "0.2-dev": [
+      "O termo agora lista exatamente o que o módulo registra: circunferências em centímetros (o peso e o percentual de gordura saíram).",
+      "Nova seção “Quem vê suas medidas”: só você, numa área privada do perfil; o GUF AI não tem acesso.",
+      "As medidas não são salvas no aparelho para uso sem internet.",
+    ],
+  },
 };
 
 /** Aceito só na tela de assinatura do Pro, junto com o que estiver pendente do cadastro. */

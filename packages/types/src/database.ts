@@ -1699,6 +1699,10 @@ export type Database = {
         Returns: undefined
       }
       revoke_plan_grant: { Args: { p_grant_id: string }; Returns: undefined }
+      save_body_measurement: {
+        Args: { p_measured_on: string; p_values: Json }
+        Returns: undefined
+      }
       save_push_subscription: {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined

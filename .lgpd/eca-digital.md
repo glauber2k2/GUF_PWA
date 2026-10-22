@@ -27,7 +27,7 @@
 | Supervisão parental (tempo, recomendação, contato com estranhos, geolocalização) | Controles para responsáveis | Sem chat, sem rede social, sem contato entre usuários, sem geolocalização, sem recomendação algorítmica de conteúdo | Baixo |
 | Conteúdo ilícito / denúncia | Remoção e comunicação | Não há conteúdo publicado por usuários para outros usuários (os Stories são imagens geradas no aparelho e compartilhadas pelo próprio usuário fora do app) | Baixo |
 | Relatório de transparência | Acima de 1 milhão de usuários menores | Não se aplica | — |
-| Dados de saúde de menores (medidas) | LGPD Art. 14 (melhor interesse) + dado sensível | Módulo de medidas ainda sem tela; público 18+ | Médio no lançamento do módulo — tratar no RIPD (F12) |
+| Dados de saúde de menores (medidas) | LGPD Art. 14 (melhor interesse) + dado sensível | Módulo com tela desde 2026-10-22 (só o titular vê); público 18+ | Médio — avaliado no `RIPD/ripd-medidas-corporais.md` (R6): verificação de idade continua pré-requisito do lançamento público ⚖ |
 
 ## 3. Medidas sem custo adotadas agora
 

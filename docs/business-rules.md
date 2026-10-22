@@ -36,7 +36,7 @@ Este documento tem como finalidade listar as regras de negócio em vigor e onde 
 | Conta Google com o mesmo e-mail confirmado de uma conta existente é vinculada pelo Supabase. | Supabase Auth |
 | Ao sair da conta: tenta enviar as gravações pendentes; depois apaga do aparelho o cache de consultas, o treino ativo e os dados offline. | Web (`features/auth/providers/auth-provider.tsx`) |
 | A segurança dos dados é do banco (RLS): cada usuário só lê e grava os próprios registros. O app usa apenas a chave pública. | Banco |
-| Dados de medidas corporais nunca vão para logs, Sentry ou analytics. *(Módulo de medidas ainda não implementado.)* | Regra de projeto |
+| Dados de medidas corporais nunca vão para logs, Sentry, analytics, o GUF AI ou a cópia offline do aparelho. | Regra de projeto |
 
 ## 2. Unidades, datas e formatação
 
@@ -269,6 +269,16 @@ Arquitetura completa em `docs/plans-and-access.md`.
 | Assinar: os Termos da Assinatura (e qualquer documento pendente) são aceitos juntos, numa única caixa desmarcada, na tela de planos. Enquanto o pagamento não existe, "Assinar" avisa que a assinatura chega em breve e nada é gravado. | Web (`/planos`) + Banco (`accept_documents`, source `subscribe`) |
 | Versão de documento publicada com `requires_reaccept = false` (sem mudança material) não pede novo aceite. | Banco (`pending_documents_of`) |
 
+## 8.6 Medidas corporais
+
+- **Só a própria pessoa vê.** Entrada no SEU perfil social (cartão "Medidas corporais" com o selo "Só você", abaixo das ações); no perfil de outra pessoa o botão não existe, nem aviso de conteúdo oculto. Nada aparece para seguidores, na competição ou no GUF AI.
+- **Consentimento:** pedido só na primeira entrada em Medidas corporais (resumo em camadas do Termo de Saúde, "Ler termo completo", caixa desmarcada, "Agora não" e "Autorizar e continuar" com o mesmo peso). Vale a versão vigente do termo: versão nova pede de novo. Revogar (Configurações › Privacidade) apaga todas as medidas.
+- **O que é medido:** circunferências em cm, uma casa (0,1 a 299,9). Braços e pernas com os dois lados (bíceps, antebraço, quadríceps → coxa, panturrilha); tronco com medida única (peitoral, ombros, abdômen, glúteos → quadril). Peso e % de gordura não são coletados.
+- **Uma medição por dia:** registrar de novo o mesmo dia substitui os valores preenchidos (aviso na tela); datas futuras não são aceitas. "Desfazer" logo depois de salvar volta cada valor ao que o dia tinha antes (ou apaga). Campos vazios não são gravados.
+- **Lista:** valor mais recente de cada músculo e a variação em 3 meses (último registro − primeiro registro da janela; nos dois lados, a média dos lados), sem cor de bom/ruim. **Evolução:** gráfico do lado escolhido (3M · 6M · Tudo), diferença entre os lados no último dia com os dois e os registros com a diferença para o anterior.
+- **Apagar:** arrastar um registro para o lado (como a série no treino) apaga aquele músculo naquele dia, nos dois lados; sem confirmação, com "Desfazer".
+- **Só online:** as medidas não ficam guardadas no aparelho.
+
 ## 9. Mensagens ao usuário
 
 | Regra | Onde |
@@ -309,5 +319,4 @@ Arquitetura completa em `docs/plans-and-access.md`.
 
 - Documentos legais: o leitor dentro do app já existe, com texto de rascunho. Falta a redação final do jurídico (dados do controlador e do encarregado, base legal, prazos) e as versões definitivas em `legal_documents` por nova migration.
 
-- Quais medidas corporais entram no módulo de medidas.
 - Esforço percebido (RPE): removido da competição em 2026-10-20; as colunas antigas (`workout_sessions.session_rpe`, `set_logs.rpe`) seguem sem uso até uma limpeza.

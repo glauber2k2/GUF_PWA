@@ -5,3 +5,4 @@ export * from "./routines";
 export * from "./profile";
 export * from "./social";
 export * from "./plan-import";
+export * from "./body-measurements";
