@@ -40,20 +40,23 @@ export interface BannerProps {
   className?: string;
 }
 
-/** Banner de estado. Offline tranquiliza; erro diz o que aconteceu e como resolver. */
+/**
+ * Banner de estado. Offline tranquiliza; erro diz o que aconteceu e como resolver.
+ * Texto longo quebra linha e o botão desce para baixo dele quando não cabe ao lado (nunca sai do cartão).
+ */
 export function Banner({ tone = "info", icon, title, children, actionLabel, onAction, className }: BannerProps) {
   const t = BANNER_TONES[tone];
   return (
     <div
       role={t.role}
       className={cn(
-        "flex min-h-12 items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-sm leading-5 text-fg",
+        "flex min-h-12 flex-wrap items-center gap-x-2.5 gap-y-1 rounded-md border px-3.5 py-2.5 text-sm leading-5 text-fg",
         t.box,
         className,
       )}
     >
-      <Icon icon={icon ?? t.icon} size={18} className={t.text} />
-      <span className="flex-1">
+      <Icon icon={icon ?? t.icon} size={18} className={cn("flex-none", t.text)} />
+      <span className="min-w-0 flex-[1_1_10rem] text-pretty break-words">
         {title && <strong>{title}</strong>}
         {title && children ? " – " : null}
         {children}
@@ -62,7 +65,7 @@ export function Banner({ tone = "info", icon, title, children, actionLabel, onAc
         <button
           type="button"
           onClick={onAction}
-          className="h-10 cursor-pointer rounded-[10px] bg-transparent px-3 text-sm font-bold text-fg"
+          className="ml-auto h-10 flex-none cursor-pointer rounded-[10px] bg-transparent px-3 text-sm font-bold whitespace-nowrap text-fg"
         >
           {actionLabel}
         </button>
