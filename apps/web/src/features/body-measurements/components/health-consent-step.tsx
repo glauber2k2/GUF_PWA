@@ -50,11 +50,12 @@ export function HealthConsentStep({ canUse, isGranting, error, onDecline, onGran
 
       {error && <Banner tone="danger">{error}</Banner>}
 
-      <div className="grid grid-cols-2 gap-2.5">
-        <Button variant="secondary" size="lg" onClick={onDecline} disabled={isGranting}>
+      {/* Um embaixo do outro, em largura total: lado a lado, "Autorizar e continuar" (mais o carregando) não cabia no celular. */}
+      <div className="flex flex-col gap-2.5">
+        <Button variant="secondary" size="lg" fullWidth onClick={onDecline} disabled={isGranting}>
           Agora não
         </Button>
-        <Button variant="secondary" size="lg" disabled={!checked || !canUse} loading={isGranting} onClick={onGrant}>
+        <Button variant="secondary" size="lg" fullWidth disabled={!checked || !canUse} loading={isGranting} onClick={onGrant}>
           Autorizar e continuar
         </Button>
       </div>
