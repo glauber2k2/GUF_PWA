@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { UserPlus, Users } from "lucide-react";
+import { ReceiptText, UserPlus, Users } from "lucide-react";
 import { AppHeader, EmptyState, Icon } from "@/shared/components/ds";
+import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { METRICS } from "@/features/competition/constants/competition-labels";
+import { POINTS_STATEMENT_PATH } from "@/features/competition/constants/point-sources";
 import { useCompetitionView, type ReadyBoard } from "@/features/competition/hooks/use-competition-view";
 import { CompetitionBoard, PeriodCaption } from "@/features/competition/components/competition-board";
 import { PositionCard } from "@/features/competition/components/position-card";
@@ -60,9 +62,14 @@ export function CompetitionScreen() {
             title="Competição"
             collapsed
             trailing={
-              <Link href={SEARCH_PEOPLE_PATH} aria-label="Convidar amigos" className="grid size-11 place-items-center rounded-md text-fg">
-                <Icon icon={UserPlus} size={20} />
-              </Link>
+              <span className="flex">
+                <Link href={withDevState(POINTS_STATEMENT_PATH)} aria-label="Ver extrato de pontos" className="grid size-11 place-items-center rounded-md text-fg">
+                  <Icon icon={ReceiptText} size={20} />
+                </Link>
+                <Link href={SEARCH_PEOPLE_PATH} aria-label="Convidar amigos" className="grid size-11 place-items-center rounded-md text-fg">
+                  <Icon icon={UserPlus} size={20} />
+                </Link>
+              </span>
             }
           />
         )}
@@ -72,6 +79,14 @@ export function CompetitionScreen() {
           <h1 className="m-0 text-[32px] leading-[38px] font-bold tracking-[-0.02em]">Competição</h1>
           <PeriodCaption view={view} />
         </div>
+        <span className="flex flex-none gap-2">
+        <Link
+          href={withDevState(POINTS_STATEMENT_PATH)}
+          aria-label="Ver extrato de pontos"
+          className="grid size-11 flex-none place-items-center rounded-md border border-border-strong bg-surface-3 text-fg hover:bg-surface-elevated"
+        >
+          <Icon icon={ReceiptText} size={20} />
+        </Link>
         <Link
           href={SEARCH_PEOPLE_PATH}
           aria-label="Convidar amigos"
@@ -80,6 +95,7 @@ export function CompetitionScreen() {
         >
           <Icon icon={UserPlus} size={20} />
         </Link>
+        </span>
       </header>
 
       <CompetitionBoard

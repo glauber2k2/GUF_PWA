@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Ellipsis } from "lucide-react";
+import { ChevronLeft, Ellipsis, type LucideIcon } from "lucide-react";
 import { IconButton, Skeleton } from "@/shared/components/ds";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { cn } from "@/shared/helpers/class-names";
@@ -17,10 +17,12 @@ export interface DetailHeaderProps {
   /** Menu de três pontos (ex.: "Excluir treino"). */
   menuLabel?: string;
   onMenu?: () => void;
+  /** Ícone do botão da direita (padrão: três pontos; ex.: Info para "Como funciona"). */
+  menuIcon?: LucideIcon;
 }
 
 /** Cabeçalho fixo das telas internas (resumo, evolução, busca): voltar, título centralizado e menu. */
-export function DetailHeader({ title, overline, subtitle, position, loading = false, onBack, menuLabel, onMenu }: DetailHeaderProps) {
+export function DetailHeader({ title, overline, subtitle, position, loading = false, onBack, menuLabel, onMenu, menuIcon = Ellipsis }: DetailHeaderProps) {
   const scrolled = useScrolled(8);
   return (
     <header
@@ -53,7 +55,7 @@ export function DetailHeader({ title, overline, subtitle, position, loading = fa
           )}
         </div>
         <div className="flex justify-end pr-1">
-          {onMenu && <IconButton icon={Ellipsis} label={menuLabel ?? "Mais opções"} variant="ghost" onClick={onMenu} />}
+          {onMenu && <IconButton icon={menuIcon} label={menuLabel ?? "Mais opções"} variant="ghost" onClick={onMenu} />}
         </div>
       </div>
     </header>
