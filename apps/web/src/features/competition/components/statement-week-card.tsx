@@ -120,7 +120,7 @@ export function StatementWeekCard({ week, rule, filter, isFirstWeek, isOpen, onT
           <span className="text-[15px] font-semibold">{week.label}</span>
           {week.relative && <span className="text-xs text-fg-muted">{week.relative}</span>}
         </span>
-        <span className="text-[13px] font-semibold text-fg-secondary tabular-nums">{pointsDeltaLabel(total).replace("+", "")} pts</span>
+        <span className="text-[13px] font-semibold text-fg-secondary tabular-nums">{pointsDeltaLabel(total)} pts na semana</span>
       </div>
       <div className="flex flex-col divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
         {days.map((day, i) => {
