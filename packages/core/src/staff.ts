@@ -10,7 +10,7 @@ export type StaffRole = "viewer" | "support" | "admin";
 export const STAFF_ROLES: Record<StaffRole, { label: string; description: string; rank: number }> = {
   viewer: { label: "Leitura", description: "Só consulta contas e comunicados.", rank: 1 },
   support: { label: "Suporte", description: "Edita @ e nome, desvincula login e cria rascunhos.", rank: 2 },
-  admin: { label: "Admin", description: "Tudo, incluindo plano, publicação, auditoria e equipe.", rank: 3 },
+  admin: { label: "Admin", description: "Tudo, incluindo plano, suspensão e exclusão de contas, publicação, auditoria e equipe.", rank: 3 },
 };
 
 export type StaffPermission =
@@ -19,6 +19,8 @@ export type StaffPermission =
   | "edit_profile"
   | "unlink_login"
   | "change_plan"
+  | "ban_accounts"
+  | "delete_accounts"
   | "draft_announcements"
   | "publish_announcements"
   | "view_audit"
@@ -31,6 +33,8 @@ export const STAFF_PERMISSIONS: Record<StaffPermission, StaffRole> = {
   edit_profile: "support",
   unlink_login: "support",
   change_plan: "admin",
+  ban_accounts: "admin",
+  delete_accounts: "admin",
   draft_announcements: "support",
   publish_announcements: "admin",
   view_audit: "admin",
@@ -94,6 +98,55 @@ export const AUDIT_ACTIONS: Record<string, string> = {
   announcement_ended: "Encerrou comunicado",
   plan_granted: "Liberou plano",
   plan_revoked: "Encerrou plano",
+  staff_banned_user: "Suspendeu a conta",
+  staff_unbanned_user: "Encerrou a suspensão",
+  staff_deleted_account: "Excluiu a conta",
+  staff_scheduled_deletion: "Agendou a exclusão",
+  staff_cancelled_deletion: "Cancelou a exclusão agendada",
+  scheduled_deletion_executed: "Exclusão agendada executada",
+  account_deleted: "Conta excluída",
+};
+
+/** Prazos da suspensão no painel ("custom" = data escolhida; "indefinite" = até alguém encerrar). */
+export type BanDuration = "1d" | "7d" | "30d" | "custom" | "indefinite";
+
+export const BAN_DURATIONS: Record<BanDuration, { label: string; days?: number }> = {
+  "1d": { label: "1 dia", days: 1 },
+  "7d": { label: "7 dias", days: 7 },
+  "30d": { label: "30 dias", days: 30 },
+  custom: { label: "Até uma data" },
+  indefinite: { label: "Indeterminado" },
+};
+
+/**
+ * Fim da suspensão em ISO.
+ * @param customEnd instante escolhido no campo de data (só em "custom")
+ * @returns null = indeterminado; undefined = "custom" sem data
+ */
+export function banEndsAt(duration: BanDuration, customEnd: string | null, now: Date = new Date()): string | null | undefined {
+  if (duration === "indefinite") return null;
+  if (duration === "custom") return customEnd ?? undefined;
+  const end = new Date(now);
+  end.setDate(end.getDate() + (BAN_DURATIONS[duration].days ?? 0));
+  return end.toISOString();
+}
+
+/** "Suspensa até 12 nov 2026, 14:00" · "Suspensa por tempo indeterminado". */
+export function banStatusText(endsAt: string | null): string {
+  return endsAt ? `Suspensa até ${formatStaffDateTime(endsAt)}` : "Suspensa por tempo indeterminado";
+}
+
+/** "Exclusão agendada para 12 nov 2026, 14:00". */
+export function deletionStatusText(scheduledFor: string): string {
+  return `Exclusão agendada para ${formatStaffDateTime(scheduledFor)}`;
+}
+
+export type DocumentAcceptance = "accepted" | "outdated" | "not_accepted";
+
+export const DOCUMENT_ACCEPTANCE_LABELS: Record<DocumentAcceptance, string> = {
+  accepted: "Aceito",
+  outdated: "Versão nova pendente",
+  not_accepted: "Não aceito",
 };
 
 export function auditActionLabel(action: string): string {

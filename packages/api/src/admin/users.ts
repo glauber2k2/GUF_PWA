@@ -1,4 +1,4 @@
-import type { ChangeReason } from "@guf/core";
+import type { ChangeReason, DocumentAcceptance } from "@guf/core";
 import type { GufClient } from "../client";
 import type { ApiResult } from "../result";
 import { runQuery } from "./run-query";
@@ -19,6 +19,10 @@ export interface AdminUserSummary {
   isDefaultPlan: boolean;
   createdAt: string;
   isPrivate: boolean;
+  isBanned: boolean;
+  /** Fim da suspensão ativa; null = indeterminada (ou sem suspensão). */
+  banEndsAt: string | null;
+  deletionScheduledFor: string | null;
 }
 
 export interface AdminPlanGrant {
@@ -40,6 +44,31 @@ export interface AdminStaffActivity {
   note: string | null;
 }
 
+export interface AdminAccountBan {
+  /** null = indeterminada. */
+  endsAt: string | null;
+  reason: ChangeReason;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface AdminDeletionSchedule {
+  scheduledFor: string;
+  reason: ChangeReason;
+  note: string | null;
+  createdAt: string;
+  /** A última tentativa não excluiu (ex.: "account_has_files"). */
+  lastError: string | null;
+}
+
+export interface AdminUserDocument {
+  docType: string;
+  currentVersion: string;
+  acceptedVersion: string | null;
+  acceptedAt: string | null;
+  status: DocumentAcceptance;
+}
+
 export interface AdminUserDetail {
   userId: string;
   name: string | null;
@@ -49,15 +78,20 @@ export interface AdminUserDetail {
   createdAt: string;
   lastSignInAt: string | null;
   hasPassword: boolean;
+  /** Conta de alguém da equipe: não pode ser suspensa nem excluída pelo painel. */
+  isStaff: boolean;
   logins: Array<{ provider: string; createdAt: string }>;
   plan: { code: string; name: string; isDefault: boolean };
   planGrants: AdminPlanGrant[];
   followers: number;
   following: number;
   workouts: number;
-  documents: Array<{ docType: string; version: string; acceptedAt: string }>;
+  /** Documentos vigentes do cadastro e da assinatura, aceitos ou não. */
+  documents: AdminUserDocument[];
   /** Só o sim/não (nunca as medidas); null quando o papel não vê (Leitura). */
   healthConsent: boolean | null;
+  ban: AdminAccountBan | null;
+  deletion: AdminDeletionSchedule | null;
   staffActivity: AdminStaffActivity[];
 }
 
@@ -85,6 +119,14 @@ export interface AdminUsersApi {
   updateName: (client: GufClient, input: ReasonInput & { userId: string; name: string }) => Result;
   setPlan: (client: GufClient, input: ReasonInput & { userId: string; planCode: string; validUntil: string | null }) => Result;
   unlinkLogin: (client: GufClient, input: { userId: string; provider: string; note: string }) => Result;
+  /** Todos os logins sociais de uma vez (ações em lote); devolve quantos saíram. */
+  unlinkSocialLogins: (client: GufClient, input: { userId: string; note: string }) => Result<number>;
+  /** endsAt null = indeterminado. */
+  banUser: (client: GufClient, input: ReasonInput & { userId: string; endsAt: string | null }) => Result;
+  unbanUser: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
+  deleteUser: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
+  scheduleDeletion: (client: GufClient, input: ReasonInput & { userId: string; at: string }) => Result;
+  cancelDeletion: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
   listPlans: (client: GufClient) => Result<AdminPlanOption[]>;
 }
 
@@ -105,6 +147,7 @@ interface UserDetailRow {
   created_at: string;
   last_sign_in_at: string | null;
   has_password: boolean;
+  is_staff: boolean;
   logins: Array<{ provider: string; created_at: string }>;
   plan: { code: string; name: string; is_default: boolean };
   plan_grants: Array<{
@@ -119,8 +162,16 @@ interface UserDetailRow {
   followers: number;
   following: number;
   workouts: number;
-  documents: Array<{ doc_type: string; version: string; accepted_at: string }>;
+  documents: Array<{
+    doc_type: string;
+    current_version: string;
+    accepted_version: string | null;
+    accepted_at: string | null;
+    status: DocumentAcceptance;
+  }>;
   health_consent: boolean | null;
+  ban: { ends_at: string | null; reason: ChangeReason; note: string | null; created_at: string } | null;
+  deletion: { scheduled_for: string; reason: ChangeReason; note: string | null; created_at: string; last_error: string | null } | null;
   staff_activity: Array<{ id: number; occurred_at: string; staff_name: string; action: string; details: { reason?: ChangeReason; note?: string } }>;
 }
 
@@ -134,6 +185,7 @@ function toUserDetail(row: UserDetailRow): AdminUserDetail {
     createdAt: row.created_at,
     lastSignInAt: row.last_sign_in_at,
     hasPassword: row.has_password,
+    isStaff: row.is_staff,
     logins: row.logins.map((l) => ({ provider: l.provider, createdAt: l.created_at })),
     plan: { code: row.plan.code, name: row.plan.name, isDefault: row.plan.is_default },
     planGrants: row.plan_grants.map((g) => ({
@@ -148,8 +200,22 @@ function toUserDetail(row: UserDetailRow): AdminUserDetail {
     followers: Number(row.followers),
     following: Number(row.following),
     workouts: Number(row.workouts),
-    documents: row.documents.map((d) => ({ docType: d.doc_type, version: d.version, acceptedAt: d.accepted_at })),
+    documents: row.documents.map((d) => ({
+      docType: d.doc_type,
+      currentVersion: d.current_version,
+      acceptedVersion: d.accepted_version,
+      acceptedAt: d.accepted_at,
+      status: d.status,
+    })),
     healthConsent: row.health_consent,
+    ban: row.ban && { endsAt: row.ban.ends_at, reason: row.ban.reason, note: row.ban.note, createdAt: row.ban.created_at },
+    deletion: row.deletion && {
+      scheduledFor: row.deletion.scheduled_for,
+      reason: row.deletion.reason,
+      note: row.deletion.note,
+      createdAt: row.deletion.created_at,
+      lastError: row.deletion.last_error,
+    },
     staffActivity: row.staff_activity.map((a) => ({
       id: a.id,
       occurredAt: a.occurred_at,
@@ -175,6 +241,9 @@ export const searchUsers: AdminUsersApi["searchUsers"] = async (client, query) =
       isDefaultPlan: r.plan_is_default,
       createdAt: r.created_at,
       isPrivate: r.visibility !== "open",
+      isBanned: r.is_banned,
+      banEndsAt: r.ban_ends_at,
+      deletionScheduledFor: r.deletion_scheduled_for,
     })),
     error: null,
   };
@@ -232,6 +301,46 @@ export const unlinkLogin: AdminUsersApi["unlinkLogin"] = async (client, { userId
   return result.error ? result : { data: null, error: null };
 };
 
+export const unlinkSocialLogins: AdminUsersApi["unlinkSocialLogins"] = async (client, { userId, note }) => {
+  const result = await runQuery(() => client.rpc("admin_unlink_social_identities", { p_user_id: userId, p_note: noteOrNull(note) ?? undefined }));
+  return result.error ? result : { data: result.data ?? 0, error: null };
+};
+
+export const banUser: AdminUsersApi["banUser"] = async (client, { userId, endsAt, reason, note }) => {
+  const result = await runQuery(() =>
+    client.rpc("admin_ban_user", {
+      p_user_id: userId,
+      // null = indeterminado (o tipo gerado não aceita null em timestamptz)
+      p_ends_at: endsAt as string,
+      p_reason: reason,
+      p_note: noteOrNull(note) ?? undefined,
+    }),
+  );
+  return result.error ? result : { data: null, error: null };
+};
+
+export const unbanUser: AdminUsersApi["unbanUser"] = async (client, { userId, reason, note }) => {
+  const result = await runQuery(() => client.rpc("admin_unban_user", { p_user_id: userId, p_reason: reason, p_note: noteOrNull(note) ?? undefined }));
+  return result.error ? result : { data: null, error: null };
+};
+
+export const deleteUser: AdminUsersApi["deleteUser"] = async (client, { userId, reason, note }) => {
+  const result = await runQuery(() => client.rpc("admin_delete_user", { p_user_id: userId, p_reason: reason, p_note: noteOrNull(note) ?? undefined }));
+  return result.error ? result : { data: null, error: null };
+};
+
+export const scheduleDeletion: AdminUsersApi["scheduleDeletion"] = async (client, { userId, at, reason, note }) => {
+  const result = await runQuery(() =>
+    client.rpc("admin_schedule_deletion", { p_user_id: userId, p_at: at, p_reason: reason, p_note: noteOrNull(note) ?? undefined }),
+  );
+  return result.error ? result : { data: null, error: null };
+};
+
+export const cancelDeletion: AdminUsersApi["cancelDeletion"] = async (client, { userId, reason, note }) => {
+  const result = await runQuery(() => client.rpc("admin_cancel_deletion", { p_user_id: userId, p_reason: reason, p_note: noteOrNull(note) ?? undefined }));
+  return result.error ? result : { data: null, error: null };
+};
+
 export const listPlans: AdminUsersApi["listPlans"] = async (client) => {
   const result = await runQuery(() => client.from("plans").select("code, name, is_default, rank").order("rank"));
   if (result.error) return result;
@@ -247,5 +356,11 @@ export const adminUsersApi = {
   updateName,
   setPlan,
   unlinkLogin,
+  unlinkSocialLogins,
+  banUser,
+  unbanUser,
+  deleteUser,
+  scheduleDeletion,
+  cancelDeletion,
   listPlans,
 } satisfies AdminUsersApi;

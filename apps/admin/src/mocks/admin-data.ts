@@ -57,6 +57,7 @@ function person(id: string, name: string, handle: string, email: string, plan: "
     createdAt: day(-createdDaysAgo),
     lastSignInAt: day(0, 8),
     hasPassword: true,
+    isStaff: false,
     logins: [
       { provider: "email", createdAt: day(-createdDaysAgo) },
       { provider: "google", createdAt: day(-createdDaysAgo + 2) },
@@ -70,11 +71,14 @@ function person(id: string, name: string, handle: string, email: string, plan: "
     following: 131,
     workouts: 96,
     documents: [
-      { docType: "terms", version: "0.5-dev", acceptedAt: day(-40) },
-      { docType: "privacy", version: "0.7-dev", acceptedAt: day(-40) },
-      { docType: "age_declaration", version: "0.1-dev", acceptedAt: day(-200) },
+      { docType: "terms", currentVersion: "0.5-dev", acceptedVersion: "0.5-dev", acceptedAt: day(-40), status: "accepted" },
+      { docType: "privacy", currentVersion: "0.7-dev", acceptedVersion: "0.6-dev", acceptedAt: day(-40), status: "outdated" },
+      { docType: "age_declaration", currentVersion: "0.1-dev", acceptedVersion: "0.1-dev", acceptedAt: day(-200), status: "accepted" },
+      { docType: "subscription_terms", currentVersion: "0.2-dev", acceptedVersion: null, acceptedAt: null, status: "not_accepted" },
     ],
     healthConsent: true,
+    ban: null,
+    deletion: null,
     staffActivity: [
       { id: 7, occurredAt: day(0, 10), staffName: "Lucas Ferreira", action: "staff_revealed_email", reason: null, note: null },
       { id: 4, occurredAt: day(-10, 15), staffName: "Paula Mendes", action: "staff_changed_plan", reason: "courtesy", note: null },
@@ -138,6 +142,10 @@ function seed(): MockDb {
   const lastPerson = people[people.length - 1];
   if (lastPerson) lastPerson.logins = [{ provider: "google", createdAt: lastPerson.createdAt }];
   if (lastPerson) lastPerson.hasPassword = false;
+  const banned = people[1];
+  if (banned) banned.ban = { endsAt: day(6, 23), reason: "terms_violation", note: null, createdAt: day(-1) };
+  const leaving = people[4];
+  if (leaving) leaving.deletion = { scheduledFor: day(14, 9), reason: "titular_request", note: null, createdAt: day(-1), lastError: null };
 
   const announcements = [
     announcement("a0000000-0000-4000-8000-000000000001", "active", draft({ title: "Novo: exporte seu treino em stories", body: "Compartilhe o resumo do treino no Instagram, com sua carga e seus recordes.", ctaLabel: "Experimentar", ctaPath: "/perfil", purpose: "product", startsAt: day(-21), endsAt: day(9) }), [18420, 12905, 8311, 3112]),

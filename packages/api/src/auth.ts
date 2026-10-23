@@ -5,6 +5,7 @@ import {
   isAuthRetryableFetchError,
   isAuthWeakPasswordError,
 } from "@supabase/supabase-js";
+import { PRIVACY_CONTACT_EMAIL } from "@guf/core";
 import type { GufClient } from "./client";
 
 /* =====================================================================
@@ -18,6 +19,7 @@ export type AuthErrorCode =
   | "email_already_registered"
   | "weak_password"
   | "rate_limited"
+  | "account_suspended"
   | "documents_unavailable"
   | "documents_outdated"
   | "oauth_cancelled"
@@ -42,6 +44,7 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   email_already_registered: "Este e-mail já tem conta. Entre com ele ou use “Esqueci minha senha”.",
   weak_password: "Senha fraca. Use 8 ou mais caracteres, com número e símbolo.",
   rate_limited: "Muitas tentativas seguidas. Aguarde um minuto e tente de novo.",
+  account_suspended: `Sua conta está suspensa pela equipe do guf. Para saber o motivo ou contestar, escreva para ${PRIVACY_CONTACT_EMAIL}.`,
   documents_unavailable: "Não foi possível carregar os Termos de Uso e a Política de Privacidade. Tente de novo em instantes.",
   documents_outdated: "Os termos foram atualizados. Confira a nova versão e aceite de novo.",
   oauth_cancelled: "Login com Google cancelado. Tente de novo ou entre com e-mail e senha.",
@@ -116,6 +119,9 @@ export interface AuthApi {
  * Implementação (Supabase)
  * ===================================================================== */
 
+/** Conta suspensa pelo painel (auth.users.banned_until): vale no login com senha e no retorno do Google. */
+const BANNED_CODE = "user_banned";
+
 /** Códigos de erro do Supabase Auth ligados ao fluxo OAuth/PKCE. */
 const OAUTH_CODE_MAP: Record<string, AuthErrorCode> = {
   provider_disabled: "oauth_unavailable",
@@ -142,6 +148,7 @@ export interface OAuthReturnParams {
  */
 export function oauthReturnError({ error, errorCode, errorDescription }: OAuthReturnParams): AuthError | null {
   if (!error && !errorCode) return null;
+  if (errorCode === BANNED_CODE) return authError("account_suspended");
   if (errorCode && OAUTH_CODE_MAP[errorCode]) return authError(OAUTH_CODE_MAP[errorCode]!);
   if (error === "access_denied") return authError("oauth_cancelled");
   if (errorDescription && /provider is not enabled|unsupported provider/i.test(errorDescription)) {
@@ -175,6 +182,8 @@ export function toAuthError(error: unknown): AuthError {
         return authError("email_already_registered");
       case "weak_password":
         return authError("weak_password");
+      case BANNED_CODE:
+        return authError("account_suspended");
       case "over_request_rate_limit":
       case "over_email_send_rate_limit":
         return authError("rate_limited");

@@ -139,9 +139,9 @@ export function formatIsoDay(iso: string): string {
 export const AUDIENCE_CRITERIA: Record<AudienceRuleType, AudienceCriterion> = {
   all: { label: "Todos", create: () => ({ type: "all" }), describe: () => "Todos" },
   ids: {
-    label: "Lista de ids",
+    label: "Pessoas específicas",
     create: () => ({ type: "ids" }),
-    describe: (_rule, { targetCount }) => `Lista de ids · ${targetCount.toLocaleString("pt-BR")}`,
+    describe: (_rule, { targetCount }) => `Pessoas específicas · ${targetCount.toLocaleString("pt-BR")}`,
   },
   plans: {
     label: "Plano",

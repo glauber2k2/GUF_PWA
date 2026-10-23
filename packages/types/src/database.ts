@@ -39,6 +39,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_bans: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          note: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          note?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          note?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      account_deletion_schedules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          last_error: string | null
+          note: string | null
+          reason: string
+          scheduled_for: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          note?: string | null
+          reason: string
+          scheduled_for: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          last_error?: string | null
+          note?: string | null
+          reason?: string
+          scheduled_for?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_conversations: {
         Row: {
           created_at: string
@@ -1349,15 +1415,56 @@ export type Database = {
         }
         Returns: undefined
       }
+      account_has_storage_files: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       activate_project: { Args: { p_project_id: string }; Returns: undefined }
+      active_ban_of: {
+        Args: { p_user_id: string }
+        Returns: {
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          note: string | null
+          reason: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "account_bans"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       admin_assert_role: { Args: { p_role: string }; Returns: undefined }
       admin_audience_count: {
         Args: { p_audience: Json; p_target_ids?: string[] }
         Returns: number
       }
+      admin_ban_user: {
+        Args: {
+          p_ends_at: string
+          p_note?: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      admin_cancel_deletion: {
+        Args: { p_note?: string; p_reason: string; p_user_id: string }
+        Returns: undefined
+      }
       admin_check_handle: {
         Args: { p_handle: string; p_user_id: string }
         Returns: string
+      }
+      admin_delete_user: {
+        Args: { p_note?: string; p_reason: string; p_user_id: string }
+        Returns: undefined
       }
       admin_duplicate_announcement: { Args: { p_id: string }; Returns: string }
       admin_end_announcement: { Args: { p_id: string }; Returns: undefined }
@@ -1434,11 +1541,23 @@ export type Database = {
         Args: { p_draft: Json; p_id: string; p_target_ids?: string[] }
         Returns: Json
       }
+      admin_schedule_deletion: {
+        Args: {
+          p_at: string
+          p_note?: string
+          p_reason: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       admin_search_users: {
         Args: { p_limit?: number; p_query: string }
         Returns: {
+          ban_ends_at: string
           created_at: string
+          deletion_scheduled_for: string
           handle: string
+          is_banned: boolean
           masked_email: string
           name: string
           plan_code: string
@@ -1466,9 +1585,17 @@ export type Database = {
         Args: { p_role: string; p_user_id: string }
         Returns: undefined
       }
+      admin_unban_user: {
+        Args: { p_note?: string; p_reason: string; p_user_id: string }
+        Returns: undefined
+      }
       admin_unlink_identity: {
         Args: { p_note?: string; p_provider: string; p_user_id: string }
         Returns: undefined
+      }
+      admin_unlink_social_identities: {
+        Args: { p_note?: string; p_user_id: string }
+        Returns: number
       }
       admin_update_handle: {
         Args: {
@@ -1502,6 +1629,16 @@ export type Database = {
           p_user_id: string
         }
         Returns: string
+      }
+      assert_account_actionable: {
+        Args: { p_user_id: string }
+        Returns: unknown
+        SetofOptions: {
+          from: "*"
+          to: "users"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       assert_announcement_valid: {
         Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }
@@ -1695,8 +1832,10 @@ export type Database = {
         }
       }
       current_season_start_of: { Args: { p_user_id: string }; Returns: string }
+      delete_account_now: { Args: { p_user_id: string }; Returns: undefined }
       effective_plan: { Args: never; Returns: string }
       ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
+      execute_scheduled_account_deletions: { Args: never; Returns: undefined }
       export_my_data: { Args: never; Returns: Json }
       feature_limit: { Args: { p_feature: string }; Returns: number }
       feature_limit_of: {

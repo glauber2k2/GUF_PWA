@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, CalendarClock, Moon, Save, Send, Smartphone, Sun, X } from "lucide-react";
 import type { AdminAnnouncement } from "@guf/api/admin";
+import { parseTargetIds } from "@guf/core";
 import { Banner, Button, IconButton, ScreenPortal, SegmentedControl, Skeleton } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { useAnnouncement, useAudienceReach } from "@/features/announcements/api/use-announcements-admin";
@@ -32,7 +33,9 @@ const THEME_OPTIONS = [
 
 /** 8 · Novo comunicado ou rascunho (?id=). Publicado não abre aqui: vai para o resultado. */
 export function AnnouncementEditorScreen() {
-  const id = useSearchParams().get("id");
+  const params = useSearchParams();
+  const id = params.get("id");
+  const presetTargetIds = parseTargetIds(params.get("para") ?? "").ids;
   const existing = useAnnouncement(id);
   const router = useRouter();
 
@@ -55,7 +58,7 @@ export function AnnouncementEditorScreen() {
     );
   }
   if (existing.data && existing.data.state !== "draft") return <RedirectTo path={resultPath(existing.data.id)} />;
-  return <Editor key={existing.data?.id ?? "novo"} existing={existing.data} />;
+  return <Editor key={existing.data?.id ?? "novo"} existing={existing.data} presetTargetIds={presetTargetIds} />;
 }
 
 /** Publicado não se edita: leva para o resultado. */
@@ -65,13 +68,13 @@ function RedirectTo({ path }: { path: string }) {
   return null;
 }
 
-function Editor({ existing }: { existing: AdminAnnouncement | undefined }) {
+function Editor({ existing, presetTargetIds }: { existing: AdminAnnouncement | undefined; presetTargetIds: string[] }) {
   const router = useRouter();
   const device = useDevice();
   const toast = useToast();
   const { can } = useStaff();
   const planNames = usePlanNames();
-  const editor = useAnnouncementEditor(existing);
+  const editor = useAnnouncementEditor(existing, presetTargetIds);
   const [previewTheme, setPreviewTheme] = useState<PreviewTheme>("dark");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);

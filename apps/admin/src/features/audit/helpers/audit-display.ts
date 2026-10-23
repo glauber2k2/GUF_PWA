@@ -1,11 +1,15 @@
 import {
   AtSign,
   Ban,
+  CalendarClock,
+  CalendarX,
   Crown,
   Eye,
   Megaphone,
   Pencil,
   ScrollText,
+  ShieldCheck,
+  Trash2,
   Unlink,
   UserCog,
   UserPlus,
@@ -17,6 +21,7 @@ import {
   ANNOUNCEMENT_FORMATS,
   describeReason,
   formatCount,
+  formatStaffDateTime,
   loginProviderLabel,
   STAFF_ROLES,
   isStaffRole,
@@ -38,6 +43,13 @@ export const AUDIT_ICONS: Record<string, LucideIcon> = {
   staff_member_enabled: UserPlus,
   announcement_published: Megaphone,
   announcement_ended: Ban,
+  staff_banned_user: Ban,
+  staff_unbanned_user: ShieldCheck,
+  staff_deleted_account: Trash2,
+  account_deleted: Trash2,
+  scheduled_deletion_executed: Trash2,
+  staff_scheduled_deletion: CalendarClock,
+  staff_cancelled_deletion: CalendarX,
 };
 
 export function auditIcon(action: string): LucideIcon {
@@ -53,6 +65,8 @@ export function auditDetail(entry: AuditEntry): { reason: string; detail: string
   if (typeof d.provider === "string") parts.push(`Login: ${loginProviderLabel(d.provider)}`);
   if (typeof d.role === "string" && isStaffRole(d.role)) parts.push(`Papel: ${STAFF_ROLES[d.role].label}`);
   if (typeof d.format === "string" && d.format in ANNOUNCEMENT_FORMATS) parts.push(`Formato: ${ANNOUNCEMENT_FORMATS[d.format as AnnouncementFormat].label}`);
+  if ("ends_at" in d) parts.push(typeof d.ends_at === "string" ? `Suspensa até ${formatStaffDateTime(d.ends_at)}` : "Suspensa por tempo indeterminado");
+  if (typeof d.scheduled_for === "string") parts.push(`Exclusão em ${formatStaffDateTime(d.scheduled_for)}`);
   if (typeof d.reach === "number") parts.push(`${formatCount(d.reach)} pessoas`);
   return { reason, detail: parts.join(" · ") || "Sem outros detalhes." };
 }

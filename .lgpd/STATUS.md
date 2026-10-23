@@ -188,3 +188,9 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Transparência (Art. 6º, VI): mudar @ ou nome manda um aviso dirigido à pessoa no app.
 - Atualizados: `data-map.md` (A022, A023), `legal-basis.md`, `ROPA.md`, `retention.md` (comunicados 12 meses; lista de ids até o fim; colaboradores), `incidents/runbook.md` (conta de colaborador comprometida), `RIPD/ripd-medidas-corporais.md` (R9), `gaps.md` (G24, G25). LIA de produto em rascunho: `lia/a023-comunicados.md`.
 - ⏸ Antes de abrir o painel a colaboradores além do desenvolvedor (G24): termo de confidencialidade (Art. 47), Política com a seção do suporte e dos comunicados ⚖, LIA aprovada e opção de não receber comunicados de produto.
+
+## Rodada 2026-10-23 — Suspensão e exclusão de contas pelo painel (A022)
+- Migration `20261023120000_admin_bans_and_deletion` aplicada em 2026-10-23: suspensão (`account_bans` + `auth.users.banned_until`, sessões encerradas na hora), exclusão imediata e agendada (job a cada 10 min), desvincular todos os logins sociais e ações em lote no painel. Só Admin; toda ação com motivo e auditada; contas da equipe recusadas (GA014).
+- Exclusão pelo painel = mesma cascata do app (prova dos aceites e `account_deleted` pelos gatilhos). Conta com arquivos no Storage é recusada (GA015) para não deixar órfãos.
+- Transparência (Art. 6º, VI): exclusão agendada manda aviso no app com a data e o caminho para exportar os dados; o login de conta suspensa explica e dá o contato.
+- ⚖ Pendente: os Termos de Uso precisam prever suspensão e exclusão por violação (com prazo e contestação) antes de usar esses motivos com pessoas reais; revisar com o jurídico.

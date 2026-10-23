@@ -9,6 +9,7 @@ import {
   CREATED_OPS,
   formatCount,
   hasAudienceRule,
+  parseTargetIds,
   removeAudienceRule,
   replaceAudienceRule,
   type AccountCreatedOp,
@@ -17,6 +18,7 @@ import {
   type AudienceRuleType,
 } from "@guf/core";
 import { Banner, Chip, cn, Icon, SegmentedControl, TextAreaField, TextField } from "@guf/ui";
+import { PersonPicker } from "@/features/announcements/components/person-picker";
 import { usePlanOptions } from "@/shared/hooks/use-plan-options";
 
 /** Ícone de cada tipo de regra (o catálogo de regras fica em packages/core). */
@@ -60,12 +62,13 @@ function RuleEditor({ rule, onChange, idsText, onIdsText, targetCount, invalidId
     case "ids":
       return (
         <>
+          <PersonPicker selectedIds={parseTargetIds(idsText).ids} onAdd={(userId) => onIdsText(`${idsText}\n${userId}`.trim())} />
           <TextAreaField
             label="Lista de ids"
             rows={4}
             value={idsText}
             onChange={(e) => onIdsText(e.target.value)}
-            placeholder="Cole os ids, um por linha"
+            placeholder="Ou cole os ids, um por linha"
             className="font-display"
           />
           <label className="flex cursor-pointer flex-wrap items-center justify-between gap-3 text-[13px] text-fg-secondary">

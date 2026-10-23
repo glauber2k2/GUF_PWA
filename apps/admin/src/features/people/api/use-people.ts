@@ -1,26 +1,12 @@
 "use client";
 
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiError, ApiResult } from "@guf/api";
-import type { AdminUserDetail, AdminUserSummary, HandleAvailability, ReasonInput } from "@guf/api/admin";
+import type { AdminUserDetail, HandleAvailability, ReasonInput } from "@guf/api/admin";
 import { unwrap } from "@/shared/helpers/unwrap";
 import { useAdminApi } from "@/shared/libs/admin-api";
 import { PEOPLE_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
-
-const MIN_QUERY_LENGTH = 2;
-
-/** Busca por @, nome, e-mail exato ou id (a partir de 2 caracteres). */
-export function useSearchPeople(query: string) {
-  const { apis, mockKey } = useAdminApi();
-  const q = query.trim();
-  return useQuery<AdminUserSummary[], ApiError>({
-    queryKey: [PEOPLE_KEY, "search", q, mockKey],
-    enabled: q.length >= MIN_QUERY_LENGTH,
-    placeholderData: keepPreviousData,
-    queryFn: () => unwrap(apis.users.searchUsers(getSupabaseClient(), q)),
-  });
-}
 
 /**
  * Resumo da conta. Cada abertura fica na auditoria (no banco); por isso não recarrega sozinho ao
