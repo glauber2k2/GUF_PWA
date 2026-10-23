@@ -94,6 +94,7 @@ export function PeopleScreen() {
 
   const detailOpen = Boolean(selectedId);
   const showList = !detailOpen || device !== "mobile";
+  const isSplit = detailOpen && device !== "mobile";
 
   /** "Mudar plano" da conta aberta usa o diálogo próprio (com o plano atual); o resto, o diálogo de ação. */
   const startAction = (action: AccountActionKind, targets: AccountTarget[]) => {
@@ -116,10 +117,12 @@ export function PeopleScreen() {
   };
 
   return (
-    <div className="relative min-h-full">
+    // Tablet e computador com a conta aberta: duas colunas, cada uma com a própria rolagem (o detalhe
+    // nunca cobre a busca nem a lista). Celular: uma tela de cada vez.
+    <div className={cn("relative", isSplit ? "flex h-full" : "min-h-full")}>
       {showList && (
-        <div className={cn(detailOpen && device === "desktop" && "pr-[560px]")}>
-          <PageBody>
+        <div className={cn(isSplit && "min-w-0 flex-1 overflow-auto")}>
+          <PageBody full>
             <PageTitle>Pessoas</PageTitle>
             <div className="flex flex-col gap-2">
               <label htmlFor={PEOPLE_SEARCH_INPUT_ID} className="text-[13px] font-semibold text-fg-secondary">
@@ -200,7 +203,7 @@ export function PeopleScreen() {
           aria-label="Detalhe da pessoa"
           className={cn(
             "bg-background",
-            device === "mobile" ? "min-h-full" : "fixed top-16 right-0 bottom-0 z-10 w-[min(100%,560px)] overflow-auto border-l border-border shadow-e3",
+            isSplit ? "w-[min(50%,560px)] flex-none overflow-auto border-l border-border" : "min-h-full",
           )}
         >
           <div className="flex flex-col gap-4 p-4 pb-28 md:p-7">

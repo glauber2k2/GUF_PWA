@@ -50,9 +50,15 @@ export function PageTitle({ children, actions }: { children: ReactNode; actions?
 }
 
 /** Miolo rolável das páginas, centralizado. */
-export function PageBody({ children, wide = false }: { children: ReactNode; wide?: boolean }) {
+/** wide = tabelas largas; full = ocupa toda a largura disponível (ex.: Pessoas, lista ao lado do detalhe). */
+export function PageBody({ children, wide = false, full = false }: { children: ReactNode; wide?: boolean; full?: boolean }) {
   return (
-    <div className={cn("mx-auto flex w-full flex-col gap-5 p-4 pb-28 md:gap-6 md:p-8 md:pb-10", wide ? "max-w-[1240px]" : "max-w-[1120px]")}>
+    <div
+      className={cn(
+        "mx-auto flex w-full flex-col gap-5 p-4 pb-28 md:gap-6 md:p-8 md:pb-10",
+        full ? "max-w-none" : wide ? "max-w-[1240px]" : "max-w-[1120px]",
+      )}
+    >
       {children}
     </div>
   );
