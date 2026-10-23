@@ -11,7 +11,6 @@ import {
   formatNumber,
   formatShortDate,
   fromLocalISODate,
-  EVOLUTION_METRICS,
   evolutionMetricsFor,
   isEvolutionMetric,
   isEvolutionPeriod,
@@ -22,6 +21,7 @@ import {
   toDisplayWeight,
   toLocalISODate,
   type EvolutionMetric,
+  type EvolutionMetricOption,
   type EvolutionPeriod,
   type ExerciseSessionEvolution,
   type WeightUnit,
@@ -90,7 +90,7 @@ export function EvolutionScreen() {
 }
 
 /** Métrica e período ficam na URL (voltar/compartilhar mantém a escolha). */
-function useEvolutionParams(defaultPeriod: EvolutionPeriod, metrics: typeof EVOLUTION_METRICS): {
+function useEvolutionParams(defaultPeriod: EvolutionPeriod, metrics: ReadonlyArray<EvolutionMetricOption>): {
   metric: EvolutionMetric;
   period: EvolutionPeriod;
   set: (key: "metrica" | "periodo", value: string) => void;

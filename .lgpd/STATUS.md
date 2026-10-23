@@ -212,3 +212,9 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - **G20 → GREEN:** `ALLOWED_ORIGINS` ativo (app, painel, localhost).
 - Competição: conferida a pontuação da temporada de outubro; os pontos são recalculados a cada consulta com os parâmetros vigentes (uma linha, a da regra sem esforço) e os estados guardados dos avisos batem com a regra atual. Nada a corrigir.
 - ⚖ Fora do alcance técnico (seguem abertos): G1, G2, G3, G7, G21, G22 e a previsão de suspensão/exclusão por violação nos Termos.
+
+## Rodada 2026-10-23 (5) — Checkup depois das últimas entregas (lgpd-audit)
+- **Corrigido:** o cronômetro do cardio guardava no aparelho (localStorage) o treino, a série e o horário de início e **não era apagado ao sair da conta** (Art. 46; Art. 6º, III). Agora sai junto com o treino ativo ao sair da conta e também ao finalizar ou descartar o treino. Inventário do A011 atualizado.
+- Conferido sem achados: músculos trabalhados e volume ao vivo (dados que a pessoa já vê, calculados no aparelho); excluir rotina (dado da própria pessoa; treinos seguem no histórico); fotos da competição levam ao perfil só de quem já compete com você (nenhuma exposição nova); /redefinir-senha tira os tokens do endereço; painel em duas colunas (só layout).
+- **Competição (pontos por dia, valendo desde outubro):** a regra é pública em Competição › Como funciona (montada dos parâmetros do servidor) e no GUF AI; os Termos só remetem às regras publicadas no app, então não houve nova versão ⚖. Recomendação (Art. 6º, VI): avisar quem compete por um comunicado de serviço, porque os pontos de outubro mudaram no meio do mês.
+- Seguem abertos os itens jurídicos de antes (G1, G2, G3, G7, G21, G22, Termos com suspensão/exclusão, G24 parte jurídica).

@@ -37,6 +37,27 @@ function spreadEndpoints(items: Array<{ id: string; y: number }>): Map<string, n
 }
 
 /** Corrida: valor acumulado de cada pessoa no período. Você em volt, o adversário em azul, o resto neutro. */
+/**
+ * Foto no fim da linha da corrida: com `onSelect` (tela geral), tocar troca o adversário do 1×1;
+ * sem ele (duelo, ou a sua), é só imagem. Nunca abre o perfil: o gráfico é para comparar.
+ */
+function RaceEndpointAvatar({ competitor, isRival, onSelect }: { competitor: RankedCompetitor; isRival: boolean; onSelect?: () => void }) {
+  const avatar = <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />;
+  if (!onSelect) return avatar;
+  return (
+    <button
+      type="button"
+      aria-label={`Comparar com ${firstName(competitor)}`}
+      aria-pressed={isRival}
+      onClick={onSelect}
+      // Foto de 24 px: a área de toque cresce até 44 px sem mudar o desenho.
+      className="relative grid cursor-pointer rounded-pill outline-none after:absolute after:-inset-2.5 after:content-[''] focus-visible:shadow-focus"
+    >
+      {avatar}
+    </button>
+  );
+}
+
 export function RaceChart({
   lines,
   dates,
@@ -99,20 +120,11 @@ export function RaceChart({
               className={cn("absolute left-[calc(100%+20px)] grid -translate-x-1/2 -translate-y-1/2 rounded-pill p-0.5 transition-[top] duration-300", dotColor(competitor))}
               style={{ top: `${(ends.get(competitor.userId) ?? 0).toFixed(2)}%` }}
             >
-              {onSelect && !competitor.isMe ? (
-                <button
-                  type="button"
-                  aria-label={`Comparar com ${firstName(competitor)}`}
-                  aria-pressed={competitor.userId === rivalId}
-                  onClick={() => onSelect(competitor.userId)}
-                  // Foto de 24 px: a área de toque cresce até 44 px sem mudar o desenho.
-                  className="relative grid cursor-pointer rounded-pill outline-none after:absolute after:-inset-2.5 after:content-[] focus-visible:shadow-focus"
-                >
-                  <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />
-                </button>
-              ) : (
-                <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />
-              )}
+              <RaceEndpointAvatar
+                competitor={competitor}
+                isRival={competitor.userId === rivalId}
+                onSelect={onSelect && !competitor.isMe ? () => onSelect(competitor.userId) : undefined}
+              />
             </span>
           ))}
           {tickIndexes.map((i, k) => (

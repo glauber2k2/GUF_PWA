@@ -52,6 +52,12 @@ export function Podium({ ranking, label, format }: { ranking: RankedCompetitor[]
 }
 
 /** Ranking completo; tocar numa pessoa escolhe o adversário do gráfico e do duelo. */
+/** Leitura da linha do ranking para leitor de tela (o texto visível fica escondido dele). */
+function rankingRowLabel(c: RankedCompetitor, valueText: string, movementText: string): string {
+  const who = c.isMe ? "você" : (c.name ?? `@${c.handle}`);
+  return `${c.rank}º, ${who}, ${valueText}, ${movementText}${c.isMe ? "" : ". Duelar"}`;
+}
+
 export function RankingList({
   ranking,
   rivalId,
@@ -89,7 +95,7 @@ export function RankingList({
             <button
               type="button"
               aria-pressed={selected}
-              aria-label={`${c.rank}º, ${c.isMe ? "você" : (c.name ?? `@${c.handle}`)}, ${format(c.value)} ${unit}, ${move.text}${c.isMe ? "" : ". Duelar"}`}
+              aria-label={rankingRowLabel(c, `${format(c.value)} ${unit}`, move.text)}
               onClick={() => !c.isMe && onSelect(c.userId)}
               className="absolute inset-0 cursor-pointer rounded-lg outline-none focus-visible:shadow-focus"
             />

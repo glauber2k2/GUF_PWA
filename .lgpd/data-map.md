@@ -249,12 +249,12 @@
 | Base legal | Proposta: Art. 7º, V |
 | Categorias de titulares | Usuários |
 | Sensíveis? | Não (confirmado em 2026-10-22: as medidas não são guardadas no aparelho; só na memória da tela) |
-| Dados | sessão do Supabase, treino em andamento, fila de gravações, cópias de histórico/resumos/evolução, preferências (tema, alerta, tela ligada) |
+| Dados | sessão do Supabase, treino em andamento, cronômetro do cardio (treino, série e horário de início; desde 2026-10-23), fila de gravações, cópias de histórico/resumos/evolução, preferências (tema, alerta, tela ligada) |
 | Fonte | Gerado pelo app no aparelho do titular |
 | Sistemas | localStorage, IndexedDB (Dexie), cache do service worker (só arquivos do app) |
 | Operadores | Nenhum (fica no aparelho) |
 | Transferência intl. | Não |
-| Retenção | Até sair da conta (limpa cache, treino ativo e IndexedDB); preferências ficam no aparelho |
+| Retenção | Até sair da conta (limpa cache, treino ativo, cronômetro do cardio e IndexedDB); o cronômetro também sai ao finalizar ou descartar o treino; preferências ficam no aparelho |
 | Segurança | Service worker nunca cacheia respostas do Supabase; sem cookies de terceiros |
 | Alto risco? | Não |
 | RIPD | N/A |
