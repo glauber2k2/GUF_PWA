@@ -194,3 +194,8 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Exclusão pelo painel = mesma cascata do app (prova dos aceites e `account_deleted` pelos gatilhos). Conta com arquivos no Storage é recusada (GA015) para não deixar órfãos.
 - Transparência (Art. 6º, VI): exclusão agendada manda aviso no app com a data e o caminho para exportar os dados; o login de conta suspensa explica e dá o contato.
 - ⚖ Pendente: os Termos de Uso precisam prever suspensão e exclusão por violação (com prazo e contestação) antes de usar esses motivos com pessoas reais; revisar com o jurídico.
+
+## Rodada 2026-10-23 (2) — Redefinir senha pelo painel (A022)
+- Migration `20261023160000_admin_password_reset` aplicada e Edge Function `admin-reset-password` publicada em 2026-10-23. Só individual, papel Suporte+, motivo obrigatório e auditado (`staff_sent_password_reset`).
+- Minimização e segurança (Art. 6º, III; Art. 46): o e-mail da pessoa é lido só na Edge Function (não vai ao navegador da equipe); a equipe nunca vê nem define a senha; o link vai para o e-mail da própria pessoa e vence (Email OTP Expiration do Supabase Auth; recomendado 15 min).
+- **Recusado:** "hard reset" (admin define a senha ou recebe um link para entregar). Daria à equipe acesso à conta, inclusive a dados de saúde (Art. 11), contra o A022. Quem perdeu o e-mail: DSAR com conferência de identidade (`.lgpd/dsar/workflow.md`).

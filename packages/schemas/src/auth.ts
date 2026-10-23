@@ -33,6 +33,12 @@ export const emailSchema = z
     }
   });
 
+/** Senha nova (cadastro e redefinição): mínimo do guf e o máximo do bcrypt (72). */
+export const passwordSchema = z
+  .string()
+  .min(PASSWORD_MIN_LENGTH, `A senha precisa ter pelo menos ${PASSWORD_MIN_LENGTH} caracteres.`)
+  .max(72, "Use no máximo 72 caracteres na senha.");
+
 export const loginSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Informe sua senha."),
@@ -45,15 +51,18 @@ export const signUpSchema = z.object({
     .min(2, "Informe seu nome (pelo menos 2 letras).")
     .max(NAME_MAX_LENGTH, `Use no máximo ${NAME_MAX_LENGTH} caracteres no nome.`),
   email: emailSchema,
-  password: z
-    .string()
-    .min(PASSWORD_MIN_LENGTH, `A senha precisa ter pelo menos ${PASSWORD_MIN_LENGTH} caracteres.`)
-    .max(72, "Use no máximo 72 caracteres na senha."),
+  password: passwordSchema,
   /** LGPD: confirmação de idade, separada do aceite dos documentos. */
   isAdult: z.boolean().refine((v) => v, "Confirme que você tem 18 anos ou mais."),
   /** LGPD: aceite dos Termos de Uso e da Política de Privacidade. */
   acceptsTerms: z.boolean().refine((v) => v, "Aceite os Termos de Uso e a Política de Privacidade para continuar."),
 });
 
+/** Redefinir a senha pelo link do e-mail: digitada duas vezes. */
+export const newPasswordSchema = z
+  .object({ password: passwordSchema, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "As senhas não conferem. Digite a mesma senha nos dois campos." });
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
+export type NewPasswordInput = z.infer<typeof newPasswordSchema>;

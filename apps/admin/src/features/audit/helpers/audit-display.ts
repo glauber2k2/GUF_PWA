@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CalendarX,
   Crown,
+  KeyRound,
   Eye,
   Megaphone,
   Pencil,
@@ -50,6 +51,7 @@ export const AUDIT_ICONS: Record<string, LucideIcon> = {
   scheduled_deletion_executed: Trash2,
   staff_scheduled_deletion: CalendarClock,
   staff_cancelled_deletion: CalendarX,
+  staff_sent_password_reset: KeyRound,
 };
 
 export function auditIcon(action: string): LucideIcon {

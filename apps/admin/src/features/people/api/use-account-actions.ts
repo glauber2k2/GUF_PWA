@@ -16,6 +16,8 @@ function callFor(users: AdminUsersApi, client: GufClient, userId: string, input:
       return users.setPlan(client, { userId, planCode: input.planCode, validUntil: input.validUntil, reason: input.reason, note: input.note });
     case "unlink_social":
       return users.unlinkSocialLogins(client, { userId, note: input.note });
+    case "reset_password":
+      return users.sendPasswordReset(client, { userId, reason: input.reason, note: input.note });
     case "ban":
       return users.banUser(client, { userId, endsAt: input.endsAt, reason: input.reason, note: input.note });
     case "unban":

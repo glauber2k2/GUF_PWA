@@ -1,6 +1,6 @@
 import type { ChangeReason, DocumentAcceptance } from "@guf/core";
 import type { GufClient } from "../client";
-import type { ApiResult } from "../result";
+import { API_ERROR_MESSAGES, apiError, toApiError, type ApiErrorCode, type ApiResult } from "../result";
 import { runQuery } from "./run-query";
 
 /* =====================================================================
@@ -127,6 +127,8 @@ export interface AdminUsersApi {
   deleteUser: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
   scheduleDeletion: (client: GufClient, input: ReasonInput & { userId: string; at: string }) => Result;
   cancelDeletion: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
+  /** Manda à pessoa o e-mail para criar uma senha nova (a equipe nunca vê a senha). Só individual. */
+  sendPasswordReset: (client: GufClient, input: ReasonInput & { userId: string }) => Result;
   listPlans: (client: GufClient) => Result<AdminPlanOption[]>;
 }
 
@@ -341,6 +343,23 @@ export const cancelDeletion: AdminUsersApi["cancelDeletion"] = async (client, { 
   return result.error ? result : { data: null, error: null };
 };
 
+/** Respostas da Edge Function admin-reset-password: { code } com o ApiErrorCode. */
+function isApiErrorCode(code: unknown): code is ApiErrorCode {
+  return typeof code === "string" && code in API_ERROR_MESSAGES;
+}
+
+export const sendPasswordReset: AdminUsersApi["sendPasswordReset"] = async (client, { userId, reason, note }) => {
+  try {
+    const { error } = await client.functions.invoke("admin-reset-password", { body: { userId, reason, note: noteOrNull(note) } });
+    if (!error) return { data: null, error: null };
+    const response = (error as { context?: Response }).context;
+    const body = response ? ((await response.json().catch(() => null)) as { code?: unknown } | null) : null;
+    return { data: null, error: isApiErrorCode(body?.code) ? apiError(body.code) : toApiError(error) };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const listPlans: AdminUsersApi["listPlans"] = async (client) => {
   const result = await runQuery(() => client.from("plans").select("code, name, is_default, rank").order("rank"));
   if (result.error) return result;
@@ -362,5 +381,6 @@ export const adminUsersApi = {
   deleteUser,
   scheduleDeletion,
   cancelDeletion,
+  sendPasswordReset,
   listPlans,
 } satisfies AdminUsersApi;
