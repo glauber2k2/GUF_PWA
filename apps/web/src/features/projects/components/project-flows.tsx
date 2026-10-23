@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Archive, ArrowDown, ArrowUp, CircleCheck, CircleOff, Pencil, Trash2 } from "lucide-react";
-import { activateProjectMessage, archiveProjectMessage, deleteProjectMessage, moveItem } from "@guf/core";
+import { activateProjectMessage, archiveProjectMessage, DELETE_ROUTINE_MESSAGE, deleteProjectMessage, moveItem } from "@guf/core";
 import type { Project, ProjectRoutine } from "@guf/api";
 import { BottomSheet, ConfirmDialog, SheetOption } from "@/shared/components/ds";
 import { ProjectFormSheet } from "./project-form-sheet";
@@ -17,7 +17,8 @@ type OverlayKind =
   | "confirm-delete"
   | "routine-menu"
   | "routine-form"
-  | "confirm-archive-routine";
+  | "confirm-archive-routine"
+  | "confirm-delete-routine";
 
 interface FlowState {
   overlay: OverlayKind | null;
@@ -122,6 +123,12 @@ export function useProjectFlows({
               subtitle="Treinos feitos continuam no histórico"
               onClick={() => open("confirm-archive-routine", { project, routine })}
             />
+            <SheetOption
+              icon={Trash2}
+              title="Excluir rotina"
+              subtitle="Treinos feitos continuam no histórico"
+              onClick={() => open("confirm-delete-routine", { project, routine })}
+            />
           </>
         )}
       </BottomSheet>
@@ -192,6 +199,20 @@ export function useProjectFlows({
         onConfirm={() => {
           close();
           if (routine) void actions.archiveRoutine(routine);
+        }}
+      />
+      <ConfirmDialog
+        placement="screen"
+        open={overlay === "confirm-delete-routine"}
+        title={routine ? `Excluir '${routine.name}'?` : "Excluir rotina?"}
+        message={DELETE_ROUTINE_MESSAGE}
+        cancelLabel="Cancelar"
+        confirmLabel="Excluir"
+        destructive
+        onCancel={close}
+        onConfirm={() => {
+          close();
+          if (routine) void actions.removeRoutine(routine);
         }}
       />
     </>

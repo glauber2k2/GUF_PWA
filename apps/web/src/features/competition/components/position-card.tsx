@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp, ChevronsUp, Dumbbell, Minus, Zap } from "lucide-react";
 import { rankLabel, rankMovement, workoutsToCover, type CompetitionMetric, type RankedCompetitor } from "@guf/core";
 import { Avatar, Button, GufRat, Icon } from "@/shared/components/ds";
+import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
 import { cn } from "@/shared/helpers/class-names";
 import { useAppShell } from "@/features/app-shell";
 
@@ -84,7 +85,7 @@ export function PositionCard({
                 <span className="text-sm text-fg-muted">{unit}</span>
               </div>
             </div>
-            <Avatar src={above.avatarUrl} name={above.name ?? above.handle} size="md" />
+            <CompetitorAvatar competitor={above} size="md" />
           </div>
           <div className="relative h-2.5 overflow-hidden rounded-pill bg-surface-3">
             {/* Largura proporcional ao valor de cada um (dinâmico). */}
@@ -111,7 +112,7 @@ export function PositionCard({
 
       {below && (
         <div className="flex items-center gap-2.5 border-t border-border pt-3.5">
-          <Avatar src={below.avatarUrl} name={below.name ?? below.handle} size="sm" />
+          <CompetitorAvatar competitor={below} size="sm" />
           <span className="flex-1 text-[13px] leading-[18px] text-pretty text-fg-secondary">
             <strong className="font-semibold text-fg">{firstName(below)}</strong> está a {format(me.value - below.value)} {unit} de você. Não deixe passar.
           </span>

@@ -220,7 +220,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const unit = workout.weightUnit;
 
   const [sheet, setSheet] = useState<Sheet>(() => (dev.has("timer") ? { kind: "timer" } : null));
-  const [dialog, setDialog] = useState<"finish" | "update-routine" | "discard" | null>(() => (dev.has("confirmar") ? "finish" : null));
+  const [dialog, setDialog] = useState<"finish" | "update-routine" | "confirm-update-routine" | "discard" | null>(() => (dev.has("confirmar") ? "finish" : null));
   const [summary, setSummary] = useState<{ data: FinishedWorkoutSummary; pending: boolean } | null>(null);
   const [finishing, setFinishing] = useState(false);
   const [sharing, setSharing] = useState(false);
@@ -582,6 +582,17 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         confirmLabel="Atualizar rotina"
         balanced
         onCancel={() => void finish(false)}
+        onConfirm={() => setDialog("confirm-update-routine")}
+      />
+      {/* Atualizar substitui o que estava planejado na rotina: confirma antes (manter não muda nada). */}
+      <ConfirmDialog
+        placement="screen"
+        open={dialog === "confirm-update-routine" && !finishing}
+        title="Substituir a rotina?"
+        message={`Os exercícios, as séries e as cargas planejadas de ${workout.name} serão trocados pelos deste treino. Não dá para desfazer.`}
+        cancelLabel="Voltar"
+        confirmLabel="Sim, atualizar"
+        onCancel={() => setDialog("update-routine")}
         onConfirm={() => void finish(true)}
       />
       <ConfirmDialog

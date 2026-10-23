@@ -108,6 +108,9 @@ export function useProjectActions() {
         icon: Archive,
         undo: (c) => api.restoreRoutine(c, { routineId: routine.id }),
       }),
+    /** Exclui a rotina (sem "Desfazer": a confirmação avisa antes). */
+    removeRoutine: (routine: ProjectRoutine) =>
+      run((c) => api.deleteRoutine(c, { routineId: routine.id }), { message: "Rotina excluída", icon: Trash2 }),
     /** Grava a nova ordem (só as positions que mudaram). */
     reorder: (ordered: ProjectRoutine[]) => {
       const positions = changedPositions(ordered);

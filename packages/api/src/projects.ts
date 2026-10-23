@@ -67,6 +67,8 @@ export interface ProjectsApi {
   deleteProject: (client: GufClient, input: { projectId: string }) => Result;
   renameRoutine: (client: GufClient, input: { routineId: string; name: string }) => Result;
   archiveRoutine: (client: GufClient, input: { routineId: string }) => Result;
+  /** Exclui a rotina e os exercícios planejados dela; os treinos feitos continuam (routine_id vira nulo). */
+  deleteRoutine: (client: GufClient, input: { routineId: string }) => Result;
   restoreRoutine: (client: GufClient, input: { routineId: string }) => Result;
   /** Grava as positions que mudaram (ver changedPositions em @guf/core). */
   reorderRoutines: (client: GufClient, input: { positions: Array<{ id: string; position: number }> }) => Result;
@@ -180,6 +182,9 @@ export const renameRoutine: ProjectsApi["renameRoutine"] = (client, { routineId,
 export const archiveRoutine: ProjectsApi["archiveRoutine"] = (client, { routineId }) =>
   write(() => client.from("routines").update({ archived_at: new Date().toISOString() }).eq("id", routineId));
 
+export const deleteRoutine: ProjectsApi["deleteRoutine"] = (client, { routineId }) =>
+  write(() => client.from("routines").delete().eq("id", routineId));
+
 export const restoreRoutine: ProjectsApi["restoreRoutine"] = (client, { routineId }) =>
   write(() => client.from("routines").update({ archived_at: null }).eq("id", routineId));
 
@@ -204,6 +209,7 @@ export const projectsApi = {
   deleteProject,
   renameRoutine,
   archiveRoutine,
+  deleteRoutine,
   restoreRoutine,
   reorderRoutines,
 } satisfies ProjectsApi;
