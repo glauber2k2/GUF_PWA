@@ -58,6 +58,7 @@ const TOOL_PHRASES: Record<string, string[]> = {
   ],
   rotinas: ["Lendo suas rotinas", "Conferindo séries e descanso", "Avaliando a divisão da semana"],
   regras_da_competicao: ["Lendo as regras da competição", "Conferindo como os pontos são somados"],
+  extrato_de_pontos: ["Abrindo seu extrato de pontos", "Somando os pontos de cada semana", "Vendo de onde veio cada ponto"],
   converter_ficha_de_treino: PLAN_IMPORT_PHRASES,
 };
 

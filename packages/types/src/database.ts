@@ -2004,6 +2004,10 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: Json
       }
+      get_my_points_statement: {
+        Args: { p_from: string; p_to: string }
+        Returns: Json
+      }
       get_my_social: {
         Args: never
         Returns: {

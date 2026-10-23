@@ -24,6 +24,7 @@ export * from "./weight-comparison";
 export * from "./social";
 export * from "./competition";
 export * from "./competition-ranking";
+export * from "./competition-statement";
 export * from "./ai";
 export * from "./set-metrics";
 export * from "./plans";

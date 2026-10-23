@@ -46,3 +46,15 @@ export function useCompetitionParameters(season: string) {
     queryFn: async () => unwrap(await api.getCompetitionParameters(getSupabaseClient(), season)),
   });
 }
+
+/** Extrato dos seus pontos no período (semanas com as partes e os treinos). */
+export function usePointsStatement(range: CompetitionRange) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return useQuery({
+    queryKey: [COMPETITION_KEY, "statement", user?.id, range.from, range.to, dev.competitionScenario],
+    enabled: Boolean(user) || dev.competitionScenario !== null,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.getPointsStatement(getSupabaseClient(), range)),
+  });
+}

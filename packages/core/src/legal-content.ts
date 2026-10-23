@@ -414,7 +414,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "GUF AI (inteligência artificial)",
       blocks: [
         p(
-          "Quando você faz uma pergunta ao GUF AI ou cola uma ficha para importar, o guf envia ao provedor de inteligência artificial (Google, pela API do Gemini, nos Estados Unidos) a sua pergunta e só os dados de treino necessários para responder: exercícios, séries, cargas, datas, rotinas e as regras da competição.",
+          "Quando você faz uma pergunta ao GUF AI ou cola uma ficha para importar, o guf envia ao provedor de inteligência artificial (Google, pela API do Gemini, nos Estados Unidos) a sua pergunta e só os dados de treino necessários para responder: exercícios, séries, cargas, datas, rotinas, as regras da competição e o seu extrato de pontos (de onde veio cada ponto seu; nunca os pontos ou a posição de outras pessoas).",
         ),
         ul(
           "Nunca são enviados: nome, e-mail, foto, @, ids da sua conta, medidas corporais, observações escritas por você nem dados de outras pessoas.",
@@ -565,6 +565,9 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.1": [
+      "GUF AI: se você perguntar sobre os seus pontos na competição, ele lê o seu extrato de pontos (só os seus; nunca os de outras pessoas).",
+    ],
     "1.0": [
       `Versão oficial: o responsável pelos seus dados é ${CONTROLLER_DESCRIPTION}. Por ser agente de pequeno porte, não há encarregado designado; o canal é ${PRIVACY_CONTACT_EMAIL}.`,
       "Nova seção sobre o GUF AI: o que vai para o Google (Gemini), o que nunca vai e por quanto tempo as conversas ficam.",

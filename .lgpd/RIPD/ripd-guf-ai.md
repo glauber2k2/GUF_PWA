@@ -1,6 +1,6 @@
 # RIPD — GUF AI (assistente sobre os próprios treinos) · A021
 
-**Versão**: 0.2 (rascunho técnico, **sem revisão jurídica** ⚖) · **Data**: 2026-10-22 (0.1: 2026-10-21) · **Branch**: `feat/guf-ai`, `feat/importar-ficha-ia`
+**Versão**: 0.3 (rascunho técnico, **sem revisão jurídica** ⚖) · **Data**: 2026-10-23 (0.2: 2026-10-22; 0.1: 2026-10-21) · **Branch**: `feat/guf-ai`, `feat/importar-ficha-ia`
 **Metodologia**: mesma do `ripd-social.md` (descrição → necessidade → riscos → medidas → decisão).
 
 ## 1. O que é
@@ -60,3 +60,18 @@ Chat na Início. A pessoa pergunta sobre os próprios treinos ("posso subir a ca
 | R10 · Uso para fugir do limite diário | Baixo | Cada conversão conta no mesmo limite do plano (`guf_ai_daily_messages`); o registro é gravado antes da chamada ao provedor e o app não pode apagá-lo |
 
 **Base legal**: a mesma (Art. 7º, V ⚖) — funcionalidade pedida pelo titular; dados de terceiros eventualmente colados não são o objetivo do tratamento e são minimizados. **Decisão**: prosseguir em beta; as pendências da seção 4 continuam valendo (a nova seção da Política precisa citar a importação).
+
+## 7. Revisão 0.3 — Extrato de pontos da competição (2026-10-23)
+Nova ferramenta `extrato_de_pontos` (`supabase/functions/guf-ai/points-statement.ts`): quando a pessoa pergunta sobre os próprios pontos, o GUF AI lê o extrato dela pela RPC `get_my_points_statement` (a mesma da tela `/competicao/extrato`).
+
+| Dado | Vai para o provedor? | Observação |
+|---|---|---|
+| Pontos do próprio usuário por semana e origem (constância, sequência, recordes, volume), dias válidos, volume da semana | Sim, só quando a pergunta pede | Derivados dos treinos que o GUF AI já lia; sem ids (treinos viram "treino-1") |
+| Pontos, posição ou ranking de outras pessoas | **Nunca** | A RPC lê só `auth.uid()` do token; não recebe id de usuário, então o modelo não tem como pedir de outra pessoa |
+| Temporadas fora do plano | Não | O corte (`competition_visible_from`) é feito no banco; a ferramenta só repassa o aviso |
+
+| Risco | Nível | Medidas |
+|---|---|---|
+| R11 · Exposição de dados da competição de outra pessoa | Baixo | RPC sem parâmetro de pessoa, SECURITY DEFINER filtrando por `auth.uid()`; a resposta não traz nada de competidores |
+
+**Base legal**: a mesma (Art. 7º, V ⚖); finalidade igual (responder sobre os próprios treinos). **Transparência**: Política 1.1 cita o extrato na seção do GUF AI (`requires_reaccept = false`: mesma finalidade, dado derivado do que já era enviado). **Decisão**: prosseguir.

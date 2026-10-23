@@ -1,4 +1,11 @@
-import type { CompetitionDayStat, CompetitionParameters, CompetitionParticipant, CompetitionRange, CompetitionWeekScore } from "@guf/core";
+import type {
+  CompetitionDayStat,
+  CompetitionParameters,
+  CompetitionParticipant,
+  CompetitionRange,
+  CompetitionWeekScore,
+  PointsStatement,
+} from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { resolveAvatarUrl } from "./shared";
@@ -21,6 +28,8 @@ export interface CompetitionApi {
   getCompetitionBoard: (client: GufClient, range: CompetitionRange) => Result<CompetitionBoard>;
   /** Parâmetros vigentes na temporada da data (regras públicas da pontuação). */
   getCompetitionParameters: (client: GufClient, season: string) => Result<CompetitionParameters>;
+  /** Extrato dos SEUS pontos no período: semanas com as partes e os treinos (o plano limita como no ranking). */
+  getPointsStatement: (client: GufClient, range: CompetitionRange) => Result<PointsStatement>;
 }
 
 /* =====================================================================
@@ -104,7 +113,74 @@ export const getCompetitionParameters: CompetitionApi["getCompetitionParameters"
   }
 };
 
+interface StatementRow {
+  visible_from: string | null;
+  weeks: Array<{
+    week_start: string;
+    points: number;
+    constancy_points: number;
+    bonus_points: number;
+    record_points: number;
+    volume_points: number;
+    valid_sessions: number;
+    weekly_volume: number;
+    records: number;
+    fulfilled: boolean;
+  }>;
+  sessions: Array<{
+    session_id: string;
+    name: string;
+    day: string;
+    week_start: string;
+    minutes: number;
+    is_valid: boolean;
+    counted: boolean;
+    volume: number;
+    records: number;
+  }>;
+}
+
+function toPointsStatement(row: StatementRow): PointsStatement {
+  return {
+    visibleFrom: row.visible_from,
+    weeks: row.weeks.map((w) => ({
+      weekStart: w.week_start,
+      points: Number(w.points),
+      constancyPoints: Number(w.constancy_points),
+      bonusPoints: Number(w.bonus_points),
+      recordPoints: Number(w.record_points),
+      volumePoints: Number(w.volume_points),
+      validSessions: Number(w.valid_sessions),
+      weeklyVolumeKg: Number(w.weekly_volume),
+      records: Number(w.records),
+      fulfilled: w.fulfilled,
+    })),
+    sessions: row.sessions.map((x) => ({
+      sessionId: x.session_id,
+      name: x.name,
+      day: x.day,
+      weekStart: x.week_start,
+      minutes: Number(x.minutes),
+      isValid: x.is_valid,
+      counted: x.counted,
+      volumeKg: Number(x.volume),
+      records: Number(x.records),
+    })),
+  };
+}
+
+export const getPointsStatement: CompetitionApi["getPointsStatement"] = async (client, { from, to }) => {
+  try {
+    const { data, error } = await client.rpc("get_my_points_statement", { p_from: from, p_to: to });
+    if (error) return { data: null, error: toApiError(error) };
+    return { data: toPointsStatement(data as unknown as StatementRow), error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const competitionApi = {
   getCompetitionBoard,
   getCompetitionParameters,
+  getPointsStatement,
 } satisfies CompetitionApi;

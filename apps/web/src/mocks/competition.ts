@@ -13,6 +13,9 @@ import {
   type CompetitionDayStat,
   type CompetitionParticipant,
   type CompetitionWeekScore,
+  type PointsStatement,
+  type StatementSession,
+  type StatementWeek,
 } from "@guf/core";
 import { apiError, type CompetitionApi, type GufClient } from "@guf/api";
 
@@ -113,6 +116,63 @@ function simulate(range: { from: string; to: string }) {
 }
 
 const LATENCY_MS = 400;
+const WORKOUT_NAMES = ["Treino A – Peito e Tríceps", "Treino B – Costas e Bíceps", "Treino C – Pernas", "Treino D – Ombros e Abdômen", "Full-body"];
+const RULE = { perDay: 15, minMinutes: 20, bonusPerWeek: 5, bonusMax: 20, recordPoints: 5, recordsMax: 25, volumeMax: 15, fulfilledDays: 3 };
+
+/** Seus treinos e semanas no período, pela mesma regra do servidor (sob demanda, nunca no carregamento). */
+function simulateStatement(range: { from: string; to: string }): PointsStatement {
+  const rand = random("extrato");
+  const sessions: StatementSession[] = [];
+  const weeks: StatementWeek[] = [];
+  let streak = 2;
+  let averageVolume = 8_000;
+  const last = fromLocalISODate(range.to);
+  for (let week = startOfLocalWeek(fromLocalISODate(range.from)); week <= last; week = addLocalDays(week, 7)) {
+    const weekStart = toLocalISODate(week);
+    const weekSessions: StatementSession[] = [];
+    for (let d = 0; d < 7; d++) {
+      const date = addLocalDays(week, d);
+      if (date > last || rand() > 0.62) continue;
+      const day = toLocalISODate(date);
+      const minutes = rand() < 0.12 ? Math.round(8 + rand() * 10) : Math.round(35 + rand() * 35);
+      const volumeKg = Math.round((6_000 + rand() * 5_000) / 10) * 10;
+      const base = { day, weekStart, isValid: minutes >= RULE.minMinutes, counted: false };
+      weekSessions.push({ ...base, sessionId: `${day}-a`, name: WORKOUT_NAMES[Math.floor(rand() * WORKOUT_NAMES.length)] ?? "Treino", minutes, volumeKg, records: rand() < 0.22 ? 1 + Math.floor(rand() * 2) : 0 });
+      if (rand() < 0.08) {
+        weekSessions.push({ ...base, sessionId: `${day}-b`, name: "Cardio leve", minutes: 25, isValid: true, volumeKg: 900, records: 0 });
+      }
+    }
+    for (const day of new Set(weekSessions.map((x) => x.day))) {
+      const best = weekSessions.filter((x) => x.day === day && x.isValid).sort((a, b) => b.volumeKg - a.volumeKg)[0];
+      if (best) best.counted = true;
+    }
+    const validSessions = weekSessions.filter((x) => x.counted).length;
+    const fulfilled = validSessions >= RULE.fulfilledDays;
+    streak = fulfilled ? streak + 1 : 0;
+    const records = weekSessions.reduce((sum, x) => sum + x.records, 0);
+    const weeklyVolumeKg = weekSessions.reduce((sum, x) => sum + x.volumeKg, 0);
+    const constancyPoints = validSessions * RULE.perDay;
+    const bonusPoints = fulfilled ? Math.min(RULE.bonusMax, RULE.bonusPerWeek * streak) : 0;
+    const recordPoints = Math.min(RULE.recordsMax, records * RULE.recordPoints);
+    const volumePoints = weeklyVolumeKg > 0 ? Math.round(RULE.volumeMax * Math.min(1, weeklyVolumeKg / averageVolume) * 100) / 100 : 0;
+    if (weeklyVolumeKg > 0) averageVolume = (averageVolume * 3 + weeklyVolumeKg) / 4;
+    sessions.push(...weekSessions);
+    weeks.push({
+      weekStart,
+      points: Math.round(constancyPoints + bonusPoints + recordPoints + volumePoints),
+      constancyPoints,
+      bonusPoints,
+      recordPoints,
+      volumePoints,
+      validSessions,
+      weeklyVolumeKg,
+      records,
+      fulfilled,
+    });
+  }
+  return { visibleFrom: range.from, weeks, sessions };
+}
+
 const wait = (ms = LATENCY_MS) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function ignoreClient(client: GufClient) {
@@ -133,6 +193,13 @@ export const mockCompetitionApi = {
       currentStreak: c.streak,
     }));
     return { data: { participants, ...simulate(range) }, error: null };
+  },
+  async getPointsStatement(client, range) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    if (scenario === "vazio") return { data: { visibleFrom: range.from, weeks: [], sessions: [] }, error: null };
+    return { data: simulateStatement(range), error: null };
   },
   async getCompetitionParameters(client) {
     ignoreClient(client);

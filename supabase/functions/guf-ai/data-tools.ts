@@ -6,13 +6,11 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { tool } from "npm:ai@7.0.131";
 import { z } from "npm:zod@4.6.5";
+import { buildPointsStatementTools } from "./points-statement.ts";
+import { seasonStart } from "./season.ts";
+import { toUnit, type WeightUnit } from "./units.ts";
 
-export type WeightUnit = "kg" | "lb";
-
-// Mesma conversão de packages/core/src/units.ts (a Edge Function não importa os pacotes do monorepo).
-const KG_PER_LB = 0.45359237;
-const toUnit = (kg: number | null, unit: WeightUnit) =>
-  kg === null ? null : Math.round((unit === "lb" ? kg / KG_PER_LB : kg) * 10) / 10;
+export type { WeightUnit } from "./units.ts";
 
 const ISO_WEEKDAYS = ["", "segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
 const DEFAULT_WORKOUTS = 8;
@@ -104,15 +102,6 @@ interface CompetitionParametersRow {
   records_max: number;
   volume_max: number;
   volume_window_weeks: number;
-}
-
-const SATURDAY = 6;
-
-/** Temporada da data (mesma regra de seasonOf em packages/core/src/competition.ts): mês do sábado que fecha a semana. */
-function seasonStart(today: string): string {
-  const date = new Date(`${today}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + SATURDAY - date.getUTCDay());
-  return `${date.toISOString().slice(0, 7)}-01`;
 }
 
 /** Monta as ferramentas de um usuário (o contexto fica preso aqui; o modelo não escolhe de quem lê). */
@@ -345,5 +334,6 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
         };
       },
     }),
+    ...buildPointsStatementTools({ db, unit, today, refFor }),
   };
 }

@@ -238,7 +238,7 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 ## 8.4 GUF AI
 
 - Responde só sobre os treinos, cargas, descanso, evolução e rotinas do próprio usuário e dúvidas gerais de musculação ligadas a isso; outros assuntos são recusados. Não dá orientação médica (dor ou lesão → profissional de saúde) e não altera nada no app.
-- Explica a competição (quem compete, temporada, métricas e pontuação). Os valores da pontuação vêm da ferramenta `regras_da_competicao` (tabela pública `competition_parameters`, mesma temporada do app); não vê pontos, posição nem ranking de ninguém, nem do próprio usuário (indica a aba Competir).
+- Explica a competição (quem compete, temporada, métricas e pontuação). Os valores da pontuação vêm da ferramenta `regras_da_competicao` (tabela pública `competition_parameters`, mesma temporada do app); lê o extrato de pontos do PRÓPRIO usuário (`extrato_de_pontos` → `get_my_points_statement`: total, origens, semanas e treinos que contaram ou não); não vê pontos, posição nem ranking de outras pessoas, nem a posição do próprio usuário (indica a aba Competir).
 - Lê os dados só pelas ferramentas da Edge Function `guf-ai` (do próprio usuário); nunca medidas corporais, observações ou dados de outra pessoa. Substituição de exercício: só exercícios do catálogo do mesmo grupo muscular.
 - Limite em 24 h pelo plano (Free 3, Pro 40); acabou no Free → tela do Pro. Pergunta de até 2.000 caracteres. Só online.
 - Conversas guardadas por 180 dias depois da última mensagem; entram em "Exportar meus dados" e saem com a conta.
