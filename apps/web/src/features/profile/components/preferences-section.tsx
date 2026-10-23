@@ -13,6 +13,7 @@ import { useUpdateProfile } from "@/features/profile/api/use-profile";
 import { playRestAlert, useRestAlertPreference, type RestAlertPreference } from "@/shared/sound/rest-alert";
 import { useThemePreference, type ThemePreference } from "@/shared/preferences/theme";
 import { cn } from "@/shared/helpers/class-names";
+import { ProductAnnouncementsRow } from "./product-announcements-row";
 import { PushAlertsRow } from "./push-alerts-row";
 import { ProfileSection, RowGroup, RowIcon } from "./profile-ui";
 
@@ -187,6 +188,8 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
           mesmo com o app fechado.
         </span>
       </RowGroup>
+
+      <ProductAnnouncementsRow optedOut={profile.productAnnouncementsOptOut} locked={locked} onSave={save} />
 
       <PushAlertsRow platform={platform} canEdit={canEdit} />
     </ProfileSection>

@@ -875,6 +875,7 @@ export type Database = {
           id: string
           name: string | null
           onboarded_at: string | null
+          product_announcements_opt_out: boolean
           timezone: string
           tour_completed_version: number | null
           updated_at: string
@@ -888,6 +889,7 @@ export type Database = {
           id: string
           name?: string | null
           onboarded_at?: string | null
+          product_announcements_opt_out?: boolean
           timezone?: string
           tour_completed_version?: number | null
           updated_at?: string
@@ -901,6 +903,7 @@ export type Database = {
           id?: string
           name?: string | null
           onboarded_at?: string | null
+          product_announcements_opt_out?: boolean
           timezone?: string
           tour_completed_version?: number | null
           updated_at?: string
@@ -1618,6 +1621,10 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      announcement_allowed_for: {
+        Args: { p_purpose: string; p_user_id: string }
+        Returns: boolean
       }
       announcement_state: {
         Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }

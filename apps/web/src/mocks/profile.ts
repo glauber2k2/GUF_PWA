@@ -22,6 +22,7 @@ function seedProfile(): Profile {
     weightUnit: "kg",
     weeklyGoal: 4,
     autoFinishWorkout: false,
+    productAnnouncementsOptOut: false,
     firstTrainedOn: "2026-03-02",
     completedSessions: 48,
   };
@@ -75,6 +76,7 @@ export const mockProfileApi = {
       ...(input.weightUnit !== undefined && { weightUnit: input.weightUnit }),
       ...(input.weeklyGoal !== undefined && { weeklyGoal: input.weeklyGoal }),
       ...(input.autoFinishWorkout !== undefined && { autoFinishWorkout: input.autoFinishWorkout }),
+      ...(input.productAnnouncementsOptOut !== undefined && { productAnnouncementsOptOut: input.productAnnouncementsOptOut }),
     };
     return { data: null, error: null };
   },
