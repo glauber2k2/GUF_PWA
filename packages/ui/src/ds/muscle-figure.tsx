@@ -116,7 +116,7 @@ const MUSCLE_REGIONS: Record<FigureMuscle, readonly [readonly Region[], readonly
 };
 
 /** Opacidade das regiões treinadas por nível (classes fixas para o Tailwind gerar). */
-export const MUSCLE_LEVEL_OPACITY = ["", "opacity-36", "opacity-64", "opacity-100"] as const;
+const MUSCLE_LEVEL_OPACITY = ["", "opacity-36", "opacity-64", "opacity-100"] as const;
 const FLIP = "translate(100 0) scale(-1 1)";
 
 function Shape({ region, className }: { region: Region; className: string }) {
