@@ -4,3 +4,4 @@ export { AuthProvider, useAuth } from "./providers/auth-provider";
 export { ConsentForm } from "./ui/consent-form";
 export { LoginForm } from "./ui/login-form";
 export { SignUpForm } from "./ui/signup-form";
+export { ResetPasswordForm } from "./ui/reset-password-form";

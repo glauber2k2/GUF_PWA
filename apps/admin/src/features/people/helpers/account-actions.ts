@@ -1,8 +1,8 @@
-import { Ban, CalendarClock, CalendarX, Crown, ShieldCheck, Trash2, Unlink, type LucideIcon } from "lucide-react";
+import { Ban, CalendarClock, CalendarX, Crown, KeyRound, ShieldCheck, Trash2, Unlink, type LucideIcon } from "lucide-react";
 import type { ChangeReason, StaffPermission } from "@guf/core";
 
 /** Ações de conta que valem para uma pessoa ou para várias selecionadas (cada uma vai ao banco à parte). */
-export type AccountActionKind = "plan" | "unlink_social" | "ban" | "unban" | "delete" | "schedule_deletion" | "cancel_deletion";
+export type AccountActionKind = "plan" | "unlink_social" | "reset_password" | "ban" | "unban" | "delete" | "schedule_deletion" | "cancel_deletion";
 
 interface Reasoned {
   reason: ChangeReason;
@@ -12,6 +12,7 @@ interface Reasoned {
 export type AccountActionInput =
   | ({ kind: "plan"; planCode: string; validUntil: string | null } & Reasoned)
   | { kind: "unlink_social"; note: string }
+  | ({ kind: "reset_password" } & Reasoned)
   | ({ kind: "ban"; endsAt: string | null } & Reasoned)
   | ({ kind: "unban" } & Reasoned)
   | ({ kind: "delete" } & Reasoned)
@@ -49,6 +50,14 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     icon: Unlink,
     permission: "unlink_login",
     isDanger: true,
+  },
+  reset_password: {
+    label: "Redefinir senha",
+    title: () => "Mandar link para criar senha nova?",
+    done: () => "Link enviado para o e-mail da pessoa",
+    icon: KeyRound,
+    permission: "reset_password",
+    isDanger: false,
   },
   ban: {
     label: "Suspender conta",
@@ -92,7 +101,10 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
   },
 };
 
-/** Ações oferecidas na seleção em lote (as de desfazer aparecem só no detalhe, onde há o estado). */
+/**
+ * Ações oferecidas na seleção em lote. Ficam de fora as de desfazer (dependem do estado de cada conta)
+ * e a redefinição de senha (só individual: cada pedido é um caso de suporte).
+ */
 export const BULK_ACTIONS: AccountActionKind[] = ["plan", "unlink_social", "ban", "schedule_deletion", "delete"];
 
 /** Palavra que a equipe digita para confirmar a exclusão imediata. */
@@ -117,5 +129,7 @@ export interface AccountActionState {
 
 /** Ações de uma conta, na ordem do menu (o papel filtra depois). */
 export function accountActionsFor({ isBanned, hasScheduledDeletion }: AccountActionState): AccountActionKind[] {
-  return ["plan", "unlink_social", isBanned ? "unban" : "ban", hasScheduledDeletion ? "cancel_deletion" : "schedule_deletion", "delete"];
+  // Conta suspensa não recebe o link de senha (o banco recusa: o link não funcionaria).
+  const resetPassword: AccountActionKind[] = isBanned ? [] : ["reset_password"];
+  return ["plan", "unlink_social", ...resetPassword, isBanned ? "unban" : "ban", hasScheduledDeletion ? "cancel_deletion" : "schedule_deletion", "delete"];
 }

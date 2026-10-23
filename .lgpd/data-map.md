@@ -451,7 +451,7 @@
 | Campo | Valor |
 |---|---|
 | Slug | a022-administracao-conta |
-| Finalidade | Atender a pessoa (suporte), corrigir @ ou nome a pedido dela ou por violação dos Termos, liberar plano manual (cortesia, teste, correção), desvincular login social a pedido, suspender a conta (prazo ou indeterminado) e excluir a conta (agora ou agendada) a pedido ou por violação dos Termos |
+| Finalidade | Atender a pessoa (suporte), corrigir @ ou nome a pedido dela ou por violação dos Termos, liberar plano manual (cortesia, teste, correção), desvincular login social a pedido, suspender a conta (prazo ou indeterminado), excluir a conta (agora ou agendada) a pedido ou por violação dos Termos e mandar à pessoa o link para criar senha nova (a equipe nunca vê nem define a senha) |
 | Base legal | Art. 7º, V (execução do contrato); correção a pedido = Art. 18, III; desvincular = pedido do titular (Art. 18) |
 | Categorias de titulares | Usuários; colaboradores (a própria conta de trabalho) |
 | Sensíveis? | Só o status sim/não do consentimento de saúde, visível aos papéis Suporte e Admin (nunca as medidas) |

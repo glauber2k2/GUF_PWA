@@ -1536,6 +1536,10 @@ export type Database = {
         }[]
       }
       admin_publish_announcement: { Args: { p_id: string }; Returns: undefined }
+      admin_request_password_reset: {
+        Args: { p_note?: string; p_reason: string; p_user_id: string }
+        Returns: undefined
+      }
       admin_reveal_email: { Args: { p_user_id: string }; Returns: string }
       admin_save_announcement: {
         Args: { p_draft: Json; p_id: string; p_target_ids?: string[] }

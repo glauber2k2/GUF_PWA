@@ -42,6 +42,10 @@ export type ApiErrorCode =
   | "account_is_staff"
   | "account_has_files"
   | "date_in_past"
+  | "account_banned"
+  | "account_without_email"
+  | "password_reset_rate_limited"
+  | "password_reset_unavailable"
   | "mfa_code_invalid"
   | "invalid_credentials"
   | "not_authenticated"
@@ -100,6 +104,10 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   account_is_staff: "Essa conta é sua ou de alguém da equipe. Tire o acesso dela em Equipe antes de suspender ou excluir.",
   account_has_files: "Essa conta tem foto guardada no aplicativo. Peça para a pessoa excluir a conta pelo app (Configurações › Privacidade).",
   date_in_past: "Escolha uma data e um horário no futuro.",
+  account_banned: "Essa conta está suspensa: o link não funcionaria. Encerre a suspensão antes de redefinir a senha.",
+  account_without_email: "Essa conta não tem e-mail para receber o link. A pessoa precisa entrar pelo login social.",
+  password_reset_rate_limited: "Muitos e-mails de senha enviados em pouco tempo. Espere alguns minutos e tente de novo.",
+  password_reset_unavailable: "A redefinição de senha ainda não está configurada no servidor (APP_URL). Fale com quem administra o guf.",
   invalid_credentials: "E-mail ou senha não conferem. Confira os dois campos e tente de novo.",
   mfa_code_invalid: "Código incorreto ou vencido. Digite o código que aparece agora no aplicativo.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
@@ -141,6 +149,8 @@ const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
   GA014: "account_is_staff",
   GA015: "account_has_files",
   GA016: "date_in_past",
+  GA017: "account_banned",
+  GA018: "account_without_email",
 };
 
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {

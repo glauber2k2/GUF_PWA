@@ -20,6 +20,8 @@ export type AuthErrorCode =
   | "weak_password"
   | "rate_limited"
   | "account_suspended"
+  | "recovery_link_invalid"
+  | "same_password"
   | "documents_unavailable"
   | "documents_outdated"
   | "oauth_cancelled"
@@ -44,6 +46,8 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   email_already_registered: "Este e-mail já tem conta. Entre com ele ou use “Esqueci minha senha”.",
   weak_password: "Senha fraca. Use 8 ou mais caracteres, com número e símbolo.",
   rate_limited: "Muitas tentativas seguidas. Aguarde um minuto e tente de novo.",
+  recovery_link_invalid: "Este link para criar a senha venceu ou já foi usado. Peça um novo ao suporte do guf.",
+  same_password: "A senha nova precisa ser diferente da anterior.",
   account_suspended: `Sua conta está suspensa pela equipe do guf. Para saber o motivo ou contestar, escreva para ${PRIVACY_CONTACT_EMAIL}.`,
   documents_unavailable: "Não foi possível carregar os Termos de Uso e a Política de Privacidade. Tente de novo em instantes.",
   documents_outdated: "Os termos foram atualizados. Confira a nova versão e aceite de novo.",
@@ -108,11 +112,23 @@ export type SignInWithGoogle = (client: GufClient, input: SignInWithGoogleInput)
 
 export type SignOut = (client: GufClient) => Promise<AuthResult<null>>;
 
+/**
+ * Abre a sessão pelo link de redefinição de senha (#access_token=…&refresh_token=…&type=recovery).
+ * O link é implícito de propósito: pedido pela equipe, ele é aberto em outro aparelho, onde o PKCE
+ * não teria o código guardado.
+ */
+export type SetRecoverySession = (client: GufClient, hash: string) => Promise<AuthResult<null>>;
+
+/** Grava a senha nova da sessão aberta pelo link. */
+export type UpdatePassword = (client: GufClient, password: string) => Promise<AuthResult<null>>;
+
 export interface AuthApi {
   signInWithEmail: SignInWithEmail;
   signUpWithEmail: SignUpWithEmail;
   signInWithGoogle: SignInWithGoogle;
   signOut: SignOut;
+  setRecoverySession: SetRecoverySession;
+  updatePassword: UpdatePassword;
 }
 
 /* =====================================================================
@@ -182,6 +198,8 @@ export function toAuthError(error: unknown): AuthError {
         return authError("email_already_registered");
       case "weak_password":
         return authError("weak_password");
+      case "same_password":
+        return authError("same_password");
       case BANNED_CODE:
         return authError("account_suspended");
       case "over_request_rate_limit":
@@ -257,5 +275,29 @@ export const signOut: SignOut = async (client) => {
   }
 };
 
+export const setRecoverySession: SetRecoverySession = async (client, hash) => {
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+  // Link vencido ou já usado volta com #error_code=otp_expired (ou sem os tokens).
+  if (params.get("error_code") === BANNED_CODE) return { data: null, error: authError("account_suspended") };
+  if (!accessToken || !refreshToken || params.get("type") !== "recovery") return { data: null, error: authError("recovery_link_invalid") };
+  try {
+    const { error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+    return error ? { data: null, error: authError("recovery_link_invalid") } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toAuthError(e) };
+  }
+};
+
+export const updatePassword: UpdatePassword = async (client, password) => {
+  try {
+    const { error } = await client.auth.updateUser({ password });
+    return error ? { data: null, error: toAuthError(error) } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toAuthError(e) };
+  }
+};
+
 /** Garante em tempo de compilação que a implementação segue o contrato. */
-export const authApi = { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut } satisfies AuthApi;
+export const authApi = { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, setRecoverySession, updatePassword } satisfies AuthApi;

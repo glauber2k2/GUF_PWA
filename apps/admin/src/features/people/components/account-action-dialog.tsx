@@ -29,6 +29,8 @@ interface AccountActionDialogProps {
 const CONSEQUENCES: Record<AccountActionKind, string> = {
   plan: "O plano muda na hora e a pessoa recebe um aviso no app. Contas com assinatura paga ativa não mudam.",
   unlink_social: "Google e Apple deixam de entrar nessas contas. Contas sem senha não mudam: ficariam sem jeito de entrar.",
+  reset_password:
+    "A pessoa recebe no e-mail um link para criar a senha nova no app. Você não vê nem escolhe a senha. O link vence em pouco tempo: sem usar, a senha atual continua valendo e é preciso mandar outro. Quem entra só com Google passa a ter também uma senha.",
   ban: "A pessoa sai de todos os aparelhos e não consegue entrar até o fim da suspensão. Os dados ficam guardados.",
   unban: "A pessoa volta a entrar normalmente.",
   delete: "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer.",

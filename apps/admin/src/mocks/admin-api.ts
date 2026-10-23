@@ -261,6 +261,16 @@ export const mockAdminUsersApi = {
     audit("staff_cancelled_deletion", userId, `@${found.handle}`, { reason });
     return { data: null, error: null };
   },
+  async sendPasswordReset(client, { userId, reason }) {
+    const denied = await guard(client, "reset_password");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (found.isStaff) return fail(apiError("account_is_staff"));
+    if (found.ban) return fail(apiError("account_banned"));
+    audit("staff_sent_password_reset", userId, `@${found.handle}`, { reason });
+    return { data: null, error: null };
+  },
   async listPlans(client) {
     ignoreClient(client);
     return {

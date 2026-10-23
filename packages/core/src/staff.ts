@@ -9,7 +9,7 @@ export type StaffRole = "viewer" | "support" | "admin";
 
 export const STAFF_ROLES: Record<StaffRole, { label: string; description: string; rank: number }> = {
   viewer: { label: "Leitura", description: "Só consulta contas e comunicados.", rank: 1 },
-  support: { label: "Suporte", description: "Edita @ e nome, desvincula login e cria rascunhos.", rank: 2 },
+  support: { label: "Suporte", description: "Edita @ e nome, desvincula login, redefine senha e cria rascunhos.", rank: 2 },
   admin: { label: "Admin", description: "Tudo, incluindo plano, suspensão e exclusão de contas, publicação, auditoria e equipe.", rank: 3 },
 };
 
@@ -18,6 +18,7 @@ export type StaffPermission =
   | "reveal_email"
   | "edit_profile"
   | "unlink_login"
+  | "reset_password"
   | "change_plan"
   | "ban_accounts"
   | "delete_accounts"
@@ -32,6 +33,7 @@ export const STAFF_PERMISSIONS: Record<StaffPermission, StaffRole> = {
   reveal_email: "support",
   edit_profile: "support",
   unlink_login: "support",
+  reset_password: "support",
   change_plan: "admin",
   ban_accounts: "admin",
   delete_accounts: "admin",
@@ -103,6 +105,7 @@ export const AUDIT_ACTIONS: Record<string, string> = {
   staff_deleted_account: "Excluiu a conta",
   staff_scheduled_deletion: "Agendou a exclusão",
   staff_cancelled_deletion: "Cancelou a exclusão agendada",
+  staff_sent_password_reset: "Enviou link de senha nova",
   scheduled_deletion_executed: "Exclusão agendada executada",
   account_deleted: "Conta excluída",
 };
