@@ -10,7 +10,7 @@
 
 | Item | Onde | Situação |
 |---|---|---|
-| CORS da Edge Function `delete-account` restrito por lista de sites (G20) | `supabase/functions/delete-account/index.ts` | **Publicado**. Fica ativo quando o secret `ALLOWED_ORIGINS` for definido (abaixo); sem ele, aceita qualquer origem como antes |
+| CORS da Edge Function `delete-account` restrito por lista de sites (G20) | `supabase/functions/delete-account/index.ts` | **Ativo** desde 2026-10-23: `ALLOWED_ORIGINS` = `https://gufapp.vercel.app`, `https://adminguf.vercel.app`, `http://localhost:3000`, `http://localhost:3001` (vale também para `guf-ai`, `admin-invite-staff` e `admin-reset-password`; site fora da lista recebe 403). Endereços de prévia da Vercel ficam de fora: incluir na lista se precisar testar por eles |
 | Cabeçalhos de segurança da hospedagem: HSTS, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` | `vercel.json` (raiz) e `apps/web/vercel.json` | Valem no próximo deploy. A Vercel lê só o arquivo da pasta configurada como Root Directory; quando souber qual é, apague o outro |
 | Senha mínima de 8 caracteres no Supabase local (igual ao app) | `supabase/config.toml` | Feito (vale para o ambiente local) |
 
