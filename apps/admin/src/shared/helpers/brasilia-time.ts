@@ -23,3 +23,13 @@ export function fromBrasiliaIso(iso: string | null): { date: string; time: strin
   const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
   return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
 }
+
+/** Campo de data "2027-10-22" → fim do dia em Brasília, em ISO (validade "até o dia"). Vazio = null. */
+export function endOfDayBrasiliaIso(day: string): string | null {
+  return toBrasiliaIso(day, "23:59");
+}
+
+/** Campo de data "2027-10-22" → "22/10/2027". */
+export function formatDateField(day: string): string {
+  return day.split("-").reverse().join("/");
+}

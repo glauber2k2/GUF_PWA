@@ -3,33 +3,28 @@
 import { Megaphone, X, type LucideIcon } from "lucide-react";
 import { cn, Icon } from "@guf/ui";
 import { useStaff } from "@/features/auth";
-import { ACCOUNT_ACTIONS, BULK_ACTIONS, type AccountActionKind } from "@/features/people/helpers/account-actions";
+import { ACCOUNT_ACTIONS, BULK_ACTIONS, MAX_BULK_SELECTION, type AccountActionKind, type ActionTone } from "@/features/people/helpers/account-actions";
 
 interface BulkActionBarProps {
   count: number;
+  /** Chegou ao limite (MAX_BULK_SELECTION): avisa por que não dá para marcar mais. */
+  isFull: boolean;
   onAction: (kind: AccountActionKind) => void;
   onAnnounce: () => void;
   onClear: () => void;
 }
 
-/** neutral = ação comum · caution = muda o acesso (ícone em vermelho) · destructive = não tem volta. */
-type TileTone = "neutral" | "caution" | "destructive";
-
-const TILE_STYLES: Record<TileTone, { tile: string; badge: string }> = {
+/** Cor do ladrilho pelo tom da ação (o catálogo decide; aqui só a aparência). */
+const TILE_STYLES: Record<ActionTone, { tile: string; badge: string }> = {
   neutral: { tile: "border-border-strong bg-surface-3 text-fg hover:bg-surface", badge: "bg-accent/14 text-accent-text" },
   caution: { tile: "border-border-strong bg-surface-3 text-fg hover:bg-surface", badge: "bg-danger/14 text-danger" },
   destructive: { tile: "border-danger/30 bg-danger/8 text-danger hover:bg-danger/14", badge: "bg-danger/14" },
 };
 
-function toneOf(kind: AccountActionKind): TileTone {
-  if (kind === "delete") return "destructive";
-  return ACCOUNT_ACTIONS[kind].isDanger ? "caution" : "neutral";
-}
-
 interface ActionTileProps {
   label: string;
   icon: LucideIcon;
-  tone?: TileTone;
+  tone?: ActionTone;
   onClick: () => void;
 }
 
@@ -53,7 +48,7 @@ function ActionTile({ label, icon, tone = "neutral", onClick }: ActionTileProps)
 }
 
 /** Painel preso ao pé da lista com as ações para as pessoas selecionadas (só as que o papel permite). */
-export function BulkActionBar({ count, onAction, onAnnounce, onClear }: BulkActionBarProps) {
+export function BulkActionBar({ count, isFull, onAction, onAnnounce, onClear }: BulkActionBarProps) {
   const { can } = useStaff();
   const actions = BULK_ACTIONS.filter((kind) => can(ACCOUNT_ACTIONS[kind].permission));
 
@@ -77,10 +72,11 @@ export function BulkActionBar({ count, onAction, onAnnounce, onClear }: BulkActi
           Limpar
         </button>
       </div>
+      {isFull && <p className="m-0 pl-1 text-[13px] text-fg-secondary">Limite de {MAX_BULK_SELECTION} pessoas por vez. Conclua uma ação ou desmarque alguém para incluir outras.</p>}
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-[repeat(auto-fill,minmax(104px,1fr))]">
         {can("draft_announcements") && <ActionTile label="Enviar comunicado" icon={Megaphone} onClick={onAnnounce} />}
         {actions.map((kind) => (
-          <ActionTile key={kind} label={ACCOUNT_ACTIONS[kind].label} icon={ACCOUNT_ACTIONS[kind].icon} tone={toneOf(kind)} onClick={() => onAction(kind)} />
+          <ActionTile key={kind} label={ACCOUNT_ACTIONS[kind].label} icon={ACCOUNT_ACTIONS[kind].icon} tone={ACCOUNT_ACTIONS[kind].tone} onClick={() => onAction(kind)} />
         ))}
       </div>
     </div>

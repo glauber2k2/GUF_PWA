@@ -49,15 +49,16 @@ function StatusTags({ person }: { person: AdminUserSummary }) {
   );
 }
 
-function SelectBox({ person, checked, onToggle }: { person: AdminUserSummary; checked: boolean; onToggle: () => void }) {
+function SelectBox({ person, checked, disabled, onToggle }: { person: AdminUserSummary; checked: boolean; disabled: boolean; onToggle: () => void }) {
   return (
     <input
       type="checkbox"
       checked={checked}
+      disabled={disabled}
       onChange={onToggle}
       onClick={(event) => event.stopPropagation()}
       aria-label={`Selecionar ${displayName(person.name, person.handle)}`}
-      className="size-5 cursor-pointer accent-accent"
+      className="size-5 cursor-pointer accent-accent disabled:cursor-not-allowed disabled:opacity-40"
     />
   );
 }
@@ -72,6 +73,8 @@ interface PeopleResultsProps {
   onOpen: (userId: string) => void;
   /** Sem a função, a lista não mostra as caixas de seleção (papel sem ação em lote). */
   selectedIds: string[];
+  /** Chegou ao limite da seleção: as caixas desmarcadas ficam indisponíveis. */
+  isSelectionFull: boolean;
   onToggle?: (person: AdminUserSummary) => void;
   onToggleAll?: () => void;
   onAction: (person: AdminUserSummary, kind: AccountActionKind) => void;
@@ -79,7 +82,7 @@ interface PeopleResultsProps {
 }
 
 /** 3a–3c · Resultados: cartões no celular; tabela ordenável no tablet e no computador. Seleção para ações em lote. */
-export function PeopleResults({ people, device, onOpen, selectedIds, onToggle, onToggleAll, onAction, onAnnounce }: PeopleResultsProps) {
+export function PeopleResults({ people, device, onOpen, selectedIds, isSelectionFull, onToggle, onToggleAll, onAction, onAnnounce }: PeopleResultsProps) {
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({ key: "name", dir: "asc" });
   const sorted = sortPeople(people, sort.key, sort.dir);
   const toggleSort = (key: SortKey) => setSort((s) => ({ key, dir: s.key === key && s.dir === "asc" ? "desc" : "asc" }));
@@ -102,7 +105,7 @@ export function PeopleResults({ people, device, onOpen, selectedIds, onToggle, o
           <li key={p.userId} className={cn("flex items-center gap-1 rounded-lg border bg-surface pr-1", isSelected(p.userId) ? "border-accent-text" : "border-border")}>
             {onToggle && (
               <label className="grid size-11 flex-none cursor-pointer place-items-center pl-2">
-                <SelectBox person={p} checked={isSelected(p.userId)} onToggle={() => onToggle(p)} />
+                <SelectBox person={p} checked={isSelected(p.userId)} disabled={isSelectionFull && !isSelected(p.userId)} onToggle={() => onToggle(p)} />
               </label>
             )}
             <button
@@ -189,7 +192,7 @@ export function PeopleResults({ people, device, onOpen, selectedIds, onToggle, o
             >
               {onToggle && (
                 <td className="pl-4">
-                  <SelectBox person={p} checked={isSelected(p.userId)} onToggle={() => onToggle(p)} />
+                  <SelectBox person={p} checked={isSelected(p.userId)} disabled={isSelectionFull && !isSelected(p.userId)} onToggle={() => onToggle(p)} />
                 </td>
               )}
               <td className="px-4 py-2.5">

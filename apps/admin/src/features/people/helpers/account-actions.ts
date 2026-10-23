@@ -27,8 +27,24 @@ export interface AccountActionMeta {
   done: (count: number) => string;
   icon: LucideIcon;
   permission: StaffPermission;
-  isDanger: boolean;
+  tone: ActionTone;
+  /** O que acontece com a pessoa (texto do diálogo). */
+  consequence: string;
 }
+
+/** neutral = comum · caution = muda o acesso da pessoa · destructive = não tem volta. */
+export type ActionTone = "neutral" | "caution" | "destructive";
+
+/** Ação de risco (botão de confirmar em vermelho e item do menu em vermelho). */
+export function isRiskyAction(kind: AccountActionKind): boolean {
+  return ACCOUNT_ACTIONS[kind].tone !== "neutral";
+}
+
+/** Limite da seleção em lote: cada conta é uma chamada ao banco, uma depois da outra. */
+export const MAX_BULK_SELECTION = 100;
+
+const RESET_PASSWORD_CONSEQUENCE =
+  "A pessoa recebe no e-mail um link para criar a senha nova no app. Você não vê nem escolhe a senha. O link vence em pouco tempo: sem usar, a senha atual continua valendo e é preciso mandar outro. Quem entra só com Google passa a ter também uma senha.";
 
 function people(count: number): string {
   return count === 1 ? "1 pessoa" : `${count} pessoas`;
@@ -41,7 +57,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => `Plano alterado para ${people(n)}`,
     icon: Crown,
     permission: "change_plan",
-    isDanger: false,
+    tone: "neutral",
+    consequence: "O plano muda na hora e a pessoa recebe um aviso no app. Contas com assinatura paga ativa não mudam.",
   },
   unlink_social: {
     label: "Desvincular logins sociais",
@@ -49,7 +66,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => `Logins sociais desvinculados de ${people(n)}`,
     icon: Unlink,
     permission: "unlink_login",
-    isDanger: true,
+    tone: "caution",
+    consequence: "Google e Apple deixam de entrar nessas contas. Contas sem senha não mudam: ficariam sem jeito de entrar.",
   },
   reset_password: {
     label: "Redefinir senha",
@@ -57,7 +75,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: () => "Link enviado para o e-mail da pessoa",
     icon: KeyRound,
     permission: "reset_password",
-    isDanger: false,
+    tone: "neutral",
+    consequence: RESET_PASSWORD_CONSEQUENCE,
   },
   ban: {
     label: "Suspender conta",
@@ -65,7 +84,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => (n === 1 ? "Conta suspensa" : `${people(n)} suspensas`),
     icon: Ban,
     permission: "ban_accounts",
-    isDanger: true,
+    tone: "caution",
+    consequence: "A pessoa sai de todos os aparelhos e não consegue entrar até o fim da suspensão. Os dados ficam guardados.",
   },
   unban: {
     label: "Encerrar suspensão",
@@ -73,7 +93,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => (n === 1 ? "Suspensão encerrada" : `Suspensão encerrada para ${people(n)}`),
     icon: ShieldCheck,
     permission: "ban_accounts",
-    isDanger: false,
+    tone: "neutral",
+    consequence: "A pessoa volta a entrar normalmente.",
   },
   delete: {
     label: "Excluir conta",
@@ -81,7 +102,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => (n === 1 ? "Conta excluída" : `${people(n)} excluídas`),
     icon: Trash2,
     permission: "delete_accounts",
-    isDanger: true,
+    tone: "destructive",
+    consequence: "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer.",
   },
   schedule_deletion: {
     label: "Agendar exclusão",
@@ -89,7 +111,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => `Exclusão agendada para ${people(n)}`,
     icon: CalendarClock,
     permission: "delete_accounts",
-    isDanger: true,
+    tone: "caution",
+    consequence: "A pessoa recebe um aviso no app com a data e pode exportar os dados antes. Dá para cancelar até lá.",
   },
   cancel_deletion: {
     label: "Cancelar exclusão agendada",
@@ -97,7 +120,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     done: (n) => `Exclusão cancelada para ${people(n)}`,
     icon: CalendarX,
     permission: "delete_accounts",
-    isDanger: false,
+    tone: "neutral",
+    consequence: "A conta continua ativa e o agendamento sai.",
   },
 };
 
@@ -125,11 +149,16 @@ export interface AccountActionOutcome {
 export interface AccountActionState {
   isBanned: boolean;
   hasScheduledDeletion: boolean;
+  /** Conta da equipe: o banco recusa suspender, excluir e mandar senha (GA014). */
+  isStaff?: boolean;
 }
 
+const BLOCKED_FOR_STAFF: AccountActionKind[] = ["reset_password", "ban", "unban", "delete", "schedule_deletion", "cancel_deletion"];
+
 /** Ações de uma conta, na ordem do menu (o papel filtra depois). */
-export function accountActionsFor({ isBanned, hasScheduledDeletion }: AccountActionState): AccountActionKind[] {
+export function accountActionsFor({ isBanned, hasScheduledDeletion, isStaff = false }: AccountActionState): AccountActionKind[] {
   // Conta suspensa não recebe o link de senha (o banco recusa: o link não funcionaria).
   const resetPassword: AccountActionKind[] = isBanned ? [] : ["reset_password"];
-  return ["plan", "unlink_social", ...resetPassword, isBanned ? "unban" : "ban", hasScheduledDeletion ? "cancel_deletion" : "schedule_deletion", "delete"];
+  const actions: AccountActionKind[] = ["plan", "unlink_social", ...resetPassword, isBanned ? "unban" : "ban", hasScheduledDeletion ? "cancel_deletion" : "schedule_deletion", "delete"];
+  return isStaff ? actions.filter((kind) => !BLOCKED_FOR_STAFF.includes(kind)) : actions;
 }

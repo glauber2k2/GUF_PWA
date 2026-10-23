@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { banEndsAt, isReasonComplete, type BanDuration, type ChangeReason } from "@guf/core";
 import { DELETE_CONFIRM_WORD, type AccountActionInput, type AccountActionKind } from "@/features/people/helpers/account-actions";
-import { endOfDayIso } from "@/features/people/hooks/use-account-edit";
-import { toBrasiliaIso } from "@/shared/helpers/brasilia-time";
+import { endOfDayBrasiliaIso, toBrasiliaIso } from "@/shared/helpers/brasilia-time";
 import { usePlanOptions } from "@/shared/hooks/use-plan-options";
 
 const DEFAULT_TIME = "09:00";
@@ -54,7 +53,7 @@ export function useAccountActionForm(kind: AccountActionKind) {
     const base = { reason, note };
     switch (kind) {
       case "plan":
-        return { kind, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayIso(validUntil), ...base };
+        return { kind, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayBrasiliaIso(validUntil), ...base };
       case "ban": {
         const endsAt = banEndsAt(banDuration, chosenInstant);
         return endsAt === undefined ? null : { kind, endsAt, ...base };
