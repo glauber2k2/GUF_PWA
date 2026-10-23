@@ -2,18 +2,23 @@
  * Conteúdo dos documentos legais lidos DENTRO do app (/termos, /privacidade, /termo-de-saude).
  * Puro (sem React): o app web e o futuro app mobile renderizam a mesma estrutura.
  *
- * ATENÇÃO: texto provisório do protótipo (Claude Design), SEM validação jurídica.
- * Os marcadores entre colchetes ([RAZÃO SOCIAL], [CNPJ]…) são dados reais a preencher.
- * A redação final é do jurídico e entra junto com as versões definitivas em legal_documents
- * (nova migration). Enquanto LEGAL_CONTENT_IS_DRAFT for true, o leitor mostra "Rascunho".
+ * Versão 1.0 (2026-10-23): textos oficiais do guf mantido por pessoa física, agente de pequeno porte
+ * (Res. CD/ANPD nº 2/2022), sem revisão por advogado (decisão do controlador: revisão jurídica depois
+ * dos primeiros clientes pagantes; .lgpd/STATUS.md). Escritos a partir do que o sistema faz de
+ * verdade: mudou o comportamento, mude o texto (nova versão em legal_documents por migration, hashes
+ * de `legal:hashes`). Marcadores "[…]" não podem voltar: o leitor os destaca como pendência.
  */
 
-export const LEGAL_CONTENT_IS_DRAFT = true;
+export const LEGAL_CONTENT_IS_DRAFT = false;
+
+/** Quem responde pelos dados (LGPD, art. 9º, III): pessoa física, sem CPF nem endereço publicados. */
+export const CONTROLLER_NAME = "Glauber Monteiro";
+export const CONTROLLER_DESCRIPTION = `${CONTROLLER_NAME}, pessoa física, desenvolvedor independente`;
 
 /**
- * Canal de comunicação com o titular para pedidos sobre dados (LGPD art. 18; Res. CD/ANPD nº 2/2022, art. 11).
- * Provisório do beta: o Encarregado será designado antes do lançamento (.lgpd/STATUS.md).
- * Fica no topo porque os textos abaixo o usam (mudar o e-mail muda o hash da Política: nova versão).
+ * Canal de comunicação com o titular (LGPD art. 18; Res. CD/ANPD nº 2/2022, art. 11: agente de pequeno
+ * porte sem encarregado mantém um canal). Também é o e-mail de suporte. Mudar o e-mail muda o hash
+ * dos documentos: nova versão.
  */
 export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
 /** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
@@ -116,7 +121,10 @@ const TERMS: LegalDocumentContent = {
       title: "Aceite",
       blocks: [
         p(
-          "Estes Termos de Uso regulam o uso do guf, oferecido por [RAZÃO SOCIAL], CNPJ [CNPJ]. Ao criar uma conta, você declara que leu e aceita estes termos e a Política de Privacidade.",
+          `Estes Termos de Uso regulam o uso do guf, mantido por ${CONTROLLER_DESCRIPTION}. Contato: ${PRIVACY_CONTACT_EMAIL}. Ao criar uma conta, você declara que leu e aceita estes termos e a Política de Privacidade.`,
+        ),
+        p(
+          "O guf está em fase inicial: funcionalidades podem mudar, melhorar ou sair. Quando uma mudança afetar seus dados ou o seu plano, você é avisado no app antes.",
         ),
       ],
     },
@@ -142,7 +150,7 @@ const TERMS: LegalDocumentContent = {
         ul(
           "Use dados verdadeiros e mantenha o e-mail atualizado.",
           "A senha é pessoal. Não a compartilhe.",
-          "Se notar um acesso que não foi seu, escreva para [E-MAIL DE SUPORTE].",
+          `Se notar um acesso que não foi seu, escreva para ${PRIVACY_CONTACT_EMAIL}.`,
         ),
       ],
     },
@@ -166,7 +174,7 @@ const TERMS: LegalDocumentContent = {
       title: "Conteúdo do usuário",
       blocks: [
         p(
-          "Treinos, rotinas, notas e medidas que você registra são seus. A [RAZÃO SOCIAL] só os usa para prestar o serviço, como descrito na Política de Privacidade.",
+          "Treinos, rotinas, notas e medidas que você registra são seus. O guf só os usa para prestar o serviço, como descrito na Política de Privacidade.",
         ),
         p("Não é permitido usar o app para enviar conteúdo ilegal, ofensivo ou que viole direitos de terceiros."),
       ],
@@ -192,6 +200,22 @@ const TERMS: LegalDocumentContent = {
       ],
     },
     {
+      id: "guf-ai",
+      title: "GUF AI",
+      blocks: [
+        p(
+          "O GUF AI responde perguntas sobre os seus próprios treinos e ajuda a montar rotinas a partir de uma ficha colada por você. As respostas são geradas por inteligência artificial e podem conter erros.",
+        ),
+        ul(
+          "Confira cargas, séries e exercícios antes de treinar. O GUF AI não é médico nem profissional de educação física e não faz diagnóstico.",
+          "Rotinas sugeridas só são criadas depois que você revisa e confirma.",
+          "Não escreva nas perguntas nomes, telefones, documentos ou informações de saúde.",
+          "O número de perguntas por dia depende do plano.",
+        ),
+        { kind: "link", doc: "privacidade", anchor: "guf-ai", text: "Ler como o GUF AI usa seus dados" },
+      ],
+    },
+    {
       id: "planos",
       title: "Planos Free e Pro",
       blocks: [
@@ -214,7 +238,14 @@ const TERMS: LegalDocumentContent = {
       blocks: [
         p("Você pode excluir sua conta a qualquer momento. A exclusão apaga treinos, rotinas, projetos e medidas."),
         action("delete"),
-        p("A conta pode ser suspensa se estes termos forem violados, com aviso prévio, salvo quando a lei exigir ação imediata."),
+        p("Se estes termos forem violados, a conta pode ser suspensa (por um prazo ou até nova análise) ou excluída:"),
+        ul(
+          "Sempre que possível, você é avisado antes, no app ou por e-mail, com o motivo.",
+          "Em casos graves, como fraude, uso da conta de outra pessoa, assédio ou risco a outras pessoas, a suspensão pode ser imediata.",
+          "Durante a suspensão você não consegue entrar, e seus dados continuam guardados.",
+          "A exclusão por violação é avisada no app com a data, para você poder exportar seus dados antes, salvo nos casos graves.",
+          `Você pode contestar a suspensão ou a exclusão pelo e-mail ${PRIVACY_CONTACT_EMAIL}; a resposta sai em até ${DSAR_RESPONSE_DAYS} dias.`,
+        ),
       ],
     },
     {
@@ -222,7 +253,7 @@ const TERMS: LegalDocumentContent = {
       title: "Limitação de responsabilidade",
       blocks: [
         p(
-          "A [RAZÃO SOCIAL] trabalha para manter o app disponível e seguro, mas não responde por lesões decorrentes da execução dos exercícios nem por indisponibilidades temporárias, nos limites do Código de Defesa do Consumidor.",
+          "O guf trabalha para manter o app disponível e seguro, mas não responde por lesões decorrentes da execução dos exercícios, por decisões tomadas a partir de respostas do GUF AI nem por indisponibilidades temporárias, nos limites do Código de Defesa do Consumidor.",
         ),
       ],
     },
@@ -234,10 +265,16 @@ const TERMS: LegalDocumentContent = {
     {
       id: "foro",
       title: "Foro e contato",
-      blocks: [p("Estes termos seguem a lei brasileira. Fica eleito o foro do domicílio do usuário. Dúvidas: [E-MAIL DE SUPORTE].")],
+      blocks: [p(`Estes termos seguem a lei brasileira. Fica eleito o foro do domicílio do usuário. Dúvidas: ${PRIVACY_CONTACT_EMAIL}.`)],
     },
   ],
   changes: {
+    "1.0": [
+      `Versão oficial: o guf é mantido por ${CONTROLLER_DESCRIPTION}, com contato em ${PRIVACY_CONTACT_EMAIL}.`,
+      "Suspensão e exclusão por violação: quando há aviso antes, quando pode ser imediata e como contestar.",
+      "Nova seção sobre o GUF AI: as respostas podem errar e não substituem um profissional.",
+      "O guf está em fase inicial: mudanças que afetem seus dados ou seu plano são avisadas antes.",
+    ],
     "0.5-dev": [
       "Seus treinos, recordes e evolução ficam completos em qualquer plano; o Free limita só o período mostrado nos gráficos.",
       "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual.",
@@ -272,6 +309,7 @@ const PRIVACY: LegalDocumentContent = {
     { icon: "heart-pulse", text: "Medidas corporais são opcionais e só são coletadas com o seu consentimento." },
     { icon: "download", text: "Você pode exportar ou apagar seus dados pelo app, em Configurações › Privacidade." },
     { icon: "globe", text: "Seus dados ficam guardados no Brasil. Alguns prestadores ficam nos EUA, e a transferência segue as regras da LGPD." },
+    { icon: "user-check", text: `Responsável: ${CONTROLLER_NAME}. Pedidos sobre seus dados: ${PRIVACY_CONTACT_EMAIL}.` },
   ],
   sections: [
     {
@@ -279,10 +317,10 @@ const PRIVACY: LegalDocumentContent = {
       title: "Quem somos",
       blocks: [
         p(
-          "O guf é oferecido por [RAZÃO SOCIAL], CNPJ [CNPJ], com sede em [ENDEREÇO]. Para a LGPD, ela é a controladora dos seus dados pessoais: decide como e para que eles são tratados.",
+          `O guf é mantido por ${CONTROLLER_DESCRIPTION}. Para a LGPD, ele é o controlador dos seus dados pessoais: decide como e para que eles são tratados.`,
         ),
         p(
-          `O encarregado pelo tratamento de dados (DPO) é [NOME DO ENCARREGADO]. Até a designação, dúvidas e pedidos sobre seus dados vão para ${PRIVACY_CONTACT_EMAIL}.`,
+          `Como agente de tratamento de pequeno porte (Resolução CD/ANPD nº 2/2022), o guf não tem encarregado (DPO) designado, o que a resolução dispensa (art. 11). O canal para dúvidas e pedidos sobre seus dados é o e-mail ${PRIVACY_CONTACT_EMAIL}, que recebe e responde esses pedidos.`,
         ),
       ],
     },
@@ -307,6 +345,10 @@ const PRIVACY: LegalDocumentContent = {
               "O app e, se você assinar, o prestador de pagamento",
             ],
             ["Medidas corporais", "Circunferências do corpo, em centímetros", "Você, opcional e com consentimento"],
+            ["Conversas com o GUF AI", "Suas perguntas, as respostas e se você marcou a resposta como útil", "Você, se usar o GUF AI"],
+            ["Ficha colada para importar", "O texto da ficha (não é guardado) e o horário da conversão", "Você, se usar a importação"],
+            ["Comunicados", "Quais avisos do guf você viu, fechou ou tocou", "O app"],
+            ["Atendimento", "Registro do que a equipe viu ou alterou na sua conta, com o motivo; suspensões e exclusões agendadas", "A equipe do guf, ao atender ou moderar"],
           ],
         },
         p("Não são coletados localização, contatos nem dados de outros apps."),
@@ -329,6 +371,10 @@ const PRIVACY: LegalDocumentContent = {
             ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
             ["Liberar o que o seu plano inclui e gerir a assinatura do Pro", "Plano e assinatura", "Execução de contrato (art. 7º, V)"],
             ["Guardar os registros de pagamento exigidos pela lei fiscal", "Assinatura e pagamentos", "Obrigação legal (art. 7º, II)"],
+            ["Responder suas perguntas no GUF AI e converter fichas em rotinas", "Conversas, treinos e rotinas (sem identificação)", "Execução de contrato (art. 7º, V), só se você usar"],
+            ["Avisos sobre o serviço e sobre estes documentos", "Comunicados", "Execução de contrato (art. 7º, V) e obrigação legal (art. 7º, II)"],
+            ["Avisos de novidades do guf", "Comunicados", "Legítimo interesse (art. 7º, IX), com opção de desligar em Configurações › Preferências"],
+            ["Atender pedidos de suporte e aplicar estes termos (suspensão ou exclusão por violação)", "Atendimento e o resumo da conta", "Execução de contrato (art. 7º, V) e exercício regular de direitos (art. 7º, VI)"],
             ["Comprovar seus aceites e consentimentos", "Documento, versão e data de cada aceite", "Obrigação legal (art. 7º, II)"],
             ["Segurança e prevenção a fraudes", "Conta e registros de acesso", "Legítimo interesse (art. 7º, IX)"],
             ["Cumprir obrigações legais", "Registros de acesso", "Obrigação legal (art. 7º, II)"],
@@ -364,6 +410,47 @@ const PRIVACY: LegalDocumentContent = {
       ],
     },
     {
+      id: "guf-ai",
+      title: "GUF AI (inteligência artificial)",
+      blocks: [
+        p(
+          "Quando você faz uma pergunta ao GUF AI ou cola uma ficha para importar, o guf envia ao provedor de inteligência artificial (Google, pela API do Gemini, nos Estados Unidos) a sua pergunta e só os dados de treino necessários para responder: exercícios, séries, cargas, datas, rotinas e as regras da competição.",
+        ),
+        ul(
+          "Nunca são enviados: nome, e-mail, foto, @, ids da sua conta, medidas corporais, observações escritas por você nem dados de outras pessoas.",
+          "Antes de enviar, o guf remove da pergunta e-mails, CPF ou CNPJ, telefones, links e números longos.",
+          "O guf usa hoje o plano gratuito da API do Gemini, em que o Google pode usar o conteúdo recebido para melhorar os próprios serviços, inclusive com revisão por pessoas. Por isso não escreva dados pessoais ou de saúde nas perguntas.",
+          `As conversas ficam guardadas para você continuar de onde parou e são apagadas 180 dias depois da última mensagem ou quando você exclui a conta. Para apagar antes, peça pelo e-mail ${PRIVACY_CONTACT_EMAIL}.`,
+          "O texto da ficha colada não é guardado; fica só o horário da conversão, por 2 dias, para contar o limite diário.",
+          "O GUF AI só lê; ele não altera nada na sua conta. Rotinas sugeridas só são criadas depois da sua confirmação.",
+        ),
+      ],
+    },
+    {
+      id: "atendimento",
+      title: "Atendimento e moderação",
+      blocks: [
+        p(
+          "Para atender pedidos de suporte e aplicar os Termos de Uso, a equipe do guf (hoje, só o responsável) usa um painel interno com acesso protegido por senha e segundo fator. O painel mostra um resumo da sua conta: nome, @, e-mail parcialmente escondido, datas, logins, plano, seguidores, total de treinos e quais documentos você aceitou.",
+        ),
+        ul(
+          "O painel nunca mostra medidas corporais, observações, conversas com o GUF AI, séries ou cargas.",
+          "Mostrar o e-mail completo e qualquer alteração ficam registrados, com o motivo e quem fez.",
+          "A equipe pode corrigir o @ ou o nome (você recebe um aviso no app), mudar o plano, desvincular um login social a seu pedido, mandar um link para você criar uma senha nova (a equipe nunca vê nem escolhe a sua senha) e, por violação dos Termos, suspender ou excluir a conta.",
+        ),
+      ],
+    },
+    {
+      id: "comunicados",
+      title: "Comunicados no app",
+      blocks: [
+        p(
+          "O guf pode mostrar avisos no app sobre o serviço (manutenção, mudanças na sua conta), sobre estes documentos e sobre novidades do guf. O app registra se você viu, fechou ou tocou no aviso, para não repetir o mesmo aviso.",
+        ),
+        p("Os avisos de novidades podem ser desligados em Configurações › Preferências › Novidades do guf no app. Avisos sobre o serviço e sobre os documentos continuam chegando."),
+      ],
+    },
+    {
       id: "compartilhamento",
       title: "Com quem compartilhamos",
       blocks: [
@@ -374,7 +461,8 @@ const PRIVACY: LegalDocumentContent = {
           "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
           "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
-          "[PRESTADOR DE PAGAMENTO], só se você assinar o Pro: recebe os dados de pagamento direto de você. O guf não vê nem guarda o número do cartão; recebe só a situação da assinatura.",
+          "Google (API do Gemini), se você usar o GUF AI: recebe a pergunta e os dados de treino sem identificação (veja a seção GUF AI).",
+          "Prestador de pagamento: o Pro ainda não está à venda. Quando estiver, uma nova versão desta política dirá qual é o prestador; ele receberá os dados de pagamento direto de você, e o guf não verá nem guardará o número do cartão.",
           "Serviço de notificações do seu navegador ou celular (Google, Apple ou Mozilla), se você ligar as notificações. O texto do aviso vai criptografado: só o seu aparelho consegue ler.",
           "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
@@ -386,7 +474,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (só se você entrar com Google), o serviço de notificações do seu aparelho (só se você ligar as notificações) e empresas contratadas pelo Supabase. Essas transferências seguem o art. 33 da LGPD, com [MECANISMO DE TRANSFERÊNCIA].",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
         ),
       ],
     },
@@ -404,8 +492,13 @@ const PRIVACY: LegalDocumentContent = {
             ["Perfil social, seguidores e bloqueios", "Enquanto a conta existir; seguidores até você remover; bloqueios até desbloquear"],
             ["Avisos no celular", "Até você desligar as notificações, sair da conta no aparelho ou o aparelho deixar de aceitar notificações; o registro dos avisos de seguidores enviados, por 1 dia"],
             ["Plano e assinatura", "Enquanto a conta existir; os registros de pagamento exigidos pela lei fiscal ficam com o prestador de pagamento pelo prazo legal"],
-            ["Registros de acesso", "[PRAZO DOS REGISTROS DE ACESSO]"],
-            ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança do provedor somem em até [PRAZO DOS BACKUPS]"],
+            ["Conversas com o GUF AI", "Até 180 dias depois da última mensagem, ou até excluir a conta"],
+            ["Horário das conversões de ficha", "2 dias"],
+            ["Registro dos comunicados que você viu", "Até 12 meses depois de o comunicado terminar"],
+            ["Suspensões e exclusões agendadas", "Enquanto a conta existir"],
+            ["Registro do que a equipe viu ou alterou na sua conta", "5 anos, sem o conteúdo dos seus dados (só a ação, a data, quem fez e o motivo)"],
+            ["Registros técnicos de acesso (IP, data e hora)", "Ficam nos provedores (Supabase e Vercel) pelo prazo curto de cada um; o guf não guarda um arquivo próprio desses registros"],
+            ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança automáticas do provedor do banco, se houver, são substituídas no ciclo dele e não são usadas para recuperar contas excluídas"],
             [
               "Prova dos seus aceites, depois de excluir a conta",
               "5 anos, só com o documento, a versão, a data e o seu e-mail transformado em código irreversível (hash)",
@@ -439,7 +532,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Dados salvos no aparelho",
       blocks: [
         p(
-          "Para o treino funcionar sem internet, o app guarda no seu aparelho o treino em andamento, as rotinas e a preferência de tema. Esses dados vão para a sua conta quando a conexão volta.",
+          "Para o treino funcionar sem internet, o app guarda no seu aparelho o treino em andamento, as alterações que ainda vão ser enviadas, cópias do histórico, dos resumos e da evolução já vistos, o cronômetro do cardio e preferências (tema, aviso do descanso, tela ligada). As alterações vão para a sua conta quando a conexão volta. Ao sair da conta, o app apaga do aparelho os dados de treino; as preferências continuam. Medidas corporais nunca ficam salvas no aparelho.",
         ),
         p("O guf não usa cookies de publicidade nem rastreadores de terceiros."),
       ],
@@ -449,7 +542,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Segurança",
       blocks: [
         p(
-          "Os dados trafegam com criptografia (HTTPS) e as senhas são guardadas de forma irreversível. O acesso interno é restrito a quem precisa. Em caso de incidente com risco relevante, você e a ANPD serão avisados (art. 48).",
+          "Os dados trafegam com criptografia (HTTPS) e as senhas são guardadas de forma irreversível. O banco só entrega a cada conta os dados que ela pode ver. O acesso interno é restrito a quem precisa, exige segundo fator e fica registrado. Em caso de incidente com risco relevante, você e a ANPD serão avisados (art. 48).",
         ),
       ],
     },
@@ -466,12 +559,18 @@ const PRIVACY: LegalDocumentContent = {
       title: "Alterações desta política",
       blocks: [
         p(
-          "Quando esta política mudar de forma relevante, o app mostra o que mudou e pede seu aceite antes de a nova versão valer. Versões anteriores ficam em [ENDEREÇO DO HISTÓRICO DE VERSÕES].",
+          `Quando esta política mudar de forma relevante, o app mostra o que mudou e pede seu aceite antes de a nova versão valer. O que mudou em cada versão aparece no próprio documento; o texto de uma versão anterior pode ser pedido pelo e-mail ${PRIVACY_CONTACT_EMAIL}.`,
         ),
       ],
     },
   ],
   changes: {
+    "1.0": [
+      `Versão oficial: o responsável pelos seus dados é ${CONTROLLER_DESCRIPTION}. Por ser agente de pequeno porte, não há encarregado designado; o canal é ${PRIVACY_CONTACT_EMAIL}.`,
+      "Nova seção sobre o GUF AI: o que vai para o Google (Gemini), o que nunca vai e por quanto tempo as conversas ficam.",
+      "Novas seções sobre o atendimento da equipe (o que o painel mostra e o que fica registrado) e os comunicados no app (com opção de desligar as novidades).",
+      "Prazos de guarda completos, inclusive dos registros técnicos de acesso e das cópias de segurança, e a lista do que fica salvo no aparelho.",
+    ],
     "0.7-dev": [
       "Medidas corporais: o módulo registra só circunferências, em centímetros. Só você vê, e elas não vão para o GUF AI.",
     ],
@@ -619,7 +718,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
       title: "O que é a assinatura",
       blocks: [
         p(
-          "A assinatura do plano Pro do guf, oferecido por [RAZÃO SOCIAL], CNPJ [CNPJ], libera as funcionalidades do Pro enquanto estiver ativa. A lista atualizada do que cada plano inclui fica na tela Planos do app.",
+          `A assinatura do plano Pro do guf, mantido por ${CONTROLLER_DESCRIPTION}, libera as funcionalidades do Pro enquanto estiver ativa. A lista atualizada do que cada plano inclui fica na tela Planos do app.`,
         ),
         p("Estes termos completam os Termos de Uso; em caso de conflito sobre a assinatura, valem estes."),
       ],
@@ -628,10 +727,12 @@ const SUBSCRIPTION: LegalDocumentContent = {
       id: "preco",
       title: "Preço e cobrança",
       blocks: [
-        p(
-          "O preço é de [PREÇO] por [PERIODICIDADE], cobrado por [PRESTADOR DE PAGAMENTO] na forma escolhida por você. O valor e a data da cobrança aparecem na tela de assinatura antes da confirmação.",
-        ),
-        p("Mudanças de preço são avisadas no app e por e-mail com pelo menos [PRAZO DE AVISO] de antecedência e só valem a partir da renovação seguinte."),
+        {
+          kind: "note",
+          icon: "bell",
+          text: "O Pro ainda não está à venda e nada é cobrado. Antes de qualquer cobrança, uma nova versão destes termos informará o preço, a periodicidade, o prestador de pagamento e o canal de cancelamento, e você precisará aceitá-la.",
+        },
+        p("Quando a venda começar, o valor e a data da cobrança aparecerão na tela de assinatura antes da confirmação. Mudanças de preço serão avisadas no app e por e-mail antes de valer e só valerão a partir da renovação seguinte."),
       ],
     },
     {
@@ -649,7 +750,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
       title: "Direito de arrependimento",
       blocks: [
         p(
-          "Por ser uma contratação pela internet, você pode desistir em até 7 dias a contar da contratação e receber de volta o valor pago (art. 49 do Código de Defesa do Consumidor). O pedido é feito em [CANAL DE CANCELAMENTO].",
+          `Por ser uma contratação pela internet, você pode desistir em até 7 dias a contar da contratação e receber de volta o valor pago (art. 49 do Código de Defesa do Consumidor). O pedido pode ser feito pelo e-mail ${PRIVACY_CONTACT_EMAIL}.`,
         ),
       ],
     },
@@ -674,6 +775,10 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.0": [
+      `Versão oficial, mantida por ${CONTROLLER_DESCRIPTION}.`,
+      "O Pro ainda não está à venda: preço, prestador de pagamento e canal de cancelamento entram numa nova versão, que você aceita antes de qualquer cobrança.",
+    ],
     "0.2-dev": ["Quando o Pro termina, seus treinos continuam completos; só os gráficos voltam a mostrar o período do plano Free."],
   },
 };
@@ -693,9 +798,9 @@ export function privacyRequestMailto(): string {
   return `mailto:${PRIVACY_CONTACT_EMAIL}?subject=${encodeURIComponent("Pedido sobre meus dados (LGPD)")}`;
 }
 
-/** Contato do encarregado e da empresa (rodapé do leitor). Marcadores até o texto final. */
-export const LEGAL_DPO_LINE = `${PRIVACY_CONTACT_EMAIL} · Encarregado: [A DESIGNAR]`;
-export const LEGAL_COMPANY_LINE = "[RAZÃO SOCIAL] · CNPJ [CNPJ] · [ENDEREÇO]";
+/** Contato e responsável (rodapé do leitor). Sem encarregado: agente de pequeno porte (Res. CD/ANPD nº 2/2022, art. 11). */
+export const LEGAL_DPO_LINE = `${PRIVACY_CONTACT_EMAIL} · Sem encarregado designado (agente de pequeno porte)`;
+export const LEGAL_COMPANY_LINE = `${CONTROLLER_NAME} · pessoa física`;
 export const LEGAL_DPO_EMAIL = PRIVACY_CONTACT_EMAIL;
 
 export interface LegalTextPart {
