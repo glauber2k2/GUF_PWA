@@ -7,7 +7,19 @@ import type { TourTargetId } from "./tour-targets";
  */
 export const TOUR_VERSION = 2;
 
-export type TourChapter ="Início" | "Projetos" | "Treino" | "Competição" | "Perfil";
+export type TourChapter = "Primeiros passos" | "Início" | "Projetos" | "Treino" | "Competição" | "Perfil";
+
+/**
+ * O que o tour sabe sobre a conta para decidir quais passos mostrar. Quem monta é a composição
+ * (`app/`), para o tour não depender das features de onde os fatos vêm. Condição nova = campo novo
+ * aqui + valor na composição; o provider não muda.
+ */
+export interface TourFacts {
+  /** O @ ainda é o aleatório do cadastro (`guf.xxxxxx`). */
+  hasGeneratedHandle: boolean;
+}
+
+export type TourCondition = keyof TourFacts;
 
 export interface TourStep {
   id: string;
@@ -24,20 +36,51 @@ export interface TourStep {
   title: string;
   body: string;
   rat?: GufRatOccasion;
+  /** Só aparece quando o fato da conta é verdadeiro (sem condição = sempre). */
+  showIf?: TourCondition;
 }
 
 /**
- * Tour completo, na ordem em que a pessoa usa o app: Início (treino de hoje, semana, sequência,
- * histórico) → Projetos e rotinas → Treino (demonstração) → Competição e amigos → Perfil.
+ * Tour completo: primeiros passos (seu @, o GUF AI e importar a ficha) e depois a ordem em que a
+ * pessoa usa o app: Início (treino de hoje, semana, sequência, histórico) → Projetos e rotinas →
+ * Treino (demonstração) → Competição e amigos → Perfil.
  */
 export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "welcome",
-    chapter: "Início",
+    chapter: "Primeiros passos",
     route: "/",
     title: "Bem-vindo ao guf",
-    body: "Vamos dar uma volta pelo app: Início, projetos, treino, competição e perfil. Leva uns 2 minutos e dá para pular quando quiser.",
+    body: "Vamos dar uma volta pelo app: seu perfil, o GUF AI, projetos, treino e competição. Leva uns 2 minutos e dá para pular quando quiser.",
     rat: "welcome",
+  },
+  {
+    id: "handle",
+    chapter: "Primeiros passos",
+    route: "/perfil",
+    target: "editProfile",
+    showIf: "hasGeneratedHandle",
+    title: "Escolha o seu @",
+    body: "Seu @ ainda é o que o guf criou no cadastro. Toque em Editar perfil e escolha um com a sua cara: é por ele que seus amigos vão te encontrar.",
+    rat: "tip",
+  },
+  {
+    id: "guf-ai",
+    chapter: "Primeiros passos",
+    route: "/",
+    target: "aiAssistant",
+    title: "Conheça o GUF AI",
+    body: "Pergunte sobre os seus treinos: sua evolução, os seus pontos na competição, alternativas para um exercício. Ele responde com os seus dados.",
+    rat: "thinking",
+  },
+  {
+    id: "plan-import",
+    chapter: "Primeiros passos",
+    route: "/projetos",
+    target: "planImport",
+    title: "Importe sua ficha com IA",
+    body: "Recebeu a ficha do personal? Cole o texto aqui e o GUF AI monta o projeto e as rotinas. Você revisa tudo antes de criar.",
+    rat: "saved",
   },
   {
     id: "today",

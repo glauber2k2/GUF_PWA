@@ -7,6 +7,7 @@ import { AiMark } from "@/shared/components/ai-mark";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 import { cn } from "@/shared/helpers/class-names";
 import { PLAN_IMPORT_PATH } from "@/features/projects/helpers/paths";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 /** Atalho da lista de Projetos para importar a ficha do personal com o GUF AI (só online). */
 export function PlanImportEntry({ disabled }: { disabled: boolean }) {
@@ -26,13 +27,13 @@ export function PlanImportEntry({ disabled }: { disabled: boolean }) {
 
   if (disabled) {
     return (
-      <div aria-disabled="true" className={cn(className, "opacity-50")}>
+      <div data-tour={TOUR_TARGETS.planImport} aria-disabled="true" className={cn(className, "opacity-50")}>
         {content}
       </div>
     );
   }
   return (
-    <Link href={withDevState(PLAN_IMPORT_PATH)} className={cn(className, "transition-colors hover:bg-surface-3")}>
+    <Link data-tour={TOUR_TARGETS.planImport} href={withDevState(PLAN_IMPORT_PATH)} className={cn(className, "transition-colors hover:bg-surface-3")}>
       {content}
     </Link>
   );

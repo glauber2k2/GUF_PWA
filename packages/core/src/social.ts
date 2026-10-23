@@ -11,6 +11,17 @@ export const HANDLE_MAX_LENGTH = 20;
 /** Mesma regra do banco (social_profiles.handle): letras minúsculas, números, ponto e _; sem começar ou terminar com ponto ou _. */
 export const HANDLE_PATTERN = /^[a-z0-9][a-z0-9._]{1,18}[a-z0-9]$/;
 
+/** @ aleatório do cadastro ("guf." + 6 caracteres hexadecimais, gerado no handle_new_user). */
+const GENERATED_HANDLE_PATTERN = /^guf\.[0-9a-f]{6}$/;
+
+/**
+ * Se o @ ainda é o que o cadastro gerou (a pessoa nunca escolheu um).
+ * @returns false sem @ (perfil ainda não carregado)
+ */
+export function isGeneratedHandle(handle: string | null | undefined): boolean {
+  return handle !== null && handle !== undefined && GENERATED_HANDLE_PATTERN.test(handle);
+}
+
 /** A busca só começa a partir deste número de caracteres (igual ao servidor). */
 export const SOCIAL_SEARCH_MIN_LENGTH = 3;
 

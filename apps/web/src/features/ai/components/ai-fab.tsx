@@ -3,6 +3,7 @@
 import type { Ref } from "react";
 import { cn } from "@/shared/helpers/class-names";
 import { AiMark } from "@/shared/components/ai-mark";
+import { TOUR_TARGETS } from "@/features/onboarding";
 
 interface AiFabProps {
   /** Botão principal (o foco volta para ele quando o painel fecha). */
@@ -35,6 +36,7 @@ export function AiFab({ ref, isHidden, isHintVisible, isRaised, onOpen }: AiFabP
       <button
         ref={ref}
         type="button"
+        data-tour={TOUR_TARGETS.aiAssistant}
         aria-label="Abrir GUF AI"
         aria-haspopup="dialog"
         onClick={onOpen}

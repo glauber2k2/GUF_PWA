@@ -7,6 +7,7 @@ import { duelPath, FOLLOW_BUTTON_LABELS, followButtonState, socialInvitePath } f
 import type { MemberProfile } from "@guf/api";
 import { BottomSheet, Button, ConfirmDialog, IconButton, SheetOption } from "@/shared/components/ds";
 import { useAppShell } from "@/features/app-shell";
+import { TOUR_TARGETS } from "@/features/onboarding";
 import { useBlockUser, useCanUseSocial, useRemoveFollower, useRequestFollow, useUnfollow } from "@/features/social/api/use-social";
 
 /** Link completo do perfil (convite). */
@@ -34,7 +35,7 @@ export function SelfActions({ handle, onEdit }: { handle: string; onEdit: () => 
   const { showToast } = useAppShell();
   return (
     <div className="flex gap-2">
-      <Button variant="secondary" size="tall" icon={Pencil} fullWidth onClick={onEdit} className="flex-1">
+      <Button data-tour={TOUR_TARGETS.editProfile} variant="secondary" size="tall" icon={Pencil} fullWidth onClick={onEdit} className="flex-1">
         Editar perfil
       </Button>
       <Button variant="secondary" size="tall" icon={Share2} fullWidth onClick={() => void shareProfileLink(handle, showToast)} className="flex-1">
