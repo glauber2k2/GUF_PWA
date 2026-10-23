@@ -96,7 +96,7 @@ function summarizeSession(row: SessionRow, ref: string, unit: WeightUnit, withSe
 
 interface CompetitionParametersRow {
   sessions_for_max_constancy: number;
-  constancy_max: number;
+  constancy_points_per_day: number;
   min_minutes: number;
   bonus_per_week: number;
   bonus_max: number;
@@ -326,7 +326,7 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
       inputSchema: z.object({}),
       execute: async () => {
         const { data } = await db.from("competition_parameters")
-          .select("sessions_for_max_constancy, constancy_max, min_minutes, bonus_per_week, bonus_max, record_points, records_max, volume_max, volume_window_weeks")
+          .select("sessions_for_max_constancy, constancy_points_per_day, min_minutes, bonus_per_week, bonus_max, record_points, records_max, volume_max, volume_window_weeks")
           .lte("effective_from", seasonStart(today))
           .order("effective_from", { ascending: false }).limit(1).maybeSingle();
         if (!data) return { erro: "Não foi possível ler as regras da competição agora." };
@@ -336,11 +336,11 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
           treino_valido: `pelo menos ${p.min_minutes} minutos de tempo efetivo (tempo medido, sem pausas); no máximo 1 por dia (o de maior volume)`,
           semana: "domingo a sábado; o dia é o do início do treino",
           temporada: "o mês; uma semana pertence ao mês do sábado em que termina",
-          constancia: `${p.constancy_max / p.sessions_for_max_constancy} pontos por treino válido, até ${p.constancy_max} (${p.sessions_for_max_constancy} treinos); é o que mais pesa`,
-          sequencia: `semana com ${p.sessions_for_max_constancy} ou mais treinos válidos é "cumprida"; ${p.bonus_per_week} pontos × semanas cumpridas seguidas, até ${p.bonus_max}; zera numa semana não cumprida e continua entre temporadas`,
+          constancia: `${p.constancy_points_per_day} pontos por dia com treino válido, todos os dias da semana (sem limite de dias); é o que mais pesa`,
+          sequencia: `semana com ${p.sessions_for_max_constancy} ou mais dias de treino válido é "cumprida"; ${p.bonus_per_week} pontos × semanas cumpridas seguidas, até ${p.bonus_max}; zera numa semana não cumprida e continua entre temporadas`,
           recordes: `${p.record_points} pontos por recorde batido na semana (maior 1RM estimado de um exercício: mais carga ou mais repetições com a mesma carga), até ${p.records_max}; a primeira vez de um exercício não é recorde`,
           volume: `até ${p.volume_max} pontos: ${p.volume_max} × (volume da semana ÷ média das suas últimas ${p.volume_window_weeks} semanas com treino), limitado a ${p.volume_max}; sem histórico, ${p.volume_max} se treinou`,
-          maximo_por_semana: p.constancy_max + p.bonus_max + p.records_max + p.volume_max,
+          limite_por_semana: "sem máximo: cada dia treinado soma; recordes e volume têm limite próprio",
           desempate: "mais semanas cumpridas, depois mais treinos válidos, depois mais volume",
         };
       },
