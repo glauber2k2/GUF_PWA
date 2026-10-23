@@ -166,7 +166,14 @@ export function personalBests(sessions: readonly ExerciseSessionEvolution[]): Pe
 export type EvolutionMetric = "carga" | "1rm" | "volume";
 export type EvolutionPeriod = "1m" | "3m" | "6m" | "1a" | "tudo";
 
-export const EVOLUTION_METRICS: ReadonlyArray<{ value: EvolutionMetric; label: string; name: string; footnote: string }> = [
+export interface EvolutionMetricOption {
+  value: EvolutionMetric;
+  label: string;
+  name: string;
+  footnote: string;
+}
+
+export const EVOLUTION_METRICS: ReadonlyArray<EvolutionMetricOption> = [
   { value: "carga", label: "Carga máx.", name: "Carga máxima", footnote: "Maior carga de cada treino. Só séries concluídas, sem aquecimento." },
   { value: "1rm", label: "1RM est.", name: "1RM estimado", footnote: "1RM estimado pela fórmula de Epley, com a melhor série de cada treino. Sem aquecimento." },
   { value: "volume", label: "Volume", name: "Volume por treino", footnote: "Volume = carga × repetições das séries concluídas, sem aquecimento." },
@@ -181,7 +188,7 @@ export const EVOLUTION_PERIODS: ReadonlyArray<{ value: EvolutionPeriod; label: s
 ];
 
 /** Métricas do gráfico de um exercício: o 1RM só existe com carga × repetições (cardio não tem). */
-export function evolutionMetricsFor(muscleGroup: string): typeof EVOLUTION_METRICS {
+export function evolutionMetricsFor(muscleGroup: string): ReadonlyArray<EvolutionMetricOption> {
   return EVOLUTION_METRICS.filter((m) => m.value !== "1rm" || measuresReps(muscleGroup));
 }
 

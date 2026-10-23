@@ -13,6 +13,7 @@ import {
 import { isWorkoutPaused, toggleWorkoutPause, workoutElapsedSeconds, type WorkoutClock } from "@guf/core";
 import { keepScreenOnPreference, useScreenWakeLock } from "@/shared/hooks/use-screen-wake-lock";
 import { enqueue } from "@/shared/offline/outbox";
+import { clearCardioStopwatch } from "@/features/workout/hooks/use-cardio-stopwatch";
 import { playRestAlert, primeRestAlert } from "@/shared/sound/rest-alert";
 
 /*
@@ -90,9 +91,10 @@ function writeStored(state: ActiveWorkoutState | null) {
   }
 }
 
-/** Apaga o cache do treino ativo (ao sair da conta). */
+/** Apaga do aparelho o treino ativo e o cronômetro do cardio (ao sair da conta: nada do treino fica). */
 export function clearActiveWorkoutCache() {
   writeStored(null);
+  clearCardioStopwatch();
 }
 
 /** Segundos restantes de descanso agora. */
@@ -141,7 +143,10 @@ export function WorkoutProvider({ children }: { children: ReactNode }) {
         update((prev) =>
           prev?.sessionId === sessionId ? { ...prev, name, persist } : { sessionId, name, clock, rest: null, persist },
         ),
-      clear: () => update(() => null),
+      clear: () => {
+        update(() => null);
+        clearCardioStopwatch();
+      },
       togglePause: () => {
         const at = new Date();
         update((prev) => {

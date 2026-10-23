@@ -5,7 +5,6 @@ import { Area, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis }
 import { ChartLine, Minus, TrendingDown, TrendingUp, Trophy } from "lucide-react";
 import {
   addLocalDays,
-  EVOLUTION_METRICS,
   EVOLUTION_PERIODS,
   evolutionChartSummary,
   evolutionDeltaLabel,
@@ -15,6 +14,7 @@ import {
   TIMES_SIGN,
   toDisplayWeight,
   type EvolutionMetric,
+  type EvolutionMetricOption,
   type EvolutionPeriod,
   type EvolutionPoint,
   type EvolutionSeries,
@@ -34,7 +34,7 @@ export interface EvolutionChartProps {
   last: ExerciseSessionEvolution;
   metric: EvolutionMetric;
   /** Métricas do exercício (cardio sem 1RM: evolutionMetricsFor). */
-  metrics: typeof EVOLUTION_METRICS;
+  metrics: ReadonlyArray<EvolutionMetricOption>;
   period: EvolutionPeriod;
   unit: WeightUnit;
   /** Só 1 treino em todo o histórico. */

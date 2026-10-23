@@ -45,6 +45,11 @@ function writeRun(run: CardioStopwatchRun | null) {
   }
 }
 
+/** Apaga o cronômetro guardado no aparelho (fim do treino e saída da conta: nada do treino fica para trás). */
+export function clearCardioStopwatch() {
+  writeRun(null);
+}
+
 function secondsSince(startedAt: number, now: number): number {
   return Math.min(MAX_SET_DURATION_SECONDS, Math.max(0, Math.floor((now - startedAt) / 1000)));
 }
