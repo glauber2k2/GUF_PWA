@@ -1,6 +1,8 @@
 import { formatDayMonthYear } from "@guf/core";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 
+export { displayName } from "@/shared/helpers/display-name";
+
 /** /pessoas?q=…&id=… (busca e conta aberta ficam na URL: voltar e recarregar funcionam). */
 export function peoplePath({ query, userId }: { query?: string; userId?: string | null }): string {
   const params = new URLSearchParams();
@@ -26,9 +28,4 @@ export const GRANT_SOURCE_LABELS: Record<string, string> = {
 /** "12 mar 2026" a partir de um instante ISO. */
 export function formatDate(iso: string): string {
   return formatDayMonthYear(new Date(iso));
-}
-
-/** Nome para mostrar quando a pessoa não preencheu. */
-export function displayName(name: string | null, handle: string | null): string {
-  return name?.trim() || (handle ? `@${handle}` : "Sem nome");
 }

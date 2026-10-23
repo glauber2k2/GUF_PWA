@@ -39,6 +39,9 @@ export type ApiErrorCode =
   | "reason_required"
   | "nothing_changed"
   | "staff_already_member"
+  | "account_is_staff"
+  | "account_has_files"
+  | "date_in_past"
   | "mfa_code_invalid"
   | "invalid_credentials"
   | "not_authenticated"
@@ -94,6 +97,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   reason_required: "Escolha um motivo (em \"Outro\", descreva em até 200 caracteres). Ele fica registrado na auditoria.",
   nothing_changed: "Nada mudou: o valor novo é igual ao atual.",
   staff_already_member: "Essa pessoa já faz parte da equipe.",
+  account_is_staff: "Essa conta é sua ou de alguém da equipe. Tire o acesso dela em Equipe antes de suspender ou excluir.",
+  account_has_files: "Essa conta tem foto guardada no aplicativo. Peça para a pessoa excluir a conta pelo app (Configurações › Privacidade).",
+  date_in_past: "Escolha uma data e um horário no futuro.",
   invalid_credentials: "E-mail ou senha não conferem. Confira os dois campos e tente de novo.",
   mfa_code_invalid: "Código incorreto ou vencido. Digite o código que aparece agora no aplicativo.",
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
@@ -132,6 +138,9 @@ const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
   GA011: "reason_required",
   GA012: "nothing_changed",
   GA013: "staff_already_member",
+  GA014: "account_is_staff",
+  GA015: "account_has_files",
+  GA016: "date_in_past",
 };
 
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {

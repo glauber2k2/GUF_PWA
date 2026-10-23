@@ -99,6 +99,10 @@ export const mockStaffSessionApi = {
 
 // ---------------------------------------------------------------------------------------------
 
+function findPerson(userId: string) {
+  return getMockDb().people.find((p) => p.userId === userId);
+}
+
 export const mockAdminUsersApi = {
   async searchUsers(client, query) {
     const denied = await guard(client, "view_accounts");
@@ -119,6 +123,9 @@ export const mockAdminUsersApi = {
         isDefaultPlan: p.plan.isDefault,
         createdAt: p.createdAt,
         isPrivate: p.isPrivate,
+        isBanned: p.ban !== null,
+        banEndsAt: p.ban?.endsAt ?? null,
+        deletionScheduledFor: p.deletion?.scheduledFor ?? null,
       })),
       error: null,
     };
@@ -187,6 +194,71 @@ export const mockAdminUsersApi = {
     if (remaining.length === 0) return fail(apiError("only_login_method"));
     found.logins = found.logins.filter((l) => l.provider !== provider);
     audit("staff_unlinked_identity", userId, `@${found.handle}`, { reason: "titular_request", provider });
+    return { data: null, error: null };
+  },
+  async unlinkSocialLogins(client, { userId }) {
+    const denied = await guard(client, "unlink_login");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    const social = found.logins.filter((l) => l.provider !== "email");
+    if (social.length === 0) return fail(apiError("nothing_changed"));
+    if (!found.hasPassword || !found.logins.some((l) => l.provider === "email")) return fail(apiError("only_login_method"));
+    found.logins = found.logins.filter((l) => l.provider === "email");
+    social.forEach((l) => audit("staff_unlinked_identity", userId, `@${found.handle}`, { reason: "titular_request", provider: l.provider }));
+    return { data: social.length, error: null };
+  },
+  async banUser(client, { userId, endsAt, reason, note }) {
+    const denied = await guard(client, "ban_accounts");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (found.isStaff) return fail(apiError("account_is_staff"));
+    if (endsAt && endsAt <= new Date().toISOString()) return fail(apiError("date_in_past"));
+    found.ban = { endsAt, reason, note: note.trim() || null, createdAt: new Date().toISOString() };
+    audit("staff_banned_user", userId, `@${found.handle}`, { reason, ends_at: endsAt });
+    return { data: null, error: null };
+  },
+  async unbanUser(client, { userId, reason }) {
+    const denied = await guard(client, "ban_accounts");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (!found.ban) return fail(apiError("nothing_changed"));
+    found.ban = null;
+    audit("staff_unbanned_user", userId, `@${found.handle}`, { reason });
+    return { data: null, error: null };
+  },
+  async deleteUser(client, { userId, reason }) {
+    const denied = await guard(client, "delete_accounts");
+    if (denied) return fail(denied);
+    const db = getMockDb();
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (found.isStaff) return fail(apiError("account_is_staff"));
+    db.people = db.people.filter((p) => p.userId !== userId);
+    audit("staff_deleted_account", userId, "Conta excluída", { reason });
+    return { data: null, error: null };
+  },
+  async scheduleDeletion(client, { userId, at, reason, note }) {
+    const denied = await guard(client, "delete_accounts");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (found.isStaff) return fail(apiError("account_is_staff"));
+    if (at <= new Date().toISOString()) return fail(apiError("date_in_past"));
+    found.deletion = { scheduledFor: at, reason, note: note.trim() || null, createdAt: new Date().toISOString(), lastError: null };
+    audit("staff_scheduled_deletion", userId, `@${found.handle}`, { reason, scheduled_for: at });
+    return { data: null, error: null };
+  },
+  async cancelDeletion(client, { userId, reason }) {
+    const denied = await guard(client, "delete_accounts");
+    if (denied) return fail(denied);
+    const found = findPerson(userId);
+    if (!found) return fail(apiError("account_not_found"));
+    if (!found.deletion) return fail(apiError("nothing_changed"));
+    found.deletion = null;
+    audit("staff_cancelled_deletion", userId, `@${found.handle}`, { reason });
     return { data: null, error: null };
   },
   async listPlans(client) {

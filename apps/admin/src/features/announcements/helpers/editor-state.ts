@@ -1,6 +1,6 @@
 import type { AdminAnnouncement, AnnouncementDraft } from "@guf/api/admin";
 import { AUDIENCE_ALL, fallbackPurpose, type Audience } from "@guf/core";
-import { fromBrasiliaIso, toBrasiliaIso } from "@/features/announcements/helpers/announcement-display";
+import { fromBrasiliaIso, toBrasiliaIso } from "@/shared/helpers/brasilia-time";
 
 export type EditorStep = 1 | 2 | 3 | 4;
 export type StartMode = "now" | "later";
@@ -38,13 +38,17 @@ export const EMPTY_DRAFT: AnnouncementDraft = {
   endsAt: null,
 };
 
-export function initialEditorState(existing?: AdminAnnouncement): EditorState {
-  const draft = existing?.draft ?? EMPTY_DRAFT;
+/** Pessoas escolhidas em Pessoas (?para=) começam o comunicado novo só com a lista de ids. */
+const IDS_AUDIENCE: Audience = { rules: [{ type: "ids" }] };
+
+export function initialEditorState(existing?: AdminAnnouncement, presetTargetIds: string[] = []): EditorState {
+  const usePreset = !existing && presetTargetIds.length > 0;
+  const draft = existing?.draft ?? (usePreset ? { ...EMPTY_DRAFT, audience: IDS_AUDIENCE } : EMPTY_DRAFT);
   const start = fromBrasiliaIso(draft.startsAt);
   const end = fromBrasiliaIso(draft.endsAt);
   return {
     draft,
-    idsText: existing?.targetIds.join("\n") ?? "",
+    idsText: (existing?.targetIds ?? presetTargetIds).join("\n"),
     startMode: draft.startsAt ? "later" : "now",
     startDate: start.date,
     startTime: start.time || "09:00",

@@ -34,6 +34,8 @@ O guf **não tem obrigação fiscal, trabalhista ou bancária** hoje (não cobra
 | Comunicados (`announcements`) e quem viu/fechou/tocou (`announcement_receipts`) | **12 meses** depois do fim do comunicado | `ended_at` ou `ends_at` + 12 meses | Job diário `purge-expired-announcements` (03:41 UTC, registra `announcements_purged`); cascata na exclusão da conta | Art. 16 (minimização) — A023 |
 | Lista de ids de um comunicado (`announcement_targets`) | Até o comunicado terminar | Encerrado ou fim passado | Apagada ao encerrar e pelo mesmo job diário | Art. 6º, III — A023 |
 | Colaboradores (`staff_members`) | Até desligar (`disabled_at`, no mesmo dia) ou excluir a conta de trabalho | Desligamento | Admin no painel; cascata na exclusão | Art. 46 — A022 |
+| Suspensões (`account_bans`) | Até a conta ser excluída (histórico das suspensões encerradas fica para a defesa em caso de contestação) | Exclusão da conta | Cascata | Art. 7º, VI (exercício regular de direitos) ⚖ — A022 |
+| Exclusões agendadas (`account_deletion_schedules`) | Até executar ou cancelar | Data agendada | Job `execute-scheduled-account-deletions` (10 min) | Art. 16 — A022 |
 | Arquivo exportado (JSON) | Fica só no aparelho do titular | — | Nunca é guardado no servidor | Art. 18, II e V |
 | Logs da plataforma (Supabase API/Auth, Vercel) | **Retenção do plano** (curta nos planos gratuitos) | Automático pelo fornecedor | Fornecedor | G9 — os "6 meses" do Marco Civil não estão garantidos; só valem para provedor PJ com fins econômicos ⚖ |
 | **Backups do banco** | **Retenção do plano** (a confirmar) | Automático pelo fornecedor | Fornecedor; dados excluídos somem dos backups quando o backup expira | G15 — ver seção 4 |

@@ -3,25 +3,37 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Search, UserX } from "lucide-react";
+import type { AdminUserSummary } from "@guf/api/admin";
 import { Avatar, Banner, Button, cn, EmptyState, Icon, Skeleton } from "@guf/ui";
+import { editorForPeoplePath } from "@/features/announcements";
 import { useStaff } from "@/features/auth";
 import { PEOPLE_SEARCH_INPUT_ID } from "@/features/shell";
-import { usePerson, useSearchPeople } from "@/features/people/api/use-people";
+import { usePerson } from "@/features/people/api/use-people";
+import { AccountActionDialog } from "@/features/people/components/account-action-dialog";
+import { BulkActionBar } from "@/features/people/components/bulk-action-bar";
 import { EditAccountDialog } from "@/features/people/components/edit-account-dialog";
 import { PeopleResults } from "@/features/people/components/people-results";
 import { PersonDetail } from "@/features/people/components/person-detail";
 import { RevealEmailDialog } from "@/features/people/components/reveal-email-dialog";
 import { UnlinkDialog } from "@/features/people/components/unlink-dialog";
+import { ACCOUNT_ACTIONS, BULK_ACTIONS, type AccountActionKind, type AccountActionOutcome, type AccountTarget } from "@/features/people/helpers/account-actions";
 import { displayName, peoplePath } from "@/features/people/helpers/people";
 import type { EditField } from "@/features/people/hooks/use-account-edit";
+import { toAccountTarget, usePeopleSelection } from "@/features/people/hooks/use-people-selection";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useDevice } from "@/shared/hooks/use-device";
 import { useDevAdminState } from "@/shared/hooks/use-dev-admin-state";
+import { useSearchPeople } from "@/shared/hooks/use-search-people";
 import { useToast } from "@/shared/libs/toast-provider";
 
-type DialogState = { kind: "edit"; field: EditField } | { kind: "unlink"; provider: string } | { kind: "email" } | null;
+type DialogState =
+  | { kind: "edit"; field: EditField }
+  | { kind: "unlink"; provider: string }
+  | { kind: "email" }
+  | { kind: "action"; action: AccountActionKind; targets: AccountTarget[] }
+  | null;
 
 function ResultsSkeleton() {
   return (
@@ -61,6 +73,8 @@ export function PeopleScreen() {
   const person = usePerson(selectedId);
   const [dialog, setDialog] = useState<DialogState>(null);
   const [revealed, setRevealed] = useState<{ userId: string; email: string } | null>(null);
+  const selection = usePeopleSelection();
+  const canSelect = can("draft_announcements") || BULK_ACTIONS.some((kind) => can(ACCOUNT_ACTIONS[kind].permission));
 
   useEffect(() => {
     if (params.get("foco")) inputRef.current?.focus();
@@ -79,6 +93,21 @@ export function PeopleScreen() {
 
   const detailOpen = Boolean(selectedId);
   const showList = !detailOpen || device !== "mobile";
+
+  /** "Mudar plano" de uma pessoa usa o diálogo de edição (com @ e nome); o resto, o diálogo de ação. */
+  const startAction = (action: AccountActionKind, targets: AccountTarget[]) => {
+    if (action === "plan" && targets.length === 1 && targets[0]?.userId === selectedId) setDialog({ kind: "edit", field: "plan" });
+    else setDialog({ kind: "action", action, targets });
+  };
+  const actionFor = (person: AdminUserSummary, action: AccountActionKind) => startAction(action, [toAccountTarget(person)]);
+  const announceTo = (userIds: string[]) => router.push(editorForPeoplePath(userIds));
+
+  const afterAction = (action: AccountActionKind, outcome: AccountActionOutcome, message: string) => {
+    toast(message, { tone: "success" });
+    const doneIds = outcome.succeeded.map((t) => t.userId);
+    selection.remove(doneIds);
+    if (action === "delete" && selectedId && doneIds.includes(selectedId)) closeDetail();
+  };
 
   const copyId = async (id: string) => {
     await navigator.clipboard.writeText(id);
@@ -160,8 +189,25 @@ export function PeopleScreen() {
                 <span aria-live="polite" className="text-[13px] text-fg-muted">
                   {results.length === 1 ? "1 pessoa" : `${results.length} pessoas`}
                 </span>
-                <PeopleResults people={results} device={device} onOpen={open} />
+                <PeopleResults
+                  people={results}
+                  device={device}
+                  onOpen={open}
+                  selectedIds={selection.selectedIds}
+                  onToggle={canSelect ? selection.toggle : undefined}
+                  onToggleAll={canSelect ? () => selection.toggleAll(results) : undefined}
+                  onAction={actionFor}
+                  onAnnounce={(p) => announceTo([p.userId])}
+                />
               </>
+            )}
+            {selection.targets.length > 0 && !detailOpen && (
+              <BulkActionBar
+                count={selection.targets.length}
+                onAction={(action) => startAction(action, selection.targets)}
+                onAnnounce={() => announceTo(selection.selectedIds)}
+                onClear={selection.clear}
+              />
             )}
           </PageBody>
         </div>
@@ -201,6 +247,8 @@ export function PeopleScreen() {
                 onHideEmail={() => setRevealed(null)}
                 onEdit={(field) => setDialog({ kind: "edit", field })}
                 onUnlink={(provider) => setDialog({ kind: "unlink", provider })}
+                onAction={(action) => startAction(action, [toAccountTarget({ userId: person.data.userId, name: person.data.name, handle: person.data.handle })])}
+                onAnnounce={() => announceTo([person.data.userId])}
               />
             )}
           </div>
@@ -213,7 +261,7 @@ export function PeopleScreen() {
               )}
               {can("edit_profile") && (
                 <Button variant="secondary" size="tall" fullWidth className="flex-1" onClick={() => setDialog({ kind: "edit", field: "handle" })}>
-                  Editar @ e nome
+                  Editar conta
                 </Button>
               )}
             </MobileActionBar>
@@ -223,6 +271,14 @@ export function PeopleScreen() {
 
       {person.data && dialog?.kind === "edit" && (
         <EditAccountDialog person={person.data} initialField={dialog.field} onClose={() => setDialog(null)} onSaved={(message) => toast(message, { tone: "success" })} />
+      )}
+      {dialog?.kind === "action" && (
+        <AccountActionDialog
+          kind={dialog.action}
+          targets={dialog.targets}
+          onClose={() => setDialog(null)}
+          onDone={(outcome, message) => afterAction(dialog.action, outcome, message)}
+        />
       )}
       {person.data && dialog?.kind === "unlink" && (
         <UnlinkDialog person={person.data} provider={dialog.provider} onClose={() => setDialog(null)} onDone={(message) => toast(message, { tone: "success" })} />

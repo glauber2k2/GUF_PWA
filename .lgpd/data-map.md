@@ -451,7 +451,7 @@
 | Campo | Valor |
 |---|---|
 | Slug | a022-administracao-conta |
-| Finalidade | Atender a pessoa (suporte), corrigir @ ou nome a pedido dela ou por violação dos Termos, liberar plano manual (cortesia, teste, correção) e desvincular login social a pedido |
+| Finalidade | Atender a pessoa (suporte), corrigir @ ou nome a pedido dela ou por violação dos Termos, liberar plano manual (cortesia, teste, correção), desvincular login social a pedido, suspender a conta (prazo ou indeterminado) e excluir a conta (agora ou agendada) a pedido ou por violação dos Termos |
 | Base legal | Art. 7º, V (execução do contrato); correção a pedido = Art. 18, III; desvincular = pedido do titular (Art. 18) |
 | Categorias de titulares | Usuários; colaboradores (a própria conta de trabalho) |
 | Sensíveis? | Só o status sim/não do consentimento de saúde, visível aos papéis Suporte e Admin (nunca as medidas) |
@@ -460,7 +460,7 @@
 | Sistemas | `staff_members` (papéis), `audit_log` (actor_type `staff`), Edge Function `admin-invite-staff` |
 | Operadores | Supabase |
 | Transferência intl. | Não (sa-east-1) |
-| Retenção | Auditoria 5 anos (igual ao `audit_log`); `staff_members` até desligar (`disabled_at`) ou excluir a conta de trabalho |
+| Retenção | Auditoria 5 anos (igual ao `audit_log`); `staff_members` até desligar (`disabled_at`) ou excluir a conta de trabalho; `account_bans` e `account_deletion_schedules` até a conta ser excluída (cascata) |
 | Segurança | Colaborador ativo + segundo fator (aal2) + papel mínimo conferidos no banco a cada chamada; leitura de conta e toda alteração auditadas com motivo; painel em domínio próprio, `noindex`, CSP; nada guardado no aparelho |
 | Alto risco? | Não (Res. 2/2022 Art. 4º: sem larga escala, sem decisão automatizada); revisar se a equipe crescer |
 | Owner | Desenvolvedor (controlador pendente — G22) |

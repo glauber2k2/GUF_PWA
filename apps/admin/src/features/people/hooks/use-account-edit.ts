@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ApiError } from "@guf/api";
 import type { AdminUserDetail } from "@guf/api/admin";
 import { describeReason, isReasonComplete, normalizeHandle, type ChangeReason } from "@guf/core";
 import { staffNameSchema } from "@guf/schemas";
@@ -11,7 +12,10 @@ import { usePlanOptions } from "@/shared/hooks/use-plan-options";
 export type EditField = "plan" | "handle" | "name";
 export type EditStage = "form" | "review";
 
-const FIELD_LABELS: Record<EditField, string> = { plan: "Plano", handle: "@", name: "Nome" };
+/** Ordem de gravação: @ e nome antes do plano (o plano é o que mais recusa: assinatura paga). */
+const FIELD_ORDER: EditField[] = ["handle", "name", "plan"];
+
+export const FIELD_LABELS: Record<EditField, string> = { plan: "Plano", handle: "@", name: "Nome" };
 
 const HANDLE_MESSAGES = {
   invalid: "Use de 3 a 20 caracteres: letras minúsculas, números, ponto ou _.",
@@ -19,17 +23,34 @@ const HANDLE_MESSAGES = {
   same: "Esse já é o @ atual. Digite um novo.",
 } as const;
 
+export interface FieldChange {
+  field: EditField;
+  label: string;
+  before: string;
+  after: string;
+}
+
 /** "2027-10-22" (campo de data) → fim do dia em Brasília, em ISO. */
-function endOfDayIso(day: string): string | null {
+export function endOfDayIso(day: string): string | null {
   return day ? new Date(`${day}T23:59:59-03:00`).toISOString() : null;
 }
 
+/** "2027-10-22" → "22/10/2027". */
+export function formatDateField(day: string): string {
+  return day.split("-").reverse().join("/");
+}
+
+/** "@, nome e plano" */
+function joinLabels(fields: EditField[]): string {
+  const labels = fields.map((f) => FIELD_LABELS[f].toLowerCase());
+  return labels.length > 1 ? `${labels.slice(0, -1).join(", ")} e ${labels[labels.length - 1]}` : (labels[0] ?? "");
+}
+
 /**
- * Estado do diálogo "Editar conta" (protótipo 5a–5e): campo, valor novo com validação, motivo
- * obrigatório e resumo antes de confirmar. Salvar fica no banco (auditado com o motivo).
+ * Estado do diálogo "Editar conta" (protótipo 5a–5e): plano, @ e nome no mesmo formulário, com um
+ * motivo só. Envia só o que mudou, um por vez; se um falhar, os já gravados não são reenviados.
  */
-export function useAccountEdit(person: AdminUserDetail, initialField: EditField, onDone: (message: string) => void) {
-  const [field, setFieldState] = useState<EditField>(initialField);
+export function useAccountEdit(person: AdminUserDetail, allowedFields: EditField[], onDone: (message: string) => void) {
   const [stage, setStage] = useState<EditStage>("form");
   const [handle, setHandle] = useState("");
   const [name, setName] = useState(person.name ?? "");
@@ -38,67 +59,93 @@ export function useAccountEdit(person: AdminUserDetail, initialField: EditField,
   const [reason, setReason] = useState<ChangeReason | null>(null);
   const [note, setNote] = useState("");
   const [tried, setTried] = useState(false);
+  const [saved, setSaved] = useState<EditField[]>([]);
+  const [isSaving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<{ field: EditField; error: ApiError } | null>(null);
 
+  const allows = (field: EditField) => allowedFields.includes(field);
   const plans = usePlanOptions();
-  const debouncedHandle = useDebouncedValue(normalizeHandle(handle), 350);
-  const availability = useHandleAvailability(person.userId, debouncedHandle, field === "handle");
+  const normalizedHandle = normalizeHandle(handle);
+  const debouncedHandle = useDebouncedValue(normalizedHandle, 350);
+  const availability = useHandleAvailability(person.userId, debouncedHandle, allows("handle") && !saved.includes("handle"));
   const updateHandle = useUpdateHandle();
   const updateName = useUpdateName();
   const setPlan = useSetPlan();
 
-  const handleStatus = debouncedHandle === normalizeHandle(handle) ? availability.data : undefined;
-  const handleError = handleStatus && handleStatus !== "available" ? HANDLE_MESSAGES[handleStatus] : undefined;
+  const handleTyped = normalizedHandle.length > 0;
+  const handleStatus = debouncedHandle === normalizedHandle ? availability.data : undefined;
+  const handleError = handleTyped && handleStatus && handleStatus !== "available" ? HANDLE_MESSAGES[handleStatus] : undefined;
+
+  const trimmedName = name.trim();
+  const nameChanged = trimmedName !== (person.name ?? "").trim();
   const nameParse = staffNameSchema.safeParse(name);
-  const nameError = nameParse.success ? (nameParse.data === (person.name ?? "") ? "Esse já é o nome atual." : undefined) : nameParse.error.issues[0]?.message;
+  const nameError = nameChanged && !nameParse.success ? nameParse.error.issues[0]?.message : undefined;
+
   const selectedPlan = plans.data?.find((p) => p.code === planCode);
   const planChanged = planCode !== person.plan.code || (Boolean(validUntil) && !selectedPlan?.isDefault);
 
-  const isValueValid = { handle: handleStatus === "available", name: !nameError, plan: planChanged }[field];
+  const changes: FieldChange[] = FIELD_ORDER.filter(allows).flatMap((field): FieldChange[] => {
+    if (field === "handle" && handleTyped) {
+      return [{ field, label: FIELD_LABELS.handle, before: person.handle ? `@${person.handle}` : "Sem @", after: `@${normalizedHandle}` }];
+    }
+    if (field === "name" && nameChanged) return [{ field, label: FIELD_LABELS.name, before: person.name ?? "Sem nome", after: trimmedName }];
+    if (field === "plan" && planChanged) {
+      const until = validUntil && !selectedPlan?.isDefault ? ` até ${formatDateField(validUntil)}` : "";
+      return [{ field, label: FIELD_LABELS.plan, before: person.plan.name, after: `${selectedPlan?.name ?? planCode}${until}` }];
+    }
+    return [];
+  });
+
+  const isHandleReady = !handleTyped || handleStatus === "available" || saved.includes("handle");
+  const isValueValid = changes.length > 0 && isHandleReady && !nameError;
   const isReasonValid = isReasonComplete(reason, note);
-
-  const currentValue = { plan: person.plan.name, handle: person.handle ? `@${person.handle}` : "Sem @", name: person.name ?? "Sem nome" }[field];
-  const nextValue = {
-    plan: `${selectedPlan?.name ?? planCode}${validUntil && !selectedPlan?.isDefault ? ` até ${validUntil.split("-").reverse().join("/")}` : ""}`,
-    handle: `@${normalizeHandle(handle)}`,
-    name: name.trim(),
-  }[field];
-
-  const mutation = { handle: updateHandle, name: updateName, plan: setPlan }[field];
-
-  const setField = (next: EditField) => {
-    setFieldState(next);
-    setTried(false);
-  };
 
   const toReview = () => {
     setTried(true);
     if (isValueValid && isReasonValid) setStage("review");
   };
 
-  const confirm = () => {
+  const saveField = (field: EditField, base: { userId: string; reason: ChangeReason; note: string }) => {
+    if (field === "handle") return updateHandle.mutateAsync({ ...base, handle: normalizedHandle });
+    if (field === "name") return updateName.mutateAsync({ ...base, name: trimmedName });
+    return setPlan.mutateAsync({ ...base, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayIso(validUntil) });
+  };
+
+  const confirm = async () => {
     if (!reason) return;
     const base = { userId: person.userId, reason, note };
-    const done = () => onDone(`${FIELD_LABELS[field] === "@" ? "@" : FIELD_LABELS[field]} alterado para ${nextValue}`);
-    if (field === "handle") updateHandle.mutate({ ...base, handle: normalizeHandle(handle) }, { onSuccess: done });
-    if (field === "name") updateName.mutate({ ...base, name: name.trim() }, { onSuccess: done });
-    if (field === "plan") setPlan.mutate({ ...base, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayIso(validUntil) }, { onSuccess: done });
+    const done = [...saved];
+    setSaving(true);
+    setSaveError(null);
+    for (const { field } of changes) {
+      if (done.includes(field)) continue;
+      try {
+        await saveField(field, base);
+        done.push(field);
+        setSaved([...done]);
+      } catch (error) {
+        setSaveError({ field, error: error as ApiError });
+        setSaving(false);
+        return;
+      }
+    }
+    setSaving(false);
+    onDone(`${joinLabels(changes.map((c) => c.field))} ${changes.length > 1 ? "alterados" : "alterado"}`.replace(/^./, (c) => c.toUpperCase()));
   };
 
   return {
-    field,
-    setField,
     stage,
     backToForm: () => setStage("form"),
-    fieldLabel: FIELD_LABELS[field],
-    currentValue,
-    nextValue,
+    allows,
+    changes,
+    saved,
     handle,
     setHandle,
-    handleError: tried || handle ? handleError : undefined,
-    handleHint: handleStatus === "available" ? `@${normalizeHandle(handle)} está disponível.` : undefined,
+    handleError,
+    handleHint: handleTyped && handleStatus === "available" ? `@${normalizedHandle} está disponível.` : undefined,
     name,
     setName,
-    nameError: tried || name !== (person.name ?? "") ? nameError : undefined,
+    nameError,
     plans: plans.data ?? [],
     planCode,
     setPlanCode,
@@ -110,11 +157,11 @@ export function useAccountEdit(person: AdminUserDetail, initialField: EditField,
     note,
     setNote,
     showReasonError: tried && !isReasonValid,
-    showPlanError: tried && field === "plan" && !planChanged,
+    showNoChangeError: tried && changes.length === 0,
     reasonText: describeReason(reason, note),
     toReview,
-    confirm,
-    isSaving: mutation.isPending,
-    saveError: mutation.error,
+    confirm: () => void confirm(),
+    isSaving,
+    saveError: saveError && { label: FIELD_LABELS[saveError.field], message: saveError.error.message },
   };
 }

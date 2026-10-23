@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { ArrowDown, ChevronDown, ChevronUp, ScrollText } from "lucide-react";
 import type { AuditEntry } from "@guf/api/admin";
 import { auditActionLabel, AUDIT_ACTIONS, formatStaffDateTime } from "@guf/core";
@@ -57,7 +57,10 @@ function AuditLog() {
   const [period, setPeriod] = useState("7");
   const [expanded, setExpanded] = useState<number | null>(null);
   const debouncedSubject = useDebouncedValue(subject.trim(), 400);
-  const audit = useAuditLog({ subject: debouncedSubject || undefined, action: action || undefined, from: daysAgoIso(period) });
+  // Calculado só quando o período muda: um instante novo a cada render trocava a chave da consulta
+  // e a lista ficava carregando para sempre.
+  const from = useMemo(() => daysAgoIso(period), [period]);
+  const audit = useAuditLog({ subject: debouncedSubject || undefined, action: action || undefined, from });
   const rows = audit.data?.pages.flat() ?? [];
   const toggle = (id: number) => setExpanded((current) => (current === id ? null : id));
   const clearFilters = () => {

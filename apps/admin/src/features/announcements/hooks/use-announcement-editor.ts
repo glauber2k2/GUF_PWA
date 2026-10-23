@@ -31,7 +31,7 @@ function firstIssue(draft: AnnouncementDraft, targetCount: number, forPublish: b
     return { step: STEP_OF_FIELD[String(issue?.path[0])] ?? 1, message: issue?.message ?? "Confira os campos." };
   }
   if (draft.ctaLabel && !draft.ctaPath) return { step: 1, message: "Escolha a tela que o botão abre." };
-  if (draft.audience.rules.some((r) => r.type === "ids") && targetCount === 0) return { step: 2, message: "Cole pelo menos um id na lista." };
+  if (draft.audience.rules.some((r) => r.type === "ids") && targetCount === 0) return { step: 2, message: "Adicione pelo menos uma pessoa à lista." };
   if (!forPublish) return null;
   const ready = announcementPublishSchema.safeParse({ title: draft.title, body: draft.body, endsAt: draft.endsAt ?? "" });
   if (!ready.success) {
@@ -46,9 +46,9 @@ function firstIssue(draft: AnnouncementDraft, targetCount: number, forPublish: b
  * Estado do editor de comunicado (protótipo 8a–8n): 4 passos, rascunho salvo no banco e publicar
  * (só admin). Público e finalidade andam juntos: com consentimento de saúde, "Produto" sai.
  */
-export function useAnnouncementEditor(existing: AdminAnnouncement | undefined) {
+export function useAnnouncementEditor(existing: AdminAnnouncement | undefined, presetTargetIds: string[] = []) {
   const [id, setId] = useState<string | null>(existing?.id ?? null);
-  const [state, setState] = useState<EditorState>(() => initialEditorState(existing));
+  const [state, setState] = useState<EditorState>(() => initialEditorState(existing, presetTargetIds));
   const [step, setStep] = useState<EditorStep>(1);
   const [isDirty, setDirty] = useState(false);
   const save = useSaveAnnouncement();

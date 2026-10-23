@@ -54,7 +54,8 @@ export function AnnouncementFullscreen({ tone, title, body, ctaLabel, hasImage, 
   return (
     <div className={cn("flex h-full flex-col gap-3 bg-background px-5 pt-12 pb-6 text-fg", className)}>
       {hasImage ? (
-        <ImageSlot className="min-h-32 flex-1" />
+        // Proporção fixa (5:4): a foto não cresce com a altura da tela; o espaço que sobra fica embaixo.
+        <ImageSlot className="aspect-[5/4] w-full shrink-0" />
       ) : (
         <div className="grid min-h-32 flex-1 place-items-center rounded-xl bg-surface-3">
           <Icon icon={style.icon} size={44} className={style.text} />
@@ -63,7 +64,7 @@ export function AnnouncementFullscreen({ tone, title, body, ctaLabel, hasImage, 
       <ToneLabel tone={tone} />
       <h2 className="m-0 text-2xl leading-tight font-bold tracking-tight text-pretty">{title}</h2>
       <p className="m-0 text-sm leading-5 text-pretty text-fg-secondary">{body}</p>
-      <div className="mt-1.5 flex flex-col gap-1.5">
+      <div className={cn("flex flex-col gap-1.5", hasImage ? "mt-auto pt-1.5" : "mt-1.5")}>
         {ctaLabel && (
           <Button size="tall" fullWidth onClick={onCta}>
             {ctaLabel}
