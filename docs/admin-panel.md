@@ -1,6 +1,6 @@
 # Painel de administração (guf admin)
 
-**Situação:** implementado em 2026-10-22 (branch `feat/painel-admin`), seguindo o protótipo `Guf Admin.dc.html` do Claude Design. Migration `20261022160000_admin_panel` aplicada em 2026-10-22 (testada antes em transação desfeita); Edge Function `admin-invite-staff` publicada (`ADMIN_APP_URL` = `https://guf-pwa.vercel.app`, endereço do painel); primeiro admin: a conta do desenvolvedor. Antes de abrir a colaboradores além do desenvolvedor: itens da seção 2.2 (gap G24). O que mudou em relação ao plano está na seção 5.
+**Situação:** implementado em 2026-10-22 (branch `feat/painel-admin`), seguindo o protótipo `Guf Admin.dc.html` do Claude Design. Migration `20261022160000_admin_panel` aplicada em 2026-10-22 (testada antes em transação desfeita); Edge Function `admin-invite-staff` publicada (`ADMIN_APP_URL` = `https://adminguf.vercel.app`, endereço do painel; até 2026-10-23 apontava para `guf-pwa.vercel.app`, que não existe, e o link do convite não abria); primeiro admin: a conta do desenvolvedor. Antes de abrir a colaboradores além do desenvolvedor: itens da seção 2.2 (gap G24). O que mudou em relação ao plano está na seção 5.
 
 **O que o painel faz**
 1. **Contas:** buscar pessoas e ver conta (data de criação, logins vinculados, plano, @, nome, visibilidade do perfil, status dos consentimentos); editar plano, @ e nome; desvincular login social.
