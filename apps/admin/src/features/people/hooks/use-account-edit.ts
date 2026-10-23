@@ -6,6 +6,7 @@ import type { AdminUserDetail } from "@guf/api/admin";
 import { describeReason, isReasonComplete, normalizeHandle, type ChangeReason } from "@guf/core";
 import { staffNameSchema } from "@guf/schemas";
 import { useHandleAvailability, useSetPlan, useUpdateHandle, useUpdateName } from "@/features/people/api/use-people";
+import { endOfDayBrasiliaIso, formatDateField } from "@/shared/helpers/brasilia-time";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { usePlanOptions } from "@/shared/hooks/use-plan-options";
 
@@ -28,16 +29,6 @@ export interface FieldChange {
   label: string;
   before: string;
   after: string;
-}
-
-/** "2027-10-22" (campo de data) → fim do dia em Brasília, em ISO. */
-export function endOfDayIso(day: string): string | null {
-  return day ? new Date(`${day}T23:59:59-03:00`).toISOString() : null;
-}
-
-/** "2027-10-22" → "22/10/2027". */
-export function formatDateField(day: string): string {
-  return day.split("-").reverse().join("/");
 }
 
 /** "@, nome e plano" */
@@ -108,7 +99,7 @@ export function useAccountEdit(person: AdminUserDetail, allowedFields: EditField
   const saveField = (field: EditField, base: { userId: string; reason: ChangeReason; note: string }) => {
     if (field === "handle") return updateHandle.mutateAsync({ ...base, handle: normalizedHandle });
     if (field === "name") return updateName.mutateAsync({ ...base, name: trimmedName });
-    return setPlan.mutateAsync({ ...base, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayIso(validUntil) });
+    return setPlan.mutateAsync({ ...base, planCode, validUntil: selectedPlan?.isDefault ? null : endOfDayBrasiliaIso(validUntil) });
   };
 
   const confirm = async () => {

@@ -5,17 +5,18 @@ import { CircleAlert, ScrollText } from "lucide-react";
 import { BAN_DURATIONS, type BanDuration } from "@guf/core";
 import { Banner, Button, Checkbox, Icon, RadioGroup, SegmentedControl, TextAreaField, TextField } from "@guf/ui";
 import { useAccountActionRunner } from "@/features/people/api/use-account-actions";
+import { ActionOutcomeDialog } from "@/features/people/components/action-outcome-dialog";
 import { ReasonFields } from "@/features/people/components/reason-fields";
 import {
   ACCOUNT_ACTIONS,
   DELETE_CONFIRM_WORD,
+  isRiskyAction,
   type AccountActionKind,
   type AccountActionOutcome,
   type AccountTarget,
 } from "@/features/people/helpers/account-actions";
 import { useAccountActionForm } from "@/features/people/hooks/use-account-action-form";
 import { Dialog, DialogActions } from "@/shared/components/dialog";
-import { Panel } from "@/shared/components/panel";
 
 interface AccountActionDialogProps {
   kind: AccountActionKind;
@@ -24,19 +25,6 @@ interface AccountActionDialogProps {
   /** Chamado quando ao menos uma conta foi alterada (a tela mostra o aviso e limpa a seleção). */
   onDone: (outcome: AccountActionOutcome, message: string) => void;
 }
-
-/** O que acontece com a pessoa em cada ação (texto do diálogo). */
-const CONSEQUENCES: Record<AccountActionKind, string> = {
-  plan: "O plano muda na hora e a pessoa recebe um aviso no app. Contas com assinatura paga ativa não mudam.",
-  unlink_social: "Google e Apple deixam de entrar nessas contas. Contas sem senha não mudam: ficariam sem jeito de entrar.",
-  reset_password:
-    "A pessoa recebe no e-mail um link para criar a senha nova no app. Você não vê nem escolhe a senha. O link vence em pouco tempo: sem usar, a senha atual continua valendo e é preciso mandar outro. Quem entra só com Google passa a ter também uma senha.",
-  ban: "A pessoa sai de todos os aparelhos e não consegue entrar até o fim da suspensão. Os dados ficam guardados.",
-  unban: "A pessoa volta a entrar normalmente.",
-  delete: "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer.",
-  schedule_deletion: "A pessoa recebe um aviso no app com a data e pode exportar os dados antes. Dá para cancelar até lá.",
-  cancel_deletion: "A conta continua ativa e o agendamento sai.",
-};
 
 const BAN_OPTIONS = (Object.keys(BAN_DURATIONS) as BanDuration[]).map((value) => ({ value, label: BAN_DURATIONS[value].label }));
 
@@ -70,33 +58,11 @@ export function AccountActionDialog({ kind, targets, onClose, onDone }: AccountA
     else setOutcome(result);
   };
 
-  if (outcome) {
-    return (
-      <Dialog
-        open
-        title={outcome.succeeded.length === 0 ? (targets.length === 1 ? "A conta não mudou" : "Nenhuma conta mudou") : "Algumas contas não mudaram"}
-        subtitle={`${outcome.succeeded.length} de ${targets.length} concluídas · o motivo de cada uma está abaixo`}
-        onClose={onClose}
-        showClose
-      >
-        <Panel as="ul">
-          {outcome.failed.map(({ target, message }) => (
-            <li key={target.userId} className="flex flex-col gap-0.5 px-4 py-3">
-              <strong className="text-sm">{target.label}</strong>
-              <span className="text-[13px] text-fg-secondary">{message}</span>
-            </li>
-          ))}
-        </Panel>
-        <Button size="tall" fullWidth onClick={onClose}>
-          Fechar
-        </Button>
-      </Dialog>
-    );
-  }
+  if (outcome) return <ActionOutcomeDialog outcome={outcome} total={targets.length} onClose={onClose} />;
 
   return (
     <Dialog open title={meta.title(targets.length)} subtitle={subtitle} onClose={runner.isRunning ? () => undefined : onClose} showClose={!runner.isRunning}>
-      <p className="m-0 text-pretty text-fg-secondary">{CONSEQUENCES[kind]}</p>
+      <p className="m-0 text-pretty text-fg-secondary">{meta.consequence}</p>
 
       {kind === "plan" && (
         <div className="flex flex-col gap-3">
@@ -169,7 +135,7 @@ export function AccountActionDialog({ kind, targets, onClose, onDone }: AccountA
         <Button variant="secondary" size="tall" fullWidth onClick={onClose} disabled={runner.isRunning}>
           Cancelar
         </Button>
-        <Button variant={meta.isDanger ? "danger" : "primary"} size="tall" fullWidth loading={runner.isRunning} onClick={() => void confirm()}>
+        <Button variant={isRiskyAction(kind) ? "danger" : "primary"} size="tall" fullWidth loading={runner.isRunning} onClick={() => void confirm()}>
           {meta.label}
         </Button>
       </DialogActions>

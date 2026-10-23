@@ -1,6 +1,6 @@
 # Painel de administração (guf admin)
 
-**Situação:** implementado em 2026-10-22 (branch `feat/painel-admin`), seguindo o protótipo `Guf Admin.dc.html` do Claude Design. Migration `20261022160000_admin_panel` aplicada em 2026-10-22 (testada antes em transação desfeita); Edge Function `admin-invite-staff` publicada (`ADMIN_APP_URL` = `https://guf-pwa.vercel.app`, endereço do painel); primeiro admin: a conta do desenvolvedor. Antes de abrir a colaboradores além do desenvolvedor: itens da seção 2.2 (gap G24). O que mudou em relação ao plano está na seção 5.
+**Situação:** implementado em 2026-10-22 (branch `feat/painel-admin`), seguindo o protótipo `Guf Admin.dc.html` do Claude Design. Migration `20261022160000_admin_panel` aplicada em 2026-10-22 (testada antes em transação desfeita); Edge Function `admin-invite-staff` publicada (`ADMIN_APP_URL` = `https://adminguf.vercel.app`, endereço do painel; até 2026-10-23 apontava para `guf-pwa.vercel.app`, que não existe, e o link do convite não abria); primeiro admin: a conta do desenvolvedor. Antes de abrir a colaboradores além do desenvolvedor: itens da seção 2.2 (gap G24). O que mudou em relação ao plano está na seção 5.
 
 **O que o painel faz**
 1. **Contas:** buscar pessoas e ver conta (data de criação, logins vinculados, plano, @, nome, visibilidade do perfil, status dos consentimentos); editar plano, @ e nome; desvincular login social.
@@ -256,7 +256,7 @@ Um canvas com cada tela nos três tamanhos (celular, tablet, computador), tema e
 - **Fluxo:** detalhe ou três pontinhos da conta → "Redefinir senha" (motivo obrigatório; papel Suporte+; nunca em lote) → `sendPasswordReset` → Edge Function `admin-reset-password` → `admin_request_password_reset` com o token do colaborador (equipe, aal2, papel, conta não suspensa — GA017 —, com e-mail — GA018 —; audita `staff_sent_password_reset`) → e-mail de redefinição do Supabase Auth (cliente implícito: o link funciona no aparelho da pessoa) → app `/redefinir-senha` (`ResetPasswordForm` + `useRecoverySession`: abre a sessão pelo `#access_token`, tira os tokens do endereço, senha nova duas vezes com `newPasswordSchema`).
 - **A equipe nunca vê nem escolhe a senha, e o e-mail da pessoa não passa pelo navegador da equipe** (a função busca com a service_role). Sem usar o link, a senha antiga continua; o prazo do link é o "Email OTP Expiration" do Supabase Auth (padrão 1 h; recomendado 900 s).
 - **Decisão (LGPD):** não há "hard reset" em que o admin define ou recebe uma senha ou link para entregar à pessoa: quem tem esse acesso entra como a pessoa e vê dados de saúde (Art. 11; Art. 46; Art. 6º, III), o que o A022 exclui. Quem perdeu o e-mail segue o fluxo de DSAR com conferência de identidade e troca do e-mail.
-- **Configurar:** secret `APP_URL` (endereço do app, ex. `npx supabase secrets set APP_URL=https://<app>`); `https://<app>/**` nas Redirect URLs do Supabase Auth. Sem `APP_URL`, a função responde `password_reset_unavailable`.
+- **Configurar:** secret `APP_URL` = `https://gufapp.vercel.app` (endereço do app; configurado em 2026-10-23); `https://<app>/**` nas Redirect URLs do Supabase Auth. Sem `APP_URL`, a função responde `password_reset_unavailable`.
 
 ### 5.5 Colocar no ar
 1. Aplicar a migration (`npx supabase db push`) e regenerar os tipos.

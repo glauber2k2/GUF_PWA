@@ -1,22 +1,15 @@
 "use client";
 
-import { Ban, CalendarClock, Copy, Crown, Eye, EyeOff, FileText, Globe, History, KeyRound, Lock, Pencil, ScrollText, ShieldCheck, ShieldOff, Unlink, X } from "lucide-react";
-import type { AdminUserDetail, AdminUserDocument } from "@guf/api/admin";
-import {
-  auditActionLabel,
-  banStatusText,
-  deletionStatusText,
-  describeReason,
-  DOCUMENT_ACCEPTANCE_LABELS,
-  formatStaffDateTime,
-  loginProviderLabel,
-  type DocumentAcceptance,
-} from "@guf/core";
-import { Avatar, Banner, Button, cn, Icon, IconButton, Tag } from "@guf/ui";
+import { Copy, Crown, Eye, EyeOff, Globe, History, KeyRound, Lock, Pencil, ScrollText, ShieldCheck, ShieldOff, Unlink, X } from "lucide-react";
+import type { AdminUserDetail } from "@guf/api/admin";
+import { auditActionLabel, describeReason, formatStaffDateTime, loginProviderLabel } from "@guf/core";
+import { Avatar, Banner, Button, Icon, IconButton, Tag } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { AccountActionsMenu } from "@/features/people/components/account-actions-menu";
+import { AccountStatusBanners } from "@/features/people/components/account-status-banners";
+import { DocumentsSection } from "@/features/people/components/documents-section";
 import type { AccountActionKind } from "@/features/people/helpers/account-actions";
-import { DOCUMENT_LABELS, GRANT_SOURCE_LABELS, displayName, formatDate } from "@/features/people/helpers/people";
+import { GRANT_SOURCE_LABELS, displayName, formatDate } from "@/features/people/helpers/people";
 import type { EditField } from "@/features/people/hooks/use-account-edit";
 import { InfoRow, Panel, PanelSection } from "@/shared/components/panel";
 
@@ -33,19 +26,6 @@ interface PersonDetailProps {
   onAnnounce: () => void;
 }
 
-const DOCUMENT_STATUS_TONE: Record<DocumentAcceptance, string> = {
-  accepted: "bg-success/14 text-success",
-  outdated: "bg-warning/14 text-warning",
-  not_accepted: "bg-surface-3 text-fg-secondary",
-};
-
-function documentDetail(doc: AdminUserDocument): string {
-  if (doc.status === "not_accepted") {
-    return doc.docType === "subscription_terms" ? `Versão vigente ${doc.currentVersion} · pedido só ao assinar` : `Versão vigente ${doc.currentVersion} · nunca aceito`;
-  }
-  const accepted = `Versão ${doc.acceptedVersion} aceita em ${formatDate(doc.acceptedAt as string)}`;
-  return doc.status === "outdated" ? `${accepted} · vigente ${doc.currentVersion}` : accepted;
-}
 
 const PROVIDER_ICONS: Record<string, typeof KeyRound> = { email: KeyRound };
 
@@ -96,31 +76,7 @@ export function PersonDetail({ person, revealedEmail, onClose, onCopyId, onRevea
         {onClose && <IconButton icon={X} label="Fechar detalhe" variant="ghost" onClick={onClose} />}
       </div>
 
-      {person.ban && (
-        <Banner
-          tone="warning"
-          icon={Ban}
-          title={banStatusText(person.ban.endsAt)}
-          actionLabel={can("ban_accounts") ? "Encerrar suspensão" : undefined}
-          onAction={() => onAction("unban")}
-        >
-          Motivo: {describeReason(person.ban.reason, person.ban.note)} · desde {formatStaffDateTime(person.ban.createdAt)}. A pessoa não consegue entrar no app.
-        </Banner>
-      )}
-      {person.deletion && (
-        <Banner
-          tone="danger"
-          icon={CalendarClock}
-          title={deletionStatusText(person.deletion.scheduledFor)}
-          actionLabel={can("delete_accounts") ? "Cancelar exclusão" : undefined}
-          onAction={() => onAction("cancel_deletion")}
-        >
-          Motivo: {describeReason(person.deletion.reason, person.deletion.note)}.
-          {person.deletion.lastError === "account_has_files"
-            ? " A última tentativa não excluiu: a conta tem foto guardada. Peça para a pessoa excluir pelo app."
-            : " A pessoa recebeu um aviso no app."}
-        </Banner>
-      )}
+      <AccountStatusBanners ban={person.ban} deletion={person.deletion} onAction={onAction} />
 
       <div className="flex items-start gap-2.5 rounded-md bg-surface-3 px-3 py-2.5 text-[13px] leading-[18px] text-fg-secondary">
         <Icon icon={EyeOff} size={16} className="mt-px flex-none" />
@@ -256,21 +212,7 @@ export function PersonDetail({ person, revealedEmail, onClose, onCopyId, onRevea
         </Panel>
       </PanelSection>
 
-      <PanelSection id="sec-docs" title="Documentos">
-        <Panel as="ul">
-          {person.documents.length === 0 && <li className="px-4 py-3 text-[13px] text-fg-secondary">Nenhum documento publicado.</li>}
-          {person.documents.map((doc) => (
-            <li key={doc.docType} className="flex min-h-14 flex-wrap items-center gap-3 px-4 py-2">
-              <Icon icon={FileText} size={17} className="text-fg-secondary" />
-              <span className="flex min-w-0 flex-[1_1_12rem] flex-col">
-                <strong className="text-sm">{DOCUMENT_LABELS[doc.docType] ?? doc.docType}</strong>
-                <span className="text-[13px] text-fg-secondary">{documentDetail(doc)}</span>
-              </span>
-              <span className={cn("rounded-sm px-2 py-0.5 text-[12.5px] font-semibold", DOCUMENT_STATUS_TONE[doc.status])}>{DOCUMENT_ACCEPTANCE_LABELS[doc.status]}</span>
-            </li>
-          ))}
-        </Panel>
-      </PanelSection>
+      <DocumentsSection documents={person.documents} />
 
       {person.healthConsent !== null && (
         <PanelSection id="sec-saude" title="Consentimento de saúde">

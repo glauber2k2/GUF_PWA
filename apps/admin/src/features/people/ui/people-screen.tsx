@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Search, UserX } from "lucide-react";
 import type { AdminUserSummary } from "@guf/api/admin";
-import { Avatar, Banner, Button, cn, EmptyState, Icon, Skeleton } from "@guf/ui";
+import { Banner, Button, cn, EmptyState, Icon, Skeleton } from "@guf/ui";
 import { editorForPeoplePath } from "@/features/announcements";
 import { useStaff } from "@/features/auth";
 import { PEOPLE_SEARCH_INPUT_ID } from "@/features/shell";
@@ -12,12 +12,14 @@ import { usePerson } from "@/features/people/api/use-people";
 import { AccountActionDialog } from "@/features/people/components/account-action-dialog";
 import { BulkActionBar } from "@/features/people/components/bulk-action-bar";
 import { EditAccountDialog } from "@/features/people/components/edit-account-dialog";
+import { PeopleCompactList } from "@/features/people/components/people-compact-list";
 import { PeopleResults } from "@/features/people/components/people-results";
 import { PersonDetail } from "@/features/people/components/person-detail";
+import { ResultsSkeleton } from "@/features/people/components/results-skeleton";
 import { RevealEmailDialog } from "@/features/people/components/reveal-email-dialog";
 import { UnlinkDialog } from "@/features/people/components/unlink-dialog";
 import { ACCOUNT_ACTIONS, BULK_ACTIONS, type AccountActionKind, type AccountActionOutcome, type AccountTarget } from "@/features/people/helpers/account-actions";
-import { displayName, peoplePath } from "@/features/people/helpers/people";
+import { peoplePath } from "@/features/people/helpers/people";
 import type { EditField } from "@/features/people/hooks/use-account-edit";
 import { toAccountTarget, usePeopleSelection } from "@/features/people/hooks/use-people-selection";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
@@ -35,23 +37,6 @@ type DialogState =
   | { kind: "action"; action: AccountActionKind; targets: AccountTarget[] }
   | null;
 
-function ResultsSkeleton() {
-  return (
-    <div aria-busy="true" aria-label="Carregando resultados" className="overflow-hidden rounded-lg border border-border bg-surface">
-      {["42%", "36%", "48%", "30%", "40%"].map((width) => (
-        <div key={width} className="flex items-center gap-3 border-b border-border px-4 py-3.5 last:border-b-0">
-          <Skeleton className="size-9 rounded-pill" />
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Skeleton className="h-3.5" />
-            <Skeleton className="h-3 w-1/4" />
-          </div>
-          <Skeleton className="h-6 w-18 rounded-sm" />
-        </div>
-      ))}
-      <span className="sr-only">Carregando</span>
-    </div>
-  );
-}
 
 /**
  * 3 e 4 · Pessoas: busca enquanto digita (por @, nome, e-mail exato ou id) e o detalhe da conta.
@@ -161,32 +146,7 @@ export function PeopleScreen() {
             ) : hasQuery && results.length === 0 ? (
               <EmptyState icon={UserX} title={`Nenhuma pessoa encontrada para “${debounced}”`} message="Confira a grafia ou tente o e-mail completo. Contas excluídas não aparecem na busca." />
             ) : detailOpen && device !== "mobile" ? (
-              <ul className="m-0 flex list-none flex-col gap-1 p-0">
-                {listed.map((p) => {
-                  const selected = p.userId === selectedId;
-                  return (
-                    <li key={p.userId}>
-                      <button
-                        type="button"
-                        aria-current={selected || undefined}
-                        onClick={() => open(p.userId)}
-                        className={cn(
-                          "flex min-h-15 w-full cursor-pointer items-center gap-3 rounded-[14px] border-[1.5px] px-3 py-2.5 text-left",
-                          selected ? "border-accent-text bg-accent/10" : "border-transparent hover:bg-surface",
-                        )}
-                      >
-                        <Avatar name={displayName(p.name, p.handle)} size="sm" />
-                        <span className="flex min-w-0 flex-1 flex-col">
-                          <strong className="truncate">{displayName(p.name, p.handle)}</strong>
-                          <span className="truncate text-[13px] text-fg-secondary">
-                            {p.handle ? `@${p.handle}` : "Sem @"} · {p.planName}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
+              <PeopleCompactList people={listed} selectedId={selectedId} onOpen={open} />
             ) : (
               <>
                 <span aria-live="polite" className="text-[13px] text-fg-muted">
@@ -201,6 +161,7 @@ export function PeopleScreen() {
                   device={device}
                   onOpen={open}
                   selectedIds={selection.selectedIds}
+                  isSelectionFull={selection.isFull}
                   onToggle={canSelect ? selection.toggle : undefined}
                   onToggleAll={canSelect ? () => selection.toggleAll(listed) : undefined}
                   onAction={actionFor}
@@ -211,6 +172,7 @@ export function PeopleScreen() {
             {selection.targets.length > 0 && !detailOpen && (
               <BulkActionBar
                 count={selection.targets.length}
+                isFull={selection.isFull}
                 onAction={(action) => startAction(action, selection.targets)}
                 onAnnounce={() => announceTo(selection.selectedIds)}
                 onClear={selection.clear}

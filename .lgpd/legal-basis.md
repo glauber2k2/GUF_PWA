@@ -29,7 +29,7 @@
 | A019 | Competição e pontuação | Art. 7º, V ⚖ | Sim, na prática (deixar de seguir ou remover o seguidor) |
 | A020 | Avisos no celular (competição e seguidores) | Art. 7º, V, ligado pelo titular no aparelho ⚖ | Sim (desligar no app ou nas configurações do celular, ou sair da conta) |
 | A021 | GUF AI (assistente sobre os próprios treinos) | Art. 7º, V — funcionalidade pedida pelo titular ⚖ | Sim (não usar o GUF AI; conversas saem em 180 dias ou na exclusão da conta) |
-| A022 | Administração e suporte da conta (painel) | Art. 7º, V; correção a pedido: Art. 18, III; desvincular login: pedido do titular | Não (é o atendimento do contrato); toda leitura e alteração auditada |
+| A022 | Administração e suporte da conta (painel) | Art. 7º, V; correção a pedido: Art. 18, III; desvincular login e senha nova: pedido do titular; exclusão a pedido: Art. 18, VI; suspensão e exclusão por violação dos Termos: Art. 7º, V e VI (exercício regular de direitos) ⚖ — exige previsão nos Termos | Não (é o atendimento do contrato); toda leitura e alteração auditada |
 | A023 | Comunicados no app | Serviço: Art. 7º, V · Legal: Art. 7º, II e Art. 9º · Produto: Art. 7º, IX + Art. 10, com LIA ⚖ | Produto: sim (opção de não receber antes do primeiro envio); serviço e legal: não |
 
 **Totais**: 1 atividade com consentimento (A010) · 1 com legítimo interesse (A012, LIA em `.lgpd/lia/a012-seguranca.md`) · 10 com execução de contrato · 4 com obrigação legal (A003, A012, A013, A014; A015 parcial) · 1 com exercício regular de direitos (A003 após a exclusão).
