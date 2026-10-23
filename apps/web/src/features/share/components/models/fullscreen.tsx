@@ -4,7 +4,7 @@ import { ArrowRight, Check, TrendingDown, TrendingUp, Trophy } from "lucide-reac
 import { plural, WEEKDAY_INITIALS } from "@guf/core";
 import { GufRat, Logo, MuscleIcon, StreakFlame, type MuscleIconKey } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import { STORY_DOMAIN, STORY_SIGNATURE_LEAD, type StoryModelProps } from "@/features/share/type";
 
 type Data = StoryModelProps["d"];
@@ -91,8 +91,8 @@ export function StoryF01({ d }: StoryModelProps) {
       <Overline className="mt-[72px]">TREINO CONCLUÍDO</Overline>
       <span className="mt-[12px] text-[96px] leading-[100px] font-bold tracking-[-.02em]">{d.title}</span>
       <div className="mt-[56px] relative flex gap-[48px]">
-        <StoryFigure view="front" height={620} levels={d.muscles} />
-        <StoryFigure view="back" height={620} levels={d.muscles} />
+        <MuscleFigure view="front" height={620} levels={d.muscles} />
+        <MuscleFigure view="back" height={620} levels={d.muscles} />
         <div className="absolute right-[-24px] bottom-[-16px]">
           <GufRat occasion="workoutDone" size={320} animated={false} label={null} />
         </div>
@@ -180,8 +180,8 @@ export function StoryF03({ d }: StoryModelProps) {
       <Header right={d.date} />
       <div className="mt-[56px] flex items-center gap-[40px]">
         <div className="flex gap-[16px] flex-none">
-          <StoryFigure view="front" height={400} levels={d.muscles} />
-          <StoryFigure view="back" height={400} levels={d.muscles} />
+          <MuscleFigure view="front" height={400} levels={d.muscles} />
+          <MuscleFigure view="back" height={400} levels={d.muscles} />
         </div>
         <div className="flex flex-col gap-[16px] min-w-0">
           <Overline>FICHA DE TREINO</Overline>
@@ -359,8 +359,8 @@ export function StoryF06({ d }: StoryModelProps) {
       </div>
       <div className="mt-[48px] flex items-center gap-[48px]">
         <div className="flex gap-[12px] flex-none">
-          <StoryFigure view="front" height={340} levels={month.muscles} />
-          <StoryFigure view="back" height={340} levels={month.muscles} />
+          <MuscleFigure view="front" height={340} levels={month.muscles} />
+          <MuscleFigure view="back" height={340} levels={month.muscles} />
         </div>
         <div className="flex-1 min-w-0 flex flex-col gap-[36px]">
           <div className="flex flex-col gap-[4px]">
@@ -454,8 +454,8 @@ export function StoryF07({ d }: StoryModelProps) {
       </div>
       <div className="mt-[40px] flex items-center gap-[32px]">
         <div className="flex gap-[12px] flex-none">
-          <StoryFigure view="front" height={300} levels={d.muscles} />
-          <StoryFigure view="back" height={300} levels={d.muscles} />
+          <MuscleFigure view="front" height={300} levels={d.muscles} />
+          <MuscleFigure view="back" height={300} levels={d.muscles} />
         </div>
         <div className="flex flex-col gap-[8px] min-w-0">
           {d.routine && <span className="text-[30px] font-semibold tracking-[.08em] text-fg">{d.routine.toUpperCase()}</span>}
@@ -508,7 +508,7 @@ export function StoryF09({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute right-[-40px] top-[380px]">
-        <StoryFigure view="front" height={1080} levels={d.muscles} />
+        <MuscleFigure view="front" height={1080} levels={d.muscles} />
       </div>
       <Frame>
         <Logo className="h-[88px]" />

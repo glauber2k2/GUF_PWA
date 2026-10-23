@@ -6,6 +6,7 @@ import {
   pauseCount,
   pickSetValues,
   sessionTotals,
+  measuresReps,
   setMetricFor,
   workoutElapsedSeconds,
   type SetType,
@@ -15,7 +16,6 @@ import type { WorkoutViewState } from "./workout-state";
 
 /* Montagem de exercícios/séries com ids gerados no aparelho (funciona offline). */
 
-const DEFAULT_SETS = 3;
 
 function previousFor(context: ExerciseContext | undefined, setNumber: number) {
   const prev = context?.previous.find((p) => p.setNumber === setNumber);
@@ -24,16 +24,16 @@ function previousFor(context: ExerciseContext | undefined, setNumber: number) {
 
 /**
  * Exercício novo no treino: séries do último desempenho (medidas preenchidas: carga/reps ou
- * distância/tempo) ou, sem histórico/sem internet, 3 séries vazias. `template` (troca) mantém nº e tipos das séries.
+ * distância/tempo) ou, sem histórico/sem internet, as séries vazias do tipo (força 3, cardio 1). `template` (troca) mantém nº e tipos das séries.
  */
 export function buildWorkoutExercise(
   library: LibraryExercise,
   context: ExerciseContext | undefined,
   template?: Pick<WorkoutSet, "setType" | "reps">[],
 ): WorkoutExercise {
-  const total = template?.length || context?.previous.length || DEFAULT_SETS;
+  const total = template?.length || context?.previous.length || setMetricFor(library.muscleGroup).defaultSetCount;
   // Na troca, as repetições do exercício antigo só servem se o novo também mede repetições (não no cardio).
-  const keepsTemplateReps = setMetricFor(library.muscleGroup).fields.some((f) => f.key === "reps");
+  const keepsTemplateReps = measuresReps(library.muscleGroup);
   return {
     id: crypto.randomUUID(),
     exerciseId: library.id,

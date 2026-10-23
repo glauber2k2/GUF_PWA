@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { ArrowLeftRight, NotepadText, Plus, Trash2 } from "lucide-react";
 import type { ActiveWorkout, ExerciseContext, LibraryExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
-import { markRecordSets, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
+import { markRecordSets, MAX_SET_DURATION_SECONDS, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
 import type { ToastOptions } from "@/features/app-shell";
 import { buildWorkoutExercise } from "@/features/workout/helpers/workout-builders";
 import {
@@ -205,6 +205,17 @@ export function useWorkoutEditing({
     setEdit(null);
   };
 
+  /** Tempo de uma série vindo do cronômetro do cardio (segundos); grava como a edição manual. */
+  const setDuration = (exerciseId: string, setId: string, seconds: number) => {
+    const ex = state.exercises.find((e) => e.id === exerciseId);
+    const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
+    const set = ex?.sets[setIndex];
+    if (!ex || !set) return;
+    const durationSeconds = Math.min(MAX_SET_DURATION_SECONDS, Math.max(1, Math.round(seconds)));
+    dispatch({ type: "setField", exerciseId, setIndex, field: "durationSeconds", value: durationSeconds });
+    sink.saveSet(exerciseId, { ...set, durationSeconds });
+  };
+
   /* ---------- Exercícios ---------- */
 
   const removeExercise = (exerciseId: string) => {
@@ -299,6 +310,7 @@ export function useWorkoutEditing({
     cycleType,
     addSet,
     removeSet,
+    setDuration,
     edit,
     editSet,
     editMetric,

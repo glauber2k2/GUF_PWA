@@ -1,5 +1,6 @@
 import { differenceInCalendarDays, format, getWeek, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { figureMuscleOf, MUSCLE_FIGURE_LABELS, muscleLegend as muscleLegendOf, muscleLevelsFromSets, type FigureMuscle, type MuscleLevels } from "./muscle-levels";
 import {
   addLocalDays,
   formatShortDate,
@@ -22,70 +23,6 @@ import { liftEffort, pickWeightComparison, type LiftEffort, type WeightCompariso
  * e devolve os textos e números prontos para os modelos. Pesos convertidos para a unidade do usuário.
  */
 
-/* ---------------------------------------------------------------------
- * Mapa muscular dos stories (boneco frente/costas)
- * --------------------------------------------------------------------- */
-
-/** Regiões do boneco do story (Claude Design "StoryArt"). */
-export type StoryMuscle =
-  | "peito"
-  | "ombro"
-  | "costas"
-  | "trapezio"
-  | "abdomen"
-  | "biceps"
-  | "triceps"
-  | "antebraco"
-  | "gluteos"
-  | "quadriceps"
-  | "posterior"
-  | "panturrilha";
-
-/** Intensidade da região: 1 (leve) a 3 (principal). */
-export type StoryMuscleLevels = Partial<Record<StoryMuscle, 1 | 2 | 3>>;
-
-/** Código do banco (exercises.muscle_group) → região do boneco; corpo inteiro e cardio não pintam. */
-const MUSCLE_TO_STORY: Record<string, StoryMuscle | undefined> = {
-  peito: "peito",
-  costas: "costas",
-  ombros: "ombro",
-  biceps: "biceps",
-  triceps: "triceps",
-  antebraco: "antebraco",
-  quadriceps: "quadriceps",
-  posterior: "posterior",
-  gluteos: "gluteos",
-  panturrilha: "panturrilha",
-  abdomen: "abdomen",
-};
-
-const STORY_MUSCLE_LABEL: Record<StoryMuscle, string> = {
-  peito: "Peito",
-  ombro: "Ombro",
-  costas: "Costas",
-  trapezio: "Trapézio",
-  abdomen: "Abdômen",
-  biceps: "Bíceps",
-  triceps: "Tríceps",
-  antebraco: "Antebraço",
-  gluteos: "Glúteos",
-  quadriceps: "Quadríceps",
-  posterior: "Posterior",
-  panturrilha: "Panturrilha",
-};
-
-/** Séries por região → nível 1–3 proporcional ao grupo mais treinado. */
-export function storyMuscleLevels(setsByGroup: ReadonlyArray<{ muscleGroup: string; sets: number }>): StoryMuscleLevels {
-  const totals = new Map<StoryMuscle, number>();
-  for (const { muscleGroup, sets } of setsByGroup) {
-    const key = MUSCLE_TO_STORY[muscleGroup];
-    if (key && sets > 0) totals.set(key, (totals.get(key) ?? 0) + sets);
-  }
-  const max = Math.max(0, ...totals.values());
-  const levels: StoryMuscleLevels = {};
-  for (const [key, sets] of totals) levels[key] = Math.min(3, Math.max(1, Math.ceil((3 * sets) / max))) as 1 | 2 | 3;
-  return levels;
-}
 
 /* ---------------------------------------------------------------------
  * Formatações dos stories
@@ -256,7 +193,7 @@ export interface StoryMonth {
   /** "168.420" (inteiro, unidade do usuário) */
   volumeFull: string;
   groups: number;
-  muscles: StoryMuscleLevels;
+  muscles: MuscleLevels;
 }
 
 /** Dia do calendário do mês (semana de domingo a sábado). */
@@ -294,7 +231,7 @@ export interface StoryData {
   sets: number;
   reps: number;
   exerciseCount: number;
-  muscles: StoryMuscleLevels;
+  muscles: MuscleLevels;
   /** Até 3 grupos com a intensidade da legenda. */
   muscleLegend: Array<{ label: string; level: 1 | 2 | 3 }>;
   exercises: StoryExercise[];
@@ -332,7 +269,7 @@ export interface StoryData {
     /** Os 7 dias da semana do treino (domingo primeiro). */
     days: StoryWeekDay[];
     /** Grupos treinados na semana (níveis 1–3) e os 4 principais. */
-    muscles: StoryMuscleLevels;
+    muscles: MuscleLevels;
     muscleLegend: string[];
   };
   month: {
@@ -483,16 +420,13 @@ export function buildStoryData(input: StoryInput): StoryData {
   const topVolume = ranked[0]?.volumeKg ?? 1;
 
   const setsByGroup = summary.exercises.map((e) => ({ muscleGroup: e.muscleGroup, sets: e.setCount }));
-  const muscles = storyMuscleLevels(setsByGroup);
-  const muscleLegend = (Object.entries(muscles) as Array<[StoryMuscle, 1 | 2 | 3]>)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([key, level]) => ({ label: STORY_MUSCLE_LABEL[key], level }));
+  const muscles = muscleLevelsFromSets(setsByGroup);
+  const muscleLegend = muscleLegendOf(muscles, 3).map(({ label, level }) => ({ label, level }));
 
   // Grupo com mais séries no treino (Músculo do dia).
-  const groupTotals = new Map<StoryMuscle, { exercises: number; sets: number }>();
+  const groupTotals = new Map<FigureMuscle, { exercises: number; sets: number }>();
   for (const e of summary.exercises) {
-    const key = MUSCLE_TO_STORY[e.muscleGroup];
+    const key = figureMuscleOf(e.muscleGroup);
     if (!key || e.setCount <= 0) continue;
     const g = groupTotals.get(key) ?? { exercises: 0, sets: 0 };
     groupTotals.set(key, { exercises: g.exercises + 1, sets: g.sets + e.setCount });
@@ -577,13 +511,13 @@ export function buildStoryData(input: StoryInput): StoryData {
       ? `${sunday.getDate()} – ${dayMonth(saturday)}`
       : `${dayMonth(sunday)} – ${dayMonth(saturday)}`;
   const weekKeyOfDay = weekKey(day);
-  const weekLevels = storyMuscleLevels(
+  const weekLevels = muscleLevelsFromSets(
     monthSets.filter((s) => s.performedOn <= summary.performedOn && weekKey(fromLocalISODate(s.performedOn)) === weekKeyOfDay),
   );
-  const weekLegend = (Object.entries(weekLevels) as Array<[StoryMuscle, 1 | 2 | 3]>)
+  const weekLegend = (Object.entries(weekLevels) as Array<[FigureMuscle, 1 | 2 | 3]>)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
-    .map(([key]) => STORY_MUSCLE_LABEL[key]);
+    .map(([key]) => MUSCLE_FIGURE_LABELS[key]);
 
   // Meses: o do treino e o anterior.
   const currentStart = startOfMonth(day);
@@ -595,7 +529,7 @@ export function buildStoryData(input: StoryInput): StoryData {
   const monthOf = (start: Date): StoryMonth => {
     const days = trainingDays.filter((d) => inMonth(d.performedOn, start));
     const sets = monthSets.filter((s) => inMonth(s.performedOn, start));
-    const levels = storyMuscleLevels(sets);
+    const levels = muscleLevelsFromSets(sets);
     const volumeKg = days.reduce((n, d) => n + d.volumeKg, 0);
     return {
       name: monthName(start),
@@ -608,9 +542,9 @@ export function buildStoryData(input: StoryInput): StoryData {
   };
   const shareTotals = new Map<string, number>();
   for (const s of monthSets.filter((x) => inMonth(x.performedOn, currentStart))) {
-    const key = MUSCLE_TO_STORY[s.muscleGroup];
+    const key = figureMuscleOf(s.muscleGroup);
     if (!key) continue;
-    const label = key === "biceps" || key === "triceps" || key === "antebraco" ? "Braços" : STORY_MUSCLE_LABEL[key];
+    const label = key === "biceps" || key === "triceps" || key === "antebraco" ? "Braços" : MUSCLE_FIGURE_LABELS[key];
     shareTotals.set(label, (shareTotals.get(label) ?? 0) + s.sets);
   }
   const shareSum = [...shareTotals.values()].reduce((a, b) => a + b, 0) || 1;
@@ -684,7 +618,7 @@ export function buildStoryData(input: StoryInput): StoryData {
     },
     comparison: comparison ? { ...comparison, effort: liftEffort(summary.volumeKg) } : null,
     restAverage: storyRestAverage(summary.exercises),
-    topMuscle: top ? { label: STORY_MUSCLE_LABEL[top[0]], ...top[1] } : null,
+    topMuscle: top ? { label: MUSCLE_FIGURE_LABELS[top[0]], ...top[1] } : null,
     featured: storyFeatured(input.featured, unit),
     milestone: {
       total: input.history.totalWorkouts,

@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { formatDayMonthYear, formatShortDate, fromLocalISODate, toLocalISODate } from "./dates";
 import { formatClock, formatNumber, MINUS_SIGN, plural } from "./format";
 import { searchFilter } from "./session";
+import { measuresReps } from "./set-metrics";
 import { estimate1RM, type SetType } from "./training";
 import { toDisplayWeight, type WeightUnit } from "./units";
 
@@ -178,6 +179,11 @@ export const EVOLUTION_PERIODS: ReadonlyArray<{ value: EvolutionPeriod; label: s
   { value: "1a", label: "1 ano", months: 12 },
   { value: "tudo", label: "Tudo", months: null },
 ];
+
+/** Métricas do gráfico de um exercício: o 1RM só existe com carga × repetições (cardio não tem). */
+export function evolutionMetricsFor(muscleGroup: string): typeof EVOLUTION_METRICS {
+  return EVOLUTION_METRICS.filter((m) => m.value !== "1rm" || measuresReps(muscleGroup));
+}
 
 export function isEvolutionMetric(value: string | null | undefined): value is EvolutionMetric {
   return EVOLUTION_METRICS.some((m) => m.value === value);

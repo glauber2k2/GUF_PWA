@@ -3,7 +3,7 @@
 import { formatNumber, type StoryData } from "@guf/core";
 import { Trophy } from "lucide-react";
 import { GufRat, Logo } from "@/shared/components/ds";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import type { StoryModelProps } from "@/features/share/type";
 
 type CardModel = 1 | 2 | 3 | 4;
@@ -156,7 +156,7 @@ function MuscleLegend({ d, feed }: { d: StoryData; feed: boolean }) {
 function Figure({ d, view, feed }: { d: StoryData; view: "front" | "back"; feed: boolean }) {
   return (
     <div className={`flex flex-col items-center ${feed ? "gap-[12px]" : "gap-[16px]"}`}>
-      <StoryFigure view={view} height={feed ? 320 : 400} levels={d.muscles} />
+      <MuscleFigure view={view} height={feed ? 320 : 400} levels={d.muscles} />
       <span className={`font-semibold tracking-[.08em] text-fg ${feed ? "text-[26px]" : "text-[28px]"}`}>
         {view === "front" ? "FRENTE" : "COSTAS"}
       </span>

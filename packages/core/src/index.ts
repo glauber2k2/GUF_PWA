@@ -18,6 +18,7 @@ export * from "./coalesce";
 export * from "./evolution";
 export * from "./legal-content";
 export * from "./share";
+export * from "./muscle-levels";
 export * from "./legal-hash";
 export * from "./weight-comparison";
 export * from "./social";

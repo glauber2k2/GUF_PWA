@@ -2,10 +2,10 @@
 // altura automática. O StoryArt envolve com folga, tema e fundo transparente; os dados vêm de StoryData.
 import type { ReactNode } from "react";
 import { Check, Timer, Trophy } from "lucide-react";
-import { plural, type StoryData, type StoryMuscle } from "@guf/core";
+import { plural, type StoryData, type FigureMuscle } from "@guf/core";
 import { GufRat, Logo, MuscleIcon, StreakFlame } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import { STORY_DOMAIN, STORY_SIGNATURE_LEAD, type StoryModelProps } from "@/features/share/type";
 
 /* ---------------------------------------------------------------------
@@ -53,8 +53,8 @@ export function streakLabel(weeks: number): string {
 }
 
 /** Grupos mais treinados (maior nível primeiro), para os ícones de músculo. */
-export function topMuscles(d: StoryData, count: number): StoryMuscle[] {
-  return (Object.entries(d.muscles) as Array<[StoryMuscle, 1 | 2 | 3]>)
+export function topMuscles(d: StoryData, count: number): FigureMuscle[] {
+  return (Object.entries(d.muscles) as Array<[FigureMuscle, 1 | 2 | 3]>)
     .sort((a, b) => b[1] - a[1])
     .slice(0, count)
     .map(([muscle]) => muscle);
@@ -182,7 +182,7 @@ export function StoryS05({ d }: StoryModelProps) {
       <StickerHeader aside={d.date} />
       <div className="flex items-center gap-[28px]">
         <div className="flex-none">
-          <StoryFigure view="back" height={360} levels={d.muscles} />
+          <MuscleFigure view="back" height={360} levels={d.muscles} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-[20px]">
           <span className="text-[40px] leading-[46px] font-bold tracking-[-.02em]">{d.focus}</span>
@@ -249,7 +249,7 @@ export function StoryS08({ d }: StoryModelProps) {
       <StickerHeader aside={d.date} />
       <div className="flex items-center gap-[32px]">
         <div className="flex-none">
-          <StoryFigure view="front" height={340} levels={d.muscles} />
+          <MuscleFigure view="front" height={340} levels={d.muscles} />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-[20px]">
           <div className="flex flex-col gap-[4px]">

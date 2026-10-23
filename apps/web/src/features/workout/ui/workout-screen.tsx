@@ -14,7 +14,16 @@ import {
   type FinishedWorkoutSummary,
   type WorkoutSet,
 } from "@guf/api";
-import { finishWorkoutMessage, formatElapsed, nextSetLabel, pickSetValues, setsProgressLabel, toLocalISODate } from "@guf/core";
+import {
+  completedVolume,
+  finishWorkoutMessage,
+  formatElapsed,
+  nextSetLabel,
+  pickSetValues,
+  setsProgressLabel,
+  toLocalISODate,
+  volumeLabel,
+} from "@guf/core";
 import { useAppShell, useRaisedToast, type ToastOptions } from "@/features/app-shell";
 import {
   Banner,
@@ -30,6 +39,7 @@ import {
 } from "@/shared/components/ds";
 import { historyAnchorPath } from "@/features/history";
 import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
+import { useCardioStopwatch } from "@/features/workout/hooks/use-cardio-stopwatch";
 import { useDevWorkoutState, type DevWorkoutFlag } from "@/features/workout/hooks/use-dev-workout-state";
 import { useScreenToasts } from "@/features/workout/hooks/use-screen-toasts";
 import { useWorkoutEditing, type WorkoutChangeSink } from "@/features/workout/hooks/use-workout-editing";
@@ -248,6 +258,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
     startRest(ex.restSeconds, nextSetLabel(labels, exerciseIndex, setIndex, unit));
   };
 
+  const stopwatch = useCardioStopwatch(workout.id);
   const editing = useWorkoutEditing({
     initial: workout,
     unit,
@@ -304,6 +315,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   const allSets = state.exercises.flatMap((e) => e.sets);
   const doneCount = allSets.filter((s) => s.isCompleted).length;
   const progressPct = allSets.length ? (doneCount / allSets.length) * 100 : 0;
+  const volumeText = volumeLabel(completedVolume(allSets), unit);
 
   /* ---------- Finalizar / descartar ---------- */
 
@@ -438,6 +450,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           paused={paused}
           progressText={setsProgressLabel(doneCount, allSets.length)}
           progressPct={progressPct}
+          volumeText={volumeText}
           onMinimize={() => router.push("/")}
           onTogglePause={togglePause}
           onOpenMenu={() => setSheet({ kind: "workout-menu" })}
@@ -462,6 +475,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           exerciseNoteHint="Fica salva para os próximos treinos"
           offline={offline}
           persist={persist}
+          stopwatch={stopwatch}
         />
       </main>
 

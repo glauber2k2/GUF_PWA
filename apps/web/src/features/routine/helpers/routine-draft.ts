@@ -1,4 +1,4 @@
-import { NEW_PLANNED_EXERCISE, toggleWeekday, type IsoWeekday } from "@guf/core";
+import { measuresReps, NEW_PLANNED_EXERCISE, setMetricFor, toggleWeekday, type IsoWeekday } from "@guf/core";
 import type { LibraryExercise, RoutineDraft, RoutineExerciseDraft } from "@guf/api";
 
 /** Rascunho da rotina na tela: só é gravado ao tocar em "Salvar". */
@@ -15,7 +15,7 @@ export type DraftAction =
   | { type: "restoreExercise"; index: number; exercise: RoutineExerciseDraft }
   | { type: "reorder"; exercises: RoutineExerciseDraft[] };
 
-/** Exercício da biblioteca → planejado (id novo gerado no app; padrões 3 × 10, 90 s). */
+/** Exercício da biblioteca → planejado (id novo gerado no app; força 3 × 10, cardio 1 série sem repetições; 90 s). */
 export function toPlannedExercise(library: LibraryExercise): RoutineExerciseDraft {
   return {
     id: crypto.randomUUID(),
@@ -24,6 +24,8 @@ export function toPlannedExercise(library: LibraryExercise): RoutineExerciseDraf
     muscleGroup: library.muscleGroup,
     equipment: library.equipment,
     ...NEW_PLANNED_EXERCISE,
+    targetSets: setMetricFor(library.muscleGroup).defaultSetCount,
+    targetReps: measuresReps(library.muscleGroup) ? NEW_PLANNED_EXERCISE.targetReps : "",
   };
 }
 

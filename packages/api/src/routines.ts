@@ -1,3 +1,4 @@
+import { setMetricFor } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 
@@ -51,7 +52,6 @@ export interface RoutinesApi {
  * ===================================================================== */
 
 /** Valores do banco quando a rotina não definiu meta (mesmos padrões do resumo da rotina). */
-const DEFAULT_SETS = 3;
 const DEFAULT_REST_SECONDS = 90;
 
 export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId }) => {
@@ -79,7 +79,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
           name: re.exercises?.name ?? "Exercício",
           muscleGroup: re.exercises?.muscle_group ?? "",
           equipment: re.exercises?.equipment ?? "outro",
-          targetSets: re.target_sets ?? DEFAULT_SETS,
+          targetSets: re.target_sets ?? setMetricFor(re.exercises?.muscle_group ?? "").defaultSetCount,
           targetReps: re.target_reps ?? "",
           targetWeightKg: re.target_weight_kg === null ? null : Number(re.target_weight_kg),
           restSeconds: re.rest_seconds ?? DEFAULT_REST_SECONDS,

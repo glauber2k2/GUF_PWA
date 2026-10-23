@@ -11,6 +11,8 @@ import {
   formatNumber,
   formatShortDate,
   fromLocalISODate,
+  EVOLUTION_METRICS,
+  evolutionMetricsFor,
   isEvolutionMetric,
   isEvolutionPeriod,
   muscleGroupLabel,
@@ -88,7 +90,7 @@ export function EvolutionScreen() {
 }
 
 /** Métrica e período ficam na URL (voltar/compartilhar mantém a escolha). */
-function useEvolutionParams(defaultPeriod: EvolutionPeriod): {
+function useEvolutionParams(defaultPeriod: EvolutionPeriod, metrics: typeof EVOLUTION_METRICS): {
   metric: EvolutionMetric;
   period: EvolutionPeriod;
   set: (key: "metrica" | "periodo", value: string) => void;
@@ -99,7 +101,8 @@ function useEvolutionParams(defaultPeriod: EvolutionPeriod): {
   const m = params.get("metrica");
   const p = params.get("periodo");
   return {
-    metric: isEvolutionMetric(m) ? m : "carga",
+    // Link antigo com métrica que o exercício não tem (ex.: 1RM de cardio) cai na primeira dele.
+    metric: isEvolutionMetric(m) && metrics.some((x) => x.value === m) ? m : (metrics[0]?.value ?? "carga"),
     period: isEvolutionPeriod(p) ? p : defaultPeriod,
     set: (key, value) => {
       const next = new URLSearchParams(params.toString());
@@ -120,7 +123,8 @@ function EvolutionContent({ evolution }: { evolution: ExerciseEvolution }) {
   const chartFrom = (p: EvolutionPeriod) => evolutionPeriodStart(p, today, firstPerformedOn);
   const isPeriodVisible = (p: EvolutionPeriod) => gate.isChartFromVisible(chartFrom(p), today);
   const defaultPeriod = isPeriodVisible(PREFERRED_PERIOD) ? PREFERRED_PERIOD : SHORTEST_PERIOD;
-  const params = useEvolutionParams(defaultPeriod);
+  const metrics = evolutionMetricsFor(evolution.exercise.muscleGroup);
+  const params = useEvolutionParams(defaultPeriod, metrics);
   const { metric, set } = params;
   // Link antigo ou plano que mudou: período fora do plano volta ao que cabe.
   const period = isPeriodVisible(params.period) ? params.period : defaultPeriod;
@@ -140,6 +144,7 @@ function EvolutionContent({ evolution }: { evolution: ExerciseEvolution }) {
         series={series}
         last={last}
         metric={metric}
+        metrics={metrics}
         period={period}
         unit={unit}
         single={single}

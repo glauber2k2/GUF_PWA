@@ -2,10 +2,11 @@
 
 import type { ReactNode } from "react";
 import { CalendarDays, Pencil } from "lucide-react";
-import { editedAtLabel, plural, workoutDateTimeLabel } from "@guf/core";
+import { editedAtLabel, muscleLevelsFromSets, plural, workoutDateTimeLabel } from "@guf/core";
 import type { WorkoutSummaryBase } from "@guf/api";
 import { Icon } from "@/shared/components/ds";
 import { SummaryExerciseCard } from "./summary-exercise-card";
+import { SummaryMuscles } from "./summary-muscles";
 import { SummaryRecords } from "./summary-records";
 import { SummaryStats } from "./summary-stats";
 
@@ -19,9 +20,10 @@ export interface WorkoutSummaryBodyProps {
   onOpenExercise?: (exerciseId: string) => void;
 }
 
-/** Conteúdo do resumo de um treino concluído: data, números, recordes e exercícios. Seu ou de outra pessoa. */
+/** Conteúdo do resumo de um treino concluído: data, números, recordes, músculos e exercícios. Seu ou de outra pessoa. */
 export function WorkoutSummaryBody({ summary, notices, actions, onOpenExercise }: WorkoutSummaryBodyProps) {
   const unit = summary.weightUnit;
+  const muscleLevels = muscleLevelsFromSets(summary.exercises.map((e) => ({ muscleGroup: e.muscleGroup, sets: e.setCount })));
   return (
     <div className="flex flex-col gap-4 pt-2">
       {notices}
@@ -40,6 +42,7 @@ export function WorkoutSummaryBody({ summary, notices, actions, onOpenExercise }
       <SummaryStats summary={summary} />
       {actions}
       {summary.records.length > 0 && <SummaryRecords records={summary.records} unit={unit} onOpenExercise={onOpenExercise} />}
+      {Object.keys(muscleLevels).length > 0 && <SummaryMuscles levels={muscleLevels} />}
 
       <section aria-labelledby="summary-exercises" className="flex flex-col gap-2.5">
         <div className="flex items-baseline justify-between px-1 pt-1">

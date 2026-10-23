@@ -1,4 +1,4 @@
-import { plannedSetValues, sessionTotals, type ActivePeriod, type SetType } from "@guf/core";
+import { plannedSetValues, sessionTotals, setMetricFor, type ActivePeriod, type SetType } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -119,8 +119,6 @@ export interface HomeApi {
 /* =====================================================================
  * Implementação (Supabase)
  * ===================================================================== */
-
-const DEFAULT_PLANNED_SETS = 3;
 
 export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEnd }) => {
   try {
@@ -254,12 +252,13 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
       target_sets: number | null;
       target_reps: string | null;
       target_weight_kg: number | null;
+      exercises: { muscle_group: string } | null;
     }[] = [];
     let autoProgress = true;
     if (routineId) {
       const routineRes = await client
         .from("routines")
-        .select("name, auto_progress, routine_exercises(exercise_id, position, target_sets, target_reps, target_weight_kg)")
+        .select("name, auto_progress, routine_exercises(exercise_id, position, target_sets, target_reps, target_weight_kg, exercises(muscle_group))")
         .eq("id", routineId)
         .maybeSingle();
       if (routineRes.error || !routineRes.data) return { data: null, error: toApiError(routineRes.error) };
@@ -283,7 +282,7 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
 
     const exercises: NewWorkoutExercise[] = planned.map((p, position) => {
       const previous = (lastRes.data ?? []).filter((l) => l.exercise_id === p.exercise_id);
-      const count = p.target_sets ?? Math.max(previous.length, DEFAULT_PLANNED_SETS);
+      const count = p.target_sets ?? Math.max(previous.length, setMetricFor(p.exercises?.muscle_group ?? "").defaultSetCount);
       const lastPrev = previous[previous.length - 1];
       return {
         id: crypto.randomUUID(),

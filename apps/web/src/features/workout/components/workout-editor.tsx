@@ -1,13 +1,18 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowLeftRight, NotepadText, Trash2 } from "lucide-react";
 import { AnimatePresence, BottomSheet, Button, LAYOUT_ITEM_PROPS, LayoutItem, SheetOption, TextField } from "@/shared/components/ds";
 import { ExercisePicker } from "@/features/exercise-picker";
+import { measuresTime } from "@guf/core";
 import { useHoldReorder } from "@/shared/hooks/use-hold-reorder";
 import { AddExerciseButton } from "@/features/workout/components/add-exercise-button";
 import { SetEditSheet } from "@/features/workout/components/set-edit-sheet";
 import { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX, WorkoutExerciseCard } from "@/features/workout/components/workout-exercise-card";
+import type { CardioStopwatchBarProps } from "@/features/workout/components/cardio-stopwatch-bar";
+import { isStopwatchOrphan, stopwatchTarget } from "@/features/workout/helpers/cardio-stopwatch";
+import type { ExerciseView } from "@/features/workout/helpers/workout-state";
+import type { CardioStopwatch } from "@/features/workout/hooks/use-cardio-stopwatch";
 import type { WorkoutEditing } from "@/features/workout/hooks/use-workout-editing";
 
 export interface WorkoutEditorProps {
@@ -20,6 +25,8 @@ export interface WorkoutEditorProps {
   offline: boolean;
   /** false = demonstração (o seletor não grava exercícios criados). */
   persist: boolean;
+  /** Cronômetro do cardio: só no treino em andamento (na edição de treino concluído não existe). */
+  stopwatch?: CardioStopwatch;
 }
 
 /**
@@ -27,8 +34,31 @@ export interface WorkoutEditorProps {
  * adicionar exercício, folha de carga/repetições, menu do exercício, observação e seletor.
  * Não sabe se o treino está em andamento ou concluído: o estado e as ações vêm de useWorkoutEditing.
  */
-export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, offline, persist }: WorkoutEditorProps) {
+export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, offline, persist, stopwatch }: WorkoutEditorProps) {
   const { state, unit, sheet } = editing;
+
+  // Série cronometrada que saiu da lista (removida, exercício trocado): o cronômetro para sem gravar.
+  const isOrphan = isStopwatchOrphan(state.exercises, stopwatch?.running ?? null);
+  const cancelStopwatch = stopwatch?.cancel;
+  useEffect(() => {
+    if (isOrphan) cancelStopwatch?.();
+  }, [isOrphan, cancelStopwatch]);
+
+  const stopwatchFor = (ex: ExerciseView): CardioStopwatchBarProps | undefined => {
+    if (!stopwatch || !measuresTime(ex.muscleGroup)) return undefined;
+    const target = stopwatchTarget(ex, stopwatch.running);
+    if (!target) return undefined;
+    return {
+      setLabel: `Série ${target.setNumber}`,
+      elapsedSeconds: target.isRunningHere ? stopwatch.elapsedSeconds : null,
+      isBusy: Boolean(stopwatch.running) && !target.isRunningHere,
+      onStart: () => stopwatch.start(ex.id, target.setId),
+      onStop: () => {
+        const run = stopwatch.stop();
+        if (run) editing.setDuration(run.exerciseId, run.setId, run.seconds);
+      },
+    };
+  };
   const listRef = useRef<HTMLDivElement>(null);
   const reorder = useHoldReorder({
     items: state.exercises,
@@ -82,6 +112,7 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
                 onCycleType={(si) => editing.cycleType(ex, si)}
                 onEditField={(si, field) => editing.startEdit({ exerciseId: ex.id, setIndex: si, field })}
                 onRemoveSet={(si) => editing.removeSet(ex, si)}
+                stopwatch={stopwatchFor(ex)}
               />
             </LayoutItem>
           ))}
