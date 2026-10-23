@@ -10,6 +10,7 @@ export * from "./overlays";
 export * from "./toast";
 export * from "./feedback";
 export * from "./body-map";
+export * from "./muscle-figure";
 export * from "./swipe-to-delete";
 export * from "./portal";
 export * from "./loader";

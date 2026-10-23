@@ -60,6 +60,8 @@ export interface SetMetricDefinition {
   fields: readonly [SetFieldDefinition, SetFieldDefinition];
   /** Valores de uma série nova sem histórico (força: 10 repetições). */
   defaults: Partial<SetValues>;
+  /** Séries de um exercício novo sem histórico nem meta (força: 3; cardio: 1, uma corrida ou pedalada). */
+  defaultSetCount: number;
   /** Curto, para "Anterior" e "Próx.": "80 × 10" · "5,2 km · 32:10" · "—". */
   formatCompact: (values: SetValues, unit: WeightUnit) => string;
   /** Com unidades, para o resumo e avisos: "80 kg × 10" · "5,2 km · 32:10". */
@@ -178,6 +180,7 @@ const STRENGTH: SetMetricDefinition = {
   kind: "strength",
   fields: [WEIGHT_FIELD, REPS_FIELD],
   defaults: { reps: 10 },
+  defaultSetCount: 3,
   formatCompact: ({ weightKg, reps }, unit) => {
     if (reps === null) return DASH;
     const load = toDisplayWeight(weightKg, unit);
@@ -202,6 +205,7 @@ const CARDIO: SetMetricDefinition = {
   kind: "cardio",
   fields: [DISTANCE_FIELD, DURATION_FIELD],
   defaults: {},
+  defaultSetCount: 1,
   formatCompact: (values) => cardioParts(values).join(" · ") || DASH,
   formatFull: (values) => cardioParts(values).join(" · ") || DASH,
   describe: ({ distanceKm, durationSeconds }) =>
@@ -226,6 +230,19 @@ export function setMetricKind(muscleGroup: string): SetMetricKind {
 export function setMetricFor(muscleGroup: string): SetMetricDefinition {
   return SET_METRICS[setMetricKind(muscleGroup)];
 }
+
+/** O exercício registra repetições? (cardio não: as repetições planejadas não valem para ele) */
+export function measuresReps(muscleGroup: string): boolean {
+  return setMetricFor(muscleGroup).fields.some((field) => field.key === "reps");
+}
+
+/** O exercício registra tempo? (cardio: a série pode ser cronometrada no treino) */
+export function measuresTime(muscleGroup: string): boolean {
+  return setMetricFor(muscleGroup).fields.some((field) => field.key === "durationSeconds");
+}
+
+/** Maior tempo de uma série (24 h, o limite do banco em set_logs.duration_seconds). */
+export const MAX_SET_DURATION_SECONDS = 24 * 60 * 60;
 
 /** Valores medidos de uma série (descarta os outros campos do objeto). */
 export function pickSetValues(set: Partial<SetValues> | null | undefined): SetValues {

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Check, Dumbbell, NotepadText, X } from "lucide-react";
 import { getExerciseContext, type EditableWorkout, type ExerciseContext } from "@guf/api";
-import { formatElapsed, setsProgressLabel } from "@guf/core";
+import { completedVolume, formatElapsed, setsProgressLabel, volumeLabel } from "@guf/core";
 import { useAppShell } from "@/features/app-shell";
 import { Banner, BottomSheet, Button, ConfirmDialog, EmptyState, SavingOverlay, SheetOption, SkeletonCard } from "@/shared/components/ds";
 import { useGoBack } from "@/shared/hooks/use-go-back";
@@ -121,6 +121,7 @@ function WorkoutEditView({ workout, onExit }: { workout: EditableWorkout; onExit
           paused={false}
           progressText={setsProgressLabel(doneCount, allSets.length)}
           progressPct={allSets.length ? (doneCount / allSets.length) * 100 : 0}
+          volumeText={volumeLabel(completedVolume(allSets), workout.weightUnit)}
           minimizeIcon={X}
           minimizeLabel="Sair da edição"
           onMinimize={leave}

@@ -2,7 +2,7 @@
 // altura automática. O StoryArt envolve com folga, tema e fundo transparente; os dados vêm de StoryData.
 import { formatNumber, plural } from "@guf/core";
 import { GufRat, MuscleIcon, type MuscleIconKey } from "@/shared/components/ds";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import type { StoryModelProps } from "@/features/share/type";
 import { StickerCard, StickerHeader, StickerLogo, StickerSignature, StickerTagline } from "./stickers-a";
 
@@ -19,8 +19,8 @@ export function StoryS12({ d }: StoryModelProps) {
       </span>
       <div className="flex items-end justify-between">
         <div className="flex gap-[10px]">
-          <StoryFigure view="front" height={320} levels={d.muscles} />
-          <StoryFigure view="back" height={320} levels={d.muscles} />
+          <MuscleFigure view="front" height={320} levels={d.muscles} />
+          <MuscleFigure view="back" height={320} levels={d.muscles} />
         </div>
         <GufRat occasion={LEG_FOCUS.test(d.focus) ? "legDay" : "workoutDone"} size={260} animated={false} label={null} />
       </div>
@@ -91,8 +91,8 @@ export function StoryS14({ d }: StoryModelProps) {
       <StickerHeader aside="Esta semana" />
       <span className="text-[48px] leading-[54px] font-bold tracking-[-.02em]">Músculos treinados</span>
       <div className="flex justify-center gap-[40px]">
-        <StoryFigure view="front" height={400} levels={d.week.muscles} />
-        <StoryFigure view="back" height={400} levels={d.week.muscles} />
+        <MuscleFigure view="front" height={400} levels={d.week.muscles} />
+        <MuscleFigure view="back" height={400} levels={d.week.muscles} />
       </div>
       <div className="flex justify-center gap-[28px]">
         {legend.map((item) => (
@@ -322,8 +322,8 @@ export function StoryS20({ d }: StoryModelProps) {
       <StackedNumber label="Duração" value={d.duration} />
       <StackedNumber label="Séries" value={d.sets} />
       <div className="mt-[8px] flex gap-[28px]">
-        <StoryFigure view="front" height={300} levels={d.muscles} />
-        <StoryFigure view="back" height={300} levels={d.muscles} />
+        <MuscleFigure view="front" height={300} levels={d.muscles} />
+        <MuscleFigure view="back" height={300} levels={d.muscles} />
       </div>
       <div className="mt-[8px]">
         <StickerLogo />
@@ -355,8 +355,8 @@ export function StoryS22({ d }: StoryModelProps) {
           </div>
         </div>
         <div className="flex flex-none flex-col gap-[20px]">
-          <StoryFigure view="front" height={300} levels={d.muscles} />
-          <StoryFigure view="back" height={300} levels={d.muscles} />
+          <MuscleFigure view="front" height={300} levels={d.muscles} />
+          <MuscleFigure view="back" height={300} levels={d.muscles} />
         </div>
       </div>
       <div className="flex items-center justify-between gap-[16px]">

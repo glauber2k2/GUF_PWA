@@ -28,6 +28,7 @@ import {
   Tag,
 } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
+import { CardioStopwatchBar, type CardioStopwatchBarProps } from "@/features/workout/components/cardio-stopwatch-bar";
 import type { EditableField, ExerciseView } from "@/features/workout/helpers/workout-state";
 
 /** Ícone do exercício pelo tipo de medida (o mesmo do seletor de exercícios para cardio). */
@@ -51,6 +52,8 @@ export interface WorkoutExerciseCardProps {
   onCycleType: (setIndex: number) => void;
   onEditField: (setIndex: number, field: EditableField) => void;
   onRemoveSet: (setIndex: number) => void;
+  /** Cronômetro do cardio (só no treino em andamento e em exercício que mede tempo). */
+  stopwatch?: CardioStopwatchBarProps;
   /** Segurar o cabeçalho liga o modo de reordenar (useHoldReorder). */
   holdProps?: HTMLAttributes<HTMLElement>;
   /**
@@ -82,6 +85,7 @@ export function WorkoutExerciseCard({
   onCycleType,
   onEditField,
   onRemoveSet,
+  stopwatch,
   holdProps,
   reorder,
 }: WorkoutExerciseCardProps) {
@@ -219,6 +223,7 @@ export function WorkoutExerciseCard({
             );
           })}
         </AnimatePresence>
+        {stopwatch && <CardioStopwatchBar {...stopwatch} />}
         <div className="flex gap-2 px-3 pt-2.5 pb-3.5">
           <Button variant="secondary" icon={Plus} fullWidth onClick={onAddSet}>
             Adicionar série

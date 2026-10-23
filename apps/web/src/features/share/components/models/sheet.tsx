@@ -1,7 +1,7 @@
 // Stories · Ficha (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import { Trophy } from "lucide-react";
 import { GufRat, Logo } from "@/shared/components/ds";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import { StoryCenterCard, StoryExerciseRows } from "./center-card";
 import { plural } from "@guf/core";
 import { cn } from "@/shared/helpers/class-names";
@@ -73,8 +73,8 @@ export function Story20({ d }: StoryModelProps) {
         </div>
         <div className="mt-[56px] flex items-center gap-[40px]">
           <div className="flex gap-[12px] flex-none">
-            <StoryFigure view="front" height={300} levels={d.muscles} />
-            <StoryFigure view="back" height={300} levels={d.muscles} />
+            <MuscleFigure view="front" height={300} levels={d.muscles} />
+            <MuscleFigure view="back" height={300} levels={d.muscles} />
           </div>
           <div className="flex-1 min-w-0 flex flex-col gap-[24px]">
             <span className="text-[52px] leading-[60px] font-bold tracking-[-.02em]">{d.title}</span>
@@ -123,8 +123,8 @@ export function Story20B({ d }: StoryModelProps) {
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="mt-[40px] flex justify-center gap-[56px]">
-          <StoryFigure view="front" height={420} levels={d.muscles} />
-          <StoryFigure view="back" height={420} levels={d.muscles} />
+          <MuscleFigure view="front" height={420} levels={d.muscles} />
+          <MuscleFigure view="back" height={420} levels={d.muscles} />
         </div>
         <span className="mt-[40px] text-[56px] leading-[64px] font-bold tracking-[-.02em] text-center">{d.title}</span>
         <div className="mt-[40px] py-[16px] px-[40px] rounded-[32px] bg-surface border border-border flex flex-col">
@@ -172,8 +172,8 @@ export function Story20C({ d }: StoryModelProps) {
             <span className="text-[28px] text-fg">{[d.routine, d.date].filter(Boolean).join(" · ")}</span>
           </div>
           <div className="flex gap-[8px]">
-            <StoryFigure view="front" height={360} levels={d.muscles} />
-            <StoryFigure view="back" height={360} levels={d.muscles} />
+            <MuscleFigure view="front" height={360} levels={d.muscles} />
+            <MuscleFigure view="back" height={360} levels={d.muscles} />
           </div>
         </div>
         <div className="mt-[48px] grid grid-cols-2 gap-[20px]">
@@ -244,8 +244,8 @@ export function Story20D({ d }: StoryModelProps) {
         ))}
         <div className="mt-[40px] py-[32px] px-[40px] rounded-[40px] bg-surface border border-border flex items-center gap-[40px]">
           <div className="flex gap-[12px] flex-none">
-            <StoryFigure view="front" height={300} levels={d.muscles} />
-            <StoryFigure view="back" height={300} levels={d.muscles} />
+            <MuscleFigure view="front" height={300} levels={d.muscles} />
+            <MuscleFigure view="back" height={300} levels={d.muscles} />
           </div>
           <div className="flex-1 grid grid-cols-2 gap-y-[28px] gap-x-[16px]">
             <div className="flex flex-col gap-[4px]">
@@ -321,8 +321,8 @@ export function Story37({ d }: StoryModelProps) {
           <span className="text-[32px] text-fg">{todayMeta(d)}</span>
         </div>
         <div className="flex flex-none gap-[8px]">
-          <StoryFigure view="front" height={220} levels={d.muscles} />
-          <StoryFigure view="back" height={220} levels={d.muscles} />
+          <MuscleFigure view="front" height={220} levels={d.muscles} />
+          <MuscleFigure view="back" height={220} levels={d.muscles} />
         </div>
       </div>
       <StoryExerciseRows rows={d.exercises.slice(0, TODAY_ROWS)} />

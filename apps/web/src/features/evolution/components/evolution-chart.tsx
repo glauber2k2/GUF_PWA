@@ -26,7 +26,6 @@ import { prefersReducedMotion } from "@/shared/helpers/motion";
 import { CHART_WITHOUT_FOCUS_RING } from "@/shared/helpers/chart";
 import { cn } from "@/shared/helpers/class-names";
 
-const METRIC_OPTIONS = EVOLUTION_METRICS.map((m) => ({ value: m.value, label: m.label }));
 const PERIOD_OPTIONS = EVOLUTION_PERIODS.map((p) => ({ value: p.value, label: p.label }));
 const CHART_HEIGHT = 196;
 
@@ -34,6 +33,8 @@ export interface EvolutionChartProps {
   series: EvolutionSeries;
   last: ExerciseSessionEvolution;
   metric: EvolutionMetric;
+  /** Métricas do exercício (cardio sem 1RM: evolutionMetricsFor). */
+  metrics: typeof EVOLUTION_METRICS;
   period: EvolutionPeriod;
   unit: WeightUnit;
   /** Só 1 treino em todo o histórico. */
@@ -43,18 +44,19 @@ export interface EvolutionChartProps {
 }
 
 /** Card "Evolução": métrica, último treino, variação no período, gráfico (um ponto por treino) e legenda. */
-export function EvolutionChart({ series, last, metric, period, unit, single, onMetricChange, onPeriodChange }: EvolutionChartProps) {
+export function EvolutionChart({ series, last, metric, metrics, period, unit, single, onMetricChange, onPeriodChange }: EvolutionChartProps) {
   const digits = metric === "volume" ? 0 : 1;
   const lastValue = toDisplayWeight(metric === "carga" ? last.maxWeightKg : metric === "1rm" ? last.best1RMKg : last.volumeKg, unit);
   const bigUnit = metric === "carga" && last.repsAtMax ? `${unit} ${TIMES_SIGN} ${last.repsAtMax}` : unit;
-  const footnote = EVOLUTION_METRICS.find((m) => m.value === metric)?.footnote;
+  const footnote = metrics.find((m) => m.value === metric)?.footnote;
+  const metricOptions = metrics.map((m) => ({ value: m.value, label: m.label }));
 
   return (
     <section aria-labelledby="evolution-chart-title" className="flex flex-none animate-guf-rise flex-col gap-3.5 rounded-lg border border-border bg-surface px-4 pt-5 pb-4 shadow-e1 [animation-delay:60ms]">
       <h2 id="evolution-chart-title" className="m-0 ml-1 text-lg leading-6 font-semibold tracking-[-0.015em]">
         Evolução
       </h2>
-      <SegmentedControl label="Métrica do gráfico" options={METRIC_OPTIONS} value={metric} onChange={(v) => onMetricChange(v as EvolutionMetric)} />
+      <SegmentedControl label="Métrica do gráfico" options={metricOptions} value={metric} onChange={(v) => onMetricChange(v as EvolutionMetric)} />
 
       <div className="flex flex-col gap-0.5 px-1">
         <span className="text-xs leading-4 text-fg-muted tabular-nums">Último treino · {formatDayMonth(fromLocalISODate(last.performedOn))}</span>

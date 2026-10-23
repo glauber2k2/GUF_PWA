@@ -1,6 +1,6 @@
 // Stories · Evolução (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import { GufRat, Logo } from "@/shared/components/ds";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { STORY_SIGNATURE, type StoryModelProps } from "@/features/share/type";
 
@@ -18,7 +18,7 @@ export function Story25({ d }: StoryModelProps) {
         {d.focus} em dia
       </div>
       <div className="absolute right-[72px] top-[480px]">
-        <StoryFigure view="front" height={760} levels={d.muscles} />
+        <MuscleFigure view="front" height={760} levels={d.muscles} />
       </div>
       <div className="absolute left-[40px] top-[760px]">
         <GufRat occasion="goalReached" size={500} animated={false} label={null} />
@@ -53,11 +53,11 @@ export function Story26({ d }: StoryModelProps) {
         </span>
         <div className="mt-[64px] grid grid-cols-2 gap-[24px]">
           <div className="flex flex-col items-center gap-[20px]">
-            <StoryFigure view="front" height={560} levels={d.month.previous.muscles} />
+            <MuscleFigure view="front" height={560} levels={d.month.previous.muscles} />
             <span className="text-[24px] font-semibold tracking-[.08em] text-fg">{d.month.previous.name.toUpperCase()}</span>
           </div>
           <div className="flex flex-col items-center gap-[20px]">
-            <StoryFigure view="front" height={560} levels={d.month.current.muscles} />
+            <MuscleFigure view="front" height={560} levels={d.month.current.muscles} />
             <span className="text-[24px] font-semibold tracking-[.08em] text-accent-text">{d.month.current.name.toUpperCase()}</span>
           </div>
         </div>
@@ -94,8 +94,8 @@ export function Story27({ d }: StoryModelProps) {
         </div>
         <span className="mt-[64px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">Músculos do mês</span>
         <div className="mt-[56px] flex justify-center gap-[48px]">
-          <StoryFigure view="front" height={440} levels={d.month.current.muscles} />
-          <StoryFigure view="back" height={440} levels={d.month.current.muscles} />
+          <MuscleFigure view="front" height={440} levels={d.month.current.muscles} />
+          <MuscleFigure view="back" height={440} levels={d.month.current.muscles} />
         </div>
         <div className="mt-[64px] flex flex-col gap-[28px]">
           {d.month.shares.map((m, i, list) => (

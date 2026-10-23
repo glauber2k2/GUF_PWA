@@ -13,6 +13,8 @@ export interface WorkoutHeaderProps {
   progressText?: string;
   /** 0–100 */
   progressPct?: number;
+  /** Volume das séries concluídas ("4.320 kg"), atualizado a cada série. */
+  volumeText?: string;
   onMinimize: () => void;
   /** Botão da esquerda: minimizar (padrão) ou sair (edição de um treino concluído). */
   minimizeIcon?: LucideIcon;
@@ -33,6 +35,7 @@ export function WorkoutHeader({
   paused,
   progressText,
   progressPct = 0,
+  volumeText,
   onMinimize,
   minimizeIcon = ChevronDown,
   minimizeLabel = "Minimizar treino",
@@ -56,6 +59,12 @@ export function WorkoutHeader({
               />
             )}
             <span className="truncate">{name}</span>
+            {volumeText && (
+              <span aria-label={`Volume ${volumeText}`} className="flex-none whitespace-nowrap text-fg-muted tabular-nums">
+                <span aria-hidden="true">· </span>
+                {volumeText}
+              </span>
+            )}
           </span>
           <div className="flex items-center gap-2">
             {editable ? (

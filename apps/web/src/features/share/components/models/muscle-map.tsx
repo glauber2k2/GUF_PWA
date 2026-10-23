@@ -1,7 +1,7 @@
 // Stories · Mapa muscular (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import { Logo } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
-import { StoryFigure } from "@/features/share/components/story-figure";
+import { MuscleFigure } from "@/shared/components/ds";
 import { STORY_SIGNATURE, type StoryModelProps } from "@/features/share/type";
 
 /** Legenda: mesma intensidade das regiões do boneco (níveis 1–3). */
@@ -17,8 +17,8 @@ export function Story01({ d }: StoryModelProps) {
         </div>
         <div className="mt-[24px] self-stretch text-[64px] leading-[72px] font-bold tracking-[-.02em]">{d.title}</div>
         <div className="mt-[56px] flex gap-[72px] items-end">
-          <StoryFigure view="front" height={560} levels={d.muscles} />
-          <StoryFigure view="back" height={560} levels={d.muscles} />
+          <MuscleFigure view="front" height={560} levels={d.muscles} />
+          <MuscleFigure view="back" height={560} levels={d.muscles} />
         </div>
         <div className="mt-[40px] flex gap-[40px]">
           {d.muscleLegend.map((m) => (
@@ -62,7 +62,7 @@ export function Story02({ d }: StoryModelProps) {
   return (
     <>
       <div className="absolute right-[8px] top-[420px]">
-        <StoryFigure view="front" height={1000} levels={d.muscles} />
+        <MuscleFigure view="front" height={1000} levels={d.muscles} />
       </div>
       <div className="absolute left-[96px] top-[220px] bottom-[260px] w-[460px] flex flex-col">
         <Logo className="h-[88px]" />
@@ -97,8 +97,8 @@ export function Story03({ d }: StoryModelProps) {
       <div className="absolute left-[64px] right-[64px] bottom-[260px] flex flex-col gap-[24px]">
         <div className="p-[48px] rounded-[48px] bg-surface border border-border flex gap-[40px] items-center">
           <div className="flex gap-[16px] flex-none">
-            <StoryFigure view="front" height={300} levels={d.muscles} />
-            <StoryFigure view="back" height={300} levels={d.muscles} />
+            <MuscleFigure view="front" height={300} levels={d.muscles} />
+            <MuscleFigure view="back" height={300} levels={d.muscles} />
           </div>
           <div className="flex-1 min-w-0 flex flex-col gap-[12px]">
             <span className="text-[22px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO</span>

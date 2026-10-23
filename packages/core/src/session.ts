@@ -1,6 +1,7 @@
 /** Regras do treino em andamento (puras, sem React). */
 import { formatNumber } from "./format";
-import { estimate1RM, type SetType } from "./training";
+import { estimate1RM, totalVolume, type SetLike, type SetType } from "./training";
+import { toDisplayWeight, type WeightUnit } from "./units";
 
 /** Ordem dos grupos musculares no seletor de exercícios (códigos de exercises.muscle_group). */
 export const MUSCLE_GROUP_ORDER = [
@@ -191,6 +192,16 @@ export function markRecordSets(sets: readonly RecordCandidate[], previousBest1Rm
 /** "12 de 22 séries" */
 export function setsProgressLabel(done: number, total: number): string {
   return `${done} de ${total} ${total === 1 ? "série" : "séries"}`;
+}
+
+/** Volume do treino em andamento: só séries concluídas, sem aquecimento (o mesmo número do resumo). */
+export function completedVolume(sets: ReadonlyArray<SetLike & { isCompleted: boolean }>): number {
+  return totalVolume(sets.filter((set) => set.isCompleted));
+}
+
+/** "4.320 kg" na unidade do usuário (inteiro, como no resumo). */
+export function volumeLabel(volumeKg: number, unit: WeightUnit): string {
+  return `${formatNumber(Math.round(toDisplayWeight(volumeKg, unit) ?? 0), 0)} ${unit}`;
 }
 
 /** Mensagem da confirmação de finalizar (mostra a consequência). */

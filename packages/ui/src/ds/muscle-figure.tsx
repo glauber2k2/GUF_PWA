@@ -1,7 +1,8 @@
-import type { StoryMuscle, StoryMuscleLevels } from "@guf/core";
+import type { FigureMuscle, MuscleLevels } from "@guf/core";
+import { cn } from "../helpers/class-names";
 
 /*
- * Boneco frente/costas dos stories (Claude Design · StoryArt `figure()`): silhueta em 14% do texto,
+ * Boneco frente/costas (Claude Design · StoryArt `figure()`), no resumo do treino e nos stories: silhueta em 14% do texto,
  * regiões não treinadas em 22% e as treinadas em volt com 36/64/100% conforme o nível (1–3).
  * Diferente do BodyMap do app (ícone de grupo): aqui várias regiões acendem juntas.
  */
@@ -99,7 +100,7 @@ const FRONT: readonly Region[] = ["delt", "chest", "arm", "fore", "abs1", "abs2"
 const BACK: readonly Region[] = ["trap", "delt", "lat", "low", "triO", "triL", "fore", "glu", "ham", "calf"];
 
 /** Grupo → regiões [frente, costas]. */
-const MUSCLE_REGIONS: Record<StoryMuscle, readonly [readonly Region[], readonly Region[]]> = {
+const MUSCLE_REGIONS: Record<FigureMuscle, readonly [readonly Region[], readonly Region[]]> = {
   peito: [["chest"], []],
   ombro: [["delt"], ["delt"]],
   costas: [[], ["lat", "low"]],
@@ -115,7 +116,7 @@ const MUSCLE_REGIONS: Record<StoryMuscle, readonly [readonly Region[], readonly 
 };
 
 /** Opacidade das regiões treinadas por nível (classes fixas para o Tailwind gerar). */
-const LEVEL_OPACITY = ["", "opacity-36", "opacity-64", "opacity-100"] as const;
+export const MUSCLE_LEVEL_OPACITY = ["", "opacity-36", "opacity-64", "opacity-100"] as const;
 const FLIP = "translate(100 0) scale(-1 1)";
 
 function Shape({ region, className }: { region: Region; className: string }) {
@@ -128,9 +129,9 @@ function Shape({ region, className }: { region: Region; className: string }) {
   );
 }
 
-export function StoryFigure({ view, height, levels }: { view: "front" | "back"; height: number; levels: StoryMuscleLevels }) {
+export function MuscleFigure({ view, height, levels }: { view: "front" | "back"; height: number; levels: MuscleLevels }) {
   const lit = new Map<Region, number>();
-  for (const [muscle, level] of Object.entries(levels) as Array<[StoryMuscle, number]>) {
+  for (const [muscle, level] of Object.entries(levels) as Array<[FigureMuscle, number]>) {
     for (const region of MUSCLE_REGIONS[muscle][view === "front" ? 0 : 1]) lit.set(region, Math.max(lit.get(region) ?? 0, level));
   }
   const regions = view === "front" ? FRONT : BACK;
@@ -144,7 +145,7 @@ export function StoryFigure({ view, height, levels }: { view: "front" | "back"; 
         <Shape key={r} region={r} className="fill-current opacity-22" />
       ))}
       {hit.map((r) => (
-        <Shape key={r} region={r} className={`fill-accent-text ${LEVEL_OPACITY[lit.get(r) ?? 1]}`} />
+        <Shape key={r} region={r} className={cn("fill-accent-text", MUSCLE_LEVEL_OPACITY[lit.get(r) ?? 1])} />
       ))}
     </svg>
   );
