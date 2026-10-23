@@ -46,6 +46,10 @@ export function RequireAuth({ children, mode = "app" }: { children: ReactNode; m
   const searchParams = useSearchParams();
   const pending = usePendingDocuments();
   const hasPending = (pending.data?.length ?? 0) > 0;
+  // Sem internet (consulta pausada pelo TanStack ou erro de rede) o app abre: o treino é
+  // offline-first e os aceites só mudam no servidor. Ao reconectar, a consulta roda de novo e o
+  // portão leva ao /aceite se houver documento pendente.
+  const isOffline = pending.fetchStatus === "paused" || pending.error?.code === "network_error";
   const search = searchParams.toString();
 
   let target: string | null = null;
@@ -61,8 +65,8 @@ export function RequireAuth({ children, mode = "app" }: { children: ReactNode; m
   }
   useRedirect(target);
 
-  if (user && pending.isError) return <GuardError onRetry={() => void pending.refetch()} />;
-  if (!user || !pending.isSuccess || target) return <AuthSplash />;
+  if (user && pending.isError && !isOffline) return <GuardError onRetry={() => void pending.refetch()} />;
+  if (!user || target || (!pending.isSuccess && !isOffline)) return <AuthSplash />;
   return children;
 }
 
