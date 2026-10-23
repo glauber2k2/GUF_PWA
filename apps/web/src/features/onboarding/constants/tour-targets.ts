@@ -3,6 +3,9 @@
  * (pelo barrel), para o passo e o elemento nunca ficarem com nomes diferentes.
  */
 export const TOUR_TARGETS = {
+  editProfile: "edit-profile",
+  aiAssistant: "ai-assistant",
+  planImport: "plan-import",
   todayCard: "today-card",
   weekCard: "week-card",
   streakCard: "streak-card",
@@ -44,6 +47,9 @@ function stageButtonWithText(text: string): Element | null {
 
 /** Como achar cada alvo. Um alvo pode ser vários elementos: o destaque cobre todos. */
 export const TOUR_TARGET_FINDERS = {
+  editProfile: byTarget(TOUR_TARGETS.editProfile),
+  aiAssistant: byTarget(TOUR_TARGETS.aiAssistant),
+  planImport: byTarget(TOUR_TARGETS.planImport),
   todayCard: byTarget(TOUR_TARGETS.todayCard),
   weekCard: byTarget(TOUR_TARGETS.weekCard),
   streakCard: byTarget(TOUR_TARGETS.streakCard),

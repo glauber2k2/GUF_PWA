@@ -65,6 +65,11 @@ const planImportRoutineSchema = z.object({
   name: z.string().trim().min(1, "Dê um nome para a rotina.").max(ROUTINE_NAME_MAX_LENGTH, `Use até ${ROUTINE_NAME_MAX_LENGTH} caracteres.`),
   /** Dias da semana (1 = segunda … 7 = domingo, como no banco). */
   weekdays: z.array(z.number().int().min(1).max(7)).max(7),
+  /**
+   * Rotina que já existe no projeto de destino, escolhida na revisão: os exercícios entram no fim dela
+   * (nome e dias dela continuam). Ausente = rotina nova. O GUF AI nunca preenche; o banco confere o dono.
+   */
+  intoRoutineId: z.string().min(1).max(64).optional(),
   exercises: z.array(planImportExerciseSchema).min(1, "A rotina precisa de pelo menos 1 exercício.").max(PLAN_IMPORT_MAX_EXERCISES_PER_ROUTINE),
 });
 

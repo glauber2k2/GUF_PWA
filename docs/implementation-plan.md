@@ -278,6 +278,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 |---|---|
 | Feature `features/onboarding/` (passos, alvo medido, provider, overlay com recorte e anel) sem biblioteca nova | Feito |
 | Tour completo: 28 passos em 5 capítulos (Início, Projetos, Treino, Competição, Perfil) | Feito (`feat/tutorial-completo`) |
+| Primeiros passos no começo do tour: escolher o @ (passo condicional, `showIf`), GUF AI e importar ficha | Feito (`feat/tour-perfil-guf-ai`) |
 | Demonstração da tela de treino com os componentes reais (`WorkoutTourStage`), sem gravar | Feito |
 | Balão de fala ao lado do destaque, com seta (`placeBubble`) | Feito |
 | `data-tour` no menu inferior, cards da Início, sequência, calendário, evolução, projetos, competição e busca de pessoas | Feito |
@@ -334,6 +335,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Cartão da ficha ao reabrir a conversa (hoje só aparece na resposta da sessão; o banco guarda só o texto) | Pendente |
 | Ajustar séries e repetições na revisão; frases que se alternam enquanto converte (`feat/melhorias-importar-ficha`) | Feito (conferido por print) |
 | Ajustar descanso na revisão (hoje: depois, no editor da rotina) | Pendente |
+| Mandar uma rotina da ficha para uma rotina existente do projeto (exercícios no fim, sem repetir; migration `20261024110000_plan_import_into_routine`) | Feito (`feat/tour-perfil-guf-ai`) |
 
 ### Futuro (fora do MVP)
 

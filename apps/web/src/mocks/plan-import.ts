@@ -6,7 +6,7 @@
  */
 import { apiError, type ApiResult, type GufClient, type LibraryExercise, type PlanImportApi, type PlanImportDraft } from "@guf/api";
 import { PLAN_IMPORT_DEFAULT_REST_SECONDS } from "@guf/core";
-import { mockDropsOnSave, mockProjectsApi, saveMockRoutine } from "@/mocks/projects";
+import { findMockRoutine, mockDropsOnSave, mockProjectsApi, saveMockRoutine } from "@/mocks/projects";
 import { mockWorkoutApi } from "@/mocks/workout";
 
 const LATENCY_MS = 900;
@@ -85,13 +85,15 @@ export const mockPlanImportApi = {
     const project = destination.kind === "existing" ? { data: { id: destination.projectId }, error: null } : await createMockProject(client, draft, destination.activate);
     if (project.error) return { data: null, error: project.error };
     for (const routine of draft.routines) {
-      saveMockRoutine({
-        id: crypto.randomUUID(),
-        projectId: project.data.id,
-        name: routine.name,
-        weekdays: routine.weekdays,
-        exercises: routine.exercises.map((e) => ({ targetSets: e.targetSets, restSeconds: e.restSeconds })),
-      });
+      const planned = routine.exercises.map((e) => ({ targetSets: e.targetSets, restSeconds: e.restSeconds }));
+      // Rotina existente: os exercícios entram no fim e nome/dias dela continuam (como no banco).
+      const into = routine.intoRoutineId ? findMockRoutine(routine.intoRoutineId) : null;
+      if (routine.intoRoutineId && (!into || into.project.id !== project.data.id)) return { data: null, error: apiError("routine_not_found") };
+      saveMockRoutine(
+        into
+          ? { id: into.routine.id, projectId: project.data.id, name: into.routine.name, weekdays: into.routine.weekdays, exercises: [...into.routine.exercises, ...planned] }
+          : { id: crypto.randomUUID(), projectId: project.data.id, name: routine.name, weekdays: routine.weekdays, exercises: planned },
+      );
     }
     return { data: { projectId: project.data.id }, error: null };
   },

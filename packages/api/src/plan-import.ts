@@ -10,7 +10,8 @@ import { apiError, toApiError, type ApiError, type ApiResult } from "./result";
  * 1. convertTrainingPlan: a Edge Function guf-ai converte o texto colado num rascunho (projeto,
  *    rotinas e exercícios). Exercício que é o mesmo de um do CATÁLOGO DO GUF usa o do catálogo;
  *    o resto vira "novo" (exercícios criados por outras pessoas nunca entram). Nada é gravado.
- * 2. importTrainingPlan: a pessoa revisa e cria tudo numa transação (RPC import_training_plan).
+ * 2. importTrainingPlan: a pessoa revisa e cria tudo numa transação (RPC import_training_plan). Cada
+ *    rotina da ficha vira uma rotina nova ou vai para o fim de uma que já existe no projeto escolhido.
  * ===================================================================== */
 
 export type { PlanImportDraft, PlanImportExercise, PlanImportMatch, PlanImportRoutine } from "@guf/schemas";
@@ -23,7 +24,7 @@ type Result<T = null> = Promise<ApiResult<T>>;
 export interface PlanImportApi {
   /** Converte o texto da ficha (até PLAN_IMPORT_MAX_CHARS) num rascunho; conta como uma pergunta do GUF AI. */
   convertTrainingPlan: (client: GufClient, input: { text: string }) => Result<PlanImportDraft>;
-  /** Cria o projeto (ou usa o escolhido), os exercícios novos e as rotinas; devolve o projeto. */
+  /** Cria o projeto (ou usa o escolhido), os exercícios novos e as rotinas (ou completa as existentes); devolve o projeto. */
   importTrainingPlan: (client: GufClient, input: { draft: PlanImportDraft; destination: PlanImportDestination }) => Result<{ projectId: string }>;
 }
 
@@ -67,6 +68,7 @@ const newExerciseKey = (name: string) => normalizeSearch(name);
 function toImportParams(draft: PlanImportDraft) {
   const newExercises = new Map<string, { key: string; name: string; muscle_group: string; equipment: string }>();
   const routines = draft.routines.map((routine) => ({
+    ...(routine.intoRoutineId ? { routine_id: routine.intoRoutineId } : {}),
     name: routine.name.trim(),
     weekdays: [...new Set(routine.weekdays)].sort((a, b) => a - b),
     exercises: routine.exercises.map((exercise) => {

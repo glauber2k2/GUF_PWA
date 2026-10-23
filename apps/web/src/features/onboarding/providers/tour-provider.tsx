@@ -4,12 +4,15 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { usePathname, useRouter } from "next/navigation";
 import { useHomeSummary } from "@/features/home";
 import { useActiveWorkout } from "@/features/workout";
-import { TOUR_STEPS, TOUR_VERSION } from "@/features/onboarding/constants/tour-steps";
+import { TOUR_STEPS, TOUR_VERSION, type TourFacts, type TourStep } from "@/features/onboarding/constants/tour-steps";
+import { visibleTourSteps } from "@/features/onboarding/helpers/visible-tour-steps";
 import { TourOverlay } from "@/features/onboarding/components/tour-overlay";
 import { useCompleteTour, useTourProgress } from "@/features/onboarding/api/use-tour-progress";
 
 /** O tour começa sozinho só na Início (nunca puxa quem abriu um link direto para outra tela). */
 const AUTO_START_ROUTE = "/";
+
+const NO_FACTS: TourFacts = { hasGeneratedHandle: false };
 
 interface TourApi {
   /** Começa (ou recomeça) o tour do primeiro passo. */
@@ -25,8 +28,11 @@ const TourContext = createContext<TourApi | null>(null);
  * navega até a rota de cada passo e só mostra o overlay quando a rota bate. Pular conta como
  * concluído. Se a pessoa sair da rota do passo (ex.: voltar do sistema), o tour fica pausado e
  * reaparece ao voltar.
+ *
+ * Os passos com condição dependem de `facts` (montados em app/). A lista é fixada ao começar: um
+ * fato que mude no meio (ex.: a pessoa troca o @) não desloca os passos.
  */
-export function TourProvider({ children }: { children: ReactNode }) {
+export function TourProvider({ children, facts }: { children: ReactNode; facts: TourFacts | undefined }) {
   const router = useRouter();
   // trailingSlash: true → normalizar "/projetos/" para "/projetos".
   const pathname = usePathname().replace(/(.)\/$/, "$1");
@@ -40,22 +46,24 @@ export function TourProvider({ children }: { children: ReactNode }) {
   // Sem resposta da conta (carregando ou sem internet) não conta como pendente.
   const isPending = progress.data !== undefined && !isDone;
   const [index, setIndex] = useState<number | null>(null);
+  const [steps, setSteps] = useState<readonly TourStep[]>(TOUR_STEPS);
   const [autoStarted, setAutoStarted] = useState(false);
 
   // Primeira entrada: começa uma vez por sessão (ajuste durante a renderização, sem efeito).
-  if (!autoStarted && isPending && !summary.isPending && !hasWorkout && pathname === AUTO_START_ROUTE) {
+  if (!autoStarted && isPending && facts && !summary.isPending && !hasWorkout && pathname === AUTO_START_ROUTE) {
     setAutoStarted(true);
+    setSteps(visibleTourSteps(TOUR_STEPS, facts));
     setIndex(0);
   }
 
   const goTo = useCallback(
-    (next: number) => {
-      const step = TOUR_STEPS[next];
+    (next: number, list: readonly TourStep[] = steps) => {
+      const step = list[next];
       if (!step) return;
       setIndex(next);
       if (step.route !== pathname) router.push(step.route);
     },
-    [pathname, router],
+    [pathname, router, steps],
   );
 
   const finish = useCallback(() => {
@@ -64,10 +72,15 @@ export function TourProvider({ children }: { children: ReactNode }) {
     setIndex(null);
   }, [isDone, completeTour]);
 
-  const start = useCallback(() => goTo(0), [goTo]);
+  const start = useCallback(() => {
+    // Sem os fatos ainda (ex.: sem internet), os passos com condição ficam de fora.
+    const list = visibleTourSteps(TOUR_STEPS, facts ?? NO_FACTS);
+    setSteps(list);
+    goTo(0, list);
+  }, [facts, goTo]);
 
   const api = useMemo<TourApi>(() => ({ start, active: index !== null }), [start, index]);
-  const step = index === null ? null : TOUR_STEPS[index];
+  const step = index === null ? null : steps[index];
 
   return (
     <TourContext.Provider value={api}>
@@ -76,8 +89,8 @@ export function TourProvider({ children }: { children: ReactNode }) {
         <TourOverlay
           step={step}
           position={index + 1}
-          total={TOUR_STEPS.length}
-          onNext={() => (index === TOUR_STEPS.length - 1 ? finish() : goTo(index + 1))}
+          total={steps.length}
+          onNext={() => (index === steps.length - 1 ? finish() : goTo(index + 1))}
           onBack={index > 0 ? () => goTo(index - 1) : undefined}
           onSkip={finish}
         />

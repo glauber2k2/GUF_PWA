@@ -43,7 +43,7 @@ export function PlanImportReview({ initial, projects, onDiscard }: PlanImportRev
       onBack={() => setConfirmDiscard(true)}
       bottomBar={
         <Button size="lg" icon={Check} fullWidth disabled={disabled || review.validationError !== null} loading={review.isSaving} onClick={() => void review.create()}>
-          {review.destination.kind === "new" ? "Criar projeto e rotinas" : "Criar rotinas"}
+          {review.destination.kind === "new" ? "Criar projeto e rotinas" : "Salvar no projeto"}
         </Button>
       }
     >
@@ -74,9 +74,11 @@ export function PlanImportReview({ initial, projects, onDiscard }: PlanImportRev
         <PlanImportRoutineCard
           key={routine.key}
           routine={routine}
+          targetRoutines={review.targetRoutines}
           disabled={disabled}
           canRemove={draft.routines.length > 1}
           onRename={(name) => dispatch({ type: "renameRoutine", routineKey: routine.key, name })}
+          onTarget={(routineId) => dispatch({ type: "setRoutineTarget", routineKey: routine.key, routineId })}
           onRemove={() => dispatch({ type: "removeRoutine", routineKey: routine.key })}
           onChangeExercise={(exerciseKey, patch) => dispatch({ type: "updateExercise", routineKey: routine.key, exerciseKey, patch })}
           onReplaceExercise={(exerciseKey) => setPicker({ routineKey: routine.key, exerciseKey })}
@@ -109,7 +111,7 @@ export function PlanImportReview({ initial, projects, onDiscard }: PlanImportRev
         onCancel={() => setConfirmDiscard(false)}
         onConfirm={onDiscard}
       />
-      <SavingOverlay open={review.isSaving} title="Criando rotinas" message="Leva só um instante." variant={7} />
+      <SavingOverlay open={review.isSaving} title="Salvando rotinas" message="Leva só um instante." variant={7} />
     </EditorFrame>
   );
 }

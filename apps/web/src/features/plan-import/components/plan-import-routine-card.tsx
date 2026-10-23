@@ -1,32 +1,49 @@
 import { CalendarDays, Trash2 } from "lucide-react";
-import type { PlanImportRoutine } from "@guf/api";
+import type { PlanImportRoutine, ProjectRoutine } from "@guf/api";
 import { weekdaysLabel } from "@guf/core";
 import { Icon, IconButton, TextField } from "@/shared/components/ds";
 import { PlanImportExerciseRow } from "@/features/plan-import/components/plan-import-exercise-row";
+import { PlanImportRoutineTarget } from "@/features/plan-import/components/plan-import-routine-target";
 import type { PlanImportExercisePatch } from "@/features/plan-import/helpers/plan-import-draft";
 
 interface PlanImportRoutineCardProps {
   routine: PlanImportRoutine;
+  /** Rotinas do projeto de destino que podem receber os exercícios (vazio = só rotina nova). */
+  targetRoutines: readonly ProjectRoutine[];
   disabled: boolean;
   /** Última rotina da ficha: não pode sair (sem rotina não há o que criar). */
   canRemove: boolean;
   onRename: (name: string) => void;
+  onTarget: (routineId: string | null) => void;
   onRemove: () => void;
   onChangeExercise: (exerciseKey: string, patch: PlanImportExercisePatch) => void;
   onReplaceExercise: (exerciseKey: string) => void;
   onRemoveExercise: (exerciseKey: string) => void;
 }
 
-/** Rotina da ficha convertida: nome editável, dias e a lista de exercícios. */
-export function PlanImportRoutineCard({ routine, disabled, canRemove, onRename, onRemove, onChangeExercise, onReplaceExercise, onRemoveExercise }: PlanImportRoutineCardProps) {
+/**
+ * Rotina da ficha convertida: para onde vai (rotina nova com nome editável ou uma que já existe no
+ * projeto), dias e a lista de exercícios.
+ */
+export function PlanImportRoutineCard({ routine, targetRoutines, disabled, canRemove, onRename, onTarget, onRemove, onChangeExercise, onReplaceExercise, onRemoveExercise }: PlanImportRoutineCardProps) {
+  const target = targetRoutines.find((existing) => existing.id === routine.intoRoutineId);
   const nameError = routine.name.trim() ? undefined : "Dê um nome para a rotina.";
+  const label = target?.name ?? (routine.name || "Rotina");
   return (
-    <section aria-label={routine.name || "Rotina"} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-e1">
+    <section aria-label={label} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-4 shadow-e1">
       <div className="flex items-end gap-1">
-        <TextField label="Rotina" value={routine.name} error={nameError} disabled={disabled} onChange={(event) => onRename(event.target.value)} className="min-w-0 flex-1" />
-        {canRemove && <IconButton icon={Trash2} label={`Remover ${routine.name || "rotina"}`} variant="ghost" disabled={disabled} onClick={onRemove} />}
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          {targetRoutines.length > 0 && <PlanImportRoutineTarget routines={targetRoutines} value={target?.id ?? null} disabled={disabled} onChange={onTarget} />}
+          {!target && <TextField label="Nome da rotina" value={routine.name} error={nameError} disabled={disabled} onChange={(event) => onRename(event.target.value)} />}
+        </div>
+        {canRemove && <IconButton icon={Trash2} label={`Remover ${label}`} variant="ghost" disabled={disabled} onClick={onRemove} />}
       </div>
-      {routine.weekdays.length > 0 && (
+      {target && (
+        <p className="m-0 text-[13px] leading-[18px] text-pretty text-fg-secondary">
+          Os exercícios abaixo entram no fim de {target.name}. O que ela já tem, o nome e os dias continuam; exercício que já está nela não se repete.
+        </p>
+      )}
+      {!target && routine.weekdays.length > 0 && (
         <span className="flex items-center gap-1.5 text-[13px] leading-[18px] text-fg-secondary">
           <Icon icon={CalendarDays} size={14} className="text-fg-muted" />
           {weekdaysLabel(routine.weekdays)}

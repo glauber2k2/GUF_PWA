@@ -2209,6 +2209,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      plan_import_append_to_routine: {
+        Args: {
+          p_exercises: Json
+          p_new_ids: Json
+          p_project_id: string
+          p_routine_id: string
+        }
+        Returns: undefined
+      }
+      plan_import_exercise_id: {
+        Args: { p_item: Json; p_new_ids: Json }
+        Returns: string
+      }
       plan_of: { Args: { p_user_id: string }; Returns: string }
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
