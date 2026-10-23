@@ -70,7 +70,13 @@ export function AccountActionDialog({ kind, targets, onClose, onDone }: AccountA
 
   if (outcome) {
     return (
-      <Dialog open title="Algumas contas não mudaram" subtitle={`${outcome.succeeded.length} de ${targets.length} concluídas`} onClose={onClose} showClose>
+      <Dialog
+        open
+        title={outcome.succeeded.length === 0 ? (targets.length === 1 ? "A conta não mudou" : "Nenhuma conta mudou") : "Algumas contas não mudaram"}
+        subtitle={`${outcome.succeeded.length} de ${targets.length} concluídas · o motivo de cada uma está abaixo`}
+        onClose={onClose}
+        showClose
+      >
         <Panel as="ul">
           {outcome.failed.map(({ target, message }) => (
             <li key={target.userId} className="flex flex-col gap-0.5 px-4 py-3">

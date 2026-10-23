@@ -90,6 +90,9 @@ export function PeopleScreen() {
   const isLoading = dev.forceLoading || ((search.isFetching || typing) && query.trim().length >= 2 && !search.data);
   const results = search.data ?? [];
   const hasQuery = debounced.length >= 2;
+  // Busca vazia com gente marcada: a lista vira a das selecionadas (para revisar antes da ação).
+  const showingSelection = !hasQuery && selection.people.length > 0;
+  const listed = showingSelection ? selection.people : results;
 
   const detailOpen = Boolean(selectedId);
   const showList = !detailOpen || device !== "mobile";
@@ -149,17 +152,17 @@ export function PeopleScreen() {
               </Banner>
             ) : isLoading ? (
               <ResultsSkeleton />
-            ) : !hasQuery ? (
+            ) : !hasQuery && !showingSelection ? (
               <EmptyState
                 icon={Search}
                 title="Comece digitando"
                 message="Os resultados aparecem enquanto você digita. Para ir direto a uma conta, cole o id completo."
               />
-            ) : results.length === 0 ? (
+            ) : hasQuery && results.length === 0 ? (
               <EmptyState icon={UserX} title={`Nenhuma pessoa encontrada para “${debounced}”`} message="Confira a grafia ou tente o e-mail completo. Contas excluídas não aparecem na busca." />
             ) : detailOpen && device !== "mobile" ? (
               <ul className="m-0 flex list-none flex-col gap-1 p-0">
-                {results.map((p) => {
+                {listed.map((p) => {
                   const selected = p.userId === selectedId;
                   return (
                     <li key={p.userId}>
@@ -187,15 +190,19 @@ export function PeopleScreen() {
             ) : (
               <>
                 <span aria-live="polite" className="text-[13px] text-fg-muted">
-                  {results.length === 1 ? "1 pessoa" : `${results.length} pessoas`}
+                  {showingSelection
+                    ? `Selecionadas · ${listed.length}. Digite para buscar e juntar mais pessoas.`
+                    : listed.length === 1
+                      ? "1 pessoa"
+                      : `${listed.length} pessoas`}
                 </span>
                 <PeopleResults
-                  people={results}
+                  people={listed}
                   device={device}
                   onOpen={open}
                   selectedIds={selection.selectedIds}
                   onToggle={canSelect ? selection.toggle : undefined}
-                  onToggleAll={canSelect ? () => selection.toggleAll(results) : undefined}
+                  onToggleAll={canSelect ? () => selection.toggleAll(listed) : undefined}
                   onAction={actionFor}
                   onAnnounce={(p) => announceTo([p.userId])}
                 />
