@@ -467,6 +467,8 @@
 
 ### A023 — Comunicados no app
 
+> 2026-10-23: a pessoa pode recusar comunicados de produto (Configurações › Preferências › "Novidades do guf no app"; `profiles.product_announcements_opt_out`). Serviço e legal continuam. A exportação (`guf-export/7`) inclui os comunicados vistos, fechados e tocados.
+
 | Campo | Valor |
 |---|---|
 | Slug | a023-comunicados |

@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-22
+**Última atualização**: 2026-10-23
 **Encarregado**: pendente designação
 **Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
 
@@ -204,3 +204,11 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Conferido contra o A022: nenhuma ação nova expõe medidas, observações, conversas ou cargas; o e-mail continua mascarado (completo só por ação auditada; na senha nova ele nem chega ao navegador); toda ação tem motivo e auditoria; ações em lote limitadas a 100 contas por vez, uma auditoria por conta.
 - ROPA e base legal do A022 atualizados (senha nova, suspensão, exclusão).
 - ⚖ Continua pendente: Termos com a suspensão e a exclusão por violação (prazo, aviso e contestação) e a seção do suporte na Política (G24) antes de usar com pessoas reais.
+
+## Rodada 2026-10-23 (4) — Correções aplicadas (lgpd-audit, pendências corrigíveis sem texto jurídico)
+- **G26 (novo, crítico, corrigido):** a exclusão de conta pelo painel falhava com GP002 ("O projeto Favoritos não pode ser excluído"): o gatilho `protect_favorites_project` só liberava sem usuário na sessão. Direito de eliminação (Art. 18, VI) restabelecido pela migration `20261023180000_favorites_allow_account_deletion` (aplicada; testada: excluir conta passa, apagar/arquivar o Favoritos de conta ativa continua barrado). A exclusão pelo app e pelo job já funcionavam.
+- **G25 → GREEN:** `guf-export/7` (Art. 18, II e V) com comunicados, suspensões, exclusão agendada e conversões de ficha (migration `20261023180100_lgpd_product_opt_out_and_export`, aplicada e testada).
+- **G24 (parte técnica):** opção "Novidades do guf no app" em Configurações › Preferências (Art. 10, § 2º; oposição ao tratamento por legítimo interesse, Art. 18, § 2º ⚖). Desligada, a pessoa não recebe comunicados de produto; serviço e legal continuam. O alcance publicado já desconta quem recusou. Continuam pendentes: termo de confidencialidade (Art. 47), Política com o suporte e os comunicados e a LIA aprovada ⚖.
+- **G20 → GREEN:** `ALLOWED_ORIGINS` ativo (app, painel, localhost).
+- Competição: conferida a pontuação da temporada de outubro; os pontos são recalculados a cada consulta com os parâmetros vigentes (uma linha, a da regra sem esforço) e os estados guardados dos avisos batem com a regra atual. Nada a corrigir.
+- ⚖ Fora do alcance técnico (seguem abertos): G1, G2, G3, G7, G21, G22 e a previsão de suspensão/exclusão por violação nos Termos.
