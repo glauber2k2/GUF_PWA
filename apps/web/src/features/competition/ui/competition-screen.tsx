@@ -29,7 +29,7 @@ function FullRanking({ board }: { board: ReadyBoard }) {
     <>
       <PositionCard ranking={ranking} metric={metric} unit={board.unitLabel} format={format} />
       <Podium ranking={ranking} label={METRICS[metric].label} format={format} />
-      <RaceChart lines={board.lines} dates={board.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} />
+      <RaceChart lines={board.lines} dates={board.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} onSelect={setRivalChoice} />
       <RankingList ranking={ranking} rivalId={rivalId} unit={board.unitLabel} format={format} onSelect={setRivalChoice} />
       {rival && (
         <DuelCard
