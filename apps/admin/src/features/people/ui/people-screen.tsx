@@ -11,7 +11,9 @@ import { PEOPLE_SEARCH_INPUT_ID } from "@/features/shell";
 import { usePerson } from "@/features/people/api/use-people";
 import { AccountActionDialog } from "@/features/people/components/account-action-dialog";
 import { BulkActionBar } from "@/features/people/components/bulk-action-bar";
-import { EditAccountDialog } from "@/features/people/components/edit-account-dialog";
+import { ChangePlanDialog } from "@/features/people/components/change-plan-dialog";
+import { EditHandleDialog } from "@/features/people/components/edit-handle-dialog";
+import { EditNameDialog } from "@/features/people/components/edit-name-dialog";
 import { PeopleCompactList } from "@/features/people/components/people-compact-list";
 import { PeopleResults } from "@/features/people/components/people-results";
 import { PersonDetail } from "@/features/people/components/person-detail";
@@ -19,8 +21,7 @@ import { ResultsSkeleton } from "@/features/people/components/results-skeleton";
 import { RevealEmailDialog } from "@/features/people/components/reveal-email-dialog";
 import { UnlinkDialog } from "@/features/people/components/unlink-dialog";
 import { ACCOUNT_ACTIONS, BULK_ACTIONS, type AccountActionKind, type AccountActionOutcome, type AccountTarget } from "@/features/people/helpers/account-actions";
-import { peoplePath } from "@/features/people/helpers/people";
-import type { EditField } from "@/features/people/hooks/use-account-edit";
+import { peoplePath, type EditField } from "@/features/people/helpers/people";
 import { toAccountTarget, usePeopleSelection } from "@/features/people/hooks/use-people-selection";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
 import { PageBody, PageTitle } from "@/shared/components/panel";
@@ -37,6 +38,18 @@ type DialogState =
   | { kind: "action"; action: AccountActionKind; targets: AccountTarget[] }
   | null;
 
+
+/** Um diálogo por campo: cada um valida e grava só a própria mudança. */
+const EDIT_DIALOGS: Record<EditField, typeof ChangePlanDialog> = {
+  plan: ChangePlanDialog,
+  handle: EditHandleDialog,
+  name: EditNameDialog,
+};
+
+function EditDialog({ field, ...props }: { field: EditField } & Parameters<typeof ChangePlanDialog>[0]) {
+  const Dialog = EDIT_DIALOGS[field];
+  return <Dialog {...props} />;
+}
 
 /**
  * 3 e 4 · Pessoas: busca enquanto digita (por @, nome, e-mail exato ou id) e o detalhe da conta.
@@ -82,7 +95,7 @@ export function PeopleScreen() {
   const detailOpen = Boolean(selectedId);
   const showList = !detailOpen || device !== "mobile";
 
-  /** "Mudar plano" de uma pessoa usa o diálogo de edição (com @ e nome); o resto, o diálogo de ação. */
+  /** "Mudar plano" da conta aberta usa o diálogo próprio (com o plano atual); o resto, o diálogo de ação. */
   const startAction = (action: AccountActionKind, targets: AccountTarget[]) => {
     if (action === "plan" && targets.length === 1 && targets[0]?.userId === selectedId) setDialog({ kind: "edit", field: "plan" });
     else setDialog({ kind: "action", action, targets });
@@ -230,7 +243,7 @@ export function PeopleScreen() {
               )}
               {can("edit_profile") && (
                 <Button variant="secondary" size="tall" fullWidth className="flex-1" onClick={() => setDialog({ kind: "edit", field: "handle" })}>
-                  Editar conta
+                  Editar @
                 </Button>
               )}
             </MobileActionBar>
@@ -239,7 +252,7 @@ export function PeopleScreen() {
       )}
 
       {person.data && dialog?.kind === "edit" && (
-        <EditAccountDialog person={person.data} initialField={dialog.field} onClose={() => setDialog(null)} onSaved={(message) => toast(message, { tone: "success" })} />
+        <EditDialog field={dialog.field} person={person.data} onClose={() => setDialog(null)} onSaved={(message) => toast(message, { tone: "success" })} />
       )}
       {dialog?.kind === "action" && (
         <AccountActionDialog

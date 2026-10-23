@@ -12,6 +12,9 @@ export function peoplePath({ query, userId }: { query?: string; userId?: string 
   return withDevState(search ? `/pessoas?${search}` : "/pessoas");
 }
 
+/** Campos que a equipe edita, cada um no seu diálogo (Mudar plano, Editar @, Editar nome). */
+export type EditField = "plan" | "handle" | "name";
+
 export const DOCUMENT_LABELS: Record<string, string> = {
   terms: "Termos de Uso",
   privacy: "Política de Privacidade",

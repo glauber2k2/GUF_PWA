@@ -9,8 +9,8 @@ import { AccountActionsMenu } from "@/features/people/components/account-actions
 import { AccountStatusBanners } from "@/features/people/components/account-status-banners";
 import { DocumentsSection } from "@/features/people/components/documents-section";
 import type { AccountActionKind } from "@/features/people/helpers/account-actions";
-import { GRANT_SOURCE_LABELS, displayName, formatDate } from "@/features/people/helpers/people";
-import type { EditField } from "@/features/people/hooks/use-account-edit";
+import { GRANT_SOURCE_LABELS, displayName, formatDate, type EditField } from "@/features/people/helpers/people";
+
 import { InfoRow, Panel, PanelSection } from "@/shared/components/panel";
 
 interface PersonDetailProps {
