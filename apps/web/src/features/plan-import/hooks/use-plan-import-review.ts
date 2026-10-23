@@ -2,7 +2,7 @@
 
 import { useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { PlanImportDestination, PlanImportDraft, Project } from "@guf/api";
+import type { PlanImportDestination, PlanImportDraft, Project, ProjectRoutine } from "@guf/api";
 import { countCustomProjects, hasRoomFor, planImportCounts, planImportSummary, type Entitlements } from "@guf/core";
 import { planImportDraftSchema } from "@guf/schemas";
 import { useAppShell } from "@/features/app-shell";
@@ -20,6 +20,20 @@ function initialDestination(projects: readonly Project[], entitlements: Entitlem
   return { kind: "existing", projectId: fallback.id };
 }
 
+/**
+ * O que vai para a validação: no projeto existente o nome do projeto e o das rotinas que recebem os
+ * exercícios são os que já existem (os campos somem da tela, então não podem barrar).
+ */
+function draftForValidation(draft: PlanImportDraft, project: Project | undefined): PlanImportDraft {
+  if (!project) return draft;
+  const names = new Map(project.routines.map((routine) => [routine.id, routine.name]));
+  return {
+    ...draft,
+    projectName: project.name,
+    routines: draft.routines.map((routine) => (routine.intoRoutineId ? { ...routine, name: names.get(routine.intoRoutineId) ?? routine.name } : routine)),
+  };
+}
+
 /** Revisão da ficha convertida: edições no rascunho, destino e "Criar" (uma transação no banco). */
 export function usePlanImportReview(initial: PlanImportDraft, projects: readonly Project[]) {
   const router = useRouter();
@@ -28,11 +42,18 @@ export function usePlanImportReview(initial: PlanImportDraft, projects: readonly
   const canEdit = useCanEditPlanning();
   const importPlan = useImportTrainingPlan();
   const [draft, dispatch] = useReducer(planImportDraftReducer, initial);
-  const [destination, setDestination] = useState<PlanImportDestination>(() => initialDestination(projects, gate.entitlements));
+  const [destination, setDestinationState] = useState<PlanImportDestination>(() => initialDestination(projects, gate.entitlements));
 
-  // Projeto existente: o nome do rascunho não é usado (e o campo some da tela), então não pode barrar.
   const existing = destination.kind === "existing" ? projects.find((project) => project.id === destination.projectId) : undefined;
-  const validation = planImportDraftSchema.safeParse(existing ? { ...draft, projectName: existing.name } : draft);
+  const validation = planImportDraftSchema.safeParse(draftForValidation(draft, existing));
+  /** Rotinas que podem receber os exercícios da ficha (só num projeto que já existe). */
+  const targetRoutines: readonly ProjectRoutine[] = existing?.routines ?? [];
+
+  const setDestination = (next: PlanImportDestination) => {
+    const projectChanged = next.kind !== destination.kind || (next.kind === "existing" && destination.kind === "existing" && next.projectId !== destination.projectId);
+    if (projectChanged) dispatch({ type: "clearRoutineTargets" });
+    setDestinationState(next);
+  };
   const counts = planImportCounts(draft.routines);
 
   const create = async () => {
@@ -61,6 +82,7 @@ export function usePlanImportReview(initial: PlanImportDraft, projects: readonly
     dispatch,
     destination,
     setDestination,
+    targetRoutines,
     counts,
     /** Primeiro problema do rascunho (nome vazio, rotina sem exercícios…); null = pode criar. */
     validationError: validation.success ? null : (validation.error.issues[0]?.message ?? "Confira a ficha antes de criar."),

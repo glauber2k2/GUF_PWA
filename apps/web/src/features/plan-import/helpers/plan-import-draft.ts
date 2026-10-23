@@ -8,6 +8,10 @@ export type PlanImportDraftAction =
   | { type: "renameProject"; name: string }
   | { type: "renameRoutine"; routineKey: string; name: string }
   | { type: "removeRoutine"; routineKey: string }
+  /** null = rotina nova; id = mandar para essa rotina do projeto de destino. */
+  | { type: "setRoutineTarget"; routineKey: string; routineId: string | null }
+  /** O destino mudou de projeto: as rotinas escolhidas eram do anterior. */
+  | { type: "clearRoutineTargets" }
   | { type: "removeExercise"; routineKey: string; exerciseKey: string }
   | { type: "replaceExercise"; routineKey: string; exerciseKey: string; exercise: LibraryExercise }
   | { type: "updateExercise"; routineKey: string; exerciseKey: string; patch: PlanImportExercisePatch };
@@ -22,6 +26,13 @@ function updateRoutine(draft: PlanImportDraft, routineKey: string, update: (rout
   return { ...draft, routines: draft.routines.map((routine) => (routine.key === routineKey ? update(routine) : routine)) };
 }
 
+/** A rotina volta a ser criada como nova. */
+function withoutRoutineTarget(routine: PlanImportDraft["routines"][number]): PlanImportDraft["routines"][number] {
+  const copy = { ...routine };
+  delete copy.intoRoutineId;
+  return copy;
+}
+
 export function planImportDraftReducer(draft: PlanImportDraft, action: PlanImportDraftAction): PlanImportDraft {
   switch (action.type) {
     case "renameProject":
@@ -30,6 +41,12 @@ export function planImportDraftReducer(draft: PlanImportDraft, action: PlanImpor
       return updateRoutine(draft, action.routineKey, (routine) => ({ ...routine, name: action.name }));
     case "removeRoutine":
       return { ...draft, routines: draft.routines.filter((routine) => routine.key !== action.routineKey) };
+    case "setRoutineTarget":
+      return updateRoutine(draft, action.routineKey, (routine) =>
+        action.routineId ? { ...routine, intoRoutineId: action.routineId } : withoutRoutineTarget(routine),
+      );
+    case "clearRoutineTargets":
+      return { ...draft, routines: draft.routines.map(withoutRoutineTarget) };
     case "removeExercise":
       return updateRoutine(draft, action.routineKey, (routine) => ({
         ...routine,

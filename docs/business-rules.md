@@ -249,6 +249,7 @@ O histórico fica na Início, abaixo de "Esta semana" (menu com 5 abas). "Esta s
 - Na revisão, séries (1–20) e repetições (até 20 caracteres, opcionais como na rotina) podem ser ajustadas por exercício; o descanso, depois, no editor da rotina.
 - Sem séries ou descanso na ficha: 3 séries e 90 s; sem repetições, ficam em branco (a pessoa preenche se quiser); descanso vai para a opção mais próxima (45 s a 3 min). Os dias da semana citados na ficha entram na rotina. A carga não é importada (a rotina fica com carga e repetições automáticas).
 - Destino: projeto novo (padrão quando o plano permite; pode virar o projeto ativo) ou um projeto existente (padrão no Free: Favoritos). Projeto novo no Free e rotinas além do limite abrem a tela do Pro.
+- Num projeto existente, cada rotina da ficha vai para uma **rotina nova** ou para uma **rotina que já existe** no projeto ("Enviar para"). Na existente, os exercícios da ficha entram no fim; o nome, os dias e os exercícios que ela já tinha continuam, e um exercício que já está nela não entra de novo. Nada é apagado. Completar uma rotina existente não conta no limite de rotinas do plano.
 - Cada conversão conta como uma pergunta do limite diário do GUF AI.
 
 ## 8.5 Planos (Free e Pro)
@@ -300,7 +301,7 @@ Arquitetura completa em `docs/plans-and-access.md`.
 | Regra | Onde |
 |---|---|
 | Começa sozinho uma vez por sessão, só na Início, sem treino em andamento e se a conta ainda não concluiu o tour (vale em todos os aparelhos; sem internet não começa sozinho). | `TourProvider` (features/onboarding) |
-| 28 passos em 5 capítulos, na ordem de uso: Início (treino de hoje, semana, sequência, calendário, evolução) → Projetos e rotinas → Treino (demonstração da tela: carga, repetições, concluir, tipo, excluir e adicionar série, menu do exercício, adicionar exercício, finalizar) → Competição (período e métrica, pontos, convidar amigos, buscar pessoas) → Perfil. | `TOUR_STEPS` |
+| Até 31 passos em 6 capítulos. Primeiros passos: escolher o @ (só para quem ainda tem o @ aleatório do cadastro), o GUF AI e importar a ficha com IA. Depois, na ordem de uso: Início (treino de hoje, semana, sequência, calendário, evolução) → Projetos e rotinas → Treino (demonstração da tela: carga, repetições, concluir, tipo, excluir e adicionar série, menu do exercício, adicionar exercício, finalizar) → Competição (período e métrica, pontos, convidar amigos, buscar pessoas) → Perfil. | `TOUR_STEPS` |
 | A tela do treino é mostrada com dados de exemplo e os componentes reais, sem iniciar nem gravar treino. | `WorkoutTourStage` |
 | O balão fica ao lado do que está destacado (abaixo, senão acima), com seta apontando para ele, sem cobri-lo. | `placeBubble` |
 | Pular ou concluir grava a versão do tour na conta (`profiles.tour_completed_version`); um tour novo sobe `TOUR_VERSION` e aparece de novo para todos. Contas com treino concluído foram marcadas como já vistas. | `TourProvider`, `completeTour` |
