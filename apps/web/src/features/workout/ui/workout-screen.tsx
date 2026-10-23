@@ -18,6 +18,7 @@ import {
   completedVolume,
   finishWorkoutMessage,
   formatElapsed,
+  muscleLevelsFromWorkout,
   nextSetLabel,
   pickSetValues,
   setsProgressLabel,
@@ -408,6 +409,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           performedOn={workout.performedOn}
           summary={summary.data}
           unit={unit}
+          muscleLevels={muscleLevelsFromWorkout(state.exercises)}
           pending={summary.pending}
           onDone={() => {
             if (summary.pending) shell.showToast(...PENDING_TOAST);

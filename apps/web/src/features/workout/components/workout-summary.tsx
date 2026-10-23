@@ -9,9 +9,11 @@ import {
   fromLocalISODate,
   TIMES_SIGN,
   toDisplayWeight,
+  type MuscleLevels,
   type WeightUnit,
 } from "@guf/core";
 import { Banner, Button, Icon, PRHighlight, WorkoutSummaryCard } from "@/shared/components/ds";
+import { SummaryMuscles } from "@/shared/components/workout-summary/summary-muscles";
 import { useCountUp } from "@/shared/hooks/use-count-up";
 
 export interface WorkoutSummaryProps {
@@ -20,6 +22,8 @@ export interface WorkoutSummaryProps {
   performedOn: string;
   summary: FinishedWorkoutSummary;
   unit: WeightUnit;
+  /** Músculos trabalhados (séries concluídas por grupo); vazio = só cardio ou corpo inteiro. */
+  muscleLevels: MuscleLevels;
   /** Finalizado sem internet: será enviado quando a conexão voltar. */
   pending?: boolean;
   onDone: () => void;
@@ -28,13 +32,14 @@ export interface WorkoutSummaryProps {
   onShare?: () => void;
 }
 
-/** Resumo do treino concluído: números contando e recordes do dia em dourado. */
+/** Resumo do treino concluído: números contando (duração, volume total, séries), recordes do dia em dourado e músculos trabalhados. */
 export function WorkoutSummary({
   name,
   projectName,
   performedOn,
   summary,
   unit,
+  muscleLevels,
   pending = false,
   onDone,
   onOpenHistory,
@@ -95,6 +100,8 @@ export function WorkoutSummary({
           ))}
         </>
       )}
+
+      {Object.keys(muscleLevels).length > 0 && <SummaryMuscles levels={muscleLevels} />}
 
       <div className="mt-auto flex flex-col gap-1 pt-6">
         {onShare && !pending && (
