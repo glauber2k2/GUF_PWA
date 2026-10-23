@@ -90,6 +90,9 @@ export function deleteProjectMessage(routineCount: number): string {
   return `${routines}Os treinos já feitos continuam no histórico. Não dá para desfazer.`;
 }
 
+/** Confirmação de excluir uma rotina (sem "Desfazer": a pessoa lê antes). */
+export const DELETE_ROUTINE_MESSAGE = "Os exercícios planejados desta rotina também serão excluídos. Os treinos já feitos continuam no histórico. Não dá para desfazer.";
+
 /** Aviso das telas de Projetos/Rotinas sem internet (edição só com conexão). */
 export const OFFLINE_EDIT_MESSAGE = "para criar ou editar rotinas, conecte-se à internet.";
 

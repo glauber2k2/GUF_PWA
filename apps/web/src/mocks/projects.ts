@@ -210,6 +210,11 @@ export const mockProjectsApi = {
       archivedRoutines.set(routineId, { projectId: project.id, routine: target });
       return updateProject(project.id, (p) => ({ ...p, routines: p.routines.filter((r) => r.id !== routineId) }));
     }),
+  deleteRoutine: (client, { routineId }) =>
+    mutateVoid(client, () => {
+      const project = findRoutineProject(routineId);
+      return project ? updateProject(project.id, (p) => ({ ...p, routines: p.routines.filter((r) => r.id !== routineId) })) : false;
+    }),
   restoreRoutine: (client, { routineId }) =>
     mutateVoid(client, () => {
       const saved = archivedRoutines.get(routineId);

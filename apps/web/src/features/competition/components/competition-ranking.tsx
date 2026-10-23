@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowLeftRight, Check, ChevronDown, Crown } from "lucide-react";
 import { formatNumber, metricValue, rankLabel, type CompetitorTotals, type RankedCompetitor } from "@guf/core";
 import { Avatar, BottomSheet, Icon, StreakFlame } from "@/shared/components/ds";
+import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
 import { cn } from "@/shared/helpers/class-names";
 import { firstName, movementOf } from "@/features/competition/components/position-card";
 
@@ -24,7 +25,7 @@ export function Podium({ ranking, label, format }: { ranking: RankedCompetitor[]
               <div className="relative grid place-items-center pt-[18px]">
                 {i === 1 && <Icon icon={Crown} size={22} className="absolute top-0 text-accent-text" />}
                 <span className={cn("grid rounded-pill border-2 p-0.5", c.isMe ? "border-accent" : i === 1 ? "border-accent-text" : "border-transparent")}>
-                  <Avatar src={c.avatarUrl} name={c.name ?? c.handle} size={i === 1 ? "lg" : "md"} />
+                  <CompetitorAvatar competitor={c} size={i === 1 ? "lg" : "md"} />
                 </span>
               </div>
               <div className="flex w-full min-w-0 flex-col items-center">
@@ -76,22 +77,28 @@ export function RankingList({
         const selected = c.userId === rivalId;
         const move = movementOf(c);
         return (
-          <button
+          // A linha escolhe o adversário do duelo (botão por baixo de tudo) e a foto abre o perfil (link por
+          // cima): link dentro de botão seria inválido e um anularia o outro.
+          <div
             key={c.userId}
-            type="button"
-            aria-pressed={selected}
-            onClick={() => !c.isMe && onSelect(c.userId)}
             className={cn(
-              "flex min-h-16 cursor-pointer items-center gap-2.5 rounded-lg py-2 pr-3.5 pl-2.5 text-left text-fg transition-colors duration-150 active:scale-[0.98]",
+              "relative flex min-h-16 items-center gap-2.5 rounded-lg py-2 pr-3.5 pl-2.5 text-fg transition-colors duration-150 has-[button:active]:scale-[0.98]",
               c.isMe ? "border-[1.5px] border-accent-text bg-accent/10" : selected ? "border-[1.5px] border-data bg-surface" : "border border-border bg-surface",
             )}
           >
-            <span className="flex w-[26px] flex-none flex-col items-center">
+            <button
+              type="button"
+              aria-pressed={selected}
+              aria-label={`${c.rank}º, ${c.isMe ? "você" : (c.name ?? `@${c.handle}`)}, ${format(c.value)} ${unit}, ${move.text}${c.isMe ? "" : ". Duelar"}`}
+              onClick={() => !c.isMe && onSelect(c.userId)}
+              className="absolute inset-0 cursor-pointer rounded-lg outline-none focus-visible:shadow-focus"
+            />
+            <span aria-hidden="true" className="pointer-events-none flex w-[26px] flex-none flex-col items-center">
               <span className="font-display text-xl leading-[22px] font-bold tabular-nums">{c.rank}</span>
               <Icon icon={move.icon} size={13} label={move.text} className={move.iconClass} />
             </span>
-            <Avatar src={c.avatarUrl} name={c.name ?? c.handle} size="md" />
-            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+            <CompetitorAvatar competitor={c} size="md" />
+            <span aria-hidden="true" className="pointer-events-none flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="truncate text-[15px] leading-5 font-semibold">{c.isMe ? "Você" : (c.name ?? `@${c.handle}`)}</span>
               <span className="flex items-center gap-1 text-xs leading-4 text-fg-muted tabular-nums">
                 <span>{c.totals.workouts === 1 ? "1 treino" : `${formatNumber(c.totals.workouts, 0)} treinos`}</span>
@@ -100,13 +107,13 @@ export function RankingList({
                 <span>{c.currentStreak} sem.</span>
               </span>
             </span>
-            <span className="flex flex-col items-end">
+            <span aria-hidden="true" className="pointer-events-none flex flex-col items-end">
               <span className={cn("font-display text-2xl leading-6 font-semibold tabular-nums", c.isMe ? "text-accent-text" : selected ? "text-data" : "text-fg")}>
                 {format(c.value)}
               </span>
               <span className="text-[11px] leading-4 text-fg-muted">{unit}</span>
             </span>
-          </button>
+          </div>
         );
       })}
     </section>
@@ -125,7 +132,7 @@ function RivalSide({ rival }: { rival: RankedCompetitor }) {
   return (
     <div className="flex min-w-0 flex-col items-center gap-1.5 py-2">
       <span className="grid rounded-pill border-2 border-data p-0.5">
-        <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
+        <CompetitorAvatar competitor={rival} size="lg" />
       </span>
       <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
       <span className="text-xs leading-4 text-fg-muted">{rankLabel(rival.rank)} lugar</span>

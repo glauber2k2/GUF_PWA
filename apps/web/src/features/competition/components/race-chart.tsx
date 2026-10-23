@@ -1,7 +1,7 @@
 "use client";
 
 import { formatShortDate, fromLocalISODate, type RankedCompetitor } from "@guf/core";
-import { Avatar } from "@/shared/components/ds";
+import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
 import { cn } from "@/shared/helpers/class-names";
 import { firstName } from "@/features/competition/components/position-card";
 
@@ -96,7 +96,7 @@ export function RaceChart({
               className={cn("absolute left-[calc(100%+20px)] grid -translate-x-1/2 -translate-y-1/2 rounded-pill p-0.5 transition-[top] duration-300", dotColor(competitor))}
               style={{ top: `${(ends.get(competitor.userId) ?? 0).toFixed(2)}%` }}
             >
-              <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />
+              <CompetitorAvatar competitor={competitor} size="sm" className="size-6 text-[11px]" />
             </span>
           ))}
           {tickIndexes.map((i, k) => (
