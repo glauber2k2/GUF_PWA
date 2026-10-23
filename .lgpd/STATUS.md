@@ -4,8 +4,8 @@
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
 **Última atualização**: 2026-10-23
-**Encarregado**: pendente designação
-**Controlador**: não constituído (beta desenvolvido por Glauber, pessoa natural) — G22
+**Encarregado**: não designado — dispensa da Res. CD/ANPD nº 2/2022, art. 11 (agente de pequeno porte de baixo risco); canal `devglaubermonteiro@gmail.com` (`encarregado.md`)
+**Controlador**: Glauber Monteiro, pessoa física, agente de pequeno porte — identificado nos documentos 1.0 (G1, G22)
 
 ## Pipeline atual
 - [x] L0 — Setup `.lgpd/`
@@ -218,3 +218,19 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - Conferido sem achados: músculos trabalhados e volume ao vivo (dados que a pessoa já vê, calculados no aparelho); excluir rotina (dado da própria pessoa; treinos seguem no histórico); fotos da competição levam ao perfil só de quem já compete com você (nenhuma exposição nova); /redefinir-senha tira os tokens do endereço; painel em duas colunas (só layout).
 - **Competição (pontos por dia, valendo desde outubro):** a regra é pública em Competição › Como funciona (montada dos parâmetros do servidor) e no GUF AI; os Termos só remetem às regras publicadas no app, então não houve nova versão ⚖. Recomendação (Art. 6º, VI): avisar quem compete por um comunicado de serviço, porque os pontos de outubro mudaram no meio do mês.
 - Seguem abertos os itens jurídicos de antes (G1, G2, G3, G7, G21, G22, Termos com suspensão/exclusão, G24 parte jurídica).
+
+## Rodada 2026-10-23 (6) — Pequeno porte, sem encarregado e documentos oficiais 1.0
+- **Decisão do controlador:** sem encarregado, advogado ou contador até os primeiros 100 clientes pagantes. Enquadramento como agente de pequeno porte (pessoa natural com fins econômicos, Res. CD/ANPD nº 2/2022) com dispensa do encarregado (art. 11) e canal de comunicação publicado. Condições e gatilhos de revisão em `encarregado.md`.
+- **Documentos 1.0** (Termos, Política, Termos da Assinatura): saem do rascunho, sem marcadores, com o controlador identificado e escritos a partir do comportamento real do sistema. Termo de Saúde e declaração de idade sem mudança. Migration `20261023220000_legal_docs_v1_small_agent` com **novo aceite** de Termos e Política — **aplicar depois do deploy do app**.
+- **Divergências corrigidas no texto:** GUF AI ausente da Política (Google Gemini, EUA, plano gratuito com uso pelo Google); suspensão "com aviso prévio" que o painel não fazia; atendimento da equipe e comunicados ausentes; prazos com marcadores; lista do que fica no aparelho; Termos da Assinatura com preço fictício (o Pro não está à venda).
+- **Painel alinhado aos Termos:** os diálogos orientam a mandar e-mail com o motivo ao suspender e a usar "Agendar exclusão" por violação (excluir agora só a pedido ou em caso grave).
+
+### Respaldo sem custo (fazer antes dos 100 clientes)
+1. **Contratos com operadores (G7):** aceitar os termos de tratamento de dados (DPA) que Supabase, Vercel e Google oferecem gratuitamente às contas, e guardar uma cópia em `.lgpd/vendors/`.
+2. **GUF AI:** o plano gratuito do Gemini segue como o maior risco (R1 do RIPD). Está informado na Política 1.0; trocar para o plano pago (ou outro provedor) ao ter receita remove o uso pelo Google.
+3. **Backups (G15):** conferir no painel do Supabase se há backup no plano e por quanto tempo, e anotar em `retention.md`.
+4. **Incidentes:** manter o registro em `incidents/` (Res. 15/2024, art. 10: todos os incidentes, por 5 anos). Como agente de pequeno porte, o prazo para comunicar à ANPD e aos titulares é dobrado (6 dias úteis), salvo risco à integridade física ou moral.
+5. **Pedidos de titulares:** responder em até 15 dias pelo e-mail do canal (o fluxo está em `dsar/workflow.md`) e guardar o pedido e a resposta.
+6. **Idade (G11 / ECA Digital):** o cadastro usa autodeclaração de 18+. Se houver sinal de público menor, rever antes de crescer (Lei 15.211/2025, art. 9º, § 1º veda autodeclaração quando o acesso por menores é provável) ⚖.
+7. **Comunicados de produto:** antes do primeiro, aprovar a LIA (`lia/a023-comunicados.md`); a opção de recusar já existe.
+8. **Revisão jurídica:** com os primeiros clientes pagantes, levar os documentos 1.0 e `encarregado.md` a um advogado; abrir empresa (cobrança exige emissão fiscal) e publicar nova versão com razão social e CNPJ.

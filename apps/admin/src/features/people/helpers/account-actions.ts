@@ -85,7 +85,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     icon: Ban,
     permission: "ban_accounts",
     tone: "caution",
-    consequence: "A pessoa sai de todos os aparelhos e não consegue entrar até o fim da suspensão. Os dados ficam guardados.",
+    consequence:
+      "A pessoa sai de todos os aparelhos e não consegue entrar até o fim da suspensão. Os dados ficam guardados. Os Termos prometem avisar o motivo: mande um e-mail à pessoa (ela pode contestar respondendo).",
   },
   unban: {
     label: "Encerrar suspensão",
@@ -103,7 +104,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     icon: Trash2,
     permission: "delete_accounts",
     tone: "destructive",
-    consequence: "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer.",
+    consequence:
+      "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer. Por violação dos Termos, use \"Agendar exclusão\" (avisa a pessoa e dá tempo de exportar); excluir agora só a pedido da pessoa ou em caso grave.",
   },
   schedule_deletion: {
     label: "Agendar exclusão",

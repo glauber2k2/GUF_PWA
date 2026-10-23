@@ -8,7 +8,7 @@ Este documento tem como finalidade resumir para o time o que a LGPD exige do guf
 | --- | --- |
 | Data de Criação | 17/10/2026 |
 
-**Atualizado em**: 2026-10-17 · **Fase**: beta gratuito, só com testadores convidados · **Controlador**: o desenvolvedor, como pessoa natural (sem empresa aberta)
+**Atualizado em**: 2026-10-23 · **Fase**: beta gratuito · **Controlador**: Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022) · **Encarregado**: não designado (dispensa do art. 11 da Res. 2/2022; canal `devglaubermonteiro@gmail.com`; ver [`.lgpd/encarregado.md`](../.lgpd/encarregado.md))
 
 Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evidências e os testes ficam em [`.lgpd/`](../.lgpd/STATUS.md) (auditoria completa) e as regras de implementação no [`CLAUDE.md`](../CLAUDE.md).
 
@@ -76,9 +76,9 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 | Falta | Por que ainda falta |
 |---|---|
 | Ligar MFA no Supabase, Vercel, GitHub e Google | Só o dono das contas pode ligar; é a proteção mais importante hoje |
-| Definir `ALLOWED_ORIGINS` (`npx supabase secrets set …`) | Precisa do endereço exato do app na Vercel; até lá a função aceita qualquer origem (o token continua obrigatório) |
 | Supabase › Auth: senha mínima 8 e confirmação de e-mail | Configuração do painel, sem acesso pelo código |
-| Conferir backups do plano Free | Informação só visível no painel; preenche o prazo de backups da política |
+| Conferir backups do plano Free | Informação só visível no painel; a Política 1.0 diz só que as cópias do provedor são substituídas no ciclo dele |
+| Aceitar os DPAs gratuitos de Supabase, Vercel e Google e guardar cópia em `.lgpd/vendors/` | Só o dono das contas pode aceitar; é o contrato de operador (art. 39) possível sem empresa |
 | Apagar o `vercel.json` que não for usado | Depende de qual é o Root Directory do projeto na Vercel |
 | Testar "Excluir minha conta" no app publicado | A versão nova da função foi publicada, mas o teste completo precisa de uma conta real de teste |
 | Terminar a migração (variáveis da Vercel, pausar/excluir o projeto antigo nos EUA) | Ações de painel |
@@ -87,15 +87,15 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 ### 2.2 Depende de empresa aberta
 | Falta | Por que ainda falta |
 |---|---|
-| Identificar o controlador (razão social, CNPJ, endereço) — Termos e Política ainda com marcadores | Não há empresa; usar dados pessoais do desenvolvedor exigiria decisão consciente e revisão jurídica ⚖ |
+| Trocar o controlador para a empresa (razão social e CNPJ) | Hoje o controlador é a pessoa física, identificada nos documentos 1.0 (decisão de 2026-10-23); ao abrir empresa, nova versão dos documentos |
 | Contratos (DPAs) com Supabase e Vercel e base da transferência internacional | Devem estar no nome do controlador formal; a Res. CD/ANPD nº 19/2024 exige cláusulas-padrão brasileiras ⚖ |
-| Encarregado (DPO) designado | Dispensa provisória de agente de pequeno porte, com o canal de contato ativo ⚖; designar antes do lançamento |
+| Encarregado (DPO) designado | Dispensado como agente de pequeno porte de baixo risco, com o canal publicado (decisão de 2026-10-23); gatilhos para designar em `.lgpd/encarregado.md` (ex.: 100 clientes pagantes, empresa aberta, larga escala de dado sensível) |
 | E-mail em domínio próprio para o canal | Exige domínio (custo) e serve para repassar o canal ao Encarregado |
 
 ### 2.3 Depende de advogado
 | Falta | Por que ainda falta |
 |---|---|
-| Política de privacidade final e Termos finais | Texto atual é rascunho técnico; a versão v1 completa está em `.lgpd/policies/privacy-policy-v1-draft.md` aguardando revisão |
+| Revisão por advogado da Política e dos Termos 1.0 | Os textos 1.0 estão no app, oficiais e sem marcadores, escritos a partir do que o sistema faz; a revisão jurídica fica para depois dos primeiros 100 clientes pagantes (risco aceito pelo controlador) ⚖ |
 | Dados de treino (carga, repetições, esforço) são dado de saúde? | Se forem, o cadastro precisa de consentimento específico (art. 11) — decisão jurídica |
 | Prazos de 5 anos (prova dos aceites e auditoria) | Propostos pela prescrição do CDC; precisam de validação |
 | Marco Civil (guarda de registros de acesso por 6 meses) | Só se aplica a pessoa jurídica com fins econômicos; a política deixou o prazo em aberto |
@@ -113,7 +113,6 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 | Falta | Por que ainda falta |
 |---|---|
 | Apagar foto antiga ao trocar/remover | O upload de foto ainda não existe (a exclusão da conta já apaga a pasta) |
-| Publicar a política final no app | Depende da revisão jurídica; o caminho já está pronto (nova versão + hash + `/aceite`) |
 
 ### 2.6 Melhorias gratuitas opcionais (decididas para depois)
 CAPTCHA no cadastro/login (Cloudflare Turnstile), verificação em duas etapas para usuários do app, Content-Security-Policy e âncora externa mensal do registro de auditoria.
@@ -122,7 +121,7 @@ CAPTCHA no cadastro/login (Cloudflare Turnstile), verificação em duas etapas p
 
 ## 3. Regra prática enquanto isso
 
-Manter o beta **só com convidados que sabem que é um teste**. Antes de abrir para pessoas de fora, resolver o controlador formal, a política revisada, os contratos com fornecedores e os planos pagos (seções 2.2 a 2.4).
+Os documentos 1.0 valem para todos e identificam o responsável; o canal de e-mail precisa ser lido e respondido (até 15 dias). Até os primeiros clientes pagantes: fazer os itens gratuitos da seção 2.1 e a lista "Respaldo sem custo" de `.lgpd/STATUS.md`; com eles, abrir empresa, revisar os textos com advogado e passar o GUF AI e a infraestrutura para planos pagos (seções 2.2 a 2.4). Toda funcionalidade que mude o que é coletado, com quem é compartilhado ou o que a equipe pode fazer atualiza os documentos no mesmo PR.
 
 ## 4. Ao criar uma funcionalidade nova com dados pessoais
 
