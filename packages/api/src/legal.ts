@@ -2,7 +2,7 @@ import type { Database } from "@guf/types";
 import type { ConsentSource, LegalHashDocType, LegalReaderDocType } from "@guf/core";
 import { authError, type AuthResult, type Platform } from "./auth";
 import type { GufClient } from "./client";
-import { toApiError, type ApiResult } from "./result";
+import { isNetworkError, toApiError, type ApiResult } from "./result";
 import { currentUserId } from "./shared";
 
 export type LegalDocument = Database["public"]["Tables"]["legal_documents"]["Row"];
@@ -24,7 +24,7 @@ export async function getSignupDocuments(client: GufClient): Promise<AuthResult<
     .in("doc_type", [...SIGNUP_DOCUMENT_TYPES])
     .order("published_at", { ascending: false });
 
-  if (error) return { data: null, error: authError(error.message.includes("fetch") ? "network_error" : "unknown") };
+  if (error) return { data: null, error: authError(isNetworkError(toApiError(error)) ? "network_error" : "unknown") };
 
   const current: Partial<SignupDocuments> = {};
   for (const doc of data) {
@@ -40,7 +40,7 @@ export async function getSignupDocuments(client: GufClient): Promise<AuthResult<
 /** Documentos obrigatórios ainda não aceitos pelo usuário logado (portão /aceite). */
 export async function getPendingDocuments(client: GufClient): Promise<AuthResult<LegalDocument[]>> {
   const { data, error } = await client.rpc("pending_documents");
-  if (error) return { data: null, error: authError(error.message.includes("fetch") ? "network_error" : "unknown") };
+  if (error) return { data: null, error: authError(isNetworkError(toApiError(error)) ? "network_error" : "unknown") };
   return { data: data ?? [], error: null };
 }
 
@@ -50,7 +50,7 @@ export async function hasPriorConsent(client: GufClient): Promise<AuthResult<boo
     .from("consent_records")
     .select("id", { count: "exact", head: true })
     .eq("action", "granted");
-  if (error) return { data: null, error: authError(error.message.includes("fetch") ? "network_error" : "unknown") };
+  if (error) return { data: null, error: authError(isNetworkError(toApiError(error)) ? "network_error" : "unknown") };
   return { data: (count ?? 0) > 0, error: null };
 }
 
@@ -77,7 +77,7 @@ export async function acceptDocuments(
   });
   if (!error) return { data: null, error: null };
   if (error.code === "22023") return { data: null, error: authError("documents_outdated") };
-  return { data: null, error: authError(error.message.includes("fetch") ? "network_error" : "unknown") };
+  return { data: null, error: authError(isNetworkError(toApiError(error)) ? "network_error" : "unknown") };
 }
 
 /* =====================================================================
