@@ -86,8 +86,8 @@ export const getCompetitionParameters: CompetitionApi["getCompetitionParameters"
     return {
       data: {
         effectiveFrom: data.effective_from,
-        sessionsForMaxConstancy: data.sessions_for_max_constancy,
-        constancyMax: Number(data.constancy_max),
+        fulfilledWeekDays: data.sessions_for_max_constancy,
+        constancyPointsPerDay: Number(data.constancy_points_per_day),
         minMinutes: Number(data.min_minutes),
         maxMinutes: Number(data.max_minutes),
         bonusPerWeek: Number(data.bonus_per_week),

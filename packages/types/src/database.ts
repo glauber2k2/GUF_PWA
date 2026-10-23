@@ -437,6 +437,7 @@ export type Database = {
           bonus_max: number
           bonus_per_week: number
           constancy_max: number
+          constancy_points_per_day: number
           created_at: string
           effective_from: string
           effort_max: number
@@ -458,6 +459,7 @@ export type Database = {
           bonus_max: number
           bonus_per_week: number
           constancy_max: number
+          constancy_points_per_day?: number
           created_at?: string
           effective_from: string
           effort_max: number
@@ -479,6 +481,7 @@ export type Database = {
           bonus_max?: number
           bonus_per_week?: number
           constancy_max?: number
+          constancy_points_per_day?: number
           created_at?: string
           effective_from?: string
           effort_max?: number
@@ -1748,6 +1751,7 @@ export type Database = {
           bonus_max: number
           bonus_per_week: number
           constancy_max: number
+          constancy_points_per_day: number
           created_at: string
           effective_from: string
           effort_max: number
