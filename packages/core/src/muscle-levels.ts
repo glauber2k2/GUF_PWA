@@ -76,3 +76,12 @@ export function muscleLegend(levels: MuscleLevels, limit?: number): Array<{ musc
     .map(([muscle, level]) => ({ muscle, label: MUSCLE_FIGURE_LABELS[muscle], level }));
   return limit === undefined ? ranked : ranked.slice(0, limit);
 }
+
+/** Níveis a partir dos exercícios do treino (só séries concluídas, sem aquecimento — a regra do resumo). */
+export function muscleLevelsFromWorkout(
+  exercises: ReadonlyArray<{ muscleGroup: string; sets: ReadonlyArray<{ isCompleted: boolean; setType: string }> }>,
+): MuscleLevels {
+  return muscleLevelsFromSets(
+    exercises.map((e) => ({ muscleGroup: e.muscleGroup, sets: e.sets.filter((s) => s.isCompleted && s.setType !== "warmup").length })),
+  );
+}
