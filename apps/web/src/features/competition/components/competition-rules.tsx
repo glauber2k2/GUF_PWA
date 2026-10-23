@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Users } from "lucide-react";
-import { scoringRules } from "@guf/core";
+import { scoringRules, scoringSummary } from "@guf/core";
 import { BottomSheet, Icon, Skeleton } from "@/shared/components/ds";
 import { useCompetitionParameters } from "@/features/competition/api/use-competition";
 
@@ -16,8 +16,7 @@ export function CompetitionRules({ season }: { season: string }) {
       <div className="flex items-start gap-2.5 border-t border-border px-1 pt-3">
         <Icon icon={Users} size={18} className="mt-px text-fg-muted" />
         <span className="text-xs leading-4 text-pretty text-fg-muted">
-          Só entram pessoas que vocês se seguem mutuamente. Pontos da semana = constância (até 60) + sequência (até 20) + recordes (até 25) +
-          volume (até 15).{" "}
+          Só entram pessoas que vocês se seguem mutuamente. {scoringSummary(params.data)}{" "}
           <button type="button" onClick={() => setOpen(true)} className="cursor-pointer font-semibold text-accent-text">
             Como funciona
           </button>

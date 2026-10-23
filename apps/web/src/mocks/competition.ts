@@ -140,8 +140,8 @@ export const mockCompetitionApi = {
     return {
       data: {
         effectiveFrom: "2026-01-01",
-        sessionsForMaxConstancy: 3,
-        constancyMax: 60,
+        fulfilledWeekDays: 3,
+        constancyPointsPerDay: 15,
         minMinutes: 20,
         maxMinutes: 120,
         bonusPerWeek: 5,

@@ -11,8 +11,10 @@ import { formatNumber } from "./format";
 /** Parâmetros públicos da pontuação (tabela competition_parameters), já convertidos para número. */
 export interface CompetitionParameters {
   effectiveFrom: string;
-  sessionsForMaxConstancy: number;
-  constancyMax: number;
+  /** Dias com treino válido para a semana contar como cumprida (sequência). */
+  fulfilledWeekDays: number;
+  /** Pontos por dia com treino válido, sem teto de dias. */
+  constancyPointsPerDay: number;
   minMinutes: number;
   maxMinutes: number;
   bonusPerWeek: number;
@@ -53,17 +55,20 @@ export function pointsLabel(points: number): string {
   return `${formatNumber(points, 0)} ${points === 1 ? "pt" : "pts"}`;
 }
 
+/** Resumo de uma linha embaixo do ranking; sem parâmetros (ainda carregando), só as partes. */
+export function scoringSummary(params: CompetitionParameters | undefined): string {
+  if (!params) return "Pontos da semana = constância + sequência + recordes + volume.";
+  return `Pontos da semana = constância (${formatNumber(params.constancyPointsPerDay, 0)} por dia treinado) + sequência (até ${formatNumber(params.bonusMax, 0)}) + recordes (até ${formatNumber(params.recordsMax, 0)}) + volume (até ${formatNumber(params.volumeMax, 0)}).`;
+}
+
 /** Regras da pontuação em frases curtas, montadas com os parâmetros do servidor ("Como funciona"). */
 export function scoringRules(params: CompetitionParameters): string[] {
-  const perSession = params.constancyMax / params.sessionsForMaxConstancy;
-  const weekMax = params.constancyMax + params.bonusMax + params.recordsMax + params.volumeMax;
   return [
     `Vale o treino com pelo menos ${formatNumber(params.minMinutes, 0)} minutos de tempo efetivo; conta no máximo um treino por dia.`,
-    `Constância (o que mais pesa): ${formatNumber(perSession, 0)} pontos por treino válido na semana, até ${formatNumber(params.constancyMax, 0)} pontos com ${params.sessionsForMaxConstancy} treinos.`,
-    `Sequência: semana com ${params.sessionsForMaxConstancy} ou mais treinos válidos rende ${formatNumber(params.bonusPerWeek, 0)} pontos multiplicados pelas semanas cumpridas seguidas, até ${formatNumber(params.bonusMax, 0)} pontos.`,
+    `Constância (o que mais pesa): ${formatNumber(params.constancyPointsPerDay, 0)} pontos por dia com treino válido, todos os dias da semana (sem limite de dias).`,
+    `Sequência: semana com ${params.fulfilledWeekDays} ou mais dias de treino válido rende ${formatNumber(params.bonusPerWeek, 0)} pontos multiplicados pelas semanas cumpridas seguidas, até ${formatNumber(params.bonusMax, 0)} pontos.`,
     `Recordes: ${formatNumber(params.recordPoints, 0)} pontos por recorde batido na semana (maior 1RM estimado: mais carga ou mais repetições com a mesma carga), até ${formatNumber(params.recordsMax, 0)} pontos.`,
     `Volume: até ${formatNumber(params.volumeMax, 0)} pontos, comparando o volume da semana com a sua média das últimas ${params.volumeWindowWeeks} semanas com treino. Quem mantém ou aumenta o próprio volume ganha tudo.`,
-    `Máximo de ${formatNumber(weekMax, 0)} pontos por semana.`,
     "Empate: vence quem tem mais semanas cumpridas, depois mais treinos válidos e depois mais volume no período.",
   ];
 }
