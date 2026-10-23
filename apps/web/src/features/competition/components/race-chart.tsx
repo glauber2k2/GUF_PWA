@@ -1,7 +1,7 @@
 "use client";
 
 import { formatShortDate, fromLocalISODate, type RankedCompetitor } from "@guf/core";
-import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
+import { Avatar } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { firstName } from "@/features/competition/components/position-card";
 
@@ -43,12 +43,15 @@ export function RaceChart({
   rivalId,
   caption,
   format,
+  onSelect,
 }: {
   lines: RaceLine[];
   dates: string[];
   rivalId: string | null;
   caption: string;
   format: (value: number) => string;
+  /** Tocar na foto de alguém troca o adversário do 1×1 (tela geral); sem ela (duelo), a foto é só imagem. */
+  onSelect?: (userId: string) => void;
 }) {
   const n = Math.max(1, dates.length);
   const max = niceMax(Math.max(0, ...lines.map((l) => l.values.at(-1) ?? 0)));
@@ -96,7 +99,20 @@ export function RaceChart({
               className={cn("absolute left-[calc(100%+20px)] grid -translate-x-1/2 -translate-y-1/2 rounded-pill p-0.5 transition-[top] duration-300", dotColor(competitor))}
               style={{ top: `${(ends.get(competitor.userId) ?? 0).toFixed(2)}%` }}
             >
-              <CompetitorAvatar competitor={competitor} size="sm" className="size-6 text-[11px]" />
+              {onSelect && !competitor.isMe ? (
+                <button
+                  type="button"
+                  aria-label={`Comparar com ${firstName(competitor)}`}
+                  aria-pressed={competitor.userId === rivalId}
+                  onClick={() => onSelect(competitor.userId)}
+                  // Foto de 24 px: a área de toque cresce até 44 px sem mudar o desenho.
+                  className="relative grid cursor-pointer rounded-pill outline-none after:absolute after:-inset-2.5 after:content-[] focus-visible:shadow-focus"
+                >
+                  <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />
+                </button>
+              ) : (
+                <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size="sm" className="size-6 text-[11px]" />
+              )}
             </span>
           ))}
           {tickIndexes.map((i, k) => (

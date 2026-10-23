@@ -15,7 +15,8 @@ interface CompetitorAvatarProps {
 
 /**
  * Foto de quem compete: tocar abre o perfil da pessoa (/pessoa?u=@). A sua foto não é link (você já
- * está no seu perfil pela aba Perfil). Fica acima de linhas tocáveis (z-[1]) para não disparar a linha.
+ * está no seu perfil pela aba Perfil). Fica acima de linhas tocáveis (z-[1]) para não disparar a linha;
+ * sem sublinhado (o link herdava o da página e riscava a letra de quem não tem foto).
  */
 export function CompetitorAvatar({ competitor, size, className }: CompetitorAvatarProps) {
   const avatar = <Avatar src={competitor.avatarUrl} name={competitor.name ?? competitor.handle} size={size} className={className} />;
@@ -25,7 +26,7 @@ export function CompetitorAvatar({ competitor, size, className }: CompetitorAvat
       href={withDevState(socialInvitePath(competitor.handle))}
       aria-label={`Ver perfil de ${competitor.name ?? `@${competitor.handle}`}`}
       onClick={(event) => event.stopPropagation()}
-      className="relative z-[1] grid flex-none rounded-pill outline-none focus-visible:shadow-focus"
+      className="relative z-[1] grid flex-none rounded-pill no-underline outline-none focus-visible:shadow-focus"
     >
       {avatar}
     </Link>
