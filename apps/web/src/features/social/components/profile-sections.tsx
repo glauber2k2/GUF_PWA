@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { useState } from "react";
 import { EyeOff, Lock } from "lucide-react";
-import { formatElapsed, formatNumber, fromLocalISODate, formatShortDate, MEMBER_HISTORY_SCOPE_NOTE, toDisplayWeight, type WeightUnit } from "@guf/core";
+import {
+  formatDayMonth,
+  formatElapsed,
+  formatNumber,
+  fromLocalISODate,
+  formatShortDate,
+  MEMBER_HISTORY_SCOPE_NOTE,
+  plural,
+  toDisplayWeight,
+  type WeightUnit,
+} from "@guf/core";
 import type { EvolutionWeek, MemberProfile, MemberWorkout } from "@guf/api";
 import { Button, Icon, ProgressChart, SegmentedControl, Skeleton, StreakFlame, WorkoutSummaryCard } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -146,6 +156,8 @@ export function ProfileEvolution({
           endLabel="hoje"
           unit={metric === "horas" ? "h" : unit}
           ariaLabel={METRIC_ARIA[metric]}
+          pointLabels={(weeks ?? []).map((w) => `Semana de ${formatDayMonth(fromLocalISODate(w.weekStart))}`)}
+          pointDetails={(weeks ?? []).map((w) => plural(w.sessions, "treino", "treinos"))}
         />
       )}
     </section>
