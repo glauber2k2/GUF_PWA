@@ -9,6 +9,7 @@ import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { useRaisedToast } from "@/features/app-shell";
 import { useBodyMeasurements, useCanUseMeasurements, useGrantHealthConsent, useMeasurementsSource } from "@/features/body-measurements/api/use-body-measurements";
+import { MeasurementBody3d } from "@/features/body-measurements/components/measurement-body-3d";
 import { HealthConsentStep } from "@/features/body-measurements/components/health-consent-step";
 import { MeasurementPartRow } from "@/features/body-measurements/components/measurement-part-row";
 import { PrivateNotice } from "@/features/body-measurements/components/private-notice";
@@ -82,6 +83,7 @@ export function MeasurementsScreen() {
     >
       {!canUse && <OfflineBanner />}
       <PrivateNotice />
+      <MeasurementBody3d days={data.days} />
       <MeasurementsList days={data.days} />
     </EditorFrame>
   );
