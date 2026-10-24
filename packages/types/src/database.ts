@@ -874,13 +874,16 @@ export type Database = {
         Row: {
           auto_finish_workout: boolean
           avatar_url: string | null
+          bio: string | null
           created_at: string
+          experience_level: string | null
           id: string
           name: string | null
           onboarded_at: string | null
           product_announcements_opt_out: boolean
           timezone: string
           tour_completed_version: number | null
+          training_goals: string[]
           updated_at: string
           weekly_goal: number
           weight_unit: string
@@ -888,13 +891,16 @@ export type Database = {
         Insert: {
           auto_finish_workout?: boolean
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          experience_level?: string | null
           id: string
           name?: string | null
           onboarded_at?: string | null
           product_announcements_opt_out?: boolean
           timezone?: string
           tour_completed_version?: number | null
+          training_goals?: string[]
           updated_at?: string
           weekly_goal?: number
           weight_unit?: string
@@ -902,13 +908,16 @@ export type Database = {
         Update: {
           auto_finish_workout?: boolean
           avatar_url?: string | null
+          bio?: string | null
           created_at?: string
+          experience_level?: string | null
           id?: string
           name?: string | null
           onboarded_at?: string | null
           product_announcements_opt_out?: boolean
           timezone?: string
           tour_completed_version?: number | null
+          training_goals?: string[]
           updated_at?: string
           weekly_goal?: number
           weight_unit?: string
@@ -1741,6 +1750,7 @@ export type Database = {
       }
       chart_visible_from: { Args: never; Returns: string }
       chart_visible_from_of: { Args: { p_user_id: string }; Returns: string }
+      clear_uploaded_avatar: { Args: never; Returns: undefined }
       competition_alert_state: {
         Args: { p_rival_points: number; p_watcher_points: number }
         Returns: string
@@ -1980,7 +1990,9 @@ export type Database = {
         Returns: {
           avatar_url: string
           best_streak: number
+          bio: string
           current_streak: number
+          experience_level: string
           first_workout_on: string
           followers_count: number
           following_count: number
@@ -1993,13 +2005,14 @@ export type Database = {
           name: string
           recent_weeks: boolean[]
           relationship: string
+          training_goals: string[]
           unlocked: boolean
           user_id: string
           visibility: string
           workouts_count: number
         }[]
       }
-      get_member_workout: { Args: { p_session_id: string }; Returns: Json }
+      get_member_workout:{ Args: { p_session_id: string }; Returns: Json }
       get_member_workout_unrestricted: {
         Args: { p_session_id: string }
         Returns: Json

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { profileApi, type ApiError, type Profile, type ProfileApi, type ProfileUpdate } from "@guf/api";
-import { invalidateHealthConsentData, invalidateProfileData, PROFILE_KEY } from "@/shared/libs/query-keys";
+import { invalidateHealthConsentData, invalidateProfileData, invalidateSocialData, PROFILE_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { mockProfileApi, setProfileMockScenario } from "@/mocks/profile";
 import { useAuth } from "@/features/auth";
@@ -79,6 +79,39 @@ export function useUpdateProfile() {
       if (context?.previous) queryClient.setQueryData(key, context.previous);
     },
     onSettled: () => invalidateProfileData(queryClient),
+  });
+}
+
+/** Foto mostrada em todo lugar (Perfil, Início, perfil social, competição) recarrega depois da troca. */
+function invalidateAvatarData(queryClient: ReturnType<typeof useQueryClient>) {
+  return Promise.all([invalidateProfileData(queryClient), invalidateSocialData(queryClient)]);
+}
+
+/** Envia a foto do perfil (imagem já preparada no aparelho); devolve a URL pública. */
+export function useUploadAvatar() {
+  const queryClient = useQueryClient();
+  const { api } = useProfileSource();
+  return useMutation<string, ApiError, Blob>({
+    mutationFn: async (image) => {
+      const { data, error } = await api.uploadAvatar(getSupabaseClient(), image);
+      if (error) throw error;
+      return data;
+    },
+    onSettled: () => invalidateAvatarData(queryClient),
+  });
+}
+
+/** Remove a foto enviada (volta para a da conta Google ou para a inicial). */
+export function useRemoveAvatar() {
+  const queryClient = useQueryClient();
+  const { api } = useProfileSource();
+  return useMutation<string | null, ApiError>({
+    mutationFn: async () => {
+      const { data, error } = await api.removeAvatar(getSupabaseClient());
+      if (error) throw error;
+      return data;
+    },
+    onSettled: () => invalidateAvatarData(queryClient),
   });
 }
 

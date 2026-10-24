@@ -324,7 +324,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     route: "/",
     target: "profileTab",
     title: "Seu perfil",
-    body: "Seu @, seguidores e evolução. Nos três pontinhos ficam as Configurações: privacidade, notificações e este tutorial.",
+    body: "Seu @, seguidores e evolução. No menu (três tracinhos, no topo) ficam as Configurações: privacidade, notificações e este tutorial.",
     rat: "info",
   },
   {

@@ -15,6 +15,7 @@ export type ApiErrorCode =
   | "handle_invalid"
   | "person_not_found"
   | "follow_limit"
+  | "avatar_upload_failed"
   | "history_hidden"
   | "ai_daily_limit"
   | "ai_message_invalid"
@@ -77,6 +78,7 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   handle_invalid: "Use de 3 a 20 caracteres: letras minúsculas, números, ponto ou _ (sem começar ou terminar com ponto ou _).",
   person_not_found: "Não encontramos essa pessoa. Confira o nome de usuário ou peça um novo link.",
   follow_limit: "Você atingiu o limite de pedidos para seguir de hoje. Tente de novo amanhã.",
+  avatar_upload_failed: "Não foi possível enviar a foto. Use uma imagem JPG ou PNG, confira a internet e tente de novo.",
   history_hidden: "Esta pessoa ocultou o histórico de treinos. As estatísticas e a pontuação continuam visíveis.",
   ai_daily_limit: "Você chegou ao limite de perguntas ao GUF AI nas últimas 24 horas. Tente de novo mais tarde.",
   ai_message_invalid: "Mensagem muito longa. Escreva até 2.000 caracteres e envie de novo.",

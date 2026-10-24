@@ -5,7 +5,15 @@
  * via ?estado= (useDevSocialState): padrao · vazio · erro. Dados criados sob demanda (nada roda no
  * carregamento do módulo, senão o build de produção não descarta o mock).
  */
-import { addLocalDays, memberHistoryFrom, startOfLocalWeek, toLocalISODate, type SocialVisibility } from "@guf/core";
+import {
+  addLocalDays,
+  memberHistoryFrom,
+  startOfLocalWeek,
+  toLocalISODate,
+  type ExperienceLevel,
+  type SocialVisibility,
+  type TrainingGoal,
+} from "@guf/core";
 import {
   apiError,
   type Connection,
@@ -34,6 +42,9 @@ interface MockPerson {
   streak: number;
   bestStreak: number;
   weeklyVolume: number;
+  bio: string | null;
+  trainingGoals: TrainingGoal[];
+  experienceLevel: ExperienceLevel | null;
 }
 
 interface MockState {
@@ -59,14 +70,25 @@ function person(userId: string, handle: string, name: string, extra: Partial<Moc
     streak: 7,
     bestStreak: 12,
     weeklyVolume: 8200,
+    bio: null,
+    trainingGoals: [],
+    experienceLevel: null,
     ...extra,
   };
 }
 
 function seed(scenario: SocialMockScenario): MockState {
-  const me = person(MOCK_ME, "glauber.treina", "Glauber Souza", { workouts: 186, streak: 12, bestStreak: 18, historyHidden: true });
+  const me = person(MOCK_ME, "glauber.treina", "Glauber Souza", {
+    workouts: 186,
+    streak: 12,
+    bestStreak: 18,
+    historyHidden: true,
+    bio: "Treino às 6h antes do trabalho. Foco em força e constância.",
+    trainingGoals: ["hypertrophy", "strength"],
+    experienceLevel: "intermediate",
+  });
   const people = [
-    person("marina", "marina.lift", "Marina Albuquerque", { visibility: "open", workouts: 210, streak: 9, weeklyVolume: 8800 }),
+    person("marina", "marina.lift", "Marina Albuquerque", { visibility: "open", workouts: 210, streak: 9, weeklyVolume: 8800, bio: "Powerlifting e café.", trainingGoals: ["strength"], experienceLevel: "advanced" }),
     person("lucas", "lucas.prado", "Lucas Prado", { workouts: 240, streak: 12, weeklyVolume: 9200 }),
     person("bia", "bia.moreira", "Bia Moreira", { workouts: 160, streak: 9, weeklyVolume: 8300 }),
     person("rafa", "rafa.lima", "Rafa Lima", { visibility: "open", historyHidden: true, workouts: 98, streak: 4, weeklyVolume: 8400 }),
@@ -145,6 +167,9 @@ function profileOf(p: MockPerson): MemberProfile {
   const weeks = Array.from({ length: 8 }, (_, i) => i < 7 || p.streak > 10);
   return {
     ...card(p),
+    bio: p.bio,
+    trainingGoals: open ? p.trainingGoals : [],
+    experienceLevel: open ? p.experienceLevel : null,
     visibility: p.visibility,
     historyHidden: p.historyHidden,
     isSelf: p.userId === MOCK_ME,

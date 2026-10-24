@@ -1,4 +1,12 @@
-import { HANDLE_MAX_LENGTH, HANDLE_MIN_LENGTH, HANDLE_PATTERN, normalizeHandle } from "@guf/core";
+import {
+  BIO_MAX_LENGTH,
+  EXPERIENCE_LEVELS,
+  HANDLE_MAX_LENGTH,
+  HANDLE_MIN_LENGTH,
+  HANDLE_PATTERN,
+  normalizeHandle,
+  TRAINING_GOALS,
+} from "@guf/core";
 import { z } from "zod";
 import { NAME_MAX_LENGTH } from "./auth";
 
@@ -26,7 +34,7 @@ export const socialSettingsSchema = z.object({
 export type SocialSettingsValues = z.infer<typeof socialSettingsSchema>;
 
 
-/** Editar perfil: nome (mesma regra do Perfil) e @. */
+/** Editar perfil: nome (mesma regra do Perfil), @, bio, objetivos e experiência (o banco confere os mesmos limites). */
 export const editSocialProfileSchema = z.object({
   name: z
     .string()
@@ -34,6 +42,9 @@ export const editSocialProfileSchema = z.object({
     .min(1, "Informe seu nome.")
     .max(NAME_MAX_LENGTH, `Use até ${NAME_MAX_LENGTH} caracteres.`),
   handle: handleSchema,
+  bio: z.string().max(BIO_MAX_LENGTH, `Use até ${BIO_MAX_LENGTH} caracteres.`),
+  trainingGoals: z.array(z.enum(TRAINING_GOALS)),
+  experienceLevel: z.enum(EXPERIENCE_LEVELS).nullable(),
 });
 
 export type EditSocialProfileValues = z.input<typeof editSocialProfileSchema>;

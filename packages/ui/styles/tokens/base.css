@@ -656,3 +656,25 @@
   from { opacity: 0.6; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
+
+/* Editar perfil: anel em volta da foto (gira devagar, desenha ao enviar/salvar) e foto que aparece. */
+@keyframes guf-profile-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes guf-profile-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+@keyframes guf-profile-draw {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes guf-profile-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes guf-profile-reveal {
+  from { filter: blur(14px); transform: scale(1.12); opacity: 0.4; }
+  to { filter: blur(0); transform: scale(1); opacity: 1; }
+}

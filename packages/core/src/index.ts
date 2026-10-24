@@ -13,6 +13,7 @@ export * from "./projects";
 export * from "./schedule";
 export * from "./pwa";
 export * from "./profile";
+export * from "./public-profile";
 export * from "./avatar";
 export * from "./coalesce";
 export * from "./evolution";
