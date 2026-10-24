@@ -21,6 +21,7 @@ export type WorkoutAction =
   | { type: "cycleSetType"; exerciseId: string; setIndex: number }
   | { type: "setField"; exerciseId: string; setIndex: number; field: EditableField; value: number }
   | { type: "addSet"; exerciseId: string; set: WorkoutSet }
+  | { type: "replaceSet"; exerciseId: string; setIndex: number; set: WorkoutSet }
   | { type: "removeSet"; exerciseId: string; setIndex: number }
   | { type: "restoreSet"; exerciseId: string; setIndex: number; set: WorkoutSet }
   | { type: "toggleOpen"; exerciseId: string }
@@ -73,6 +74,8 @@ export function workoutReducer(state: WorkoutViewState, action: WorkoutAction): 
       );
     case "addSet":
       return mapExercise(state, action.exerciseId, (e) => ({ ...e, sets: renumber([...e.sets, action.set]) }));
+    case "replaceSet":
+      return mapExercise(state, action.exerciseId, (e) => mapSet(e, action.setIndex, () => action.set));
     case "removeSet":
       return mapExercise(state, action.exerciseId, (e) => ({
         ...e,

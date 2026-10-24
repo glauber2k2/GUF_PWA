@@ -8,3 +8,9 @@ export const MEMBER_WORKOUT_ROUTE = "/pessoa/treino";
 
 /** Treino concluído de outra pessoa, aberto pelo histórico do perfil dela. */
 export const memberWorkoutPath = (sessionId: string) => withDevState(`${MEMBER_WORKOUT_ROUTE}?id=${encodeURIComponent(sessionId)}`);
+
+/** Rota da tela "Editar perfil" (imersiva). */
+export const EDIT_PROFILE_ROUTE = "/perfil/editar";
+
+/** "Editar perfil" (leva o ?estado= junto em dev). */
+export const editProfilePath = () => withDevState(EDIT_PROFILE_ROUTE);

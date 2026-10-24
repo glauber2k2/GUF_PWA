@@ -39,6 +39,12 @@ export interface SetEditTarget {
   field: EditableField;
 }
 
+/** Série de cardio registrada pelo cronômetro ou digitada (km opcional). */
+export interface CardioSetEntry {
+  durationSeconds: number;
+  distanceKm: number | null;
+}
+
 /** Folhas da edição: menu de um exercício ou observação (de um exercício ou do treino). */
 export type EditingSheet = { kind: "exercise-menu"; exerciseId: string } | { kind: "note"; target: string | "workout" } | null;
 
@@ -205,15 +211,34 @@ export function useWorkoutEditing({
     setEdit(null);
   };
 
-  /** Tempo de uma série vindo do cronômetro do cardio (segundos); grava como a edição manual. */
-  const setDuration = (exerciseId: string, setId: string, seconds: number) => {
+  /**
+   * Série de cardio registrada (cronômetro parado ou tempo digitado): ocupa a primeira série planejada
+   * ainda aberta ou entra no fim; sempre concluída. Grava como qualquer série.
+   */
+  const logCardioSet = (exerciseId: string, entry: CardioSetEntry): string | null => {
+    const ex = state.exercises.find((e) => e.id === exerciseId);
+    if (!ex) return null;
+    const durationSeconds = Math.min(MAX_SET_DURATION_SECONDS, Math.max(1, Math.round(entry.durationSeconds)));
+    const values = { durationSeconds, distanceKm: entry.distanceKm };
+    const openIndex = ex.sets.findIndex((s) => !s.isCompleted);
+    const open = ex.sets[openIndex];
+    const set: WorkoutSet = open ? { ...open, ...values, isCompleted: true } : { ...newSetFrom(ex), ...values, isCompleted: true };
+    if (open) dispatch({ type: "replaceSet", exerciseId, setIndex: openIndex, set });
+    else dispatch({ type: "addSet", exerciseId, set });
+    sink.saveSet(exerciseId, set);
+    vibrate([20, 40, 20]);
+    return set.id;
+  };
+
+  /** Distância (km) completada depois numa série de cardio; null apaga. */
+  const setDistance = (exerciseId: string, setId: string, distanceKm: number | null) => {
     const ex = state.exercises.find((e) => e.id === exerciseId);
     const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
     const set = ex?.sets[setIndex];
-    if (!ex || !set) return;
-    const durationSeconds = Math.min(MAX_SET_DURATION_SECONDS, Math.max(1, Math.round(seconds)));
-    dispatch({ type: "setField", exerciseId, setIndex, field: "durationSeconds", value: durationSeconds });
-    sink.saveSet(exerciseId, { ...set, durationSeconds });
+    if (!ex || !set || set.distanceKm === distanceKm) return;
+    const next = { ...set, distanceKm };
+    dispatch({ type: "replaceSet", exerciseId, setIndex, set: next });
+    sink.saveSet(exerciseId, next);
   };
 
   /* ---------- Exercícios ---------- */
@@ -310,7 +335,8 @@ export function useWorkoutEditing({
     cycleType,
     addSet,
     removeSet,
-    setDuration,
+    logCardioSet,
+    setDistance,
     edit,
     editSet,
     editMetric,

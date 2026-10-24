@@ -224,6 +224,8 @@ export function measurementPeriodStart(period: MeasurementPeriod, today: Date): 
 
 export interface MeasurementChartData {
   values: number[];
+  /** Data de cada ponto ("12 out"), para o balão da agulha. */
+  pointLabels: string[];
   /** "4 mai" (primeiro ponto do período). */
   startLabel: string;
   /** "hoje" ou "12 out" (último ponto). */
@@ -242,6 +244,7 @@ export function measurementChart(days: readonly BodyMeasurementDay[], site: Meas
   if (!first || !last) return null;
   return {
     values: points.map((p) => p.value),
+    pointLabels: points.map((p) => formatMeasurementDay(p.measuredOn)),
     startLabel: formatMeasurementDay(first.measuredOn),
     endLabel: last.measuredOn === toLocalISODate(today) ? "hoje" : formatMeasurementDay(last.measuredOn),
     latest: last.value,

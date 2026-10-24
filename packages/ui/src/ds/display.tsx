@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight, Check, Trophy, type LucideIcon } from "lucide-react";
-import { formatNumber, formatSigned, type SetType } from "@guf/core";
+import { Check, Trophy, type LucideIcon } from "lucide-react";
+import type { SetType } from "@guf/core";
 import { cn } from "../helpers/class-names";
 import { Icon } from "./brand";
 
@@ -146,94 +146,6 @@ export function PRHighlight({ label, value, className }: PRHighlightProps) {
         <span className="text-xs font-semibold text-pr-text">{label}</span>
         <span className="font-display text-[26px] font-bold tabular-nums">{value}</span>
       </div>
-    </div>
-  );
-}
-
-export interface ProgressChartProps {
-  values: number[];
-  startLabel?: string;
-  endLabel?: string;
-  unit?: string;
-  showHeader?: boolean;
-  showLegend?: boolean;
-  /** Ponto dourado no maior valor (recorde). Desligar onde "maior" não é conquista (ex.: medidas). */
-  highlightMax?: boolean;
-  ariaLabel?: string;
-  className?: string;
-}
-
-const CHART_W = 320;
-const CHART_BASE = 130;
-const CHART_TOP = 20;
-
-/**
- * Gráfico de evolução em SVG próprio (linha azul de dados + área 16%),
- * ponto dourado no maior valor do período. Telas de evolução usarão Recharts.
- */
-export function ProgressChart({
-  values,
-  startLabel = "",
-  endLabel = "Hoje",
-  unit = "kg",
-  showHeader = true,
-  showLegend = true,
-  highlightMax = true,
-  ariaLabel,
-  className,
-}: ProgressChartProps) {
-  const n = values.length;
-  if (!n) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const x = (i: number) => (n > 1 ? (i / (n - 1)) * CHART_W : CHART_W / 2);
-  const y = (v: number) => CHART_BASE - ((v - min) / (max - min || 1)) * (CHART_BASE - CHART_TOP);
-  const points = values.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
-  const area = `M0,${CHART_BASE} L${points.join(" L")} L${CHART_W},${CHART_BASE} Z`;
-  const maxIndex = values.lastIndexOf(max);
-  const now = values[n - 1] ?? 0;
-  const delta = now - (values[0] ?? 0);
-  const up = delta >= 0;
-
-  return (
-    <div className={cn("grid gap-4", className)}>
-      {showHeader && (
-        <div className="flex items-baseline gap-2.5">
-          <span className="font-display text-[44px] leading-none font-semibold tabular-nums">{formatNumber(now)}</span>
-          <span className="text-sm text-fg-muted">{unit}</span>
-          <span className={cn("flex items-center gap-0.5 text-sm font-semibold", up ? "text-success" : "text-danger")}>
-            <Icon icon={up ? ArrowUpRight : ArrowDownRight} size={15} />
-            {`${formatSigned(delta)} ${unit}`}
-          </span>
-        </div>
-      )}
-      <svg viewBox="0 0 320 150" className="h-auto w-full overflow-visible" role="img" aria-label={ariaLabel}>
-        <line x1="0" y1="20" x2="320" y2="20" strokeDasharray="3 4" className="stroke-border" />
-        <line x1="0" y1="75" x2="320" y2="75" strokeDasharray="3 4" className="stroke-border" />
-        <line x1="0" y1="130" x2="320" y2="130" className="stroke-border" />
-        <path d={area} className="fill-data/16" />
-        <polyline
-          points={points.join(" ")}
-          strokeWidth="2.5"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          className="fill-none stroke-data"
-        />
-        {highlightMax && <circle cx={x(maxIndex)} cy={y(max)} r="9" className="fill-pr/30" />}
-        {highlightMax && <circle cx={x(maxIndex)} cy={y(max)} r="4.5" strokeWidth="2" className="fill-pr stroke-surface" />}
-        <text x="0" y="146" className="fill-fg-muted font-sans text-[10px]">
-          {startLabel}
-        </text>
-        <text x="320" y="146" textAnchor="end" className="fill-fg-muted font-sans text-[10px]">
-          {endLabel}
-        </text>
-      </svg>
-      {showLegend && highlightMax && (
-        <span className="flex items-center gap-1.5 text-xs text-fg-muted">
-          <span className="size-2.5 rounded-pill bg-pr" />
-          Ponto dourado = recorde pessoal no período
-        </span>
-      )}
     </div>
   );
 }

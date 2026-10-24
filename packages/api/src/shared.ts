@@ -32,7 +32,7 @@ export function resolveAvatarUrl(client: GufClient, profileAvatar: string | null
   const source = pickAvatar(profileAvatar, user);
   if (!source) return null;
   if (source.kind === "url") return sizedAvatarUrl(source.url);
-  // Upload próprio (futuro): o bucket público de fotos é criado junto com o upload, por migration.
+  // Foto enviada: bucket público (migration edit_profile), caminho <user_id>/arquivo.
   return client.storage.from(AVATAR_BUCKET).getPublicUrl(source.path).data.publicUrl;
 }
 

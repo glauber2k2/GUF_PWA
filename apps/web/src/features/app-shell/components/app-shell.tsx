@@ -20,7 +20,7 @@ import { useClosedWorkoutWatcher } from "@/features/app-shell/hooks/use-closed-w
 import { TOUR_TARGETS } from "@/features/onboarding";
 
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
-const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/treino/editar", "/pessoa/treino", "/exercicio", "/exercicio/busca", "/planos", "/projetos/importar", "/medidas", "/medidas/musculo", "/medidas/registrar", "/competicao/extrato"]);
+const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/treino/editar", "/pessoa/treino", "/exercicio", "/exercicio/busca", "/planos", "/projetos/importar", "/medidas", "/medidas/musculo", "/medidas/registrar", "/competicao/extrato", "/perfil/editar"]);
 
 /** Rotas de cada aba (índice do BottomNav) e das telas internas que mantêm a aba acesa. */
 const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }> = [

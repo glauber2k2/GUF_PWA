@@ -187,6 +187,9 @@ const TERMS: LegalDocumentContent = {
           "Toda conta tem um perfil com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil para que outras pessoas possam seguir você. O @ começa aleatório e pode ser trocado.",
         ),
         p(
+          "Em Editar perfil você pode, se quiser, escrever uma bio, que aparece junto com o nome e a foto para qualquer pessoa com conta no guf, e marcar seus objetivos e sua experiência, que aparecem só para quem pode ver seus treinos. Não escreva na bio dados de saúde nem dados de outras pessoas.",
+        ),
+        p(
           "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência e histórico de treinos. Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
         ),
         ul(
@@ -269,6 +272,9 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.1": [
+      "Editar perfil: bio opcional (visível com o nome e a foto) e objetivos e experiência opcionais (visíveis só para quem pode ver seus treinos).",
+    ],
     "1.0": [
       `Versão oficial: o guf é mantido por ${CONTROLLER_DESCRIPTION}, com contato em ${PRIVACY_CONTACT_EMAIL}.`,
       "Suspensão e exclusão por violação: quando há aviso antes, quando pode ser imediata e como contestar.",
@@ -336,8 +342,9 @@ const PRIVACY: LegalDocumentContent = {
             ["Conta", "Nome, e-mail e senha criptografada", "Você ou o login com Google"],
             ["Treinos", "Exercícios, séries, cargas, repetições e descanso", "Você"],
             ["Preferências", "Tema, unidade de peso e meta semanal", "Você"],
-            ["Foto do perfil", "Imagem enviada ou vinda do Google", "Você, opcional"],
+            ["Foto do perfil", "Imagem enviada (recortada e reduzida no aparelho, sem os dados da câmera, como a localização) ou vinda do Google", "Você, opcional"],
             ["Perfil social", "Nome de usuário (@), seguidores, pedidos e bloqueios", "Você"],
+            ["Sobre você no perfil", "Bio, objetivos de treino e experiência", "Você, opcional"],
             ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
             [
               "Plano e assinatura",
@@ -366,7 +373,8 @@ const PRIVACY: LegalDocumentContent = {
             ["Criar e manter sua conta", "Conta", "Execução de contrato (art. 7º, V)"],
             ["Registrar treinos e mostrar evolução", "Treinos e preferências", "Execução de contrato (art. 7º, V)"],
             ["Acompanhar medidas corporais", "Medidas", "Consentimento (art. 11, I)"],
-            ["Mostrar seu perfil (@, nome e foto) na busca e receber pedidos para seguir", "Conta e perfil social", "Execução de contrato (art. 7º, V)"],
+            ["Mostrar seu perfil (@, nome, foto e bio) na busca e receber pedidos para seguir", "Conta, perfil social e bio", "Execução de contrato (art. 7º, V)"],
+            ["Mostrar seus objetivos e sua experiência a quem pode ver seus treinos", "Sobre você no perfil", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
             ["Mostrar seus treinos a quem você aprovar (ou a todos, se abrir o perfil) e competir", "Treinos e pontuação", "Execução de contrato (art. 7º, V), pela sua escolha no app"],
             ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
             ["Liberar o que o seu plano inclui e gerir a assinatura do Pro", "Plano e assinatura", "Execução de contrato (art. 7º, V)"],
@@ -400,7 +408,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Perfil, seguidores e competição",
       blocks: [
         p(
-          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
+          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos, a partir dos treinos: constância, recordes de carga e volume comparado à sua própria média. As regras ficam publicadas em Competição › Como funciona."),
         p(
@@ -565,6 +573,9 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.2": [
+      "Editar perfil: foto enviada pelo app (reduzida no aparelho, sem os dados da câmera), bio, objetivos e experiência, todos opcionais. A bio aparece com o nome e a foto; objetivos e experiência, só para quem pode ver seus treinos. Nada disso vai para o GUF AI.",
+    ],
     "1.1": [
       "GUF AI: se você perguntar sobre os seus pontos na competição, ele lê o seu extrato de pontos (só os seus; nunca os de outras pessoas).",
     ],

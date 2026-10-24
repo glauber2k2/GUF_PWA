@@ -64,6 +64,8 @@ export function MeasurementChartCard({ part, side, days, period, onPeriod, today
             startLabel={chart.startLabel}
             endLabel={chart.endLabel}
             unit="cm"
+            pointLabels={chart.pointLabels}
+            formatValue={(value) => `${formatCentimeters(value)} cm`}
             showHeader={false}
             showLegend={false}
             highlightMax={false}

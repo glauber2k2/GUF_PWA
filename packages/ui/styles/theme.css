@@ -213,6 +213,12 @@
   --animate-guf-toast-text: guf-toast-text 0.3s var(--ease-enter) 0.1s both;
   /* Duração real vem do style (tempo do aviso); pausa com [animation-play-state:paused]. */
   --animate-guf-toast-timer: guf-toast-timer 5s linear both;
+  /* Editar perfil: anel da foto (ver base.css) */
+  --animate-guf-profile-spin: guf-profile-spin 18s linear infinite;
+  --animate-guf-profile-breathe: guf-profile-breathe 2.4s var(--ease-standard) infinite;
+  --animate-guf-profile-draw: guf-profile-draw 1.1s var(--ease-standard) forwards;
+  --animate-guf-profile-pop: guf-profile-pop 0.6s var(--ease-overshoot);
+  --animate-guf-profile-reveal: guf-profile-reveal 0.9s var(--ease-enter) both;
   /* StreakFlame (ver base.css) */
   --animate-guf-rat-pop: guf-rat-pop 450ms var(--ease-overshoot) both;
   --animate-guf-wiggle: guf-wiggle 300ms ease-in-out infinite;

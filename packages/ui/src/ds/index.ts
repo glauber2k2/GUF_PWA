@@ -3,6 +3,7 @@ export * from "./brand";
 export * from "./actions";
 export * from "./forms";
 export * from "./display";
+export * from "./progress-chart";
 export * from "./cards";
 export * from "./workout";
 export * from "./navigation";

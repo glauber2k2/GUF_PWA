@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Ellipsis, Lock } from "lucide-react";
+import { ChevronLeft, Ellipsis, Lock, Menu } from "lucide-react";
 import { monthYearLabel, trainingTenure } from "@guf/core";
 import { Avatar, Banner, Icon, IconButton, Skeleton } from "@/shared/components/ds";
 import { useProfile } from "@/features/profile";
@@ -19,9 +19,9 @@ import { LockedProfile, ProfileCounts, ProfileEvolution, ProfileHistory, Profile
 import { EVOLUTION_WEEKS } from "@/features/social/constants/profile-evolution";
 import { useProfileEvolutionPeriod } from "@/features/social/hooks/use-profile-evolution-period";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
-import { EditProfileSheet } from "@/features/social/components/edit-profile-sheet";
+import { ProfileAbout } from "@/features/social/components/profile-about";
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
-import { memberWorkoutPath } from "@/features/social/helpers/paths";
+import { editProfilePath, memberWorkoutPath } from "@/features/social/helpers/paths";
 import { PlanBadge, usePlanGate } from "@/features/plans";
 import { MeasurementsEntry } from "@/features/body-measurements";
 
@@ -53,7 +53,6 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const own = useProfile();
   const canUse = useCanUseSocial();
   const unit = own.data?.weightUnit ?? "kg";
-  const [editOpen, setEditOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   const data = profile.data;
@@ -76,7 +75,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
           {data?.visibility === "private" && <Icon icon={Lock} size={14} label="Perfil privado" className="flex-none text-fg-muted" />}
         </span>
         <IconButton
-          icon={Ellipsis}
+          icon={isSelf ? Menu : Ellipsis}
           label={isSelf ? "Configurações" : "Mais opções"}
           variant="ghost"
           onClick={() => (isSelf ? router.push("/configuracoes") : setOptionsOpen(true))}
@@ -116,7 +115,8 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
                 </div>
               )}
             </div>
-            {isSelf ? <SelfActions handle={data.handle} onEdit={() => setEditOpen(true)} /> : <VisitorActions profile={data} />}
+            <ProfileAbout profile={data} />
+            {isSelf ? <SelfActions handle={data.handle} onEdit={() => router.push(editProfilePath())} /> : <VisitorActions profile={data} />}
           </section>
 
           {/* Medidas são só suas: no perfil de outra pessoa o botão não existe (nem aviso de conteúdo oculto). */}
@@ -141,11 +141,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
             </>
           )}
 
-          {isSelf ? (
-            <EditProfileSheet open={editOpen} onClose={() => setEditOpen(false)} name={data.name} handle={data.handle} />
-          ) : (
-            <VisitorOptionsSheet profile={data} open={optionsOpen} onClose={() => setOptionsOpen(false)} />
-          )}
+          {!isSelf && <VisitorOptionsSheet profile={data} open={optionsOpen} onClose={() => setOptionsOpen(false)} />}
         </>
       )}
 

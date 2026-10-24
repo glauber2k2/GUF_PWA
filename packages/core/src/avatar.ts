@@ -1,6 +1,6 @@
 /**
  * Foto do usuário (pura, sem React). Prioridade:
- * 1. foto enviada pelo próprio usuário (futuro upload) — vale para login social e e-mail/senha;
+ * 1. foto enviada pelo próprio usuário (Editar perfil) — vale para login social e e-mail/senha;
  * 2. foto atual da conta social (Google), vinda dos metadados da sessão;
  * 3. foto social guardada no cadastro (`profiles.avatar_url`, preenchida pelo gatilho handle_new_user);
  * 4. sem foto → inicial do nome (avatarInitial).
@@ -9,10 +9,15 @@
  * caminho sem protocolo (ex.: "<user_id>/avatar.webp") = foto enviada, guardada no Storage (bucket AVATAR_BUCKET).
  */
 
-/** Bucket do Supabase Storage para fotos enviadas (ainda não criado: chega com o upload, via migration). */
+/** Bucket público do Supabase Storage para fotos enviadas (pasta <user_id>/; migration edit_profile). */
 export const AVATAR_BUCKET = "avatars";
 
 const HTTP_URL = /^https?:\/\//i;
+
+/** Caminho de uma foto enviada no bucket (a pasta é o id do usuário: as políticas do Storage conferem). */
+export function avatarStoragePath(userId: string, fileId: string): string {
+  return `${userId}/${fileId}.jpg`;
+}
 
 /** Foto enviada pelo usuário (caminho no Storage), e não URL de conta social. */
 export function isUploadedAvatar(value: string | null | undefined): value is string {

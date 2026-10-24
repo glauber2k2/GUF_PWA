@@ -1,4 +1,14 @@
-import { durationSeconds, pauseStats, type SocialRelationship, type SocialVisibility, type WeightUnit } from "@guf/core";
+import {
+  durationSeconds,
+  pauseStats,
+  toExperienceLevel,
+  toTrainingGoals,
+  type ExperienceLevel,
+  type SocialRelationship,
+  type SocialVisibility,
+  type TrainingGoal,
+  type WeightUnit,
+} from "@guf/core";
 import type { GufClient } from "./client";
 import type { WorkoutSummaryBase, WorkoutSummaryRecord } from "./evolution";
 import { apiError, toApiError, type ApiResult } from "./result";
@@ -50,6 +60,11 @@ export interface PersonSearchResult extends PersonCard {
 }
 
 export interface MemberProfile extends PersonCard {
+  /** Bio do cartão (qualquer conta logada vê). */
+  bio: string | null;
+  /** Objetivos e experiência: só com o perfil desbloqueado (senão vazio/null). */
+  trainingGoals: TrainingGoal[];
+  experienceLevel: ExperienceLevel | null;
   visibility: SocialVisibility;
   historyHidden: boolean;
   isSelf: boolean;
@@ -261,6 +276,9 @@ export const getMemberProfile: SocialApi["getMemberProfile"] = async (client, us
       data: {
         ...toCard(client, row),
         avatarUrl,
+        bio: row.bio ?? null,
+        trainingGoals: toTrainingGoals(row.training_goals),
+        experienceLevel: toExperienceLevel(row.experience_level),
         visibility: toVisibility(row.visibility),
         historyHidden: row.history_hidden,
         isSelf: row.is_self,

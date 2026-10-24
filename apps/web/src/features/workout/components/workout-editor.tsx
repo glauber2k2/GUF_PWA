@@ -1,18 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ArrowLeftRight, NotepadText, Trash2 } from "lucide-react";
 import { AnimatePresence, BottomSheet, Button, LAYOUT_ITEM_PROPS, LayoutItem, SheetOption, TextField } from "@/shared/components/ds";
 import { ExercisePicker } from "@/features/exercise-picker";
-import { measuresTime } from "@guf/core";
+import { setMetricKind } from "@guf/core";
 import { useHoldReorder } from "@/shared/hooks/use-hold-reorder";
 import { AddExerciseButton } from "@/features/workout/components/add-exercise-button";
 import { SetEditSheet } from "@/features/workout/components/set-edit-sheet";
-import { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX, WorkoutExerciseCard } from "@/features/workout/components/workout-exercise-card";
-import type { CardioStopwatchBarProps } from "@/features/workout/components/cardio-stopwatch-bar";
-import { isStopwatchOrphan, stopwatchTarget } from "@/features/workout/helpers/cardio-stopwatch";
-import type { ExerciseView } from "@/features/workout/helpers/workout-state";
+import { EXERCISE_CARD_RENDERERS } from "@/features/workout/components/exercise-card-renderers";
+import { REORDER_CARD_PX, WORKOUT_LIST_GAP_PX } from "@/features/workout/components/exercise-card-shell";
 import type { CardioStopwatch } from "@/features/workout/hooks/use-cardio-stopwatch";
+import { useCardioTimerControls } from "@/features/workout/hooks/use-cardio-timer-controls";
 import type { WorkoutEditing } from "@/features/workout/hooks/use-workout-editing";
 
 export interface WorkoutEditorProps {
@@ -37,28 +36,7 @@ export interface WorkoutEditorProps {
 export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, offline, persist, stopwatch }: WorkoutEditorProps) {
   const { state, unit, sheet } = editing;
 
-  // Série cronometrada que saiu da lista (removida, exercício trocado): o cronômetro para sem gravar.
-  const isOrphan = isStopwatchOrphan(state.exercises, stopwatch?.running ?? null);
-  const cancelStopwatch = stopwatch?.cancel;
-  useEffect(() => {
-    if (isOrphan) cancelStopwatch?.();
-  }, [isOrphan, cancelStopwatch]);
-
-  const stopwatchFor = (ex: ExerciseView): CardioStopwatchBarProps | undefined => {
-    if (!stopwatch || !measuresTime(ex.muscleGroup)) return undefined;
-    const target = stopwatchTarget(ex, stopwatch.running);
-    if (!target) return undefined;
-    return {
-      setLabel: `Série ${target.setNumber}`,
-      elapsedSeconds: target.isRunningHere ? stopwatch.elapsedSeconds : null,
-      isBusy: Boolean(stopwatch.running) && !target.isRunningHere,
-      onStart: () => stopwatch.start(ex.id, target.setId),
-      onStop: () => {
-        const run = stopwatch.stop();
-        if (run) editing.setDuration(run.exerciseId, run.setId, run.seconds);
-      },
-    };
-  };
+  const cardioTimerFor = useCardioTimerControls(stopwatch, editing);
   const listRef = useRef<HTMLDivElement>(null);
   const reorder = useHoldReorder({
     items: state.exercises,
@@ -92,28 +70,21 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
               layout={reorder.draggingId === ex.id ? false : "position"}
               className="flex flex-none flex-col"
             >
-              <WorkoutExerciseCard
-                exercise={ex}
-                unit={unit}
-                enterDelayMs={i * 40}
-                poppedKey={editing.popped}
-                editing={editing.edit?.exerciseId === ex.id ? { setIndex: editing.edit.setIndex, field: editing.edit.field } : null}
-                holdProps={reorder.holdProps(ex.id)}
-                reorder={
-                  reorder.active
+              {EXERCISE_CARD_RENDERERS[setMetricKind(ex.muscleGroup)]({
+                exercise: ex,
+                exerciseIndex: i,
+                editing,
+                cardioTimerFor,
+                frame: {
+                  enterDelayMs: i * 40,
+                  holdProps: reorder.holdProps(ex.id),
+                  reorder: reorder.active
                     ? { index: i, total: list.length, dragging: reorder.draggingId === ex.id, dragOffset: reorder.dragOffset }
-                    : undefined
-                }
-                onToggleOpen={() => editing.toggleOpen(ex.id)}
-                onOpenMenu={() => editing.openExerciseMenu(ex.id)}
-                onOpenNote={() => editing.openNote(ex.id)}
-                onAddSet={() => editing.addSet(ex)}
-                onToggleSet={(si) => editing.toggleSet(i, si)}
-                onCycleType={(si) => editing.cycleType(ex, si)}
-                onEditField={(si, field) => editing.startEdit({ exerciseId: ex.id, setIndex: si, field })}
-                onRemoveSet={(si) => editing.removeSet(ex, si)}
-                stopwatch={stopwatchFor(ex)}
-              />
+                    : undefined,
+                  onToggleOpen: () => editing.toggleOpen(ex.id),
+                  onOpenMenu: () => editing.openExerciseMenu(ex.id),
+                },
+              })}
             </LayoutItem>
           ))}
         </AnimatePresence>

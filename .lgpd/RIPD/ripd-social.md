@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.6 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-21
+**Versão**: v0.7 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-23
+
+> **v0.7**: Editar perfil (`/perfil/editar`, migration `20261024120000_edit_profile`). Dados novos, todos opcionais e escritos pelo próprio titular: **foto enviada** (bucket público `avatars`, pasta `<user_id>/`; recortada em quadrado, reduzida para 512 px e convertida em JPEG no aparelho, o que tira o EXIF, inclusive a localização da câmera; só o dono grava ou apaga; trocar apaga a anterior; excluir a conta apaga a pasta), **bio** (até 150 caracteres, no cartão: qualquer conta logada vê, como nome e foto) e **objetivos de treino** (catálogo fixo: hipertrofia, força, emagrecimento, condicionamento, saúde) e **experiência** (iniciante, intermediário, avançado), visíveis só para quem pode ver os treinos (`unlocked` em `get_member_profile`). Base Art. 7º, V, pela escolha do titular. Nada disso vai para o GUF AI, notificações ou painel (o painel não mostra a bio). Termos 1.1 e Política 1.2 (`requires_reaccept = false`). Riscos R014 e R015.
 
 > **v0.6**: detalhe do treino de outra pessoa (`/pessoa/treino`, função `get_member_workout`, migration `20261021120000_member_workout_detail`). Quem já via o histórico de treinos (você, seguidor aceito ou perfil aberto, e o titular não ocultou) passa a abrir cada treino com data e hora, duração, pausas, volume, exercícios, séries concluídas (tipo, carga e repetições) e recordes. Não amplia quem vê nem cria categoria nova de dado: os Termos 0.3-dev já dizem que essas pessoas veem o "histórico de treinos" e a seção 4 já listava exercícios e séries. Continuam fora: observações, RPE, projeto e rotina (planejamento), medidas. Leitura só pela função `SECURITY DEFINER` que confere `can_view_member_history`; treino inexistente e treino sem permissão dão a mesma resposta (GS009), para não revelar se o id existe. R001 e R007 revistos (mais detalhe por treino, mesmo público); residual sem mudança.
 
@@ -150,6 +152,8 @@ flowchart LR
 | R011 | Avisos de uma conta chegam a outra pessoa no mesmo aparelho (troca de conta) | 2 | 3 | 6 | Sair da conta apaga a inscrição no servidor e cancela no navegador; o mesmo aparelho inscrito por outra conta passa para ela (`save_push_subscription`); excluir a conta apaga em cascata | mitigado | 2 |
 | R012 | Excesso de avisos / pressão (bem-estar) | 3 | 2 | 6 | Competição: só na mudança de posição (um aviso por transição e por competidor), só competidores mútuos, só a temporada atual. Seguidores: no máximo 1 aviso por dia por pessoa e tipo; limite existente de 50 pedidos por dia. Desligar a qualquer momento | mitigado | 3 |
 | R013 | Assédio por avisos (seguir e deixar de seguir repetidamente para aparecer no celular de alguém) | 2 | 3 | 6 | 1 aviso a cada 24 h por pessoa e tipo, conferido no gatilho (nem a requisição sai); bloquear interrompe; o aviso só é enviado se o vínculo ainda existe | mitigado | 3 |
+| R014 | Bio com dado sensível ou de terceiros (saúde, contato, nome de outra pessoa) exposta a qualquer conta logada | 2 | 3 | 6 | Campo opcional e curto (150); aviso nos Termos para não escrever dados de saúde nem de terceiros; o titular apaga quando quiser; contas que assediam podem ser encerradas (Termos) | mitigado | 4 |
+| R015 | Objetivo "Emagrecimento" ou "Saúde" lido como dado de saúde (Art. 11) | 2 | 2 | 4 | É meta de treino escolhida num catálogo fixo, não condição clínica; opcional; só aparece para quem já vê os treinos; nunca vai para o GUF AI. Revisar se o catálogo ganhar itens ligados a condição de saúde ⚖ | mitigado | 3 |
 
 ### 8.2 Riscos não mitigáveis
 
@@ -206,5 +210,5 @@ flowchart LR
 ## 13. Plano de revisão
 
 - Próxima revisão obrigatória: antes do lançamento público ou 2027-04-18, o que vier primeiro.
-- Revisões feitas: v0.4 em 2026-10-19 (notificações push da competição e de seguidores); v0.5 em 2026-10-20 (pontuação sem RPE); v0.6 em 2026-10-21 (detalhe do treino de outra pessoa).
+- Revisões feitas: v0.4 em 2026-10-19 (notificações push da competição e de seguidores); v0.5 em 2026-10-20 (pontuação sem RPE); v0.6 em 2026-10-21 (detalhe do treino de outra pessoa); v0.7 em 2026-10-23 (editar perfil: foto enviada, bio, objetivos e experiência).
 - Gatilhos para revisão antecipada: perfil visível fora dos seguidores, chat ou mensagens, outros tipos de notificação push (além dos avisos da competição e de seguidores), prêmios, mudança nos parâmetros da pontuação, novo operador, incidente, base > 50% maior.

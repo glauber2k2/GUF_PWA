@@ -1,4 +1,15 @@
-import type { LegalDocType, WeightUnit } from "@guf/core";
+import {
+  AVATAR_BUCKET,
+  avatarStoragePath,
+  isUploadedAvatar,
+  toExperienceLevel,
+  toStoredBio,
+  toTrainingGoals,
+  type ExperienceLevel,
+  type LegalDocType,
+  type TrainingGoal,
+  type WeightUnit,
+} from "@guf/core";
 import type { Json } from "@guf/types";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiError, type ApiResult } from "./result";
@@ -23,9 +34,20 @@ export interface Profile {
   /** Primeiro treino concluído ("yyyy-MM-dd") e total de treinos concluídos. */
   firstTrainedOn: string | null;
   completedSessions: number;
+  /** Bio do perfil social (cartão, visível a qualquer conta logada). */
+  bio: string | null;
+  /** Objetivos e experiência: só quem pode ver seus treinos. */
+  trainingGoals: TrainingGoal[];
+  experienceLevel: ExperienceLevel | null;
+  /** A foto mostrada foi enviada pelo usuário (e pode ser removida). */
+  hasUploadedPhoto: boolean;
 }
 
 export interface ProfileUpdate {
+  /** Bio vazia apaga (null no banco). */
+  bio?: string;
+  trainingGoals?: TrainingGoal[];
+  experienceLevel?: ExperienceLevel | null;
   name?: string;
   weightUnit?: WeightUnit;
   weeklyGoal?: number;
@@ -52,6 +74,10 @@ type Result<T = null> = Promise<ApiResult<T>>;
 export interface ProfileApi {
   getProfile: (client: GufClient) => Result<Profile>;
   updateProfile: (client: GufClient, input: ProfileUpdate) => Result;
+  /** Envia a foto (já recortada e reduzida no aparelho) e passa a usá-la; devolve a URL pública. */
+  uploadAvatar: (client: GufClient, image: Blob) => Result<string>;
+  /** Apaga a foto enviada; volta para a da conta Google ou para a inicial. Devolve a foto que ficou. */
+  removeAvatar: (client: GufClient) => Result<string | null>;
   getConsents: (client: GufClient) => Result<Consents>;
   /** Revoga o consentimento de saúde E apaga todas as medidas (RPC revoke_health_consent). */
   revokeHealthConsent: (client: GufClient) => Result;
@@ -73,7 +99,11 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
     if (!userId) return { data: null, error: apiError("not_authenticated") };
     const [session, profileRes, totalsRes] = await Promise.all([
       client.auth.getSession(),
-      client.from("profiles").select("name, avatar_url, weight_unit, weekly_goal, auto_finish_workout, product_announcements_opt_out").eq("id", userId).maybeSingle(),
+      client
+        .from("profiles")
+        .select("name, avatar_url, bio, training_goals, experience_level, weight_unit, weekly_goal, auto_finish_workout, product_announcements_opt_out")
+        .eq("id", userId)
+        .maybeSingle(),
       // Histórico inteiro (o 1º treino e o total não dependem do plano).
       fetchTrainingTotals(client),
     ]);
@@ -90,6 +120,10 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
         productAnnouncementsOptOut: profileRes.data?.product_announcements_opt_out ?? false,
         firstTrainedOn: totalsRes.data?.firstTrainedOn ?? null,
         completedSessions: totalsRes.data?.completedSessions ?? 0,
+        bio: profileRes.data?.bio ?? null,
+        trainingGoals: toTrainingGoals(profileRes.data?.training_goals),
+        experienceLevel: toExperienceLevel(profileRes.data?.experience_level),
+        hasUploadedPhoto: isUploadedAvatar(profileRes.data?.avatar_url),
       },
       error: null,
     };
@@ -98,12 +132,18 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
   }
 };
 
-export const updateProfile: ProfileApi["updateProfile"] = async (client, { name, weightUnit, weeklyGoal, autoFinishWorkout, productAnnouncementsOptOut }) => {
+export const updateProfile: ProfileApi["updateProfile"] = async (
+  client,
+  { name, bio, trainingGoals, experienceLevel, weightUnit, weeklyGoal, autoFinishWorkout, productAnnouncementsOptOut },
+) => {
   try {
     const userId = await currentUserId(client);
     if (!userId) return { data: null, error: apiError("not_authenticated") };
     const changes = {
       ...(name !== undefined && { name: name.trim() }),
+      ...(bio !== undefined && { bio: toStoredBio(bio) }),
+      ...(trainingGoals !== undefined && { training_goals: trainingGoals }),
+      ...(experienceLevel !== undefined && { experience_level: experienceLevel }),
       ...(weightUnit !== undefined && { weight_unit: weightUnit }),
       ...(weeklyGoal !== undefined && { weekly_goal: weeklyGoal }),
       ...(autoFinishWorkout !== undefined && { auto_finish_workout: autoFinishWorkout }),
@@ -111,6 +151,56 @@ export const updateProfile: ProfileApi["updateProfile"] = async (client, { name,
     };
     const { error } = await client.from("profiles").update(changes).eq("id", userId);
     return error ? { data: null, error: toApiError(error) } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
+const AVATAR_UPLOAD_FAILED = apiError("avatar_upload_failed");
+
+/** Apaga as fotos da pasta do usuário, menos a que ficou em uso (falha aqui não desfaz a troca). */
+async function removeOtherAvatars(client: GufClient, userId: string, keepPath: string | null): Promise<void> {
+  const avatars = client.storage.from(AVATAR_BUCKET);
+  const { data: files } = await avatars.list(userId, { limit: 100 });
+  const stale = (files ?? []).map((file) => `${userId}/${file.name}`).filter((path) => path !== keepPath);
+  if (stale.length > 0) await avatars.remove(stale);
+}
+
+export const uploadAvatar: ProfileApi["uploadAvatar"] = async (client, image) => {
+  try {
+    const userId = await currentUserId(client);
+    if (!userId) return { data: null, error: apiError("not_authenticated") };
+    // Nome novo a cada troca: a URL pública muda e nenhum cache mostra a foto antiga.
+    const path = avatarStoragePath(userId, crypto.randomUUID());
+    const upload = await client.storage.from(AVATAR_BUCKET).upload(path, image, { contentType: image.type, upsert: false });
+    if (upload.error) {
+      const mapped = toApiError(upload.error);
+      return { data: null, error: mapped.code === "network_error" ? mapped : AVATAR_UPLOAD_FAILED };
+    }
+    const { error } = await client.from("profiles").update({ avatar_url: path }).eq("id", userId);
+    if (error) {
+      await client.storage.from(AVATAR_BUCKET).remove([path]);
+      return { data: null, error: toApiError(error) };
+    }
+    await removeOtherAvatars(client, userId, path);
+    return { data: client.storage.from(AVATAR_BUCKET).getPublicUrl(path).data.publicUrl, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
+export const removeAvatar: ProfileApi["removeAvatar"] = async (client) => {
+  try {
+    const userId = await currentUserId(client);
+    if (!userId) return { data: null, error: apiError("not_authenticated") };
+    const { error } = await client.rpc("clear_uploaded_avatar");
+    if (error) return { data: null, error: toApiError(error) };
+    await removeOtherAvatars(client, userId, null);
+    const [session, profileRes] = await Promise.all([
+      client.auth.getSession(),
+      client.from("profiles").select("avatar_url").eq("id", userId).maybeSingle(),
+    ]);
+    return { data: resolveAvatarUrl(client, profileRes.data?.avatar_url, session.data.session?.user), error: null };
   } catch (e) {
     return { data: null, error: toApiError(e) };
   }
@@ -192,6 +282,8 @@ export const deleteAccount: ProfileApi["deleteAccount"] = async (client) => {
 export const profileApi = {
   getProfile,
   updateProfile,
+  uploadAvatar,
+  removeAvatar,
   getConsents,
   revokeHealthConsent,
   exportMyData,

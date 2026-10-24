@@ -79,6 +79,10 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 - Design system movido para `packages/ui`; novo app `apps/admin` (protótipo `Guf Admin.dc.html`), comunicados no app (`features/announcements`), migration `20261022160000_admin_panel` (testada em transação desfeita; aplicar com o deploy) e Edge Function `admin-invite-staff` (publicar). Passo a passo em `docs/admin-panel.md` §5.3.
 - Lacunas: imagem nos comunicados (bucket no Storage), opção de não receber comunicados de produto, recibos de comunicados na exportação (G25), itens LGPD antes de abrir a colaboradores (G24).
 
+### Editar perfil (2026-10-23, `refactor/design`)
+- Tela `/perfil/editar` (protótipo `Editar Perfil.dc.html`) no lugar da folha: foto enviada (bucket `avatars`), nome, @ com verificação de disponibilidade, bio, objetivos e experiência; migrations `20261024120000_edit_profile` e `20261024120100_legal_docs_edit_profile` (Termos 1.1, Política 1.2), RIPD social v0.7.
+- Lacunas: o painel ainda não apaga a foto no Storage ao excluir uma conta (GA015 bloqueia quem tem foto enviada; a exclusão pelo app já apaga); a bio não aparece no painel (moderação de bio ofensiva só pelo banco); recorte manual da foto (hoje: centro da imagem); envio testado só com o mock até a migration ser aplicada.
+
 ## 2. Próximas etapas (ordem recomendada)
 
 A ordem prioriza o que impede o uso real do app (criar rotinas), depois o que completa o ciclo de evolução
@@ -120,7 +124,7 @@ e do `CLAUDE.md` → commit/push e PR.
 **Dados:** tabelas `projects`, `routines`, `routine_exercises` (já existem, com RLS).
 Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_activate_project.sql`, **já aplicada** no Supabase): atômica, erro próprio `GP001`.
 
-**Reaproveitar:** `ExercisePicker`, `usePointerReorder` (o `ReorderList` do design system não funciona no toque), `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
+**Reaproveitar:** `ExercisePicker`, `useHoldReorder` (o `ReorderList` do design system não funciona no toque), `ProjectCard`, `RoutineCard`, `SheetOption`, `ConfirmDialog` e formulários com React Hook Form + Zod (schemas em `packages/schemas`).
 
 **Critérios de aceite**
 - Usuário novo cria projeto → rotina → exercícios e inicia o treino planejado pela Início.
