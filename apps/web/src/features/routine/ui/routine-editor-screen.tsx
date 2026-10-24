@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useReducer, useState } from "react";
+import { useMemo, useReducer, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftRight, Check, ChevronDown, ClipboardList, Dumbbell, Plus, SearchX, Star, NotepadText, Trash2 } from "lucide-react";
@@ -28,7 +28,7 @@ import { useProfile } from "@/features/profile";
 import { ExercisePicker } from "@/features/exercise-picker";
 import { OfflineEditBanner } from "@/features/projects";
 import { PROJECTS_PATH, projectDetailPath } from "@/features/projects";
-import { usePointerReorder } from "@/shared/hooks/use-pointer-reorder";
+import { useHoldReorder } from "@/shared/hooks/use-hold-reorder";
 import { useCanEditPlanning, useProjectsOverview, useProjectsSource } from "@/features/projects";
 import { usePlanGate } from "@/features/plans";
 import { useRoutine, useRoutinesSource } from "@/features/routine/api/use-routine";
@@ -38,7 +38,11 @@ import { getSupabaseClient } from "@/shared/libs/supabase";
 import { cn } from "@/shared/helpers/class-names";
 import { draftReducer, isDraftDirty, toPlannedExercise } from "@/features/routine/helpers/routine-draft";
 import { EditorFrame } from "@/shared/components/editor-frame";
-import { RoutineExerciseCard } from "@/features/routine/components/routine-exercise-card";
+import {
+  ROUTINE_LIST_GAP_PX,
+  ROUTINE_REORDER_CARD_PX,
+  RoutineExerciseCard,
+} from "@/features/routine/components/routine-exercise-card";
 import { WeekdayPicker } from "@/features/routine/components/weekday-picker";
 
 /** /rotina?id=… (editar) ou /rotina?projeto=… (nova): carrega e abre o editor. */
@@ -126,9 +130,13 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
   const target = sheet && "exerciseId" in sheet ? draft.exercises.find((e) => e.id === sheet.exerciseId) : undefined;
   const nameError = showErrors && !draft.name.trim() ? "Dê um nome para a rotina, como “Treino A”." : undefined;
 
-  const reorder = usePointerReorder({
+  const listRef = useRef<HTMLDivElement>(null);
+  const reorder = useHoldReorder({
     items: draft.exercises,
-    disabled,
+    itemPx: ROUTINE_REORDER_CARD_PX,
+    gapPx: ROUTINE_LIST_GAP_PX,
+    listRef,
+    disabled: disabled || draft.exercises.length < 2,
     onCommit: (exercises) => dispatch({ type: "reorder", exercises }),
   });
 
@@ -294,25 +302,30 @@ function RoutineEditor({ initial, projects }: { initial: RoutineDraft; projects:
           />
         </div>
       ) : (
-        <div role="list" aria-label="Exercícios da rotina" className="relative flex flex-col gap-2">
+        <div ref={listRef} role="list" aria-label="Exercícios da rotina" className="relative flex flex-col gap-2">
           {/* Os outros exercícios deslizam para o lugar ao reordenar, remover ou desfazer. */}
           <AnimatePresence initial={false} mode="popLayout">
-            {reorder.order.map((exercise) => (
+            {reorder.order.map((exercise, i, list) => (
               <LayoutItem
                 key={exercise.id}
                 role="presentation"
                 {...LAYOUT_ITEM_PROPS}
-                className={cn("flex flex-col", reorder.draggingId === exercise.id && "relative z-10")}
+                // O card arrastado acompanha o dedo sozinho; os outros deslizam.
+                layout={reorder.draggingId === exercise.id ? false : "position"}
+                className="flex flex-none flex-col"
               >
                 <RoutineExerciseCard
                   exercise={exercise}
                   open={openId === exercise.id}
-                  dragging={reorder.draggingId === exercise.id}
                   disabled={disabled}
                   unit={unit}
                   showTargetWeight={!draft.autoProgress}
-                  itemRef={reorder.itemRef(exercise.id)}
-                  handleProps={reorder.handleProps(exercise.id)}
+                  holdProps={reorder.holdProps(exercise.id)}
+                  reorder={
+                    reorder.active
+                      ? { index: i, total: list.length, dragging: reorder.draggingId === exercise.id, dragOffset: reorder.dragOffset }
+                      : undefined
+                  }
                   onToggle={() => setOpenId(openId === exercise.id ? null : exercise.id)}
                   onMenu={() => setSheet({ kind: "menu", exerciseId: exercise.id })}
                   dispatch={dispatch}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type HTMLAttributes } from "react";
 import { Ellipsis, GripVertical, NotepadText, Timer } from "lucide-react";
 import {
   equipmentLabel,
@@ -23,17 +23,27 @@ import type { DraftAction } from "@/features/routine/helpers/routine-draft";
 
 const REST_OPTIONS = ROUTINE_REST_OPTIONS.map((s) => ({ value: String(s), label: formatClock(s) }));
 
+/** Altura do card no modo de reordenar (só o cabeçalho) e espaço entre cards: o "slot" do useHoldReorder. */
+export const ROUTINE_REORDER_CARD_PX = 72;
+export const ROUTINE_LIST_GAP_PX = 8;
+
 export interface RoutineExerciseCardProps {
   exercise: RoutineExerciseDraft;
   open: boolean;
-  dragging: boolean;
   disabled: boolean;
   /** Unidade de exibição da carga planejada (o rascunho guarda kg). */
   unit: WeightUnit;
   /** Carga planejada só importa quando a rotina não atualiza carga automaticamente. */
   showTargetWeight: boolean;
-  itemRef: (node: HTMLElement | null) => void;
-  handleProps: Record<string, unknown>;
+  /** Segurar o cabeçalho liga o modo de reordenar (useHoldReorder). */
+  holdProps?: HTMLAttributes<HTMLElement>;
+  /** Modo de reordenar: card compacto (só cabeçalho) balançando; o arrastado segue o dedo. */
+  reorder?: {
+    index: number;
+    total: number;
+    dragging: boolean;
+    dragOffset: number;
+  };
   onToggle: () => void;
   onMenu: () => void;
   dispatch: (action: DraftAction) => void;
@@ -43,12 +53,11 @@ export interface RoutineExerciseCardProps {
 export function RoutineExerciseCard({
   exercise,
   open,
-  dragging,
   disabled,
   unit,
   showTargetWeight,
-  itemRef,
-  handleProps,
+  holdProps,
+  reorder,
   onToggle,
   onMenu,
   dispatch,
@@ -60,31 +69,41 @@ export function RoutineExerciseCard({
   return (
     <div
       role="listitem"
-      ref={itemRef}
+      aria-label={reorder ? `${exercise.name}, posição ${reorder.index + 1} de ${reorder.total}` : undefined}
+      onDragStart={(event) => event.preventDefault()}
+      // Balanço desencontrado e posição do card arrastado no modo de reordenar (valores dinâmicos).
+      style={
+        reorder
+          ? reorder.dragging
+            ? { translate: `0 ${reorder.dragOffset}px` }
+            : { animationDelay: `${-((reorder.index * 97) % 300)}ms` }
+          : undefined
+      }
       className={cn(
-        "flex-none overflow-hidden rounded-lg bg-surface-elevated transition-[scale,box-shadow] duration-150 ease-standard",
-        dragging ? "scale-[1.02] border-[1.5px] border-accent-text shadow-e3" : "border border-border",
+        "flex-none overflow-hidden rounded-lg border bg-surface-elevated",
+        !reorder && "border-border",
+        reorder && "relative h-[72px] cursor-grab touch-none select-none [-webkit-touch-callout:none]",
+        reorder && "transition-[scale,box-shadow,border-color] duration-150 ease-standard",
+        reorder &&
+          (reorder.dragging
+            ? "z-20 scale-[1.03] cursor-grabbing border-accent-text shadow-e3"
+            : "animate-guf-wiggle border-border motion-reduce:animate-none"),
       )}
     >
-      <div className="flex min-h-[72px] items-center gap-0.5 py-1.5 pr-1">
-        <span
-          role="button"
-          tabIndex={disabled ? -1 : 0}
-          aria-label={`Arrastar ${exercise.name} para reordenar (ou use as setas)`}
-          aria-disabled={disabled}
-          {...handleProps}
-          className={cn(
-            "grid h-11 w-10 flex-none touch-none place-items-center text-fg-muted",
-            disabled ? "cursor-not-allowed opacity-40" : "cursor-grab active:cursor-grabbing",
-          )}
-        >
-          <Icon icon={GripVertical} size={18} />
-        </span>
+      {/* Segurar o cabeçalho: reordenar. Sem menu de contexto nem seleção de texto ao segurar. */}
+      <div
+        {...holdProps}
+        className={cn(
+          "flex items-center gap-0.5 py-1.5 pr-1 select-none [-webkit-touch-callout:none]",
+          reorder ? "h-full" : "min-h-[72px]",
+        )}
+      >
         <button
           type="button"
-          aria-expanded={open}
-          onClick={onToggle}
-          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 bg-transparent py-1.5 pr-1 text-left text-fg"
+          aria-expanded={reorder ? undefined : open}
+          tabIndex={reorder ? -1 : undefined}
+          onClick={reorder ? undefined : onToggle}
+          className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 bg-transparent py-1.5 pr-1 pl-4 text-left text-fg"
         >
           <span className="flex min-w-0 flex-1 flex-col gap-1.5">
             <span className="truncate text-base leading-5 font-semibold">{exercise.name}</span>
@@ -104,17 +123,30 @@ export function RoutineExerciseCard({
             </span>
           </span>
         </button>
-        <IconButton icon={Ellipsis} variant="ghost" label={`Opções de ${exercise.name}`} disabled={disabled} onClick={onMenu} />
+        {/* No modo de reordenar: alça no lugar do menu (o botão fica oculto, não sai da página). */}
+        {reorder && (
+          <span aria-hidden="true" className="grid size-11 flex-none place-items-center text-fg-muted">
+            <Icon icon={GripVertical} size={20} />
+          </span>
+        )}
+        <IconButton
+          icon={Ellipsis}
+          variant="ghost"
+          label={`Opções de ${exercise.name}`}
+          disabled={disabled}
+          onClick={onMenu}
+          className={cn(reorder && "hidden")}
+        />
       </div>
 
-      {exercise.notes && (
-        <span className="-mt-1 flex items-start gap-1.5 pr-4 pb-3 pl-10 text-[13px] leading-[18px] text-fg-secondary">
+      {exercise.notes && !reorder && (
+        <span className="-mt-1 flex items-start gap-1.5 pr-4 pb-3 pl-4 text-[13px] leading-[18px] text-fg-secondary">
           <Icon icon={NotepadText} size={14} className="mt-0.5 text-fg-muted" />
           {exercise.notes}
         </span>
       )}
 
-      {open && (
+      {open && !reorder && (
         <div className="flex animate-guf-rise-fast flex-col gap-4 border-t border-border p-4">
           <Stepper
             label="Séries"
