@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, CalendarClock, Moon, Save, Send, Smartphone, Sun, X } from "lucide-react";
 import type { AdminAnnouncement } from "@guf/api/admin";
 import { parseTargetIds } from "@guf/core";
 import { Banner, Button, IconButton, ScreenPortal, SegmentedControl, Skeleton } from "@guf/ui";
 import { useStaff } from "@/features/auth";
+import { PRIMARY_ACTION_PROPS } from "@/shared/helpers/form-focus";
+import { useFormKeyboard } from "@/shared/hooks/use-form-keyboard";
 import { useAnnouncement, useAudienceReach } from "@/features/announcements/api/use-announcements-admin";
 import { AudienceStep } from "@/features/announcements/components/audience-step";
 import { ContentStep } from "@/features/announcements/components/content-step";
@@ -110,11 +112,14 @@ function Editor({ existing, presetTargetIds }: { existing: AdminAnnouncement | u
   const nextLabel = editor.step < 4 ? "Continuar" : canPublish ? (scheduled ? "Agendar" : "Publicar") : "Salvar rascunho";
   const nextIcon = editor.step < 4 ? ArrowRight : canPublish ? (scheduled ? CalendarClock : Send) : Save;
   const backLabel = editor.step > 1 ? "Voltar" : "Cancelar";
+  // Teclado: foco no primeiro campo a cada passo; Enter de campo em campo e, no último, Continuar.
+  const formRef = useRef<HTMLDivElement>(null);
+  useFormKeyboard(formRef, { focusKey: editor.step, enabled: device !== "mobile" });
 
   return (
     <div className="flex min-h-full">
       <div className="min-w-0 flex-1">
-        <div className="mx-auto flex max-w-[680px] flex-col gap-6 p-4 pb-28 md:p-9">
+        <div ref={formRef} className="mx-auto flex max-w-[680px] flex-col gap-6 p-4 pb-28 md:p-9">
           <div className="hidden items-center gap-2 md:flex">
             <IconButton icon={ArrowLeft} label="Voltar para comunicados" variant="ghost" onClick={() => router.push(listPath())} />
             <h2 className="m-0 flex-1 text-2xl leading-[30px] font-bold tracking-[-0.02em]">{existing ? "Editar rascunho" : "Novo comunicado"}</h2>
@@ -170,7 +175,7 @@ function Editor({ existing, presetTargetIds }: { existing: AdminAnnouncement | u
             <Button variant="secondary" size="tall" onClick={back}>
               {backLabel}
             </Button>
-            <Button size="tall" iconRight={nextIcon} onClick={next} loading={editor.step === 4 && editor.isSaving}>
+            <Button size="tall" iconRight={nextIcon} onClick={next} loading={editor.step === 4 && editor.isSaving} {...PRIMARY_ACTION_PROPS}>
               {nextLabel}
             </Button>
           </div>

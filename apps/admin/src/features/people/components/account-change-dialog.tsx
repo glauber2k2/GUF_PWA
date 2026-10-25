@@ -93,7 +93,7 @@ export function AccountChangeDialog({
   };
 
   return (
-    <Dialog open title={title} subtitle={`${displayName(person.name, person.handle)}${person.handle ? ` · @${person.handle}` : ""}`} onClose={onClose} showClose>
+    <Dialog open title={title} subtitle={`${displayName(person.name, person.handle)}${person.handle ? ` · @${person.handle}` : ""}`} onClose={onClose} showClose stepKey={stage}>
       {stage === "form" ? (
         <>
           <div className="flex flex-col gap-1 rounded-md bg-surface-3 px-3.5 py-3">

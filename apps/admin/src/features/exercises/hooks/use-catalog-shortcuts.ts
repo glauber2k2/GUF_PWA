@@ -1,36 +1,21 @@
 "use client";
 
-import { useKeyboardShortcuts, type KeyboardShortcut } from "@/shared/hooks/use-keyboard-shortcuts";
+import { focusFieldById } from "@/shared/helpers/form-focus";
+import { enterListOnArrowDown, listItemProps } from "@/shared/helpers/list-navigation";
+import { SHORTCUTS } from "@/shared/helpers/shortcuts";
+import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
+import { useListShortcuts } from "@/shared/hooks/use-list-shortcuts";
 
-const ROW_ATTRIBUTE = "data-catalog-exercise";
+const CATALOG_LIST = "catalog-exercises";
+export const CATALOG_SEARCH_INPUT_ID = "busca-exercicio";
 
 /** Espalhar na linha do exercício: ela recebe foco (Tab ou ↑/↓) e os atalhos agem sobre ela. */
 export function catalogRowProps(id: string) {
-  return { [ROW_ATTRIBUTE]: id, tabIndex: 0 } as const;
+  return listItemProps(CATALOG_LIST, id);
 }
 
-/** Linha em foco (a própria linha, não um botão dentro dela: Enter no menu continua sendo do menu). */
-function focusedRow(): HTMLElement | null {
-  const active = document.activeElement;
-  return active instanceof HTMLElement && active.hasAttribute(ROW_ATTRIBUTE) ? active : null;
-}
-
-function moveRowFocus(step: 1 | -1): boolean {
-  const current = focusedRow();
-  if (!current) return false;
-  const rows = [...document.querySelectorAll<HTMLElement>(`[${ROW_ATTRIBUTE}]`)];
-  rows[rows.indexOf(current) + step]?.focus();
-  return true;
-}
-
-function withFocusedRow(action: (id: string) => void): () => boolean {
-  return () => {
-    const id = focusedRow()?.getAttribute(ROW_ATTRIBUTE);
-    if (!id) return false;
-    action(id);
-    return true;
-  };
-}
+/** ↓ na busca entra na lista de exercícios. */
+export const catalogSearchKeyDown = enterListOnArrowDown(CATALOG_LIST);
 
 interface CatalogShortcutActions {
   onNew: () => void;
@@ -40,17 +25,17 @@ interface CatalogShortcutActions {
 }
 
 /**
- * Teclado no catálogo (só para quem pode cadastrar, no computador): N novo · I importar ·
- * ↑/↓ entre as linhas · E ou Enter edita · Del ou Backspace exclui a linha em foco.
+ * Teclado no catálogo (só para quem pode cadastrar, no computador): N novo · I importar · F busca ·
+ * ↑/↓ entre as linhas · Enter ou E edita · Del exclui a linha em foco. Legenda: CATALOG_SHORTCUT_HINTS.
  */
 export function useCatalogShortcuts({ onNew, onImport, onEdit, onDelete }: CatalogShortcutActions, enabled: boolean) {
-  const shortcuts: KeyboardShortcut[] = [
-    { keys: ["n"], onTrigger: onNew },
-    { keys: ["i"], onTrigger: onImport },
-    { keys: ["ArrowDown"], onTrigger: () => moveRowFocus(1) },
-    { keys: ["ArrowUp"], onTrigger: () => moveRowFocus(-1) },
-    { keys: ["e", "Enter"], onTrigger: withFocusedRow(onEdit) },
-    { keys: ["Delete", "Backspace"], onTrigger: withFocusedRow(onDelete) },
-  ];
-  useKeyboardShortcuts(shortcuts, enabled);
+  useKeyboardShortcuts(
+    [
+      { keys: SHORTCUTS.create.keys, onTrigger: onNew },
+      { keys: SHORTCUTS.importFile.keys, onTrigger: onImport },
+      { keys: SHORTCUTS.filter.keys, onTrigger: () => focusFieldById(CATALOG_SEARCH_INPUT_ID) },
+    ],
+    enabled,
+  );
+  useListShortcuts(CATALOG_LIST, { onOpen: onEdit, onEdit, onRemove: onDelete }, enabled);
 }

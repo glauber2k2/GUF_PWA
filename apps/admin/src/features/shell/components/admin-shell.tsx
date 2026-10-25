@@ -2,13 +2,17 @@
 
 import { useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronLeft, Menu, PanelLeftClose, PanelLeftOpen, Search, X } from "lucide-react";
+import { ChevronLeft, Keyboard, Menu, PanelLeftClose, PanelLeftOpen, Search, X } from "lucide-react";
 import { Avatar, cn, Icon, IconButton, ScreenPortal } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { MeCard } from "@/features/shell/components/me-card";
 import { NavList } from "@/features/shell/components/nav-list";
 import { BACK_PATHS, PAGE_TITLES } from "@/features/shell/constants/nav";
-import { useGoToSearch, useSearchShortcut } from "@/features/shell/hooks/use-search-shortcut";
+import { useGlobalShortcuts } from "@/features/shell/hooks/use-global-shortcuts";
+import { useGoToSearch } from "@/features/shell/hooks/use-search-shortcut";
+import { Kbd } from "@/shared/components/keyboard-hints";
+import { ShortcutHelpDialog } from "@/shared/components/shortcut-help-dialog";
+import { ShortcutHintsProvider } from "@/shared/libs/shortcut-hints";
 import { AdminWordmark, EnvironmentBadge, RoleBadge, ROLE_ICONS } from "@/shared/components/badges";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useDevice } from "@/shared/hooks/use-device";
@@ -17,20 +21,32 @@ import { STAFF_ROLES } from "@guf/core";
 /**
  * Moldura do painel (protótipo 2a–2f): barra lateral no computador, recolhida (só ícones) no tablet
  * com opção de abrir, e gaveta no celular. Ambiente e papel sempre visíveis no topo.
+ * Com teclado (tablet e computador): atalhos de qualquer tela e a ajuda "?" (shared/helpers/shortcuts.ts).
  */
 export function AdminShell({ children }: { children: ReactNode }) {
+  return (
+    <ShortcutHintsProvider>
+      <ShellLayout>{children}</ShellLayout>
+    </ShortcutHintsProvider>
+  );
+}
+
+function ShellLayout({ children }: { children: ReactNode }) {
   const device = useDevice();
   const [railOpen, setRailOpen] = useState(false);
-  useSearchShortcut(device === "desktop");
+  const [helpOpen, setHelpOpen] = useState(false);
+  const openHelp = () => setHelpOpen(true);
+  useGlobalShortcuts(openHelp, device !== "mobile");
 
   const showFullSidebar = device === "desktop" || (device === "tablet" && railOpen);
   return (
     <div className="flex h-dvh overflow-hidden">
       {device !== "mobile" && (showFullSidebar ? <FullSidebar onCollapse={device === "tablet" ? () => setRailOpen(false) : undefined} /> : <Rail onExpand={() => setRailOpen(true)} />)}
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {device === "mobile" ? <MobileHeader /> : <TopBar showShortcut={device === "desktop"} />}
+        {device === "mobile" ? <MobileHeader /> : <TopBar showShortcut={device === "desktop"} onHelp={openHelp} />}
         <div className="relative min-h-0 flex-1 overflow-auto">{children}</div>
       </div>
+      {helpOpen && <ShortcutHelpDialog onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }
@@ -61,7 +77,7 @@ function Rail({ onExpand }: { onExpand: () => void }) {
   );
 }
 
-function TopBar({ showShortcut }: { showShortcut: boolean }) {
+function TopBar({ showShortcut, onHelp }: { showShortcut: boolean; onHelp: () => void }) {
   const { staff } = useStaff();
   const goToSearch = useGoToSearch();
   return (
@@ -73,9 +89,19 @@ function TopBar({ showShortcut }: { showShortcut: boolean }) {
       >
         <Icon icon={Search} size={17} />
         <span className="flex-1">Buscar pessoa</span>
-        {showShortcut && <kbd className="grid h-5.5 min-w-5.5 place-items-center rounded-[6px] border border-border-strong font-sans text-[11px]">/</kbd>}
+        {showShortcut && <Kbd className="h-5.5 min-w-5.5 bg-transparent text-[11px] font-medium text-fg-muted">/</Kbd>}
       </button>
       <div className="flex-1" />
+      <button
+        type="button"
+        onClick={onHelp}
+        aria-label="Atalhos de teclado"
+        className="flex h-9 cursor-pointer items-center gap-2 rounded-pill border border-border-strong px-3 text-[13px] font-semibold text-fg-secondary hover:bg-surface-3 hover:text-fg"
+      >
+        <Icon icon={Keyboard} size={15} />
+        <span className="hidden lg:inline">Atalhos</span>
+        <Kbd className="h-5 min-w-5 bg-transparent text-[11px] font-medium text-fg-muted">?</Kbd>
+      </button>
       <EnvironmentBadge />
       <RoleBadge role={staff.role} />
     </header>

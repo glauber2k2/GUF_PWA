@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn, Icon } from "@guf/ui";
-import { useStaff } from "@/features/auth";
-import { ADMIN_NAV, isNavActive } from "@/features/shell/constants/nav";
+import { isNavActive } from "@/features/shell/constants/nav";
+import { useNavItems } from "@/features/shell/hooks/use-nav-items";
+import { Kbd } from "@/shared/components/keyboard-hints";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 
 interface NavListProps {
@@ -15,15 +16,14 @@ interface NavListProps {
   onNavigate?: () => void;
 }
 
-/** Itens do menu que o papel pode ver; o atual em volt. */
+/** Itens do menu que o papel pode ver; o atual em volt. No computador, cada um mostra o atalho (1–9). */
 export function NavList({ compact = false, large = false, onNavigate }: NavListProps) {
   const pathname = usePathname().replace(/(.)\/$/, "$1");
-  const { can } = useStaff();
-  const items = ADMIN_NAV.filter((item) => !item.permission || can(item.permission));
+  const items = useNavItems();
 
   return (
     <ul className={cn("m-0 flex list-none flex-col gap-1 p-0", compact && "items-center")}>
-      {items.map((item) => {
+      {items.map((item, index) => {
         const active = isNavActive(item, pathname);
         return (
           <li key={item.path}>
@@ -41,9 +41,7 @@ export function NavList({ compact = false, large = false, onNavigate }: NavListP
             >
               <Icon icon={item.icon} size={compact ? 20 : 19} />
               {!compact && <span className="flex-1">{item.label}</span>}
-              {!compact && item.hasShortcut && !large && (
-                <kbd className="hidden h-5 min-w-5 place-items-center rounded-[6px] border border-border-strong font-sans text-[11px] text-fg-muted lg:grid">/</kbd>
-              )}
+              {!compact && !large && <Kbd className="hidden h-5 min-w-5 bg-transparent text-[11px] font-medium text-fg-muted lg:inline-grid">{String(index + 1)}</Kbd>}
             </Link>
           </li>
         );
