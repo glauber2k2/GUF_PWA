@@ -25,7 +25,8 @@ import {
   toLocalISODate,
   volumeLabel,
 } from "@guf/core";
-import { useAppShell, useRaisedToast, type ToastOptions } from "@/features/app-shell";
+import { useAppShell, type ToastOptions } from "@/features/app-shell";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 import {
   Banner,
   BottomSheet,
@@ -52,7 +53,7 @@ import { invalidatePlanningData, invalidateTrainingData } from "@/shared/libs/qu
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { cn } from "@/shared/helpers/class-names";
 import { mockWorkoutApi } from "@/mocks/workout";
-import { localSummary, toNewWorkoutExercise, workoutSnapshot } from "@/features/workout/helpers/workout-builders";
+import { localSummary, toNewWorkoutExercise, withDeviceCardioRecords, workoutSnapshot } from "@/features/workout/helpers/workout-builders";
 import { useActiveWorkout, useWorkoutClock, type ActiveWorkoutState } from "@/features/workout/providers/workout-provider";
 import { WorkoutEditor } from "@/features/workout/components/workout-editor";
 import { WorkoutHeader } from "@/features/workout/components/workout-header";
@@ -291,7 +292,6 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
   }, [persist, summary, workout, state, clock]);
 
   // Descanso no rodapé: a pilha de avisos sobe para não cobri-lo.
-  useRaisedToast(Boolean(current.rest) && !summary);
 
   // Fila: avisa quando uma alteração foi descartada por erro.
   useEffect(() => {
@@ -353,7 +353,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           await removeWorkoutSnapshot(workout.id);
           if (updateRoutine) await applyToRoutine();
           closeOut();
-          return setSummary({ data, pending: false });
+          return setSummary({ data: withDeviceCardioRecords(data, local), pending: false });
         }
         // Já encerrado no servidor (finalização automática ou outro aparelho): o shell avisa quem
         // encerrou e leva ao resumo oficial (o treino já está no histórico).
@@ -482,7 +482,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       </main>
 
       {current.rest && (
-        <div className="fixed inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[12] mx-auto max-w-[406px] animate-guf-up">
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[12] mx-auto max-w-[406px] animate-guf-up">
           <RestTimerBar
             remaining={restLeft}
             total={current.rest.total}
@@ -494,7 +494,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         </div>
       )}
 
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
+      <footer {...BOTTOM_BAR_PROPS} className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
         <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
           {paused ? (
             <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">

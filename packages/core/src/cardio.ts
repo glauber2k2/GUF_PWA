@@ -1,6 +1,6 @@
 import { formatNumber } from "./format";
 import { formatElapsed } from "./session";
-import { MAX_SET_DURATION_SECONDS, type SetValues } from "./set-metrics";
+import type { SetValues } from "./set-metrics";
 
 /**
  * Regras do card de cardio no treino (protótipo Claude Design "Treino Cardio"): aparelho, ritmo ou
@@ -72,41 +72,6 @@ function normalizeName(name: string): string {
 export function cardioActivityFor(exerciseName: string): CardioActivity {
   const name = normalizeName(exerciseName);
   return CARDIO_ACTIVITIES.find((activity) => activity.keywords.some((word) => name.includes(word))) ?? GENERIC_ACTIVITY;
-}
-
-/** Distância aceita pelo banco (set_logs.distance_km: 0–1000, 2 casas). */
-export const MAX_CARDIO_DISTANCE_KM = 1000;
-const TIME_INPUT_MAX_DIGITS = 6;
-
-/** Máscara do tempo digitado: "2530" → "25:30"; "13000" → "1:30:00". Só dígitos, até h:mm:ss. */
-export function maskDurationInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "").slice(0, TIME_INPUT_MAX_DIGITS).replace(/^0+(?=\d{3})/, "");
-  if (digits.length <= 2) return digits;
-  if (digits.length <= 4) return `${digits.slice(0, -2)}:${digits.slice(-2)}`;
-  return `${digits.slice(0, -4)}:${digits.slice(-4, -2)}:${digits.slice(-2)}`;
-}
-
-/** Segundos do tempo mascarado; null se vazio, zero, segundos ≥ 60 ou acima de 24 h. */
-export function parseDurationInput(text: string): number | null {
-  if (!text) return null;
-  const parts = text.split(":").map((part) => Number.parseInt(part, 10));
-  if (parts.some((part) => !Number.isFinite(part))) return null;
-  const last = parts[parts.length - 1] ?? 0;
-  if (parts.length > 1 && last >= SECONDS_PER_MINUTE) return null;
-  const seconds = parts.reduce((total, part) => total * SECONDS_PER_MINUTE + part, 0);
-  return seconds > 0 && seconds <= MAX_SET_DURATION_SECONDS ? seconds : null;
-}
-
-/** Só dígitos e uma vírgula/ponto (o que o campo de km aceita enquanto digita). */
-export function sanitizeDistanceInput(raw: string): string {
-  return raw.replace(/[^\d.,]/g, "").slice(0, 7);
-}
-
-/** km digitados ("9,4") → número com 2 casas; null se vazio, zero ou fora do limite. */
-export function parseDistanceInput(text: string): number | null {
-  const value = Number.parseFloat(text.replace(",", "."));
-  if (!Number.isFinite(value) || value <= 0 || value > MAX_CARDIO_DISTANCE_KM) return null;
-  return Math.round(value * 100) / 100;
 }
 
 /** "9,4" · "10,25" (km, sem unidade). */

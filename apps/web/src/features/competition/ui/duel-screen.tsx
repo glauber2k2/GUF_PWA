@@ -37,7 +37,7 @@ export function DuelScreen() {
 
   return (
     <main className="flex flex-col px-4">
-      <div className="sticky top-0 z-[5] -mx-4 flex h-14 items-center gap-1 bg-background/90 pr-4 pl-1.5 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
+      <div className="sticky top-0 z-[5] -mx-4 box-content flex h-14 items-center gap-1 bg-background/90 pr-4 pl-1.5 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
         <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />
         <h1 className="m-0 min-w-0 flex-1 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">{title}</h1>
       </div>

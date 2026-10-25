@@ -1,6 +1,6 @@
-import { buildStoryData, storyContextRange, storyFeaturedFrom, type SetType, type StoryData, type StoryInput } from "@guf/core";
+import { buildStoryData, setMetricKind, storyContextRange, storyFeaturedFrom, type SetType, type StoryData, type StoryInput } from "@guf/core";
 import type { GufClient } from "./client";
-import { getWorkoutSummary } from "./evolution";
+import { getWorkoutSummary, type LoadSummaryRecord } from "./evolution";
 import { currentUserId, fetchTrainingTotals, toStreakSummary, toTrainingDay } from "./shared";
 import { apiError, toApiError, type ApiResult } from "./result";
 
@@ -72,7 +72,8 @@ export const getShareStoryData: GetShareStoryData = async (client, { sessionId }
         volumeKg: s.volumeKg,
         setCount: s.setCount,
         weightUnit: s.weightUnit,
-        exercises: s.exercises.map((e) => ({
+        // Cardio fica fora das imagens até ter modelos próprios (distância, tempo e ritmo).
+        exercises: s.exercises.filter((e) => setMetricKind(e.muscleGroup) !== "cardio").map((e) => ({
           name: e.name,
           muscleGroup: e.muscleGroup,
           sets: e.sets.map((x) => ({
@@ -84,7 +85,7 @@ export const getShareStoryData: GetShareStoryData = async (client, { sessionId }
           setCount: e.setCount,
           volumeKg: e.volumeKg,
         })),
-        records: s.records,
+        records: s.records.filter((r): r is LoadSummaryRecord => r.metric === "load"),
       },
       streak: toStreakSummary(streakRes.data?.[0]),
       weeklyGoal: profileRes.data?.weekly_goal ?? null,

@@ -5,9 +5,9 @@ import type { FinishedWorkoutSummary } from "@guf/api";
 import {
   formatElapsed,
   formatNumber,
+  formatRecordValue,
   formatShortDate,
   fromLocalISODate,
-  TIMES_SIGN,
   toDisplayWeight,
   type MuscleLevels,
   type WeightUnit,
@@ -94,7 +94,7 @@ export function WorkoutSummary({
             <div key={`${pr.exerciseName}-${i}`} className="animate-guf-rise" style={{ animationDelay: `${300 + i * 120}ms` }}>
               <PRHighlight
                 label={`Recorde · ${pr.exerciseName}`}
-                value={`${formatNumber(toDisplayWeight(pr.weightKg, unit) ?? 0)} ${unit} ${TIMES_SIGN} ${pr.reps}`}
+                value={formatRecordValue(pr, unit)}
               />
             </div>
           ))}

@@ -66,7 +66,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
 
   return (
     <main className="flex flex-col gap-5 px-4">
-      <div className="sticky top-0 z-[5] -mx-4 flex h-[52px] items-center gap-2 bg-background/90 px-2 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
+      <div className="sticky top-0 z-[5] -mx-4 box-content flex h-[52px] items-center gap-2 bg-background/90 px-2 pt-[env(safe-area-inset-top)] backdrop-blur-[12px]">
         {!isSelf && <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />}
         <span className="flex min-w-0 flex-1 items-center gap-1.5 pl-2 text-base leading-[22px] font-semibold">
           <span className="truncate">{data ? `@${data.handle}` : ""}</span>

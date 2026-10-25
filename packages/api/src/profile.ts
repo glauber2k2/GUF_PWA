@@ -1,6 +1,8 @@
 import {
   AVATAR_BUCKET,
+  AVATAR_CACHE_SECONDS,
   avatarStoragePath,
+  isAvatarFormat,
   isUploadedAvatar,
   toExperienceLevel,
   toStoredBio,
@@ -170,9 +172,12 @@ export const uploadAvatar: ProfileApi["uploadAvatar"] = async (client, image) =>
   try {
     const userId = await currentUserId(client);
     if (!userId) return { data: null, error: apiError("not_authenticated") };
-    // Nome novo a cada troca: a URL pública muda e nenhum cache mostra a foto antiga.
-    const path = avatarStoragePath(userId, crypto.randomUUID());
-    const upload = await client.storage.from(AVATAR_BUCKET).upload(path, image, { contentType: image.type, upsert: false });
+    if (!isAvatarFormat(image.type)) return { data: null, error: AVATAR_UPLOAD_FAILED };
+    // Nome novo a cada troca: a URL pública muda, nenhum cache mostra a foto antiga e o arquivo pode ficar em cache por 1 ano.
+    const path = avatarStoragePath(userId, crypto.randomUUID(), image.type);
+    const upload = await client.storage
+      .from(AVATAR_BUCKET)
+      .upload(path, image, { contentType: image.type, upsert: false, cacheControl: String(AVATAR_CACHE_SECONDS) });
     if (upload.error) {
       const mapped = toApiError(upload.error);
       return { data: null, error: mapped.code === "network_error" ? mapped : AVATAR_UPLOAD_FAILED };

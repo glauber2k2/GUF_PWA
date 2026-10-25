@@ -19,6 +19,7 @@ import { hasWorkoutEditChanges, toWorkoutEditInput } from "@/features/workout/he
 import { initWorkoutView } from "@/features/workout/helpers/workout-state";
 import { useScreenToasts } from "@/features/workout/hooks/use-screen-toasts";
 import { useWorkoutEditing, type WorkoutChangeSink } from "@/features/workout/hooks/use-workout-editing";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 
 /** Nada é gravado durante a edição: tudo vai de uma vez em "Salvar alterações". */
 const DRAFT_ONLY: WorkoutChangeSink = {
@@ -147,7 +148,7 @@ function WorkoutEditView({ workout, onExit }: { workout: EditableWorkout; onExit
         />
       </main>
 
-      <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
+      <footer {...BOTTOM_BAR_PROPS} className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
         <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
           <Button size="lg" icon={Check} fullWidth disabled={!changed || !online} onClick={submit}>
             {changed ? "Salvar alterações" : "Nenhuma alteração"}

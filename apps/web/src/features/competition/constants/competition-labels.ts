@@ -5,7 +5,7 @@ export const METRICS: Record<CompetitionMetric, { label: string; unit: string; s
   points: { label: "Pontos", unit: "pts", subtitle: "Constância, sequência, recordes e volume", icon: Zap, accumulated: "Pontos acumulados" },
   volume: { label: "Volume", unit: "kg", subtitle: "Carga × repetições", icon: Weight, accumulated: "Volume acumulado" },
   workouts: { label: "Treinos", unit: "treinos", subtitle: "Treinos concluídos", icon: Dumbbell, accumulated: "Treinos acumulados" },
-  records: { label: "Recordes", unit: "recordes", subtitle: "Recordes de carga batidos", icon: Medal, accumulated: "Recordes acumulados" },
+  records: { label: "Recordes", unit: "recordes", subtitle: "Recordes de carga e de cardio batidos", icon: Medal, accumulated: "Recordes acumulados" },
 };
 
 export const METRIC_ORDER: CompetitionMetric[] = ["points", "volume", "workouts", "records"];

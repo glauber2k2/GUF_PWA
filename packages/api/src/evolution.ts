@@ -6,6 +6,7 @@ import {
   previousBest1Rm,
   sessionRecord1Rm,
   withRecords,
+  type CardioRecord,
   type ExerciseSessionEvolution,
   type ExerciseSessionPoint,
   type SetType,
@@ -13,10 +14,11 @@ import {
   type WeightUnit,
 } from "@guf/core";
 import type { GufClient } from "./client";
+import { fetchCardioBests } from "./cardio-history";
 import { exerciseHistories } from "./history";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { FREE_WORKOUT_NAME, sessionDurationSeconds, toWeightUnit } from "./shared";
-import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals } from "./summary-builder";
+import { buildCardioSummaryRecord, buildSummaryExercise, buildSummaryRecord, buildSummaryTotals } from "./summary-builder";
 
 /* =====================================================================
  * Contrato — Resumo do treino e Evolução por exercício
@@ -27,7 +29,7 @@ import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals } from "./
 export interface SummarySet extends SetValues {
   setNumber: number;
   setType: SetType;
-  /** Série que bateu o recorde do exercício (maior 1RM estimado) neste treino. */
+  /** Série que bateu o recorde do exercício neste treino (maior 1RM estimado; no cardio, ritmo ou distância). */
   isRecord: boolean;
 }
 
@@ -45,18 +47,32 @@ export interface SummaryExercise {
   volumeKg: number;
 }
 
-export interface WorkoutSummaryRecord {
+interface SummaryRecordBase {
   exerciseId: string;
   exerciseName: string;
+  /** Dia da marca batida; null quando não se sabe (cardio e resumo calculado no aparelho). */
+  previousOn: string | null;
+}
+
+/** Recorde de carga: medido pelo 1RM estimado. */
+export interface LoadSummaryRecord extends SummaryRecordBase {
+  metric: "load";
   /** Série do recorde (o que a pessoa levantou). */
   weightKg: number;
   reps: number | null;
   /** 1RM estimado do recorde: o recorde é medido pelo 1RM (mais carga ou mais repetições). */
   oneRmKg: number;
-  /** Melhor 1RM antes deste treino (o recorde batido) e o dia em que foi feito. */
+  /** Melhor 1RM antes deste treino (o recorde batido); o dia fica em previousOn. */
   previous1RmKg: number | null;
-  previousOn: string | null;
 }
+
+/** Recorde de cardio: ritmo/velocidade ou distância (cardio-records.ts no core). */
+export interface CardioSummaryRecord extends SummaryRecordBase {
+  metric: "cardio";
+  cardio: CardioRecord;
+}
+
+export type WorkoutSummaryRecord = LoadSummaryRecord | CardioSummaryRecord;
 
 /** O que a tela de resumo mostra de qualquer treino concluído (seu ou de outra pessoa). */
 export interface WorkoutSummaryBase {
@@ -166,18 +182,24 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
     const exerciseRows = s.session_exercises
       .map((se) => ({ se, sets: se.set_logs.filter((l) => l.is_completed) }))
       .filter(({ sets }) => sets.length > 0);
-    const histories = await exerciseHistories(client, [...new Set(exerciseRows.map(({ se }) => se.exercise_id))]);
+    const exerciseIds = [...new Set(exerciseRows.map(({ se }) => se.exercise_id))];
+    const [histories, cardioBests] = await Promise.all([exerciseHistories(client, exerciseIds), fetchCardioBests(client, exerciseIds, s.id)]);
     if (histories.error) return { data: null, error: histories.error };
+    if (cardioBests.error) return { data: null, error: cardioBests.error };
 
     const records: WorkoutSummaryRecord[] = [];
     const exercises = exerciseRows.map<SummaryExercise>(({ se, sets }) => {
       const history = histories.data.get(se.exercise_id) ?? [];
       const record1RmKg = sessionRecord1Rm(history, s.id, s.performed_on, earlierSameDay);
+      const previousCardio = cardioBests.data.get(se.exercise_id) ?? null;
       const exercise = buildSummaryExercise(
         { id: se.id, exerciseId: se.exercise_id, name: se.exercises?.name ?? "Exercício", muscleGroup: se.exercises?.muscle_group ?? "", note: se.notes, sets },
         record1RmKg,
+        previousCardio,
       );
-      const record = buildSummaryRecord(exercise, record1RmKg, previousBest1Rm(history, s.id, s.performed_on, earlierSameDay));
+      const record =
+        buildSummaryRecord(exercise, record1RmKg, previousBest1Rm(history, s.id, s.performed_on, earlierSameDay)) ??
+        buildCardioSummaryRecord(exercise, previousCardio);
       if (record) records.push(record);
       return exercise;
     });

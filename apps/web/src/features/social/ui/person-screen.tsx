@@ -17,7 +17,7 @@ export function PersonScreen() {
 
   return (
     <main className="flex flex-col gap-4 px-4">
-      <div className="-mx-4 flex h-[52px] items-center px-2 pt-[env(safe-area-inset-top)]">
+      <div className="-mx-4 box-content flex h-[52px] items-center px-2 pt-[env(safe-area-inset-top)]">
         <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />
       </div>
       {!handle || person.isError ? (

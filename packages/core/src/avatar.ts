@@ -14,9 +14,32 @@ export const AVATAR_BUCKET = "avatars";
 
 const HTTP_URL = /^https?:\/\//i;
 
+/* ---------------------------------------------------------------------
+ * Foto enviada: tamanho e compressão (feitos no aparelho antes do envio)
+ * --------------------------------------------------------------------- */
+
+/** Lado da foto enviada: o maior avatar do app tem 124 px; 384 cobre telas de densidade 3×. */
+export const AVATAR_SIDE_PX = 384;
+/** Teto de tamanho do arquivo (economiza Storage e o tráfego de quem vê a foto). */
+export const AVATAR_MAX_BYTES = 40 * 1024;
+/** Qualidades tentadas em ordem até caber no teto (a última vale mesmo se passar). */
+export const AVATAR_QUALITY_STEPS = [0.85, 0.75, 0.65, 0.55] as const;
+/** Formatos em ordem de preferência: WebP (menor) quando o aparelho codifica; senão JPEG (todos codificam). */
+export const AVATAR_FORMATS = ["image/webp", "image/jpeg"] as const;
+export type AvatarFormat = (typeof AVATAR_FORMATS)[number];
+/** Nome único a cada troca: o arquivo nunca muda e pode ficar no cache por 1 ano. */
+export const AVATAR_CACHE_SECONDS = 365 * 24 * 60 * 60;
+
+const AVATAR_EXTENSIONS: Record<AvatarFormat, string> = { "image/webp": "webp", "image/jpeg": "jpg" };
+
+/** O tipo é um formato aceito para a foto enviada? */
+export function isAvatarFormat(type: string): type is AvatarFormat {
+  return (AVATAR_FORMATS as readonly string[]).includes(type);
+}
+
 /** Caminho de uma foto enviada no bucket (a pasta é o id do usuário: as políticas do Storage conferem). */
-export function avatarStoragePath(userId: string, fileId: string): string {
-  return `${userId}/${fileId}.jpg`;
+export function avatarStoragePath(userId: string, fileId: string, format: AvatarFormat): string {
+  return `${userId}/${fileId}.${AVATAR_EXTENSIONS[format]}`;
 }
 
 /** Foto enviada pelo usuário (caminho no Storage), e não URL de conta social. */

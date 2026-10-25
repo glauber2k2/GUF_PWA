@@ -7,7 +7,6 @@ import { lastMeasurementLabel, MEASUREMENT_PARTS, type BodyMeasurementDay } from
 import { Banner, Button, Skeleton } from "@/shared/components/ds";
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
-import { useRaisedToast } from "@/features/app-shell";
 import { useBodyMeasurements, useCanUseMeasurements, useGrantHealthConsent, useMeasurementsSource } from "@/features/body-measurements/api/use-body-measurements";
 import { MeasurementBody3d } from "@/features/body-measurements/components/measurement-body-3d";
 import { HealthConsentStep } from "@/features/body-measurements/components/health-consent-step";
@@ -31,8 +30,6 @@ export function MeasurementsScreen() {
   const grant = useGrantHealthConsent();
   const canUse = useCanUseMeasurements();
   const data = measurements.data;
-  const showList = Boolean(data?.hasConsent) && !dev.forceLoading;
-  useRaisedToast(showList);
 
   if (dev.forceLoading || measurements.isPending) {
     return (

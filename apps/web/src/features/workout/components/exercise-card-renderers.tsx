@@ -43,8 +43,8 @@ export const EXERCISE_CARD_RENDERERS: Record<SetMetricKind, (context: ExerciseCa
       {...frame}
       exercise={ex}
       timer={cardioTimerFor(ex.id)}
-      onLogSet={(entry) => editing.logCardioSet(ex.id, entry)}
-      onSaveDistance={(setId, distanceKm) => editing.setDistance(ex.id, setId, distanceKm)}
+      onAddManualSet={() => editing.addManualCardioSet(ex)}
+      onEditField={(setIndex, field) => editing.startEdit({ exerciseId: ex.id, setIndex, field })}
       onRemoveSet={(setIndex) => editing.removeSet(ex, setIndex)}
     />
   ),

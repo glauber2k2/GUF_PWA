@@ -19,6 +19,7 @@ export const WORKOUT_DEMO_EXERCISES: readonly ExerciseView[] = [
     restSeconds: 90,
     note: null,
     best1RmKg: 85,
+    cardioBest: null,
     open: true,
     flash: false,
     sets: [
@@ -36,6 +37,7 @@ export const WORKOUT_DEMO_EXERCISES: readonly ExerciseView[] = [
     restSeconds: 90,
     note: null,
     best1RmKg: 70,
+    cardioBest: null,
     open: false,
     flash: false,
     sets: [

@@ -5,7 +5,7 @@
  * do design em DESENVOLVIMENTO, via ?estado= (ver useDevHistoryState):
  * padrao · risco · recorde · novo · poucos · erro (+ carregando, offline e dia, que são da tela).
  */
-import { apiError, type DaySession, type GufClient, type HistoryApi, type HistoryOverview, type TrainingDay } from "@guf/api";
+import { apiError, type DayRecord, type DaySession, type GufClient, type HistoryApi, type HistoryOverview, type TrainingDay } from "@guf/api";
 import { addLocalDays, fromLocalISODate, toLocalISODate, weekStart } from "@guf/core";
 
 export type HistoryMockScenario = "padrao" | "risco" | "recorde" | "novo" | "poucos" | "erro";
@@ -30,11 +30,11 @@ const ROUTINES = [
   { id: "routine-b", name: "Treino B – Costas e Bíceps" },
   { id: "routine-c", name: "Treino C – Pernas e Ombros" },
 ];
-const RECORDS = [
-  { exerciseName: "Supino reto", weightKg: 82.5, reps: 8 },
-  { exerciseName: "Puxada frontal", weightKg: 65, reps: 8 },
-  { exerciseName: "Agachamento livre", weightKg: 100, reps: 6 },
-  { exerciseName: "Rosca direta", weightKg: 37.5, reps: 8 },
+const RECORDS: DayRecord[] = [
+  { exerciseName: "Supino reto", metric: "load", weightKg: 82.5, reps: 8 },
+  { exerciseName: "Puxada frontal", metric: "load", weightKg: 65, reps: 8 },
+  { exerciseName: "Agachamento livre", metric: "load", weightKg: 100, reps: 6 },
+  { exerciseName: "Esteira", metric: "cardio", cardio: { kind: "rate", rate: "pace", distanceKm: 5.2, durationSeconds: 27 * 60 + 3, previousValue: 330 } },
 ];
 /** Dias da semana treinados (0 = segunda). */
 const PATTERNS = [[0, 2, 4], [0, 2, 3, 5], [1, 3, 5], [0, 1, 3, 4], [0, 3], [1, 2, 4, 5]];

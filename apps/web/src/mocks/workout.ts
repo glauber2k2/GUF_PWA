@@ -3,7 +3,7 @@
  * (WorkoutApi). A tela usa os DADOS REAIS; este mock existe só para o modo de demonstração
  * em DESENVOLVIMENTO (/treino?id=demo&estado=demo), com o treino do design e sem gravar nada.
  */
-import { markRecordSets, sessionTotals, workoutElapsedSeconds, type SetType } from "@guf/core";
+import { buildExerciseRecord, sessionTotals, workoutElapsedSeconds, type SetType } from "@guf/core";
 import {
   apiError,
   DEFAULT_REST_SECONDS,
@@ -146,6 +146,9 @@ const seedCardioSet = ([prev, distanceKm, durationSeconds, isCompleted]: SeedCar
   previous: prev ? { weightKg: null, reps: null, distanceKm: prev[0], durationSeconds: prev[1] } : null,
 });
 
+/** Marcas anteriores do cardio na demonstração: 6:00 /km e 5 km (correr mais rápido ou mais longe vira recorde). */
+const MOCK_CARDIO_BEST = { secondsPerKm: 360, distanceKm: 5 };
+
 function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioSet[]): WorkoutExercise {
   const ex = byName(name);
   return {
@@ -157,6 +160,7 @@ function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioS
     restSeconds,
     note: null,
     best1RmKg: null,
+    cardioBest: MOCK_CARDIO_BEST,
     sets: sets.map(seedCardioSet),
   };
 }
@@ -172,6 +176,7 @@ function seedExercise(name: string, restSeconds: number, note: string | null, se
     restSeconds,
     note,
     best1RmKg: BEST_1RM_KG[name] ?? null,
+    cardioBest: null,
     sets: sets.map(seedSet),
   };
 }
@@ -275,7 +280,13 @@ export const getExerciseContext: WorkoutApi["getExerciseContext"] = async (clien
   const context: Awaited<ReturnType<WorkoutApi["getExerciseContext"]>>["data"] = {};
   for (const id of exerciseIds) {
     const ex = library.find((e) => e.id === id);
-    context[id] = { previous: [], best1RmKg: ex ? (BEST_1RM_KG[ex.name] ?? null) : null, restSeconds: DEFAULT_REST_SECONDS, routineNote: null };
+    context[id] = {
+      previous: [],
+      best1RmKg: ex ? (BEST_1RM_KG[ex.name] ?? null) : null,
+      cardioBest: ex?.muscleGroup === "cardio" ? MOCK_CARDIO_BEST : null,
+      restSeconds: DEFAULT_REST_SECONDS,
+      routineNote: null,
+    };
   }
   return { data: context, error: null };
 };
@@ -366,8 +377,8 @@ export const finishWorkout: WorkoutApi["finishWorkout"] = async (client, { sessi
   const workout = session(sessionId);
   const totals = sessionTotals(workout.exercises.flatMap((e) => e.sets));
   const personalRecords = workout.exercises.flatMap((e) => {
-    const flags = markRecordSets(e.sets, e.best1RmKg);
-    return e.sets.filter((_, i) => flags[i]).map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));
+    const built = buildExerciseRecord(e, e.sets);
+    return built ? [{ exerciseName: e.name, ...built.record }] : [];
   });
   const clock = { startedAt: workout.startedAt, periods: workout.activePeriods };
   const durationSeconds = workoutElapsedSeconds(clock);

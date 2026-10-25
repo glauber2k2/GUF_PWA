@@ -8,6 +8,7 @@ import type { RoutineSummary } from "@guf/api";
 import { BOTTOM_NAV_ITEMS, BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack, type NavBadge, type NavItem } from "@/shared/components/ds";
 import { useDevHomeState } from "@/features/home";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
+import { BOTTOM_BAR_PROPS, useBottomClearance } from "@/shared/hooks/use-bottom-clearance";
 import { useHomeSummary, useStartWorkout } from "@/features/home";
 import { hasPendingFor, isClosedLocally } from "@/shared/offline/outbox";
 import { createToastStore, TOAST_DURATION_MS, type ToastOptions } from "@/store/global/toast.store";
@@ -78,11 +79,6 @@ interface AppShellApi {
   /** Troca o conteúdo de um aviso (ex.: "carregando" → "success"); reinicia o tempo. */
   updateToast: (id: number, title: string, options?: ToastOptions) => void;
   dismissToast: (id: number) => void;
-  /**
-   * Barra de ação fixa no rodapé (ex.: "Ativar este projeto", descanso do treino): a pilha sobe para
-   * não cobri-la. Devolve a função que desfaz. Nas telas, use o hook `useRaisedToast(ativo)`.
-   */
-  raiseToast: () => () => void;
   openStartSheet: () => void;
   /** Inicia um treino (rotina ou vazio) e avisa o resultado. */
   startWorkout: (routine: Pick<RoutineSummary, "id" | "name"> | null) => void;
@@ -110,10 +106,11 @@ export function useAppShell(): AppShellApi {
   return ctx;
 }
 
-/** Sobe a pilha de avisos enquanto `raised` (barra de ação fixa no rodapé da tela). */
-export function useRaisedToast(raised: boolean) {
-  const { raiseToast } = useAppShell();
-  useEffect(() => (raised ? raiseToast() : undefined), [raised, raiseToast]);
+/** Espaço entre a pilha de avisos e a barra de baixo (ou a borda da tela, sem barra). */
+const TOAST_GAP_PX = 16;
+
+function toastBottom(clearancePx: number): string {
+  return clearancePx > 0 ? `${clearancePx + TOAST_GAP_PX}px` : `calc(${TOAST_GAP_PX}px + env(safe-area-inset-bottom))`;
 }
 
 /**
@@ -136,8 +133,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (!booted && (summary.data || summary.isError || !online)) setBooted(true);
   const start = useStartWorkout();
   const [toasts] = useState(() => createToastStore(TOAST_DURATION_MS));
-  // Contador: mais de uma barra pode pedir ao mesmo tempo (ex.: seletor aberto sobre o treino).
-  const [raisedCount, setRaisedCount] = useState(0);
+  // A pilha fica acima da barra fixa mais alta do rodapé (menu, mini card, "Salvar", descanso…), medida na tela.
+  const bottomClearance = useBottomClearance();
   const [startOpen, setStartOpen] = useState(false);
   const [baseNavItems] = useState(buildNavItems);
   const navItems = useNavItemsWithAlerts(baseNavItems);
@@ -145,15 +142,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const showToast = toasts.show;
   // Treino encerrado pelo servidor (finalização automática): fecha no aparelho e mostra o resumo.
   const resolveClosedWorkout = useClosedWorkoutWatcher(showToast);
-  const raiseToast = useCallback(() => {
-    setRaisedCount((n) => n + 1);
-    let released = false;
-    return () => {
-      if (released) return;
-      released = true;
-      setRaisedCount((n) => n - 1);
-    };
-  }, []);
 
   // Iniciando: da criação da sessão até a tela do treino abrir (o overlay cobre também a navegação).
   // Guarda a rota de onde saiu: qualquer troca de rota encerra o overlay; se a navegação não
@@ -204,7 +192,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       showToast,
       updateToast: toasts.update,
       dismissToast: toasts.dismiss,
-      raiseToast,
       openStartSheet: () => setStartOpen(true),
       startWorkout: startWorkoutFor,
       openWorkout,
@@ -212,7 +199,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       isMiniCardVisible: showMiniCard,
       isBusy,
     }),
-    [showToast, toasts, raiseToast, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout, showMiniCard, isBusy],
+    [showToast, toasts, startWorkoutFor, openWorkout, setStartOpen, resolveClosedWorkout, showMiniCard, isBusy],
   );
 
   // Treino aberto no banco → mini card e aba Treinar acompanham (sem redirecionar).
@@ -303,30 +290,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Pilha de avisos no <body>, acima de telas cheias e folhas (z-65) e abaixo dos diálogos (z-70). */}
       <ScreenPortal>
-        <ToastStack
-          store={toasts}
-          duration={TOAST_DURATION_MS}
-          className={cn(
-            "fixed inset-x-3 z-[65] mx-auto max-w-[406px]",
-            immersive
-              ? raisedCount > 0
-                ? "bottom-[calc(186px+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(114px+env(safe-area-inset-bottom))]"
-              : showMiniCard || raisedCount > 0
-                ? "bottom-[calc(168px+env(safe-area-inset-bottom))]"
-                : "bottom-[calc(92px+env(safe-area-inset-bottom))]",
-          )}
-        />
+        {/* Distância do fundo medida na hora (valor dinâmico): acima das barras ou perto da borda. */}
+        <div className="fixed inset-x-3 z-[65] mx-auto max-w-[406px]" style={{ bottom: toastBottom(bottomClearance) }}>
+          <ToastStack store={toasts} duration={TOAST_DURATION_MS} />
+        </div>
       </ScreenPortal>
 
       {showMiniCard && (
-        <MiniWorkoutCard
-          onOpen={openWorkout}
-          className="fixed inset-x-3 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[15] mx-auto max-w-[406px]"
-        />
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-3 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[15] mx-auto max-w-[406px]">
+          <MiniWorkoutCard onOpen={openWorkout} />
+        </div>
       )}
 
       <div
+        {...BOTTOM_BAR_PROPS}
         className={cn(
           "fixed inset-x-0 bottom-0 z-10 border-t border-border bg-surface/92 pb-[env(safe-area-inset-bottom)] backdrop-blur-[12px]",
           immersive && "hidden",

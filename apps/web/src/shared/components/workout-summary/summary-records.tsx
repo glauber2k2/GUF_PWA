@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronRight, Trophy } from "lucide-react";
-import { formatNumber, recordsTitle, TIMES_SIGN, toDisplayWeight, type WeightUnit } from "@guf/core";
+import { describeRecordValue, formatRecordValue, recordsTitle, type WeightUnit } from "@guf/core";
 import type { WorkoutSummaryRecord } from "@guf/api";
 import { Icon } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -28,14 +28,12 @@ export function SummaryRecords({ records, unit, onOpenExercise }: SummaryRecords
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="text-xs leading-4 font-semibold text-pr-text">{recordsTitle(records.length)}</span>
         {records.map((r) => {
-          const load = `${formatNumber(toDisplayWeight(r.weightKg, unit) ?? 0)} ${unit}`;
-          const label = `Recorde pessoal: ${r.exerciseName}, ${load}${r.reps ? ` por ${r.reps} repetições` : ""}`;
+          const label = `Recorde pessoal: ${r.exerciseName}, ${describeRecordValue(r, unit)}`;
           const content = (
             <>
               <span className="min-w-0 flex-1 text-[15px] leading-5 font-semibold">{r.exerciseName}</span>
               <span className="font-display text-[22px] leading-6 font-bold whitespace-nowrap tabular-nums">
-                {load}
-                {r.reps ? ` ${TIMES_SIGN} ${r.reps}` : ""}
+                {formatRecordValue(r, unit)}
               </span>
             </>
           );
