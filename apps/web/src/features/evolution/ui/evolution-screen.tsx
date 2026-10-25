@@ -37,6 +37,7 @@ import { EvolutionSkeleton } from "@/features/evolution/components/evolution-ske
 import { exerciseSearchPath, summaryPath } from "@/features/evolution/helpers/paths";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { usePlanGate } from "@/features/plans";
+import { DetailScreen } from "@/shared/components/detail-screen";
 
 const RECENT_LIMIT = 8;
 /** Período ao abrir; quando o plano não mostra tanto histórico, o mais curto. */
@@ -59,7 +60,7 @@ export function EvolutionScreen() {
   const subtitle = data ? [muscleGroupLabel(data.exercise.muscleGroup), equipmentLabel(data.exercise.equipment)].filter(Boolean).join(" · ") : null;
 
   return (
-    <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       <DetailHeader loading={loading} title={data?.exercise.name ?? "Evolução"} subtitle={subtitle} onBack={goBack} />
       <div className="flex flex-col gap-4 pt-2">
         {offline && !loading && (
@@ -85,7 +86,7 @@ export function EvolutionScreen() {
           <EvolutionContent evolution={data} />
         )}
       </div>
-    </main>
+    </DetailScreen>
   );
 }
 

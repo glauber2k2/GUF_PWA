@@ -6,6 +6,7 @@ import { SummaryFallback, type SummaryFallbackState } from "@/shared/components/
 import { WorkoutSummaryBody } from "@/shared/components/workout-summary/workout-summary-body";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { useMemberWorkout, useSocialSource } from "@/features/social/api/use-social";
+import { DetailScreen } from "@/shared/components/detail-screen";
 
 /**
  * Treino concluído de outra pessoa: /pessoa/treino?id=<sessão>, aberto pelo histórico do perfil.
@@ -23,7 +24,7 @@ export function MemberWorkoutScreen() {
   const fallback: SummaryFallbackState | null = loading ? "loading" : missing ? "missing" : !data ? "error" : null;
 
   return (
-    <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       {fallback || !data ? (
         <SummaryFallback state={fallback ?? "error"} onBack={goBack} onRetry={() => void workout.refetch()} errorMessage={workout.error?.message} />
       ) : (
@@ -37,6 +38,6 @@ export function MemberWorkoutScreen() {
           <WorkoutSummaryBody key={data.id} summary={data} />
         </>
       )}
-    </main>
+    </DetailScreen>
   );
 }

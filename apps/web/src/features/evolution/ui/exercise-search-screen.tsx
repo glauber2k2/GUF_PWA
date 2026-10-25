@@ -10,6 +10,7 @@ import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { DetailHeader } from "@/shared/components/detail-header";
 import { exercisePath } from "@/features/evolution/helpers/paths";
 import { useGoBack } from "@/shared/hooks/use-go-back";
+import { DetailScreen } from "@/shared/components/detail-screen";
 
 /** "Ver evolução de um exercício": só exercícios já feitos, com busca e filtro por grupo muscular. */
 export function ExerciseSearchScreen() {
@@ -28,7 +29,7 @@ export function ExerciseSearchScreen() {
   const offline = dev.forceOffline || !online || trained.data?.source === "device";
 
   return (
-    <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       <DetailHeader title="Evolução por exercício" onBack={goBack} />
       <div className="flex flex-col gap-4 pt-2">
         <SearchField value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar exercício" aria-label="Buscar exercício" />
@@ -95,6 +96,6 @@ export function ExerciseSearchScreen() {
           </>
         )}
       </div>
-    </main>
+    </DetailScreen>
   );
 }

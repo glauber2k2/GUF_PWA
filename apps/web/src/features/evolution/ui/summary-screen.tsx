@@ -15,6 +15,7 @@ import { ShareStorySheet, STORY_SAVED_TOAST } from "@/features/share";
 import { workoutEditPath } from "@/features/workout";
 import { useDeleteWorkout, useEvolutionSource, useWorkoutSummary, type SummarySource } from "@/features/evolution/api/use-evolution";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
+import { DetailScreen } from "@/shared/components/detail-screen";
 
 /** Resumo de um treino concluído: /treino/resumo?id=<sessão>. */
 export function SummaryScreen() {
@@ -31,7 +32,7 @@ export function SummaryScreen() {
   const fallback: SummaryFallbackState | null = loading ? "loading" : missing ? "missing" : !data ? "error" : null;
 
   return (
-    <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       {fallback || !data ? (
         <SummaryFallback
           state={fallback ?? "error"}
@@ -51,7 +52,7 @@ export function SummaryScreen() {
           onBack={goBack}
         />
       )}
-    </main>
+    </DetailScreen>
   );
 }
 
