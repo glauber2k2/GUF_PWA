@@ -1,4 +1,5 @@
 export * from "./client";
+export * from "./account-suspension";
 export * from "./auth";
 export * from "./legal";
 export * from "./home";

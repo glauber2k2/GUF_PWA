@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient, type SupportedStorage } from "@supabase/supabase-js";
 import type { Database } from "@guf/types";
+import { withAccountSuspensionCheck, type AccountSuspendedListener } from "./account-suspension";
 
 export type GufClient = SupabaseClient<Database>;
 
@@ -17,13 +18,16 @@ export interface GufClientConfig {
   storage?: SupportedStorage;
   /** Nomes das variáveis de ambiente, só para a mensagem de erro (web: NEXT_PUBLIC_*; mobile: EXPO_PUBLIC_*). */
   envNames?: { url: string; publishableKey: string };
+  /** Chamado quando a API recusa a conta por estar suspensa (erro GU001), na primeira chamada que esbarrar nisso. */
+  onAccountSuspended?: AccountSuspendedListener;
 }
 
 /**
  * Cria o cliente Supabase tipado do app:
  * - PKCE (código trocado no retorno de OAuth e links de e-mail);
  * - sessão persistente e renovada automaticamente;
- * - detecção da sessão na URL (troca o ?code= ao carregar a página de retorno).
+ * - detecção da sessão na URL (troca o ?code= ao carregar a página de retorno);
+ * - aviso de conta suspensa (`onAccountSuspended`), conferido em toda resposta da API REST.
  *
  * Quem chama lê as variáveis de ambiente (cada plataforma tem seu prefixo) e
  * deve manter uma única instância por app.
@@ -33,6 +37,7 @@ export function createGufClient({
   publishableKey,
   storage,
   envNames = { url: "NEXT_PUBLIC_SUPABASE_URL", publishableKey: "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" },
+  onAccountSuspended,
 }: GufClientConfig): GufClient {
   const missing = [!url && envNames.url, !publishableKey && envNames.publishableKey].filter(Boolean);
   if (missing.length > 0) {
@@ -53,5 +58,8 @@ export function createGufClient({
       detectSessionInUrl: true,
       storage,
     },
+    global: onAccountSuspended
+      ? { fetch: withAccountSuspensionCheck((input, init) => fetch(input, init), onAccountSuspended) }
+      : undefined,
   });
 }

@@ -3,3 +3,4 @@ export * from "./staff-session";
 export * from "./users";
 export * from "./announcements";
 export * from "./team";
+export * from "./exercises";

@@ -4,14 +4,16 @@
  * mesmos códigos de erro.
  */
 import { apiError, type ApiError, type ApiResult, type GufClient } from "@guf/api";
-import type {
-  AnnouncementsAdminApi,
-  AdminUsersApi,
-  StaffAccess,
-  StaffSessionApi,
-  StaffTeamApi,
+import {
+  CATALOG_PAGE_SIZE,
+  type AnnouncementsAdminApi,
+  type AdminUsersApi,
+  type ExerciseCatalogAdminApi,
+  type StaffAccess,
+  type StaffSessionApi,
+  type StaffTeamApi,
 } from "@guf/api/admin";
-import { canStaff, normalizeHandle, type StaffPermission } from "@guf/core";
+import { canStaff, catalogNameKey, normalizeHandle, type StaffPermission } from "@guf/core";
 import { getAdminMockScenario, getMockDb, MOCK_ME_ID } from "@/mocks/admin-data";
 
 const LATENCY_MS = 350;
@@ -441,3 +443,44 @@ export const mockStaffTeamApi = {
     return { data: rows, error: null };
   },
 } satisfies StaffTeamApi;
+
+export const mockExerciseCatalogAdminApi = {
+  async listCatalogExercises(client, filters) {
+    const denied = await guard(client, "view_accounts");
+    if (denied) return fail(denied);
+    if (getAdminMockScenario().empty) return { data: { items: [], total: 0 }, error: null };
+    const query = catalogNameKey(filters.query ?? "");
+    const groups = filters.muscleGroups ?? [];
+    const rows = getMockDb()
+      .catalog.filter((e) => (!query || catalogNameKey(e.name).includes(query)) && (groups.length === 0 || groups.includes(e.muscleGroup)))
+      .sort((a, b) => catalogNameKey(a.name).localeCompare(catalogNameKey(b.name)));
+    const offset = filters.offset ?? 0;
+    return { data: { items: rows.slice(offset, offset + CATALOG_PAGE_SIZE), total: rows.length }, error: null };
+  },
+  async findExistingCatalogNames(client, { names }) {
+    const denied = await guard(client, "view_accounts");
+    if (denied) return fail(denied);
+    const existing = new Set(getMockDb().catalog.map((e) => catalogNameKey(e.name)));
+    return { data: names.map(catalogNameKey).filter((key) => existing.has(key)), error: null };
+  },
+  async createCatalogExercises(client, { exercises, source }) {
+    const denied = await guard(client, "manage_exercises");
+    if (denied) return fail(denied);
+    const db = getMockDb();
+    const keys = new Set(db.catalog.map((e) => catalogNameKey(e.name)));
+    const created: string[] = [];
+    const duplicates: string[] = [];
+    for (const exercise of exercises) {
+      const key = catalogNameKey(exercise.name);
+      if (keys.has(key)) {
+        duplicates.push(exercise.name);
+        continue;
+      }
+      keys.add(key);
+      created.push(exercise.name);
+      db.catalog.push({ id: crypto.randomUUID(), name: exercise.name, muscleGroup: exercise.muscleGroup, equipment: exercise.equipment, createdAt: new Date().toISOString() });
+    }
+    if (created.length > 0) audit("staff_created_exercises", null, "Catálogo de exercícios", { created: created.length, skipped: duplicates.length, source });
+    return { data: { created, duplicates }, error: null };
+  },
+} satisfies ExerciseCatalogAdminApi;

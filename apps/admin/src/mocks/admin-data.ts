@@ -2,7 +2,7 @@
  * Dados FICTÍCIOS do painel (só desenvolvimento, ?estado=). Pessoas e equipe inventadas, como no
  * protótipo. Gerados sob demanda (nada roda no carregamento do módulo: o build descarta o mock).
  */
-import type { AdminAnnouncementSummary, AdminUserDetail, AnnouncementDraft, AuditEntry, StaffRow } from "@guf/api/admin";
+import type { AdminAnnouncementSummary, AdminUserDetail, AnnouncementDraft, AuditEntry, CatalogExercise, StaffRow } from "@guf/api/admin";
 import type { StaffRole } from "@guf/core";
 import type { DevAccess } from "@/shared/hooks/use-dev-admin-state";
 
@@ -25,6 +25,7 @@ export interface MockDb {
   announcements: MockAnnouncement[];
   staff: StaffRow[];
   audit: AuditEntry[];
+  catalog: CatalogExercise[];
 }
 
 export const MOCK_ME_ID = "00000000-0000-4000-8000-000000000001";
@@ -174,7 +175,45 @@ function seed(): MockDb {
     { id: 3, occurredAt: day(-3, 17), actorId: staff[1]?.userId ?? null, actorName: "Lucas Ferreira", action: "staff_changed_name", subjectId: people[1]?.userId ?? null, subjectLabel: "@marcos.v", details: { reason: "terms_violation", field: "name" } },
   ];
 
-  return { people, announcements, staff, audit };
+  return { people, announcements, staff, audit, catalog: seedCatalog() };
+}
+
+/** Uma amostra do catálogo do guf (o real tem mais exercícios). */
+function seedCatalog(): CatalogExercise[] {
+  const sample: Array<[string, CatalogExercise["muscleGroup"], CatalogExercise["equipment"]]> = [
+    ["Supino reto", "peito", "barra"],
+    ["Supino inclinado com halteres", "peito", "halter"],
+    ["Crucifixo na polia", "peito", "polia"],
+    ["Puxada frontal", "costas", "polia"],
+    ["Remada curvada", "costas", "barra"],
+    ["Barra fixa", "costas", "peso_corporal"],
+    ["Desenvolvimento com halteres", "ombros", "halter"],
+    ["Elevação lateral", "ombros", "halter"],
+    ["Rosca direta", "biceps", "barra"],
+    ["Rosca martelo", "biceps", "halter"],
+    ["Tríceps na polia", "triceps", "polia"],
+    ["Tríceps francês", "triceps", "halter"],
+    ["Rosca de punho", "antebraco", "halter"],
+    ["Agachamento livre", "quadriceps", "barra"],
+    ["Leg press 45°", "quadriceps", "maquina"],
+    ["Cadeira extensora", "quadriceps", "maquina"],
+    ["Mesa flexora", "posterior", "maquina"],
+    ["Stiff", "posterior", "barra"],
+    ["Elevação pélvica", "gluteos", "barra"],
+    ["Panturrilha em pé", "panturrilha", "maquina"],
+    ["Prancha", "abdomen", "peso_corporal"],
+    ["Abdominal na polia", "abdomen", "polia"],
+    ["Burpee", "corpo_inteiro", "peso_corporal"],
+    ["Esteira", "cardio", "maquina"],
+    ["Bicicleta ergométrica", "cardio", "maquina"],
+  ];
+  return sample.map(([name, muscleGroup, equipment], index) => ({
+    id: `00000000-0000-4000-9000-${String(index + 1).padStart(12, "0")}`,
+    name,
+    muscleGroup,
+    equipment,
+    createdAt: day(-120 + index),
+  }));
 }
 
 /** Banco fictício em memória (recarregar a página volta ao início). */

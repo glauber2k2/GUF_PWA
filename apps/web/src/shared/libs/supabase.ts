@@ -1,4 +1,5 @@
 import { createGufClient, type GufClient } from "@guf/api";
+import { reportAccountSuspension } from "@/store/global/account-suspension.store";
 
 let client: GufClient | null = null;
 
@@ -11,6 +12,7 @@ export function getSupabaseClient(): GufClient {
   client ??= createGufClient({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
     publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    onAccountSuspended: reportAccountSuspension,
   });
   return client;
 }

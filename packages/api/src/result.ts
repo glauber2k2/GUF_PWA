@@ -1,5 +1,6 @@
 /** Resultado e erros das funções de dados (todas seguem `{ data, error }`, como o supabase-js). */
-import { isPlanFeature, type PlanFeature } from "@guf/core";
+import { isPlanFeature, PRIVACY_CONTACT_EMAIL, type PlanFeature } from "@guf/core";
+import { ACCOUNT_SUSPENDED_DB_CODE } from "./account-suspension";
 
 export type ApiErrorCode =
   | "workout_in_progress"
@@ -45,10 +46,12 @@ export type ApiErrorCode =
   | "date_in_past"
   | "account_banned"
   | "account_without_email"
+  | "catalog_exercise_invalid"
   | "password_reset_rate_limited"
   | "password_reset_unavailable"
   | "mfa_code_invalid"
   | "invalid_credentials"
+  | "account_suspended"
   | "not_authenticated"
   | "network_error"
   | "unknown";
@@ -108,10 +111,12 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   date_in_past: "Escolha uma data e um horário no futuro.",
   account_banned: "Essa conta está suspensa: o link não funcionaria. Encerre a suspensão antes de redefinir a senha.",
   account_without_email: "Essa conta não tem e-mail para receber o link. A pessoa precisa entrar pelo login social.",
+  catalog_exercise_invalid: "Confira os exercícios: nome com 1 a 100 caracteres, grupo muscular e equipamento válidos, de 1 a 500 por vez.",
   password_reset_rate_limited: "Muitos e-mails de senha enviados em pouco tempo. Espere alguns minutos e tente de novo.",
   password_reset_unavailable: "A redefinição de senha ainda não está configurada no servidor (APP_URL). Fale com quem administra o guf.",
   invalid_credentials: "E-mail ou senha não conferem. Confira os dois campos e tente de novo.",
   mfa_code_invalid: "Código incorreto ou vencido. Digite o código que aparece agora no aplicativo.",
+  account_suspended: `Sua conta está suspensa pela equipe do guf. Para saber o motivo ou contestar, escreva para ${PRIVACY_CONTACT_EMAIL}.`,
   not_authenticated: "Sua sessão expirou. Entre de novo para continuar.",
   network_error: "Sem conexão. Verifique a internet e tente de novo.",
   unknown: "Não foi possível carregar agora. Tente de novo em instantes.",
@@ -153,6 +158,7 @@ const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
   GA016: "date_in_past",
   GA017: "account_banned",
   GA018: "account_without_email",
+  GA019: "catalog_exercise_invalid",
 };
 
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
@@ -168,6 +174,7 @@ const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
 export function toApiError(error: unknown): ApiError {
   if (error && typeof error === "object") {
     const { code, message, hint } = error as { code?: string; message?: string; hint?: string };
+    if (code === ACCOUNT_SUSPENDED_DB_CODE) return apiError("account_suspended"); // middleware guard_suspended_account
     if (code === "GL001") return planLimitError(hint); // gatilhos de limite do plano (projects, routines)
     if (code === "23505") return apiError("workout_in_progress"); // índice único: 1 treino em andamento
     if (code === "P0002") return apiError("workout_not_found"); // "Treino em andamento não encontrado"
