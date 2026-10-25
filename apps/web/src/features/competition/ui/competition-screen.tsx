@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+import type { CompetitionMetric } from "@guf/core";
 import { useRouter } from "next/navigation";
 import { ReceiptText, UserPlus, Users } from "lucide-react";
 import { AppHeader, EmptyState, Icon } from "@/shared/components/ds";
@@ -9,7 +9,10 @@ import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { METRICS } from "@/features/competition/constants/competition-labels";
 import { POINTS_STATEMENT_PATH } from "@/features/competition/constants/point-sources";
-import { useCompetitionView, type ReadyBoard } from "@/features/competition/hooks/use-competition-view";
+import { useCompetitionFilters } from "@/features/competition/hooks/use-competition-filters";
+import { useMetricFormat } from "@/features/competition/hooks/use-metric-format";
+import { useStandingsView, type StandingsView } from "@/features/competition/hooks/use-standings-view";
+import { RankingPagination } from "@/features/competition/components/ranking-pagination";
 import { CompetitionBoard, PeriodCaption } from "@/features/competition/components/competition-board";
 import { PositionCard } from "@/features/competition/components/position-card";
 import { DuelCard, Podium, RankingList } from "@/features/competition/components/competition-ranking";
@@ -18,27 +21,26 @@ import { TOUR_TARGETS } from "@/features/onboarding";
 
 const SEARCH_PEOPLE_PATH = "/buscar-pessoas";
 
-/** Pódio, corrida, ranking e duelo com o adversário escolhido (padrão: quem está logo à frente ou atrás). */
-function FullRanking({ board }: { board: ReadyBoard }) {
-  const [rivalChoice, setRivalChoice] = useState<string | null>(null);
-  const { ranking, me, metric, format } = board;
-  const meIndex = ranking.indexOf(me);
-  const fallbackRival = ranking[meIndex - 1] ?? ranking[meIndex + 1] ?? null;
-  const rival = ranking.find((c) => c.userId === rivalChoice && !c.isMe) ?? fallbackRival;
+/** Pódio, corrida, ranking paginado e duelo com o adversário escolhido (padrão: quem está logo à frente ou atrás). */
+function FullRanking({ view, metric }: { view: StandingsView; metric: CompetitionMetric }) {
+  const { unitLabel, format, formatVolume } = useMetricFormat(metric);
+  const { context, rival } = view;
+  if (!context) return null;
   const rivalId = rival?.userId ?? null;
 
   return (
     <>
-      <PositionCard ranking={ranking} metric={metric} unit={board.unitLabel} format={format} />
-      <Podium ranking={ranking} label={METRICS[metric].label} format={format} />
-      <RaceChart lines={board.lines} dates={board.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} onSelect={setRivalChoice} />
-      <RankingList ranking={ranking} rivalId={rivalId} unit={board.unitLabel} format={format} onSelect={setRivalChoice} />
+      <PositionCard context={context} metric={metric} unit={unitLabel} format={format} />
+      <Podium ranking={view.top} label={METRICS[metric].label} format={format} />
+      <RaceChart lines={view.race.lines} dates={view.race.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} onSelect={view.chooseRival} />
+      <RankingList ranking={view.page.items} total={view.page.total} rivalId={rivalId} unit={unitLabel} format={format} onSelect={view.chooseRival} />
+      <RankingPagination page={view.page.number} total={view.page.total} myPosition={context.me.position} isFetching={view.page.isFetching} onPage={view.goToPage} />
       {rival && (
         <DuelCard
-          me={me}
+          me={context.me}
           rival={rival}
-          formatVolume={board.formatVolume}
-          picker={{ candidates: ranking.filter((c) => !c.isMe), onPick: setRivalChoice }}
+          formatVolume={formatVolume}
+          picker={{ candidates: view.page.items.filter((c) => !c.isMe), onPick: view.chooseRival }}
         />
       )}
     </>
@@ -52,7 +54,8 @@ function FullRanking({ board }: { board: ReadyBoard }) {
 export function CompetitionScreen() {
   const scrolled = useScrolled();
   const router = useRouter();
-  const view = useCompetitionView();
+  const filters = useCompetitionFilters();
+  const view = useStandingsView(filters);
 
   return (
     <main className="flex flex-col px-4">
@@ -77,7 +80,7 @@ export function CompetitionScreen() {
       <header className="flex items-center justify-between gap-3 pt-5 pb-4">
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="m-0 text-[32px] leading-[38px] font-bold tracking-[-0.02em]">Competição</h1>
-          <PeriodCaption view={view} />
+          <PeriodCaption filters={filters} />
         </div>
         <span className="flex flex-none gap-2">
         <Link
@@ -99,7 +102,9 @@ export function CompetitionScreen() {
       </header>
 
       <CompetitionBoard
-        view={view}
+        filters={filters}
+        status={view.status}
+        isAlone={view.isAlone}
         empty={
           <EmptyState
             icon={Users}
@@ -110,7 +115,7 @@ export function CompetitionScreen() {
           />
         }
       >
-        {(board) => <FullRanking board={board} />}
+        <FullRanking view={view} metric={filters.metric} />
       </CompetitionBoard>
     </main>
   );

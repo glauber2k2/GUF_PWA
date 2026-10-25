@@ -1867,6 +1867,28 @@ export type Database = {
           week_start: string
         }[]
       }
+      competition_standings: {
+        Args: { p_from: string; p_metric: string; p_to: string }
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          fulfilled_weeks: number
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          position: number
+          previous_rank: number
+          rank: number
+          records: number
+          total_count: number
+          user_id: string
+          valid_sessions: number
+          value: number
+          volume_kg: number
+          workouts: number
+        }[]
+      }
       competition_visible_from: { Args: { p_from: string }; Returns: string }
       competition_week_scores: {
         Args: { p_to: string; p_user_id: string }
@@ -1977,6 +1999,92 @@ export type Database = {
           is_me: boolean
           name: string
           user_id: string
+        }[]
+      }
+      get_competition_series: {
+        Args: { p_from: string; p_to: string; p_user_ids: string[] }
+        Returns: Json
+      }
+      get_competition_standings: {
+        Args: {
+          p_from: string
+          p_limit?: number
+          p_metric: string
+          p_offset?: number
+          p_to: string
+        }
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          fulfilled_weeks: number
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          position: number
+          previous_rank: number
+          rank: number
+          records: number
+          total_count: number
+          user_id: string
+          valid_sessions: number
+          value: number
+          volume_kg: number
+          workouts: number
+        }[]
+      }
+      get_competition_standings_near_me: {
+        Args: {
+          p_from: string
+          p_metric: string
+          p_radius?: number
+          p_to: string
+        }
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          fulfilled_weeks: number
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          position: number
+          previous_rank: number
+          rank: number
+          records: number
+          total_count: number
+          user_id: string
+          valid_sessions: number
+          value: number
+          volume_kg: number
+          workouts: number
+        }[]
+      }
+      get_competition_standings_of: {
+        Args: {
+          p_from: string
+          p_metric: string
+          p_to: string
+          p_user_ids: string[]
+        }
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          fulfilled_weeks: number
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          position: number
+          previous_rank: number
+          rank: number
+          records: number
+          total_count: number
+          user_id: string
+          valid_sessions: number
+          value: number
+          volume_kg: number
+          workouts: number
         }[]
       }
       get_competition_weeks: {
