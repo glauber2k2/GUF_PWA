@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { Play, Plus, type LucideIcon } from "lucide-react";
 import { useSheetDrag } from "../hooks/use-sheet-drag";
 import { cn } from "../helpers/class-names";
+import { BOTTOM_BAR_PROPS } from "./bottom-bar";
 import { Icon } from "./brand";
 import { ScreenPortal } from "./portal";
 
@@ -70,6 +71,8 @@ export function BottomSheet({
       />
       <div
         ref={sheetRef}
+        // Barra do rodapé enquanto está na tela: a pilha de avisos sobe junto e fica acima da folha.
+        {...BOTTOM_BAR_PROPS}
         role="dialog"
         aria-modal={open || undefined}
         aria-label={title}

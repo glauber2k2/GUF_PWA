@@ -7,6 +7,7 @@ export * from "./progress-chart";
 export * from "./cards";
 export * from "./workout";
 export * from "./navigation";
+export * from "./bottom-bar";
 export * from "./overlays";
 export * from "./toast";
 export * from "./feedback";
