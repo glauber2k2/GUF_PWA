@@ -1484,12 +1484,20 @@ export type Database = {
           status: string
         }[]
       }
+      admin_delete_exercise: { Args: { p_id: string }; Returns: string }
       admin_delete_user: {
         Args: { p_note?: string; p_reason: string; p_user_id: string }
         Returns: undefined
       }
       admin_duplicate_announcement: { Args: { p_id: string }; Returns: string }
       admin_end_announcement: { Args: { p_id: string }; Returns: undefined }
+      admin_exercise_usage: {
+        Args: { p_id: string }
+        Returns: {
+          routines: number
+          workouts: number
+        }[]
+      }
       admin_existing_exercise_names: {
         Args: { p_names: string[] }
         Returns: string[]
@@ -1643,6 +1651,15 @@ export type Database = {
         Args: { p_note?: string; p_user_id: string }
         Returns: number
       }
+      admin_update_exercise: {
+        Args: {
+          p_equipment: string
+          p_id: string
+          p_muscle_group: string
+          p_name: string
+        }
+        Returns: undefined
+      }
       admin_update_handle: {
         Args: {
           p_handle: string
@@ -1774,6 +1791,24 @@ export type Database = {
       can_view_member_history: {
         Args: { p_owner: string; p_viewer: string }
         Returns: boolean
+      }
+      catalog_exercise_or_fail: {
+        Args: { p_id: string }
+        Returns: {
+          archived_at: string | null
+          created_at: string
+          equipment: string
+          id: string
+          muscle_group: string
+          name: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "exercises"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       chart_visible_from: { Args: never; Returns: string }
       chart_visible_from_of: { Args: { p_user_id: string }; Returns: string }
