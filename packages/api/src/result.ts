@@ -47,6 +47,9 @@ export type ApiErrorCode =
   | "account_banned"
   | "account_without_email"
   | "catalog_exercise_invalid"
+  | "catalog_exercise_not_found"
+  | "catalog_exercise_duplicate"
+  | "catalog_exercise_metric_locked"
   | "password_reset_rate_limited"
   | "password_reset_unavailable"
   | "mfa_code_invalid"
@@ -112,6 +115,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   account_banned: "Essa conta está suspensa: o link não funcionaria. Encerre a suspensão antes de redefinir a senha.",
   account_without_email: "Essa conta não tem e-mail para receber o link. A pessoa precisa entrar pelo login social.",
   catalog_exercise_invalid: "Confira os exercícios: nome com 1 a 100 caracteres, grupo muscular e equipamento válidos, de 1 a 500 por vez.",
+  catalog_exercise_not_found: "Esse exercício não está mais no catálogo (foi excluído ou arquivado). Atualize a lista.",
+  catalog_exercise_duplicate: "Já existe um exercício com esse nome no catálogo. Use outro nome.",
+  catalog_exercise_metric_locked: "Esse exercício já foi usado: não dá para trocar entre cardio e força (as séries guardam medidas diferentes). Cadastre um exercício novo.",
   password_reset_rate_limited: "Muitos e-mails de senha enviados em pouco tempo. Espere alguns minutos e tente de novo.",
   password_reset_unavailable: "A redefinição de senha ainda não está configurada no servidor (APP_URL). Fale com quem administra o guf.",
   invalid_credentials: "E-mail ou senha não conferem. Confira os dois campos e tente de novo.",
@@ -159,6 +165,9 @@ const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
   GA017: "account_banned",
   GA018: "account_without_email",
   GA019: "catalog_exercise_invalid",
+  GA020: "catalog_exercise_not_found",
+  GA021: "catalog_exercise_duplicate",
+  GA022: "catalog_exercise_metric_locked",
 };
 
 const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {

@@ -10,8 +10,10 @@ import {
   type AnnouncementFormat,
   type AnnouncementTone,
 } from "@guf/core";
-import { ANNOUNCEMENT_TONE_STYLES, cn, Icon, Switch, TextAreaField, TextField } from "@guf/ui";
+import { ANNOUNCEMENT_TONE_STYLES, cn, Icon, SelectField, Switch, TextAreaField, TextField } from "@guf/ui";
 import { FORMAT_ICONS } from "@/features/announcements/helpers/announcement-display";
+
+const DESTINATION_OPTIONS = ANNOUNCEMENT_DESTINATIONS.map((d) => ({ value: d.path, label: d.label }));
 
 interface ContentStepProps {
   draft: AnnouncementDraft;
@@ -134,20 +136,7 @@ export function ContentStep({ draft, onChange }: ContentStepProps) {
               onChange={(e) => onChange({ ctaLabel: e.target.value })}
               hint="Verbo curto, como “Experimentar”."
             />
-            <label className="flex flex-col gap-2">
-              <span className="text-[13px] font-semibold text-fg-secondary">Abre a tela</span>
-              <select
-                value={draft.ctaPath ?? "/"}
-                onChange={(e) => onChange({ ctaPath: e.target.value })}
-                className="h-12 cursor-pointer rounded-md border border-border-strong bg-surface-3 px-3.5 text-[15px] text-fg"
-              >
-                {ANNOUNCEMENT_DESTINATIONS.map((d) => (
-                  <option key={d.path} value={d.path}>
-                    {d.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <SelectField label="Abre a tela" value={draft.ctaPath ?? "/"} onChange={(ctaPath) => onChange({ ctaPath })} options={DESTINATION_OPTIONS} />
           </div>
         )}
       </div>

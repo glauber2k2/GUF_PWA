@@ -13,7 +13,7 @@ import {
   type StaffSessionApi,
   type StaffTeamApi,
 } from "@guf/api/admin";
-import { canStaff, catalogNameKey, normalizeHandle, type StaffPermission } from "@guf/core";
+import { canStaff, catalogNameKey, changesSetMetric, normalizeHandle, type StaffPermission } from "@guf/core";
 import { getAdminMockScenario, getMockDb, MOCK_ME_ID } from "@/mocks/admin-data";
 
 const LATENCY_MS = 350;
@@ -444,6 +444,13 @@ export const mockStaffTeamApi = {
   },
 } satisfies StaffTeamApi;
 
+/** Uso fictício e estável: os exercícios da amostra (ids terminados em número par) já foram usados. */
+function mockUsage(id: string) {
+  const seed = Number.parseInt(id.slice(-2), 16);
+  if (Number.isNaN(seed) || seed % 2 === 1) return { routines: 0, workouts: 0 };
+  return { routines: (seed % 5) + 1, workouts: (seed % 23) + 4 };
+}
+
 export const mockExerciseCatalogAdminApi = {
   async listCatalogExercises(client, filters) {
     const denied = await guard(client, "view_accounts");
@@ -482,5 +489,37 @@ export const mockExerciseCatalogAdminApi = {
     }
     if (created.length > 0) audit("staff_created_exercises", null, "Catálogo de exercícios", { created: created.length, skipped: duplicates.length, source });
     return { data: { created, duplicates }, error: null };
+  },
+  async getCatalogExerciseUsage(client, { id }) {
+    const denied = await guard(client, "view_accounts");
+    if (denied) return fail(denied);
+    const found = getMockDb().catalog.find((e) => e.id === id);
+    return found ? { data: mockUsage(found.id), error: null } : fail(apiError("catalog_exercise_not_found"));
+  },
+  async updateCatalogExercise(client, { id, exercise }) {
+    const denied = await guard(client, "manage_exercises");
+    if (denied) return fail(denied);
+    const db = getMockDb();
+    const found = db.catalog.find((e) => e.id === id);
+    if (!found) return fail(apiError("catalog_exercise_not_found"));
+    const name = exercise.name.trim();
+    if (name === found.name && exercise.muscleGroup === found.muscleGroup && exercise.equipment === found.equipment) return fail(apiError("nothing_changed"));
+    if (db.catalog.some((e) => e.id !== id && catalogNameKey(e.name) === catalogNameKey(name))) return fail(apiError("catalog_exercise_duplicate"));
+    const usage = mockUsage(id);
+    if (usage.routines + usage.workouts > 0 && changesSetMetric(found.muscleGroup, exercise.muscleGroup)) return fail(apiError("catalog_exercise_metric_locked"));
+    Object.assign(found, { name, muscleGroup: exercise.muscleGroup, equipment: exercise.equipment });
+    audit("staff_updated_exercise", null, "Catálogo de exercícios", { exercise_id: id });
+    return { data: null, error: null };
+  },
+  async deleteCatalogExercise(client, { id }) {
+    const denied = await guard(client, "manage_exercises");
+    if (denied) return fail(denied);
+    const db = getMockDb();
+    if (!db.catalog.some((e) => e.id === id)) return fail(apiError("catalog_exercise_not_found"));
+    const usage = mockUsage(id);
+    const result = usage.routines + usage.workouts > 0 ? "archived" : "deleted";
+    db.catalog = db.catalog.filter((e) => e.id !== id);
+    audit("staff_deleted_exercise", null, "Catálogo de exercícios", { exercise_id: id, result });
+    return { data: result, error: null };
   },
 } satisfies ExerciseCatalogAdminApi;
