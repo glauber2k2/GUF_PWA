@@ -15,6 +15,7 @@ export type PlanFeature =
   | "routines_per_project"
   | "guf_ai_daily_messages"
   | "chart_months"
+  | "measurement_chart_months"
   | "competition_full_history";
 
 export const PLAN_FEATURES: readonly PlanFeature[] = [
@@ -22,6 +23,7 @@ export const PLAN_FEATURES: readonly PlanFeature[] = [
   "routines_per_project",
   "guf_ai_daily_messages",
   "chart_months",
+  "measurement_chart_months",
   "competition_full_history",
 ];
 
@@ -100,6 +102,16 @@ export function isDateInChartWindow(entitlements: Entitlements | null, isoDate: 
   return start === null || isoDate >= toLocalISODate(start);
 }
 
+/**
+ * Um período de N meses (contando de hoje para trás) cabe no limite da funcionalidade?
+ * @param months tamanho do período; null = "todo o período" (só cabe sem limite).
+ */
+export function fitsMonthLimit(entitlements: Entitlements | null, feature: PlanFeature, months: number | null): boolean {
+  const limit = featureLimit(entitlements, feature);
+  if (limit === null) return true;
+  return months !== null && months <= limit;
+}
+
 export interface UpsellCopy {
   title: string;
   message: string;
@@ -134,6 +146,11 @@ export function planUpsellCopy(feature: PlanFeature, entitlements: Entitlements 
         title: "Toda a sua evolução nos gráficos",
         message: `${current} os gráficos mostram ${chartWindowText(limit)}. Com o Pro, eles mostram sua evolução desde o primeiro treino.`,
       };
+    case "measurement_chart_months":
+      return {
+        title: "Toda a evolução das suas medidas",
+        message: `${current} os gráficos das medidas mostram ${recentMonthsText(limit)}. Com o Pro, você vê sua evolução desde a primeira medição.`,
+      };
     case "competition_full_history":
       return {
         title: "A competição completa",
@@ -159,12 +176,20 @@ function chartWindowText(months: number | null): string {
   return `os últimos ${formatNumber(months, 0)} meses`;
 }
 
+/** "os últimos 3 meses" · "o último mês" · "todo o período" (janela contada de hoje para trás). */
+function recentMonthsText(months: number | null): string {
+  if (months === null) return "todo o período";
+  if (months <= 1) return "o último mês";
+  return `os últimos ${formatNumber(months, 0)} meses`;
+}
+
 /** Nome da funcionalidade na comparação de planos. */
 export const PLAN_FEATURE_LABELS: Record<PlanFeature, string> = {
   custom_projects: "Projetos além do Favoritos",
   routines_per_project: "Rotinas por projeto",
   guf_ai_daily_messages: "Perguntas ao GUF AI por dia",
   chart_months: "Período dos gráficos",
+  measurement_chart_months: "Período dos gráficos de medidas",
   competition_full_history: "Competição além do mês atual",
 };
 
@@ -173,6 +198,7 @@ export function formatFeatureAccess(feature: PlanFeature, access: FeatureAccess)
   if (!access.enabled) return "Não incluído";
   if (access.kind === "flag") return "Incluído";
   if (feature === "chart_months") return capitalize(chartWindowText(access.limit));
+  if (feature === "measurement_chart_months") return capitalize(recentMonthsText(access.limit));
   if (access.limit === null) return "Sem limite";
   return `Até ${formatNumber(access.limit, 0)}`;
 }
