@@ -7,14 +7,12 @@ export interface AdminNavItem {
   path: string;
   /** Sem a permissão, o item nem aparece (a tela também confere). */
   permission?: StaffPermission;
-  /** Atalho "/" no computador (busca de pessoas). */
-  hasShortcut?: boolean;
 }
 
-/** Menu do painel. Área nova = item novo aqui. */
+/** Menu do painel. Área nova = item novo aqui (o atalho numérico segue a posição). */
 export const ADMIN_NAV: AdminNavItem[] = [
   { label: "Início", icon: House, path: "/" },
-  { label: "Pessoas", icon: Users, path: "/pessoas", hasShortcut: true },
+  { label: "Pessoas", icon: Users, path: "/pessoas" },
   { label: "Comunicados", icon: Megaphone, path: "/comunicados" },
   { label: "Exercícios", icon: Dumbbell, path: "/exercicios" },
   { label: "Auditoria", icon: ScrollText, path: "/auditoria", permission: "view_audit" },

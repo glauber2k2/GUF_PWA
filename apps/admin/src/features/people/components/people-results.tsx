@@ -7,6 +7,8 @@ import { Avatar, cn, Icon, Tag } from "@guf/ui";
 import { AccountActionsMenu } from "@/features/people/components/account-actions-menu";
 import type { AccountActionKind } from "@/features/people/helpers/account-actions";
 import { displayName, formatDate } from "@/features/people/helpers/people";
+import { personRowProps } from "@/features/people/hooks/use-people-shortcuts";
+import { LIST_ITEM_FOCUS } from "@/shared/helpers/list-navigation";
 import type { Device } from "@/shared/hooks/use-device";
 
 type SortKey = "name" | "plan" | "created";
@@ -187,8 +189,14 @@ export function PeopleResults({ people, device, onOpen, selectedIds, isSelection
           {sorted.map((p) => (
             <tr
               key={p.userId}
+              {...personRowProps(p.userId)}
+              aria-label={displayName(p.name, p.handle)}
               onClick={() => onOpen(p.userId)}
-              className={cn("cursor-pointer border-b border-border last:border-b-0 hover:bg-surface-elevated", isSelected(p.userId) && "bg-accent/8")}
+              className={cn(
+                "cursor-pointer border-b border-border last:border-b-0 hover:bg-surface-elevated",
+                LIST_ITEM_FOCUS,
+                isSelected(p.userId) && "bg-accent/8",
+              )}
             >
               {onToggle && (
                 <td className="pl-4">

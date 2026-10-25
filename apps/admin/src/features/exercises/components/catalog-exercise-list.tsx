@@ -6,10 +6,10 @@ import { equipmentLabel, formatStaffDateTime, muscleGroupLabel } from "@guf/core
 import { Tag } from "@guf/ui";
 import { catalogRowProps } from "@/features/exercises/hooks/use-catalog-shortcuts";
 import { ActionMenu } from "@/shared/components/action-menu";
+import { LIST_ITEM_FOCUS } from "@/shared/helpers/list-navigation";
 import { useDevice } from "@/shared/hooks/use-device";
 
 const HEAD_CELL = "border-b border-border px-4 text-left font-semibold";
-const ROW_FOCUS = "outline-none focus-visible:bg-surface-elevated focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-inset";
 
 interface CatalogExerciseListProps {
   exercises: CatalogExercise[];
@@ -83,7 +83,7 @@ export function CatalogExerciseList({ exercises, actions }: CatalogExerciseListP
         </thead>
         <tbody>
           {exercises.map((exercise) => (
-            <tr key={exercise.id} {...rowProps(exercise)} className={`border-b border-border last:border-b-0 ${ROW_FOCUS}`}>
+            <tr key={exercise.id} {...rowProps(exercise)} className={`border-b border-border last:border-b-0 ${LIST_ITEM_FOCUS}`}>
               <td className="px-4 py-3 font-semibold">{exercise.name}</td>
               <td className="px-4 py-3 whitespace-nowrap text-fg-secondary">{muscleGroupLabel(exercise.muscleGroup)}</td>
               <td className="px-4 py-3 whitespace-nowrap text-fg-secondary">{equipmentLabel(exercise.equipment)}</td>

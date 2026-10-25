@@ -19,7 +19,7 @@ interface PodiumPlaceProps {
 
 /** Um lugar do pódio: foto, nome, valor e o degrau, com o destaque do tom (podiumTone). */
 function PodiumPlace({ competitor: c, isCenter, heightClass, format }: PodiumPlaceProps) {
-  const tone = PODIUM_TONE_STYLES[podiumTone(c.rank, c.isMe)];
+  const tone = PODIUM_TONE_STYLES[podiumTone(c.isMe)];
   return (
     <div className="flex min-w-0 flex-col items-center gap-2">
       <div className="relative grid place-items-center pt-[18px]">
