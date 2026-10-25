@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import type { ApiError } from "@guf/api";
-import { canUseFeature, hasRoomFor, isDateInChartWindow, type PlanFeature } from "@guf/core";
+import { canUseFeature, fitsMonthLimit, hasRoomFor, isDateInChartWindow, type PlanFeature } from "@guf/core";
 import { usePlanGateContext } from "@/features/plans/providers/plan-gate-provider";
 
 /**
@@ -44,6 +44,16 @@ export function usePlanGate() {
     [entitlements, showUpsell],
   );
 
+  /** Um período de N meses (null = "tudo") cabe no limite da funcionalidade? Senão, mostra a tela do Pro. */
+  const allowMonths = useCallback(
+    (feature: PlanFeature, months: number | null): boolean => {
+      if (fitsMonthLimit(entitlements, feature, months)) return true;
+      showUpsell(feature);
+      return false;
+    },
+    [entitlements, showUpsell],
+  );
+
   /** Erro `plan_limit` da API → tela do Pro. Devolve true quando tratou o erro. */
   const handlePlanError = useCallback(
     (error: ApiError | null | undefined, fallback: PlanFeature): boolean => {
@@ -60,12 +70,15 @@ export function usePlanGate() {
       isFeatureEnabled: (feature: PlanFeature) => canUseFeature(entitlements, feature),
       /** Só consulta (sem abrir a tela do Pro): para escolher o período padrão e corrigir links antigos. */
       isChartFromVisible: (isoDate: string, today: Date) => isDateInChartWindow(entitlements, isoDate, today),
+      /** Só consulta: o período de N meses cabe no plano (sem abrir a tela do Pro). */
+      isWithinMonths: (feature: PlanFeature, months: number | null) => fitsMonthLimit(entitlements, feature, months),
       allowFeature,
       allowAnother,
       allowChartFrom,
+      allowMonths,
       handlePlanError,
       showUpsell,
     }),
-    [entitlements, allowFeature, allowAnother, allowChartFrom, handlePlanError, showUpsell],
+    [entitlements, allowFeature, allowAnother, allowChartFrom, allowMonths, handlePlanError, showUpsell],
   );
 }

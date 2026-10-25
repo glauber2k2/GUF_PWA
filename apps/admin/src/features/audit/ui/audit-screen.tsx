@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState } from "react";
 import { ArrowDown, ChevronDown, ChevronUp, ScrollText } from "lucide-react";
 import type { AuditEntry } from "@guf/api/admin";
 import { auditActionLabel, AUDIT_ACTIONS, formatStaffDateTime } from "@guf/core";
-import { Banner, Button, EmptyState, Icon, Skeleton } from "@guf/ui";
+import { Banner, Button, EmptyState, Icon, SelectField, Skeleton, TextField } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { useAuditLog } from "@/features/audit/api/use-audit";
 import { auditDetail, auditIcon } from "@/features/audit/helpers/audit-display";
@@ -21,7 +21,7 @@ const PERIODS = [
   { value: "", label: "Tudo" },
 ];
 
-const SELECT = "h-11 cursor-pointer rounded-md border border-border-strong bg-surface-3 px-3.5 text-fg";
+const ACTION_OPTIONS = [{ value: "", label: "Todas" }, ...Object.entries(AUDIT_ACTIONS).map(([value, label]) => ({ value, label }))];
 
 function daysAgoIso(days: string): string | undefined {
   if (!days) return undefined;
@@ -76,37 +76,9 @@ function AuditLog() {
         <p className="m-0 text-fg-secondary">Tudo o que a equipe viu ou alterou. Os registros não podem ser apagados.</p>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] items-end gap-3">
-        <label className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-fg-secondary">Pessoa</span>
-          <input
-            type="search"
-            placeholder="@, nome ou id"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            className="h-11 rounded-md border border-border-strong bg-surface-3 px-3.5 text-fg outline-none focus:border-focus focus:shadow-focus"
-          />
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-fg-secondary">Ação</span>
-          <select value={action} onChange={(e) => setAction(e.target.value)} className={SELECT}>
-            <option value="">Todas</option>
-            {Object.entries(AUDIT_ACTIONS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex flex-col gap-2">
-          <span className="text-[13px] font-semibold text-fg-secondary">Período</span>
-          <select value={period} onChange={(e) => setPeriod(e.target.value)} className={SELECT}>
-            {PERIODS.map((p) => (
-              <option key={p.label} value={p.value}>
-                {p.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <TextField label="Pessoa" type="search" placeholder="@, nome ou id" value={subject} onChange={(e) => setSubject(e.target.value)} />
+        <SelectField label="Ação" value={action} onChange={setAction} options={ACTION_OPTIONS} />
+        <SelectField label="Período" value={period} onChange={setPeriod} options={PERIODS} />
       </div>
 
       {dev.forceLoading || audit.isPending ? (

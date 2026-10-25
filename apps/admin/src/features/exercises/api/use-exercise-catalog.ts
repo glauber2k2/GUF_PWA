@@ -1,13 +1,15 @@
 "use client";
 
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { ApiError } from "@guf/api";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { ApiError, ApiResult } from "@guf/api";
 import {
   CATALOG_PAGE_SIZE,
   type CatalogCreateResult,
+  type CatalogDeleteResult,
   type CatalogExerciseFilters,
   type CatalogExercisePage,
   type CatalogExerciseSource,
+  type CatalogExerciseUsage,
 } from "@guf/api/admin";
 import type { CatalogExerciseInput } from "@guf/schemas";
 import { useAdminApi } from "@/shared/libs/admin-api";
@@ -44,12 +46,12 @@ export function useFindExistingCatalogNames() {
   });
 }
 
-export function useCreateCatalogExercises() {
-  const { apis } = useAdminApi();
+/** Gravação no catálogo: ao dar certo, a lista e a auditoria recarregam. */
+function useCatalogMutation<TInput, TResult>(run: (input: TInput) => Promise<ApiResult<TResult>>) {
   const queryClient = useQueryClient();
-  return useMutation<CatalogCreateResult, ApiError, { exercises: CatalogExerciseInput[]; source: CatalogExerciseSource }>({
+  return useMutation<TResult, ApiError, TInput>({
     mutationFn: async (input) => {
-      const { data, error } = await apis.exercises.createCatalogExercises(getSupabaseClient(), input);
+      const { data, error } = await run(input);
       if (error) throw error;
       return data;
     },
@@ -58,5 +60,35 @@ export function useCreateCatalogExercises() {
         queryClient.invalidateQueries({ queryKey: [EXERCISE_CATALOG_KEY] }),
         queryClient.invalidateQueries({ queryKey: [AUDIT_KEY] }),
       ]),
+  });
+}
+
+export function useCreateCatalogExercises() {
+  const { apis } = useAdminApi();
+  return useCatalogMutation((input: { exercises: CatalogExerciseInput[]; source: CatalogExerciseSource }): Promise<ApiResult<CatalogCreateResult>> =>
+    apis.exercises.createCatalogExercises(getSupabaseClient(), input),
+  );
+}
+
+export function useUpdateCatalogExercise() {
+  const { apis } = useAdminApi();
+  return useCatalogMutation((input: { id: string; exercise: CatalogExerciseInput }) => apis.exercises.updateCatalogExercise(getSupabaseClient(), input));
+}
+
+export function useDeleteCatalogExercise() {
+  const { apis } = useAdminApi();
+  return useCatalogMutation((id: string): Promise<ApiResult<CatalogDeleteResult>> => apis.exercises.deleteCatalogExercise(getSupabaseClient(), { id }));
+}
+
+/** Em quantas rotinas e treinos o exercício aparece (decide se excluir apaga ou arquiva). */
+export function useCatalogExerciseUsage(id: string) {
+  const { apis, mockKey } = useAdminApi();
+  return useQuery<CatalogExerciseUsage, ApiError>({
+    queryKey: [EXERCISE_CATALOG_KEY, "usage", id, mockKey],
+    queryFn: async () => {
+      const { data, error } = await apis.exercises.getCatalogExerciseUsage(getSupabaseClient(), { id });
+      if (error) throw error;
+      return data;
+    },
   });
 }

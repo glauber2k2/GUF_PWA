@@ -258,3 +258,11 @@ function rowIssue(row: CatalogImportRow, key: string, existingKeys: ReadonlySet<
   if (seen.has(key)) return "repeated_in_file";
   return null;
 }
+
+/**
+ * Trocar entre cardio e força muda o que as séries medem (distância e tempo × carga e repetições):
+ * exercício já usado não pode (o banco recusa com GA022).
+ */
+export function changesSetMetric(from: MuscleGroupCode, to: MuscleGroupCode): boolean {
+  return (from === "cardio") !== (to === "cardio");
+}

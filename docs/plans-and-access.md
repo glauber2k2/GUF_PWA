@@ -63,6 +63,7 @@ só o dono (RLS). Escrita pelo app: nenhuma.
 | `routines_per_project` (rotinas ativas por projeto) | limit | 5 | sem limite |
 | `guf_ai_daily_messages` (perguntas ao GUF AI em 24 h) | limit | 3 | 40 |
 | `chart_months` (meses que os gráficos mostram, contando o atual) | limit | 2 | sem limite |
+| `measurement_chart_months` (meses que os gráficos de medidas corporais mostram, de hoje para trás; aplicado no app: 3M · 6M · Tudo, os registros ficam completos) | limit | 3 | sem limite |
 | `competition_full_history` (competição além do mês atual) | flag | não | sim |
 
 ## Funções do banco

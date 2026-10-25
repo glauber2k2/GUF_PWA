@@ -31,6 +31,7 @@ function buildCatalog(): CatalogPlan[] {
     routines_per_project: limit(5),
     guf_ai_daily_messages: limit(3),
     chart_months: limit(2),
+    measurement_chart_months: limit(3),
     competition_full_history: flag(false),
   };
   const pro: Record<PlanFeature, FeatureAccess> = {
@@ -38,6 +39,7 @@ function buildCatalog(): CatalogPlan[] {
     routines_per_project: limit(null),
     guf_ai_daily_messages: limit(40),
     chart_months: limit(null),
+    measurement_chart_months: limit(null),
     competition_full_history: flag(true),
   };
   return [

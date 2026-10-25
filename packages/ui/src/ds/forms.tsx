@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState, type ComponentPropsWithRef, type InputHTMLAttributes, type ReactNode } from "react";
-import { Check, CircleAlert, Eye, EyeOff, Search, type LucideIcon } from "lucide-react";
+import { Check, ChevronDown, CircleAlert, Eye, EyeOff, Search, type LucideIcon } from "lucide-react";
 import { PASSWORD_STRENGTH_LABELS, passwordStrength, type PasswordStrength } from "@guf/core";
 import { cn } from "../helpers/class-names";
 import { Icon } from "./brand";
@@ -197,6 +197,85 @@ export function PasswordField({
           </span>
         </>
       )}
+    </div>
+  );
+}
+
+export interface SelectFieldOption<T extends string = string> {
+  value: T;
+  label: string;
+}
+
+export interface SelectFieldProps<T extends string = string> extends Omit<ComponentPropsWithRef<"select">, "size" | "value" | "onChange"> {
+  label: string;
+  options: ReadonlyArray<SelectFieldOption<T>>;
+  /** `null` mostra o `placeholder` (ainda sem escolha). */
+  value: T | null;
+  onChange: (value: T) => void;
+  placeholder?: string;
+  error?: string;
+  hint?: string;
+  /** Rótulo só para leitor de tela (ex.: linhas de uma tabela). */
+  hideLabel?: boolean;
+  size?: FieldSize;
+}
+
+/**
+ * Lista de opções com o visual do TextField: rótulo acima, erro com ícone, foco com halo. A seta é
+ * desenhada pelo design system (a nativa de cada navegador ficava colada na borda).
+ */
+export function SelectField<T extends string = string>({
+  label,
+  options,
+  value,
+  onChange,
+  placeholder = "Escolha…",
+  error,
+  hint,
+  hideLabel = false,
+  size = "md",
+  id,
+  className,
+  ...rest
+}: SelectFieldProps<T>) {
+  const autoId = useId();
+  const selectId = id ?? autoId;
+  const messageId = `${selectId}-msg`;
+  return (
+    <div className={cn("grid min-w-0 gap-1.5", className)}>
+      <label htmlFor={selectId} className={cn(FIELD_LABEL, hideLabel && "sr-only")}>
+        {label}
+      </label>
+      <div className="relative">
+        <select
+          id={selectId}
+          value={value ?? ""}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={(error || hint) && !hideLabel ? messageId : undefined}
+          onChange={(event) => onChange(event.target.value as T)}
+          className={cn(FIELD_INPUT, FIELD_HEIGHT[size], "cursor-pointer appearance-none truncate pr-10", error ? FIELD_BORDER_ERROR : FIELD_BORDER_OK)}
+          {...rest}
+        >
+          {value === null && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <Icon icon={ChevronDown} size={18} className="pointer-events-none absolute top-1/2 right-3.5 -translate-y-1/2 text-fg-muted" />
+      </div>
+      {!hideLabel && error ? (
+        <FieldError id={messageId}>{error}</FieldError>
+      ) : !hideLabel && hint ? (
+        <span id={messageId} className="text-xs text-fg-muted">
+          {hint}
+        </span>
+      ) : null}
     </div>
   );
 }
