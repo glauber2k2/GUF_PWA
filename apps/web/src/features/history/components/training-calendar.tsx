@@ -98,7 +98,8 @@ export function TrainingCalendar({
         <IconButton icon={ChevronRight} label="Próximo mês" variant="ghost" disabled={!canGoForward} onClick={() => go(1)} />
       </div>
 
-      <div onPointerDown={onPointerDown} onPointerUp={onPointerUp} className="touch-pan-y overflow-hidden">
+      {/* overflow-hidden corta a troca de mês; a folga de 4 px (desfeita pela margem negativa) deixa inteiro o anel do "hoje" nas bordas. */}
+      <div onPointerDown={onPointerDown} onPointerUp={onPointerUp} className="-mx-1 -mb-1 touch-pan-y overflow-hidden px-1 pb-1">
         <div
           key={monthName}
           className={cn(
