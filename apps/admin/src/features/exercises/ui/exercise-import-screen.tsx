@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { Banner, Button } from "@guf/ui";
@@ -15,6 +15,8 @@ import { MobileActionBar } from "@/shared/components/mobile-action-bar";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useToast } from "@/shared/libs/toast-provider";
+import { PRIMARY_ACTION_PROPS } from "@/shared/helpers/form-focus";
+import { useFormKeyboard } from "@/shared/hooks/use-form-keyboard";
 
 function exercisesCountLabel(count: number): string {
   return count === 1 ? "1 exercício" : `${count} exercícios`;
@@ -44,40 +46,46 @@ function ExerciseImport() {
       router.push(withDevState(EXERCISES_PATH));
     });
 
+  // Teclado: na revisão, Enter anda pelos campos de cada linha e, no último, abre a confirmação.
+  const pageRef = useRef<HTMLDivElement>(null);
+  useFormKeyboard(pageRef, { focusKey: fileName ?? "upload", enabled: Boolean(fileName) });
+
   const submitButton = (
-    <Button icon={Check} disabled={!canSubmit} onClick={() => setIsConfirming(true)}>
+    <Button icon={Check} disabled={!canSubmit} onClick={() => setIsConfirming(true)} {...PRIMARY_ACTION_PROPS}>
       {submitLabel}
     </Button>
   );
 
   return (
     <PageBody wide>
-      <div className="flex flex-col gap-1">
-        <PageTitle actions={fileName ? submitButton : undefined}>Importar exercícios</PageTitle>
-        <p className="m-0 text-fg-secondary">
-          {fileName
-            ? "Confira a conversão. Nada foi cadastrado ainda: ajuste o que for preciso e confirme."
-            : "Envie uma lista de exercícios. O arquivo é lido no seu navegador e só entra no catálogo depois da sua confirmação."}
-        </p>
-      </div>
+      <div ref={pageRef} className="contents">
+        <div className="flex flex-col gap-1">
+          <PageTitle actions={fileName ? submitButton : undefined}>Importar exercícios</PageTitle>
+          <p className="m-0 text-fg-secondary">
+            {fileName
+              ? "Confira a conversão. Nada foi cadastrado ainda: ajuste o que for preciso e confirme."
+              : "Envie uma lista de exercícios. O arquivo é lido no seu navegador e só entra no catálogo depois da sua confirmação."}
+          </p>
+        </div>
 
-      {fileName ? (
-        <ImportReviewStep
-          fileName={fileName}
-          rows={importer.rows}
-          issues={importer.issues}
-          counts={counts}
-          isCheckingExisting={importer.isCheckingExisting}
-          checkError={importer.checkError}
-          onRetryCheck={importer.retryCheck}
-          onChange={importer.updateRow}
-          onRemove={importer.removeRow}
-          onRemoveSkipped={importer.removeSkipped}
-          onChangeFile={importer.reset}
-        />
-      ) : (
-        <ImportUploadStep isReading={importer.isReading} error={importer.fileError} onFile={(file) => void importer.readFile(file)} />
-      )}
+        {fileName ? (
+          <ImportReviewStep
+            fileName={fileName}
+            rows={importer.rows}
+            issues={importer.issues}
+            counts={counts}
+            isCheckingExisting={importer.isCheckingExisting}
+            checkError={importer.checkError}
+            onRetryCheck={importer.retryCheck}
+            onChange={importer.updateRow}
+            onRemove={importer.removeRow}
+            onRemoveSkipped={importer.removeSkipped}
+            onChangeFile={importer.reset}
+          />
+        ) : (
+          <ImportUploadStep isReading={importer.isReading} error={importer.fileError} onFile={(file) => void importer.readFile(file)} />
+        )}
+      </div>
 
       {fileName && (
         <MobileActionBar>

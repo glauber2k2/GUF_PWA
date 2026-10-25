@@ -12,9 +12,17 @@ import { DisableDialog, InviteDialog, RoleDialog } from "@/features/team/compone
 import { AdminOnly } from "@/shared/components/admin-only";
 import { ROLE_ICONS } from "@/shared/components/badges";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
+import { ScreenShortcutLegend } from "@/shared/components/screen-shortcut-legend";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { useDevice } from "@/shared/hooks/use-device";
 import { useToast } from "@/shared/libs/toast-provider";
+import { LIST_ITEM_FOCUS, listItemProps } from "@/shared/helpers/list-navigation";
+import { listNavigationHint, shortcutHint, SHORTCUTS } from "@/shared/helpers/shortcuts";
+import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
+import { useListShortcuts } from "@/shared/hooks/use-list-shortcuts";
+import { useScreenShortcutHints } from "@/shared/libs/shortcut-hints";
+
+const TEAM_LIST = "team";
 
 type TeamDialog = { kind: "invite" } | { kind: "role"; member: StaffRow } | { kind: "disable"; member: StaffRow } | null;
 
@@ -57,6 +65,20 @@ function Team() {
   const [dialog, setDialog] = useState<TeamDialog>(null);
   const done = (message: string) => toast(message, { tone: "success" });
   const members = team.data ?? [];
+  const openInvite = () => setDialog({ kind: "invite" });
+  // Ações por teclado só em outros colaboradores (a própria conta não muda pelo painel).
+  const onOther = (kind: "role" | "disable") => (userId: string) => {
+    const member = members.find((m) => m.userId === userId && !m.isMe);
+    if (member) setDialog({ kind, member });
+  };
+  const hasKeyboard = device !== "mobile";
+  useKeyboardShortcuts([{ keys: SHORTCUTS.create.keys, onTrigger: openInvite }], hasKeyboard);
+  useListShortcuts(TEAM_LIST, { onOpen: onOther("role"), onEdit: onOther("role"), onRemove: onOther("disable") }, hasKeyboard);
+  useScreenShortcutHints(
+    hasKeyboard
+      ? [shortcutHint("create", "convidar colaborador"), listNavigationHint(), shortcutHint("edit", "mudar o papel"), shortcutHint("remove", "desativar ou reativar")]
+      : [],
+  );
 
   const menu = (member: StaffRow) =>
     member.isMe ? null : (
@@ -67,13 +89,14 @@ function Team() {
     <PageBody wide>
       <PageTitle
         actions={
-          <Button icon={UserPlus} onClick={() => setDialog({ kind: "invite" })}>
+          <Button icon={UserPlus} onClick={openInvite}>
             Convidar
           </Button>
         }
       >
         Equipe
       </PageTitle>
+      <ScreenShortcutLegend />
       {team.isPending ? (
         <div aria-busy="true" className="flex flex-col gap-2">
           {[0, 1, 2, 3].map((i) => (
@@ -129,7 +152,12 @@ function Team() {
             </thead>
             <tbody>
               {members.map((member) => (
-                <tr key={member.userId} className={cn("border-b border-border last:border-b-0", member.status === "disabled" && "opacity-60")}>
+                <tr
+                  key={member.userId}
+                  {...listItemProps(TEAM_LIST, member.userId)}
+                  aria-label={member.displayName}
+                  className={cn("border-b border-border last:border-b-0", LIST_ITEM_FOCUS, member.status === "disabled" && "opacity-60")}
+                >
                   <td className="px-4 py-2.5">
                     <span className="flex items-center gap-3">
                       <Avatar name={member.displayName} size="sm" />
@@ -161,7 +189,7 @@ function Team() {
       )}
 
       <MobileActionBar>
-        <Button size="tall" icon={UserPlus} fullWidth onClick={() => setDialog({ kind: "invite" })}>
+        <Button size="tall" icon={UserPlus} fullWidth onClick={openInvite}>
           Convidar
         </Button>
       </MobileActionBar>

@@ -23,7 +23,10 @@ import { UnlinkDialog } from "@/features/people/components/unlink-dialog";
 import { ACCOUNT_ACTIONS, BULK_ACTIONS, type AccountActionKind, type AccountActionOutcome, type AccountTarget } from "@/features/people/helpers/account-actions";
 import { peoplePath, type EditField } from "@/features/people/helpers/people";
 import { toAccountTarget, usePeopleSelection } from "@/features/people/hooks/use-people-selection";
+import { peopleSearchKeyDown, usePeopleShortcuts } from "@/features/people/hooks/use-people-shortcuts";
+import { useScreenShortcutHints } from "@/shared/libs/shortcut-hints";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
+import { ScreenShortcutLegend } from "@/shared/components/screen-shortcut-legend";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useDevice } from "@/shared/hooks/use-device";
@@ -104,6 +107,23 @@ export function PeopleScreen() {
   const actionFor = (person: AdminUserSummary, action: AccountActionKind) => startAction(action, [toAccountTarget(person)]);
   const announceTo = (userIds: string[]) => router.push(editorForPeoplePath(userIds));
 
+  const hasKeyboard = device !== "mobile";
+  const toggleById = (userId: string) => {
+    const found = listed.find((p) => p.userId === userId);
+    if (found) selection.toggle(found);
+  };
+  const shortcutHints = usePeopleShortcuts(
+    {
+      onOpen: open,
+      onToggle: canSelect && !detailOpen ? toggleById : undefined,
+      onCloseDetail: detailOpen ? closeDetail : undefined,
+      onChangePlan: detailOpen && person.data && can("change_plan") ? () => setDialog({ kind: "edit", field: "plan" }) : undefined,
+      onEditHandle: detailOpen && person.data && can("edit_profile") ? () => setDialog({ kind: "edit", field: "handle" }) : undefined,
+    },
+    hasKeyboard,
+  );
+  useScreenShortcutHints(hasKeyboard ? shortcutHints : []);
+
   const afterAction = (action: AccountActionKind, outcome: AccountActionOutcome, message: string) => {
     toast(message, { tone: "success" });
     const doneIds = outcome.succeeded.map((t) => t.userId);
@@ -138,6 +158,7 @@ export function PeopleScreen() {
                   spellCheck={false}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={hasKeyboard ? peopleSearchKeyDown : undefined}
                   placeholder="@marina, Marina Costa, marina@…"
                   className="h-14 w-full rounded-[14px] border-[1.5px] border-border-strong bg-surface-3 px-12 text-[17px] text-fg outline-none placeholder:text-fg-muted focus:border-focus focus:shadow-focus"
                 />
@@ -146,6 +167,8 @@ export function PeopleScreen() {
                 )}
               </div>
             </div>
+
+            {!detailOpen && <ScreenShortcutLegend />}
 
             {search.isError && !isLoading ? (
               <Banner tone="danger" title="Não foi possível buscar." actionLabel="Tentar de novo" onAction={() => void search.refetch()}>

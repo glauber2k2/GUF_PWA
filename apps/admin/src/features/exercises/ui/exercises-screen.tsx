@@ -15,8 +15,9 @@ import { MuscleGroupFilter } from "@/features/exercises/components/muscle-group-
 import { NewExerciseDialog } from "@/features/exercises/components/new-exercise-dialog";
 import { CATALOG_SHORTCUT_HINTS } from "@/features/exercises/constants/catalog-shortcuts";
 import { EXERCISE_IMPORT_PATH } from "@/features/exercises/helpers/paths";
-import { useCatalogShortcuts } from "@/features/exercises/hooks/use-catalog-shortcuts";
-import { KeyboardHints } from "@/shared/components/keyboard-hints";
+import { CATALOG_SEARCH_INPUT_ID, catalogSearchKeyDown, useCatalogShortcuts } from "@/features/exercises/hooks/use-catalog-shortcuts";
+import { ScreenShortcutLegend } from "@/shared/components/screen-shortcut-legend";
+import { useScreenShortcutHints } from "@/shared/libs/shortcut-hints";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { withDevState } from "@/shared/helpers/dev-state-path";
@@ -56,6 +57,7 @@ export function ExercisesScreen() {
     : undefined;
   const showShortcuts = canManage && device === "desktop";
   useCatalogShortcuts({ onNew: openNew, onImport: openImport, onEdit: openFor("edit"), onDelete: openFor("delete") }, showShortcuts);
+  useScreenShortcutHints(showShortcuts ? CATALOG_SHORTCUT_HINTS : []);
   const done = (message: string) => toast(message, { tone: "success" });
   const closeDialog = () => setDialog(null);
   const clearFilters = () => {
@@ -82,11 +84,18 @@ export function ExercisesScreen() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <SearchField aria-label="Buscar exercício" placeholder="Buscar pelo nome" value={query} onChange={(e) => setQuery(e.target.value)} />
+        <SearchField
+          id={CATALOG_SEARCH_INPUT_ID}
+          aria-label="Buscar exercício"
+          placeholder="Buscar pelo nome"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={showShortcuts ? catalogSearchKeyDown : undefined}
+        />
         <MuscleGroupFilter selected={muscleGroups} onChange={setMuscleGroups} />
       </div>
 
-      {showShortcuts && <KeyboardHints hints={CATALOG_SHORTCUT_HINTS} />}
+      <ScreenShortcutLegend />
 
       {dev.forceLoading || catalog.isPending ? (
         <div aria-busy="true" aria-label="Carregando exercícios" className="flex flex-col gap-2">

@@ -5,6 +5,10 @@ import { ANNOUNCEMENT_FORMATS, ANNOUNCEMENT_TONES } from "@guf/core";
 import { ANNOUNCEMENT_TONE_STYLES, cn, Icon } from "@guf/ui";
 import { audienceLabel, FORMAT_ICONS, formatPeriod, statValue } from "@/features/announcements/helpers/announcement-display";
 import type { Device } from "@/shared/hooks/use-device";
+import { LIST_ITEM_FOCUS, listItemProps } from "@/shared/helpers/list-navigation";
+
+/** Nome da lista para os atalhos (↑/↓ e Enter). */
+export const ANNOUNCEMENT_LIST = "announcements";
 
 interface AnnouncementListProps {
   items: AdminAnnouncementSummary[];
@@ -91,7 +95,13 @@ export function AnnouncementList({ items, device, planNames, onOpen }: Announcem
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.id} onClick={() => onOpen(item)} className="cursor-pointer border-b border-border last:border-b-0 hover:bg-surface-elevated">
+            <tr
+              key={item.id}
+              {...listItemProps(ANNOUNCEMENT_LIST, item.id)}
+              aria-label={item.title || "Sem título"}
+              onClick={() => onOpen(item)}
+              className={cn("cursor-pointer border-b border-border last:border-b-0 hover:bg-surface-elevated", LIST_ITEM_FOCUS)}
+            >
               <td className="px-4 py-3">
                 <span className="flex flex-col gap-0.5">
                   <button

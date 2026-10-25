@@ -3,6 +3,7 @@
 import type { AdminUserSummary } from "@guf/api/admin";
 import { Avatar, cn } from "@guf/ui";
 import { displayName } from "@/features/people/helpers/people";
+import { personRowProps } from "@/features/people/hooks/use-people-shortcuts";
 
 interface PeopleCompactListProps {
   people: AdminUserSummary[];
@@ -20,6 +21,7 @@ export function PeopleCompactList({ people, selectedId, onOpen }: PeopleCompactL
           <li key={p.userId}>
             <button
               type="button"
+              {...personRowProps(p.userId)}
               aria-current={selected || undefined}
               onClick={() => onOpen(p.userId)}
               className={cn(

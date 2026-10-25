@@ -4,15 +4,25 @@ import { Fragment, useMemo, useState } from "react";
 import { ArrowDown, ChevronDown, ChevronUp, ScrollText } from "lucide-react";
 import type { AuditEntry } from "@guf/api/admin";
 import { auditActionLabel, AUDIT_ACTIONS, formatStaffDateTime } from "@guf/core";
-import { Banner, Button, EmptyState, Icon, SelectField, Skeleton, TextField } from "@guf/ui";
+import { Banner, Button, cn, EmptyState, Icon, SelectField, Skeleton, TextField } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { useAuditLog } from "@/features/audit/api/use-audit";
 import { auditDetail, auditIcon } from "@/features/audit/helpers/audit-display";
 import { AdminOnly } from "@/shared/components/admin-only";
 import { PageBody, PageTitle } from "@/shared/components/panel";
+import { ScreenShortcutLegend } from "@/shared/components/screen-shortcut-legend";
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useDevice } from "@/shared/hooks/use-device";
 import { useDevAdminState } from "@/shared/hooks/use-dev-admin-state";
+import { focusFieldById } from "@/shared/helpers/form-focus";
+import { LIST_ITEM_FOCUS, listItemProps } from "@/shared/helpers/list-navigation";
+import { listNavigationHint, shortcutHint, SHORTCUTS } from "@/shared/helpers/shortcuts";
+import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
+import { useListShortcuts } from "@/shared/hooks/use-list-shortcuts";
+import { useScreenShortcutHints } from "@/shared/libs/shortcut-hints";
+
+const AUDIT_LIST = "audit";
+const AUDIT_FILTER_INPUT_ID = "filtro-auditoria-pessoa";
 
 const PERIODS = [
   { value: "7", label: "Últimos 7 dias" },
@@ -63,6 +73,10 @@ function AuditLog() {
   const audit = useAuditLog({ subject: debouncedSubject || undefined, action: action || undefined, from });
   const rows = audit.data?.pages.flat() ?? [];
   const toggle = (id: number) => setExpanded((current) => (current === id ? null : id));
+  const hasKeyboard = device !== "mobile";
+  useKeyboardShortcuts([{ keys: SHORTCUTS.filter.keys, onTrigger: () => focusFieldById(AUDIT_FILTER_INPUT_ID) }], hasKeyboard);
+  useListShortcuts(AUDIT_LIST, { onOpen: (id) => toggle(Number(id)) }, hasKeyboard);
+  useScreenShortcutHints(hasKeyboard ? [shortcutHint("filter", "filtrar por pessoa"), listNavigationHint(), shortcutHint("open", "ver ou esconder o motivo")] : []);
   const clearFilters = () => {
     setSubject("");
     setAction("");
@@ -75,8 +89,9 @@ function AuditLog() {
         <PageTitle>Auditoria</PageTitle>
         <p className="m-0 text-fg-secondary">Tudo o que a equipe viu ou alterou. Os registros não podem ser apagados.</p>
       </div>
+      <ScreenShortcutLegend />
       <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] items-end gap-3">
-        <TextField label="Pessoa" type="search" placeholder="@, nome ou id" value={subject} onChange={(e) => setSubject(e.target.value)} />
+        <TextField id={AUDIT_FILTER_INPUT_ID} label="Pessoa" type="search" placeholder="@, nome ou id" value={subject} onChange={(e) => setSubject(e.target.value)} />
         <SelectField label="Ação" value={action} onChange={setAction} options={ACTION_OPTIONS} />
         <SelectField label="Período" value={period} onChange={setPeriod} options={PERIODS} />
       </div>
@@ -140,7 +155,13 @@ function AuditLog() {
             <tbody>
               {rows.map((entry) => (
                 <Fragment key={entry.id}>
-                  <tr onClick={() => toggle(entry.id)} className="cursor-pointer border-b border-border hover:bg-surface-elevated">
+                  <tr
+                    {...listItemProps(AUDIT_LIST, String(entry.id))}
+                    aria-label={`${auditActionLabel(entry.action)}, ${entry.actorName}`}
+                    aria-expanded={expanded === entry.id}
+                    onClick={() => toggle(entry.id)}
+                    className={cn("cursor-pointer border-b border-border hover:bg-surface-elevated", LIST_ITEM_FOCUS)}
+                  >
                     <td className="px-4 py-3 whitespace-nowrap text-fg-secondary tabular-nums">{formatStaffDateTime(entry.occurredAt)}</td>
                     <td className="px-4 py-3 whitespace-nowrap">{entry.actorName}</td>
                     <td className="px-4 py-3">

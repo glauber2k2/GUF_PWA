@@ -7,13 +7,18 @@ import { ANNOUNCEMENT_STATES, type AnnouncementState } from "@guf/core";
 import { Banner, Button, cn, EmptyState, Skeleton } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import { useAnnouncementList } from "@/features/announcements/api/use-announcements-admin";
-import { AnnouncementList } from "@/features/announcements/components/announcement-list";
+import { ANNOUNCEMENT_LIST, AnnouncementList } from "@/features/announcements/components/announcement-list";
 import { editorPath, listPath, resultPath } from "@/features/announcements/helpers/announcement-display";
 import { MobileActionBar } from "@/shared/components/mobile-action-bar";
+import { ScreenShortcutLegend } from "@/shared/components/screen-shortcut-legend";
 import { PageBody, PageTitle } from "@/shared/components/panel";
 import { useDevice } from "@/shared/hooks/use-device";
 import { useDevAdminState } from "@/shared/hooks/use-dev-admin-state";
 import { usePlanNames } from "@/shared/hooks/use-plan-options";
+import { listNavigationHint, shortcutHint, SHORTCUTS } from "@/shared/helpers/shortcuts";
+import { useKeyboardShortcuts } from "@/shared/hooks/use-keyboard-shortcuts";
+import { useListShortcuts } from "@/shared/hooks/use-list-shortcuts";
+import { useScreenShortcutHints } from "@/shared/libs/shortcut-hints";
 
 const TABS: AnnouncementState[] = ["draft", "scheduled", "active", "ended"];
 const TAB_PARAM: Record<AnnouncementState, string> = { draft: "drafts", scheduled: "scheduled", active: "active", ended: "ended" };
@@ -42,6 +47,22 @@ export function AnnouncementsScreen() {
   const items = (list.data ?? []).filter((a) => a.state === tab);
 
   const open = (item: AdminAnnouncementSummary) => router.push(item.state === "draft" ? editorPath(item.id) : resultPath(item.id));
+  const createNew = () => router.push(editorPath());
+  const hasKeyboard = device !== "mobile";
+  useKeyboardShortcuts([{ keys: SHORTCUTS.create.keys, onTrigger: createNew }], hasKeyboard && canCreate);
+  useListShortcuts(
+    ANNOUNCEMENT_LIST,
+    {
+      onOpen: (id) => {
+        const item = items.find((a) => a.id === id);
+        if (item) open(item);
+      },
+    },
+    hasKeyboard,
+  );
+  useScreenShortcutHints(
+    hasKeyboard ? [...(canCreate ? [shortcutHint("create", "novo comunicado")] : []), listNavigationHint(), shortcutHint("open", "abrir o comunicado")] : [],
+  );
   const isLoading = dev.forceLoading || list.isPending;
 
   return (
@@ -49,7 +70,7 @@ export function AnnouncementsScreen() {
       <PageTitle
         actions={
           canCreate && (
-            <Button icon={Plus} onClick={() => router.push(editorPath())}>
+            <Button icon={Plus} onClick={createNew}>
               Novo comunicado
             </Button>
           )
@@ -57,6 +78,7 @@ export function AnnouncementsScreen() {
       >
         Comunicados
       </PageTitle>
+      <ScreenShortcutLegend />
       <div role="tablist" aria-label="Situação" className="-mx-1 flex gap-1 overflow-x-auto border-b border-border">
         {TABS.map((t) => {
           const selected = t === tab;
@@ -96,7 +118,7 @@ export function AnnouncementsScreen() {
           title={EMPTY_TEXT[tab].title}
           message={EMPTY_TEXT[tab].message}
           actionLabel={canCreate ? "Novo comunicado" : undefined}
-          onAction={canCreate ? () => router.push(editorPath()) : undefined}
+          onAction={canCreate ? createNew : undefined}
         />
       ) : (
         <AnnouncementList items={items} device={device} planNames={planNames} onOpen={open} />
@@ -104,7 +126,7 @@ export function AnnouncementsScreen() {
 
       {canCreate && (
         <MobileActionBar>
-          <Button size="tall" icon={Plus} fullWidth onClick={() => router.push(editorPath())}>
+          <Button size="tall" icon={Plus} fullWidth onClick={createNew}>
             Novo comunicado
           </Button>
         </MobileActionBar>
