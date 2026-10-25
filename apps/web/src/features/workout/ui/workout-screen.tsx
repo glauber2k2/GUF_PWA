@@ -443,7 +443,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
         className={cn(
           // relative: referência do card que sai da lista (AnimatePresence popLayout).
           "relative flex min-h-dvh flex-col gap-3 px-4",
-          resting ? "pb-[calc(200px+env(safe-area-inset-bottom))]" : "pb-[calc(124px+env(safe-area-inset-bottom))]",
+          resting ? "pb-[calc(180px+env(safe-area-inset-bottom))]" : "pb-[calc(124px+env(safe-area-inset-bottom))]",
         )}
       >
         <WorkoutHeader
@@ -482,7 +482,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
       </main>
 
       {current.rest && (
-        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-3 bottom-[calc(112px+env(safe-area-inset-bottom))] z-[12] mx-auto max-w-[406px] animate-guf-up">
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-3 bottom-[calc(93px+env(safe-area-inset-bottom))] z-[12] mx-auto max-w-[406px] animate-guf-up">
           <RestTimerBar
             remaining={restLeft}
             total={current.rest.total}
