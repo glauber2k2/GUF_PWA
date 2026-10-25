@@ -1,8 +1,8 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { CompetitionRange } from "@guf/core";
-import { competitionApi, type ApiError, type CompetitionApi } from "@guf/api";
+import { STANDINGS_NEAR_RADIUS, type CompetitionRange } from "@guf/core";
+import { competitionApi, type ApiError, type CompetitionApi, type StandingsQuery } from "@guf/api";
 import { COMPETITION_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { mockCompetitionApi, setCompetitionMockScenario } from "@/mocks/competition";
@@ -24,14 +24,59 @@ function unwrap<T>(result: { data: T; error: null } | { data: null; error: ApiEr
   return result.data as T;
 }
 
-export function useCompetitionBoard(range: CompetitionRange) {
+/** Chave e permissão comuns às consultas da classificação (mesma pessoa, período e métrica). */
+function useStandingsBase(query: StandingsQuery) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return {
+    api,
+    key: [COMPETITION_KEY, "standings", user?.id, query.from, query.to, query.metric, dev.competitionScenario] as const,
+    enabled: Boolean(user) || dev.competitionScenario !== null,
+  };
+}
+
+/** Uma página da classificação (o banco ordena e pagina). */
+export function useCompetitionStandings(query: StandingsQuery, page: number) {
+  const { api, key, enabled } = useStandingsBase(query);
+  return useQuery({
+    queryKey: [...key, "page", page],
+    enabled,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.getCompetitionStandings(getSupabaseClient(), { ...query, page })),
+  });
+}
+
+/** Você e as posições vizinhas (cartão "Sua posição" e adversário padrão). */
+export function useStandingsNearMe(query: StandingsQuery) {
+  const { api, key, enabled } = useStandingsBase(query);
+  return useQuery({
+    queryKey: [...key, "near-me"],
+    enabled,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.getStandingsNearMe(getSupabaseClient(), { ...query, radius: STANDINGS_NEAR_RADIUS })),
+  });
+}
+
+/** Pessoas específicas na classificação geral (adversário fora da página, duelo). */
+export function useStandingsOf(query: StandingsQuery, userIds: string[]) {
+  const { api, key, enabled } = useStandingsBase(query);
+  return useQuery({
+    queryKey: [...key, "of", ...userIds],
+    enabled: enabled && userIds.length > 0,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.getStandingsOf(getSupabaseClient(), { ...query, userIds })),
+  });
+}
+
+/** Semanas e dias só das pessoas do gráfico ou do duelo. */
+export function useCompetitionSeries(range: CompetitionRange, userIds: string[]) {
   const { user } = useAuth();
   const { api, dev } = useCompetitionSource();
   return useQuery({
-    queryKey: [COMPETITION_KEY, "board", user?.id, range.from, range.to, dev.competitionScenario],
-    enabled: Boolean(user) || dev.competitionScenario !== null,
+    queryKey: [COMPETITION_KEY, "series", user?.id, range.from, range.to, dev.competitionScenario, ...userIds],
+    enabled: (Boolean(user) || dev.competitionScenario !== null) && userIds.length > 0,
     placeholderData: keepPreviousData,
-    queryFn: async () => unwrap(await api.getCompetitionBoard(getSupabaseClient(), range)),
+    queryFn: async () => unwrap(await api.getCompetitionSeries(getSupabaseClient(), { ...range, userIds })),
   });
 }
 

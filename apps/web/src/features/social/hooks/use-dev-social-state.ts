@@ -14,7 +14,7 @@ export interface DevSocialState {
 
 const NONE: DevSocialState = { scenario: null, competitionScenario: null, forceLoading: false, forceOffline: false };
 const SOCIAL_SCENARIOS: SocialMockScenario[] = ["padrao", "vazio", "erro"];
-const COMPETITION_SCENARIOS: CompetitionMockScenario[] = ["padrao", "vazio", "erro", "lider"];
+const COMPETITION_SCENARIOS: CompetitionMockScenario[] = ["padrao", "vazio", "erro", "lider", "muitos"];
 
 /**
  * ?estado= do Perfil social, seguidores, busca e Competição — SÓ EM DESENVOLVIMENTO (eliminado do

@@ -1,25 +1,29 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import type { CompetitionMetric } from "@guf/core";
 import { ChevronLeft, Swords } from "lucide-react";
 import { EmptyState, IconButton } from "@/shared/components/ds";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { METRICS } from "@/features/competition/constants/competition-labels";
-import { useCompetitionView, type ReadyBoard } from "@/features/competition/hooks/use-competition-view";
+import { useCompetitionFilters } from "@/features/competition/hooks/use-competition-filters";
+import { useDuelView, type DuelView } from "@/features/competition/hooks/use-duel-view";
+import { useMetricFormat } from "@/features/competition/hooks/use-metric-format";
 import { CompetitionBoard, PeriodCaption } from "@/features/competition/components/competition-board";
 import { PositionCard, firstName } from "@/features/competition/components/position-card";
 import { DuelCard } from "@/features/competition/components/competition-ranking";
 import { RaceChart } from "@/features/competition/components/race-chart";
 
 /** Você contra a pessoa: posição, corrida das duas linhas e comparação em cada métrica. */
-function HeadToHead({ board, rivalId }: { board: ReadyBoard; rivalId: string }) {
-  const rival = board.ranking.find((c) => c.userId === rivalId);
-  if (!rival) return null;
+function HeadToHead({ view, metric }: { view: DuelView; metric: CompetitionMetric }) {
+  const { unitLabel, format, formatVolume } = useMetricFormat(metric);
+  const { context, rival } = view;
+  if (!context || !rival) return null;
   return (
     <>
-      <PositionCard ranking={board.ranking} metric={board.metric} unit={board.unitLabel} format={board.format} />
-      <RaceChart lines={board.lines} dates={board.dates} rivalId={rivalId} caption={METRICS[board.metric].accumulated} format={board.format} />
-      <DuelCard me={board.me} rival={rival} formatVolume={board.formatVolume} />
+      <PositionCard context={context} metric={metric} unit={unitLabel} format={format} />
+      <RaceChart lines={view.lines} dates={view.dates} rivalId={rival.userId} caption={METRICS[metric].accumulated} format={format} />
+      <DuelCard me={context.me} rival={rival} formatVolume={formatVolume} />
     </>
   );
 }
@@ -31,9 +35,9 @@ function HeadToHead({ board, rivalId }: { board: ReadyBoard; rivalId: string }) 
 export function DuelScreen() {
   const rivalId = useSearchParams().get("id");
   const goBack = useGoBack("/competicao");
-  const view = useCompetitionView(rivalId);
-  const rival = view.board.data?.participants.find((p) => p.userId === rivalId && !p.isMe);
-  const title = rival ? `Você × ${firstName(rival)}` : "Duelo";
+  const filters = useCompetitionFilters();
+  const view = useDuelView(filters, rivalId);
+  const title = view.rival ? `Você × ${firstName(view.rival)}` : "Duelo";
 
   return (
     <main className="flex flex-col px-4">
@@ -42,11 +46,13 @@ export function DuelScreen() {
         <h1 className="m-0 min-w-0 flex-1 truncate text-xl leading-[26px] font-bold tracking-[-0.01em]">{title}</h1>
       </div>
       <div className="pt-1 pb-4">
-        <PeriodCaption view={view} />
+        <PeriodCaption filters={filters} />
       </div>
 
       <CompetitionBoard
-        view={view}
+        filters={filters}
+        status={view.status}
+        isAlone={view.isAlone}
         empty={
           <EmptyState
             icon={Swords}
@@ -57,7 +63,7 @@ export function DuelScreen() {
           />
         }
       >
-        {(board) => rivalId && <HeadToHead board={board} rivalId={rivalId} />}
+        <HeadToHead view={view} metric={filters.metric} />
       </CompetitionBoard>
     </main>
   );

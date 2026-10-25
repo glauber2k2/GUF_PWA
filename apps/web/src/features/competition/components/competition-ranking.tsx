@@ -67,12 +67,16 @@ function rankingRowLabel(c: RankedCompetitor, valueText: string, movementText: s
 
 export function RankingList({
   ranking,
+  total,
   rivalId,
   unit,
   format,
   onSelect,
 }: {
+  /** As pessoas da página aberta. */
   ranking: RankedCompetitor[];
+  /** Total da classificação (você incluído). */
+  total: number;
   rivalId: string | null;
   unit: string;
   format: (value: number) => string;
@@ -83,7 +87,7 @@ export function RankingList({
       <div className="mb-0.5 flex items-baseline justify-between px-1">
         <h2 className="m-0 text-lg leading-6 font-semibold tracking-[-0.015em]">Ranking</h2>
         <span className="text-[13px] text-fg-muted">
-          {ranking.length - 1} {ranking.length - 1 === 1 ? "amizade" : "amizades"}
+          {formatNumber(total - 1, 0)} {total - 1 === 1 ? "amizade" : "amizades"}
         </span>
       </div>
       {ranking.map((c) => {

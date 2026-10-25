@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp, ChevronsUp, Dumbbell, Minus, Zap } from "lucide-react";
-import { rankLabel, rankMovement, workoutsToCover, type CompetitionMetric, type RankedCompetitor } from "@guf/core";
+import { formatNumber, rankLabel, rankMovement, workoutsToCover, type CompetitionMetric, type RankedCompetitor, type StandingContext } from "@guf/core";
 import { Avatar, Button, GufRat, Icon } from "@/shared/components/ds";
 import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
 import { cn } from "@/shared/helpers/class-names";
@@ -20,25 +20,23 @@ export function movementOf(competitor: RankedCompetitor) {
   return { icon: Minus, text: "Manteve", chipClass: "bg-surface-3 text-fg-muted", iconClass: "text-fg-muted" };
 }
 
-/** Sua posição: quanto falta para passar quem está à frente, quem vem atrás e "Treinar agora". */
+/**
+ * Sua posição: quanto falta para passar quem está à frente, quem vem atrás e "Treinar agora".
+ * Recebe só você e os vizinhos (standingContext), nunca a classificação inteira.
+ */
 export function PositionCard({
-  ranking,
+  context,
   metric,
   unit,
   format,
 }: {
-  ranking: RankedCompetitor[];
+  context: StandingContext;
   metric: CompetitionMetric;
   unit: string;
   format: (value: number) => string;
 }) {
   const { openStartSheet } = useAppShell();
-  const meIndex = ranking.findIndex((c) => c.isMe);
-  const me = ranking[meIndex];
-  if (!me) return null;
-  const above = ranking.slice(0, meIndex).reverse().find((c) => c.value > me.value) ?? null;
-  const below = ranking.slice(meIndex + 1).find((c) => c.value < me.value) ?? null;
-  const second = ranking.find((c) => !c.isMe);
+  const { me, above, below, runnerUp: second, total } = context;
   const move = movementOf(me);
   const gap = above ? above.value - me.value : 0;
   const needed = above ? workoutsToCover(gap + (metric === "volume" ? 0 : 1), metric, me.totals) : null;
@@ -54,7 +52,7 @@ export function PositionCard({
           <span className="text-[11px] leading-4 font-semibold tracking-[0.08em] text-fg-muted uppercase">Sua posição</span>
           <div className="flex items-baseline gap-1.5">
             <span className="font-display text-[56px] leading-[56px] font-bold tracking-[-0.01em] tabular-nums">{rankLabel(me.rank)}</span>
-            <span className="text-sm text-fg-muted">de {ranking.length} {ranking.length === 1 ? "pessoa" : "pessoas"}</span>
+            <span className="text-sm text-fg-muted">de {formatNumber(total, 0)} {total === 1 ? "pessoa" : "pessoas"}</span>
           </div>
         </div>
         <span className={cn("flex h-[26px] items-center gap-1 self-start rounded-pill px-2.5 text-xs font-bold whitespace-nowrap", move.chipClass)}>

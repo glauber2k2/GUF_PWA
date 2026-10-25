@@ -2,15 +2,22 @@
  * MOCK da competição — mesmo contrato de @guf/api (CompetitionApi).
  *
  * Só para ver os estados do design em DESENVOLVIMENTO, via ?estado= (useDevSocialState):
- * padrao · vazio (só você, sem amigos) · erro · lider (você em 1º). Dados gerados sob demanda e
+ * padrao · vazio (só você, sem amigos) · erro · lider (você em 1º) · muitos (1000 competidores, para a
+ * paginação). Dados gerados sob demanda e
  * determinísticos (a mesma semente gera os mesmos treinos).
  */
 import {
   addLocalDays,
+  COMPETITION_PAGE_SIZE,
+  rankCompetitors,
+  toStandings,
   fromLocalISODate,
   startOfLocalWeek,
   toLocalISODate,
   type CompetitionDayStat,
+  type CompetitionMetric,
+  type CompetitionRange,
+  type CompetitionStanding,
   type CompetitionParticipant,
   type CompetitionWeekScore,
   type PointsStatement,
@@ -19,7 +26,7 @@ import {
 } from "@guf/core";
 import { apiError, type CompetitionApi, type GufClient } from "@guf/api";
 
-export type CompetitionMockScenario = "padrao" | "vazio" | "erro" | "lider";
+export type CompetitionMockScenario = "padrao" | "vazio" | "erro" | "lider" | "muitos";
 
 let scenario: CompetitionMockScenario = "padrao";
 
@@ -50,8 +57,31 @@ function competitors(): MockCompetitor[] {
     { userId: "dudu", handle: "dudu.faria", name: "Dudu Faria", rate: 2.2, volume: 7400, recordChance: 0.12, streak: 1 },
   ];
   if (scenario === "vazio") return all.slice(0, 1);
+  if (scenario === "muitos") return [...all, ...crowd(all.length)];
   if (scenario === "lider") return all.map((c) => (c.userId === "me" ? { ...c, rate: 5.6, volume: 10_400 } : c));
   return all;
+}
+
+const CROWD_SIZE = 1000;
+const FIRST_NAMES = ["Ana", "Bruno", "Caio", "Duda", "Enzo", "Fê", "Gabi", "Hugo", "Iris", "João", "Kaká", "Léo", "Malu", "Nina", "Otto", "Pri"];
+const LAST_NAMES = ["Silva", "Souza", "Costa", "Rocha", "Alves", "Pires", "Lima", "Gomes"];
+
+/** Competidores fictícios para ver a paginação com muita gente (determinísticos). */
+function crowd(alreadyListed: number): MockCompetitor[] {
+  return Array.from({ length: CROWD_SIZE - alreadyListed }, (_, i) => {
+    const next = random(`crowd-${i}`);
+    const first = FIRST_NAMES[i % FIRST_NAMES.length];
+    const last = LAST_NAMES[Math.floor(i / FIRST_NAMES.length) % LAST_NAMES.length];
+    return {
+      userId: `crowd-${i}`,
+      handle: `${first.toLowerCase()}.${last.toLowerCase()}${i}`,
+      name: `${first} ${last}`,
+      rate: 1 + next() * 4.5,
+      volume: 4000 + Math.round(next() * 7000),
+      recordChance: next() * 0.25,
+      streak: Math.floor(next() * 10),
+    };
+  });
 }
 
 /** Gerador pseudoaleatório determinístico (FNV-1a + mulberry32). */
@@ -179,20 +209,46 @@ function ignoreClient(client: GufClient) {
   void client;
 }
 
+function participants(): CompetitionParticipant[] {
+  return competitors().map((c) => ({ userId: c.userId, handle: c.handle, name: c.name, avatarUrl: null, isMe: c.userId === "me", currentStreak: c.streak }));
+}
+
+/** Classificação completa pela regra do core (o banco faz o mesmo em competition_standings). */
+function standings(range: CompetitionRange, metric: CompetitionMetric): CompetitionStanding[] {
+  const { weeks, days } = simulate(range);
+  return toStandings(rankCompetitors(participants(), weeks, days, metric, range));
+}
+
 export const mockCompetitionApi = {
-  async getCompetitionBoard(client, range) {
+  async getCompetitionStandings(client, { from, to, metric, page }) {
     ignoreClient(client);
     await wait();
     if (scenario === "erro") return { data: null, error: apiError("network_error") };
-    const participants: CompetitionParticipant[] = competitors().map((c) => ({
-      userId: c.userId,
-      handle: c.handle,
-      name: c.name,
-      avatarUrl: null,
-      isMe: c.userId === "me",
-      currentStreak: c.streak,
-    }));
-    return { data: { participants, ...simulate(range) }, error: null };
+    const all = standings({ from, to }, metric);
+    const start = (Math.max(page, 1) - 1) * COMPETITION_PAGE_SIZE;
+    return { data: { items: all.slice(start, start + COMPETITION_PAGE_SIZE), total: all.length }, error: null };
+  },
+  async getStandingsNearMe(client, { from, to, metric, radius }) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    const all = standings({ from, to }, metric);
+    const me = all.find((s) => s.isMe);
+    const items = me ? all.filter((s) => Math.abs(s.position - me.position) <= radius) : [];
+    return { data: { items, total: all.length }, error: null };
+  },
+  async getStandingsOf(client, { from, to, metric, userIds }) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    return { data: standings({ from, to }, metric).filter((s) => userIds.includes(s.userId)), error: null };
+  },
+  async getCompetitionSeries(client, { from, to, userIds }) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    const { weeks, days } = simulate({ from, to });
+    return { data: { weeks: weeks.filter((w) => userIds.includes(w.userId)), days: days.filter((d) => userIds.includes(d.userId)) }, error: null };
   },
   async getPointsStatement(client, range) {
     ignoreClient(client);
