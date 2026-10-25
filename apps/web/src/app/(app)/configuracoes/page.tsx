@@ -1,8 +1,8 @@
 import { PlanSettingsSection } from "@/features/plans";
 import { SettingsScreen } from "@/features/profile";
-import { SocialPrivacyGroup } from "@/features/social";
+import { editProfilePath } from "@/features/social";
 
-/** Configurações (três pontinhos do Perfil); o plano e a privacidade do perfil social vêm das features deles. */
+/** Configurações (menu do Perfil); o plano e o Editar perfil vêm das features deles. */
 export default function ConfiguracoesPage() {
-  return <SettingsScreen plan={<PlanSettingsSection />} socialPrivacy={<SocialPrivacyGroup />} />;
+  return <SettingsScreen plan={<PlanSettingsSection />} editProfileHref={editProfilePath()} />;
 }
