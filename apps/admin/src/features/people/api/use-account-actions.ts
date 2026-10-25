@@ -13,7 +13,7 @@ import { getSupabaseClient } from "@/shared/libs/supabase";
 function callFor(users: AdminUsersApi, client: GufClient, userId: string, input: AccountActionInput): Promise<ApiResult<unknown>> {
   switch (input.kind) {
     case "plan":
-      return users.setPlan(client, { userId, planCode: input.planCode, validUntil: input.validUntil, reason: input.reason, note: input.note });
+      return users.setPlan(client, { userId, planCode: input.planCode, validUntil: input.validUntil, notify: input.notify, reason: input.reason, note: input.note });
     case "unlink_social":
       return users.unlinkSocialLogins(client, { userId, note: input.note });
     case "reset_password":

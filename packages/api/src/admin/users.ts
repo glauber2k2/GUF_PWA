@@ -106,6 +106,8 @@ export interface AdminPlanOption {
   code: string;
   name: string;
   isDefault: boolean;
+  /** Ordem dos planos (maior = mais recursos): define upgrade ou downgrade. */
+  rank: number;
 }
 
 type Result<T = null> = Promise<ApiResult<T>>;
@@ -117,7 +119,8 @@ export interface AdminUsersApi {
   checkHandle: (client: GufClient, input: { userId: string; handle: string }) => Result<HandleAvailability>;
   updateHandle: (client: GufClient, input: ReasonInput & { userId: string; handle: string }) => Result;
   updateName: (client: GufClient, input: ReasonInput & { userId: string; name: string }) => Result;
-  setPlan: (client: GufClient, input: ReasonInput & { userId: string; planCode: string; validUntil: string | null }) => Result;
+  /** `notify`: manda à pessoa o aviso de upgrade, downgrade ou alteração (o banco decide qual). */
+  setPlan: (client: GufClient, input: ReasonInput & { userId: string; planCode: string; validUntil: string | null; notify: boolean }) => Result;
   unlinkLogin: (client: GufClient, input: { userId: string; provider: string; note: string }) => Result;
   /** Todos os logins sociais de uma vez (ações em lote); devolve quantos saíram. */
   unlinkSocialLogins: (client: GufClient, input: { userId: string; note: string }) => Result<number>;
@@ -282,7 +285,7 @@ export const updateName: AdminUsersApi["updateName"] = async (client, { userId, 
   return result.error ? result : { data: null, error: null };
 };
 
-export const setPlan: AdminUsersApi["setPlan"] = async (client, { userId, planCode, validUntil, reason, note }) => {
+export const setPlan: AdminUsersApi["setPlan"] = async (client, { userId, planCode, validUntil, reason, note, notify }) => {
   const result = await runQuery(() =>
     client.rpc("admin_set_plan", {
       p_user_id: userId,
@@ -291,6 +294,7 @@ export const setPlan: AdminUsersApi["setPlan"] = async (client, { userId, planCo
       p_valid_until: validUntil as string,
       p_reason: reason,
       p_note: noteOrNull(note) ?? undefined,
+      p_notify: notify,
     }),
   );
   return result.error ? result : { data: null, error: null };
@@ -363,7 +367,7 @@ export const sendPasswordReset: AdminUsersApi["sendPasswordReset"] = async (clie
 export const listPlans: AdminUsersApi["listPlans"] = async (client) => {
   const result = await runQuery(() => client.from("plans").select("code, name, is_default, rank").order("rank"));
   if (result.error) return result;
-  return { data: (result.data ?? []).map((p) => ({ code: p.code, name: p.name, isDefault: p.is_default })), error: null };
+  return { data: (result.data ?? []).map((p) => ({ code: p.code, name: p.name, isDefault: p.is_default, rank: p.rank })), error: null };
 };
 
 export const adminUsersApi = {

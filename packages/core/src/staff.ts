@@ -186,3 +186,27 @@ export function formatCount(value: number): string {
 export function shareOf(part: number, total: number): number {
   return total > 0 ? Math.round((part / total) * 100) : 0;
 }
+
+/** Tipo da mudança de plano pela ordem dos planos (mesma regra do aviso em admin_set_plan). */
+export type PlanChangeKind = "upgrade" | "downgrade" | "change";
+
+export function planChangeKind(fromRank: number, toRank: number): PlanChangeKind {
+  if (toRank > fromRank) return "upgrade";
+  if (toRank < fromRank) return "downgrade";
+  return "change";
+}
+
+/** Rótulo do interruptor "avisar a pessoa" no Mudar plano. */
+export const PLAN_CHANGE_NOTICE_LABELS: Record<PlanChangeKind, string> = {
+  upgrade: "Avisar a pessoa sobre o upgrade",
+  downgrade: "Avisar a pessoa sobre o downgrade",
+  change: "Avisar a pessoa sobre a alteração do plano",
+};
+
+/** Palavra que a pessoa da equipe digita para confirmar uma mudança sensível (ex.: plano). */
+export const STAFF_CONFIRMATION_WORD = "CONFIRMAR";
+
+/** O texto digitado confirma? Ignora espaços nas pontas e maiúsculas/minúsculas. */
+export function isConfirmationTyped(typed: string, word: string = STAFF_CONFIRMATION_WORD): boolean {
+  return typed.trim().toUpperCase() === word.toUpperCase();
+}

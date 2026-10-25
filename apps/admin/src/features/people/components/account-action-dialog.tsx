@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { CircleAlert, ScrollText } from "lucide-react";
 import { BAN_DURATIONS, type BanDuration } from "@guf/core";
-import { Banner, Button, Checkbox, Icon, RadioGroup, SegmentedControl, TextAreaField, TextField } from "@guf/ui";
+import { Banner, Button, Checkbox, Icon, RadioGroup, SegmentedControl, Switch, TextAreaField, TextField } from "@guf/ui";
 import { useAccountActionRunner } from "@/features/people/api/use-account-actions";
 import { ActionOutcomeDialog } from "@/features/people/components/action-outcome-dialog";
+import { ConfirmationWordField } from "@/features/people/components/confirmation-word-field";
 import { ReasonFields } from "@/features/people/components/reason-fields";
 import {
   ACCOUNT_ACTIONS,
-  DELETE_CONFIRM_WORD,
   isRiskyAction,
   type AccountActionKind,
   type AccountActionOutcome,
@@ -77,6 +77,12 @@ export function AccountActionDialog({ kind, targets, onClose, onDone }: AccountA
             />
           )}
           <FieldError message={form.errors.plan} />
+          <Switch
+            checked={form.notify}
+            onChange={form.setNotify}
+            label={targets.length === 1 ? "Avisar a pessoa no app" : "Avisar cada pessoa no app"}
+          />
+          <span className="-mt-1 text-[13px] text-fg-muted">O aviso diz se foi upgrade, downgrade ou alteração do plano.</span>
         </div>
       )}
 
@@ -110,16 +116,8 @@ export function AccountActionDialog({ kind, targets, onClose, onDone }: AccountA
         <ReasonFields reason={form.reason} note={form.note} onReason={form.setReason} onNote={form.setNote} showError={Boolean(form.errors.reason)} />
       )}
 
-      {kind === "delete" && (
-        <div className="flex flex-col gap-2">
-          <TextField
-            label={`Digite ${DELETE_CONFIRM_WORD} para confirmar`}
-            autoComplete="off"
-            value={form.confirmWord}
-            onChange={(e) => form.setConfirmWord(e.target.value)}
-          />
-          <FieldError message={form.errors.confirm} />
-        </div>
+      {form.confirmationWord && (
+        <ConfirmationWordField word={form.confirmationWord} value={form.confirmWord} onChange={form.setConfirmWord} error={form.errors.confirm} />
       )}
 
       <span className="flex items-start gap-2 text-[13px] text-fg-secondary">
