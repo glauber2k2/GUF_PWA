@@ -1876,6 +1876,14 @@ export type Database = {
           exercise_id: string
         }[]
       }
+      get_cardio_bests: {
+        Args: { p_before_session_id?: string; p_exercise_ids: string[] }
+        Returns: {
+          best_distance_km: number
+          best_seconds_per_km: number
+          exercise_id: string
+        }[]
+      }
       get_competition_days: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -2012,7 +2020,7 @@ export type Database = {
           workouts_count: number
         }[]
       }
-      get_member_workout:{ Args: { p_session_id: string }; Returns: Json }
+      get_member_workout: { Args: { p_session_id: string }; Returns: Json }
       get_member_workout_unrestricted: {
         Args: { p_session_id: string }
         Returns: Json
@@ -2323,6 +2331,22 @@ export type Database = {
           relationship: string
           user_id: string
           visibility: string
+        }[]
+      }
+      session_cardio_records: {
+        Args: { p_user_id: string }
+        Returns: {
+          performed_on: string
+          records: number
+          session_id: string
+        }[]
+      }
+      session_competition_records: {
+        Args: { p_user_id: string }
+        Returns: {
+          performed_on: string
+          records: number
+          session_id: string
         }[]
       }
       session_load_records: {

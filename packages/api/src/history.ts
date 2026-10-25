@@ -1,7 +1,6 @@
 import {
   buildCardioRecord,
   cardioActivityFor,
-  previousCardioBest,
   recordSetIndex,
   sessionRecord1Rm,
   sessionTotals,
@@ -13,7 +12,7 @@ import {
   type SetValues,
   type WeightUnit,
 } from "@guf/core";
-import { fetchCardioHistories } from "./cardio-history";
+import { fetchCardioBests } from "./cardio-history";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -193,9 +192,14 @@ export const getDaySessions: GetDaySessions = async (client, { performedOn }) =>
     }));
 
     const exerciseIds = [...new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)))];
-    const [histories, cardioHistories] = await Promise.all([exerciseHistories(client, exerciseIds), fetchCardioHistories(client, exerciseIds)]);
+    // Marcas de cardio antes de cada treino do dia (o banco compara pela hora em que cada um terminou).
+    const [histories, ...cardioBySession] = await Promise.all([
+      exerciseHistories(client, exerciseIds),
+      ...sessions.map(({ row }) => fetchCardioBests(client, exerciseIds, row.id)),
+    ]);
     if (histories.error) return { data: null, error: histories.error };
-    if (cardioHistories.error) return { data: null, error: cardioHistories.error };
+    const cardioFailed = cardioBySession.find((result) => result.error);
+    if (cardioFailed?.error) return { data: null, error: cardioFailed.error };
 
     return {
       data: sessions.map(({ row, exercises }, index) => {
@@ -204,7 +208,7 @@ export const getDaySessions: GetDaySessions = async (client, { performedOn }) =>
         const records = exercises.flatMap<DayRecord>((e) => {
           const record =
             setMetricKind(e.muscleGroup) === "cardio"
-              ? cardioRecordValue(e, previousCardioBest(cardioHistories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay))
+              ? cardioRecordValue(e, cardioBySession[index]?.data?.get(e.exerciseId) ?? null)
               : loadRecordValue(e.sets, sessionRecord1Rm(histories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay));
           return record ? [{ exerciseName: e.name, ...record }] : [];
         });

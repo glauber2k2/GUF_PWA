@@ -65,31 +65,6 @@ export function setSecondsPerKm(set: Pick<SetValues, "distanceKm" | "durationSec
   return durationSeconds / distanceKm;
 }
 
-function lowest(values: readonly (number | null)[]): number | null {
-  const present = values.filter((value): value is number => value !== null);
-  return present.length ? Math.min(...present) : null;
-}
-
-function highest(values: readonly (number | null)[]): number | null {
-  const present = values.filter((value): value is number => value !== null && value > 0);
-  return present.length ? Math.max(...present) : null;
-}
-
-/** Melhores marcas das séries de um treino (concluídas e sem aquecimento). */
-export function cardioBestOf(sets: readonly CardioRecordCandidate[]): CardioBest {
-  const counted = sets.filter(countsForRecord);
-  return { secondsPerKm: lowest(counted.map(setSecondsPerKm)), distanceKm: highest(counted.map((s) => s.distanceKm)) };
-}
-
-/**
- * Melhores marcas de vários treinos (o recorde a bater).
- * @returns null sem nenhum treino anterior (primeira vez: sem recorde).
- */
-export function mergeCardioBests(bests: readonly CardioBest[]): CardioBest | null {
-  if (bests.length === 0) return null;
-  return { secondsPerKm: lowest(bests.map((b) => b.secondsPerKm)), distanceKm: highest(bests.map((b) => b.distanceKm)) };
-}
-
 /** Índice da série com o melhor valor (a primeira em caso de empate) que passa de `previous`; -1 se nenhuma. */
 function beatingIndex(values: readonly (number | null)[], previous: number, isBetter: (value: number, best: number) => boolean): number {
   let index = -1;

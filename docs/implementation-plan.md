@@ -314,7 +314,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Tipos do banco conferidos com o gerado depois de aplicar | Feito (iguais) |
 | Evolução por exercício (gráfico) para cardio | Pendente |
 | Recordes de cardio por ritmo/velocidade e distância (`feat/recordes-cardio`): treino ao vivo (troféu e aviso), "Treino concluído", resumo, resumo offline, edição e folha do dia; cronômetro não abre mais o campo de km | Feito (lint, typecheck e build; falta conferir na tela) |
-| Recordes de cardio na competição (migration `20261025120000_competition_cardio_records`) + regras no app e no GUF AI + Termos 1.2 / Política 1.3 (`20261025120100_legal_docs_cardio_records`) | Escrito; **migrations não aplicadas** |
+| Recordes de cardio na competição (migration `20261025120000_competition_cardio_records`) + regras no app e no GUF AI + Termos 1.2 / Política 1.3 (`20261025120100_legal_docs_cardio_records`) | Aplicado no banco em 2026-10-25 (com `20261025120200_cardio_bests`: marcas de cardio calculadas no banco) |
 | Cardio nos PNGs dos stories | Pendente (modelos próprios); por enquanto filtrado |
 | Ajustes (`fix/ajustes`): boneco 3D mostra a medida ao tocar no músculo; toasts posicionados pela medição das barras do rodapé; cardio editado pela folha da série; recorte redondo da foto do perfil; topo do PWA no iPhone (faixa sólida + cabeçalhos `box-content`) | Feito (boneco e recorte conferidos no navegador; toasts, cardio e iPhone falta conferir no aparelho) |
 

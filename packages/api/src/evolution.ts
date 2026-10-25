@@ -4,7 +4,6 @@ import {
   durationSeconds,
   pauseStats,
   previousBest1Rm,
-  previousCardioBest,
   sessionRecord1Rm,
   withRecords,
   type CardioRecord,
@@ -15,7 +14,7 @@ import {
   type WeightUnit,
 } from "@guf/core";
 import type { GufClient } from "./client";
-import { fetchCardioHistories } from "./cardio-history";
+import { fetchCardioBests } from "./cardio-history";
 import { exerciseHistories } from "./history";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { FREE_WORKOUT_NAME, sessionDurationSeconds, toWeightUnit } from "./shared";
@@ -184,15 +183,15 @@ export const getWorkoutSummary: EvolutionApi["getWorkoutSummary"] = async (clien
       .map((se) => ({ se, sets: se.set_logs.filter((l) => l.is_completed) }))
       .filter(({ sets }) => sets.length > 0);
     const exerciseIds = [...new Set(exerciseRows.map(({ se }) => se.exercise_id))];
-    const [histories, cardioHistories] = await Promise.all([exerciseHistories(client, exerciseIds), fetchCardioHistories(client, exerciseIds)]);
+    const [histories, cardioBests] = await Promise.all([exerciseHistories(client, exerciseIds), fetchCardioBests(client, exerciseIds, s.id)]);
     if (histories.error) return { data: null, error: histories.error };
-    if (cardioHistories.error) return { data: null, error: cardioHistories.error };
+    if (cardioBests.error) return { data: null, error: cardioBests.error };
 
     const records: WorkoutSummaryRecord[] = [];
     const exercises = exerciseRows.map<SummaryExercise>(({ se, sets }) => {
       const history = histories.data.get(se.exercise_id) ?? [];
       const record1RmKg = sessionRecord1Rm(history, s.id, s.performed_on, earlierSameDay);
-      const previousCardio = previousCardioBest(cardioHistories.data.get(se.exercise_id) ?? [], s.id, s.performed_on, earlierSameDay);
+      const previousCardio = cardioBests.data.get(se.exercise_id) ?? null;
       const exercise = buildSummaryExercise(
         { id: se.id, exerciseId: se.exercise_id, name: se.exercises?.name ?? "Exercício", muscleGroup: se.exercises?.muscle_group ?? "", note: se.notes, sets },
         record1RmKg,
