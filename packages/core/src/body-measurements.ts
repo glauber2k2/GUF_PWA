@@ -217,6 +217,11 @@ export function measurementsEntrySubtitle(days: readonly BodyMeasurementDay[]): 
   return `Última em ${formatMeasurementDay(last)} · ${plural(parts, "músculo", "músculos")}`;
 }
 
+/** Meses do período do gráfico; null = "Tudo". */
+export function measurementPeriodMonths(period: MeasurementPeriod): number | null {
+  return period === "Tudo" ? null : PERIOD_MONTHS[period];
+}
+
 /** Primeiro dia que entra no gráfico do período (null = tudo). */
 export function measurementPeriodStart(period: MeasurementPeriod, today: Date): string | null {
   return period === "Tudo" ? null : toLocalISODate(subMonths(today, PERIOD_MONTHS[period]));

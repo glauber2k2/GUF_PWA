@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
-import { findMeasurementPart, measurementRecordRows, type BodyMeasurementDay, type MeasurementPart, type MeasurementPeriod, type MeasurementRecordRow, type MeasurementSide } from "@guf/core";
+import { findMeasurementPart, measurementRecordRows, type BodyMeasurementDay, type MeasurementPart, type MeasurementRecordRow, type MeasurementSide } from "@guf/core";
 import { Banner, Button, MuscleIcon, SegmentedControl, Skeleton } from "@/shared/components/ds";
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
@@ -14,6 +14,7 @@ import { MeasurementRecords } from "@/features/body-measurements/components/meas
 import { MeasurementRecordMenu } from "@/features/body-measurements/components/measurement-record-menu";
 import { measurementEditPath, measurementRegisterPath, measurementsPath, MEASUREMENTS_PATH } from "@/features/body-measurements/helpers/paths";
 import { useRemoveMeasurement } from "@/features/body-measurements/hooks/use-remove-measurement";
+import { useMeasurementChartPeriod } from "@/features/body-measurements/hooks/use-measurement-chart-period";
 
 const SIDE_OPTIONS = [
   { value: "left", label: "Esquerdo" },
@@ -73,7 +74,7 @@ function MeasurementPartDetail({ part, days, canUse, onBack }: { part: Measureme
   const router = useRouter();
   const removeRecord = useRemoveMeasurement(part, days);
   const [side, setSide] = useState<MeasurementSide>("right");
-  const [period, setPeriod] = useState<MeasurementPeriod>("6M");
+  const chartPeriod = useMeasurementChartPeriod();
   const [today] = useState(() => new Date());
   const [menuRecord, setMenuRecord] = useState<MeasurementRecordRow | null>(null);
   const isBilateral = part.sites.kind === "bilateral";
@@ -102,7 +103,7 @@ function MeasurementPartDetail({ part, days, canUse, onBack }: { part: Measureme
 
       {isBilateral && <SegmentedControl options={SIDE_OPTIONS} value={side} onChange={(value) => setSide(value as MeasurementSide)} label="Lado do corpo" />}
 
-      <MeasurementChartCard part={part} side={side} days={days} period={period} onPeriod={setPeriod} today={today} />
+      <MeasurementChartCard part={part} side={side} days={days} period={chartPeriod.period} onPeriod={chartPeriod.changePeriod} today={today} />
       <MeasurementRecords rows={measurementRecordRows(days, part, side)} onOpenMenu={setMenuRecord} />
       <MeasurementRecordMenu
         part={part}
