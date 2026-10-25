@@ -191,7 +191,7 @@ export function ProfileHistory({
         <h2 className="m-0 text-lg leading-6 font-bold tracking-[-0.01em]">Histórico de treinos</h2>
         {profile.isSelf && profile.historyHidden && (
           <Link
-            href="/configuracoes#pf-privacy"
+            href="/configuracoes/privacidade"
             className="flex h-7 items-center gap-1.5 rounded-pill bg-surface-3 px-2.5 text-xs font-semibold text-fg-secondary no-underline"
           >
             <Icon icon={EyeOff} size={14} />

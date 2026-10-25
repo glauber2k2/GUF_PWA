@@ -5,13 +5,22 @@ import { cn } from "@/shared/helpers/class-names";
 
 /** Peças comuns das seções do Perfil (lista agrupada em cartão, ícone de linha, linha tocável). */
 
-export function ProfileSection({ id, title, className, children }: { id: string; title: string; className?: string; children: ReactNode }) {
+interface ProfileSectionProps {
+  id: string;
+  title: string;
+  className?: string;
+  /** false = o conteúdo já é um cartão (ex.: o grupo de privacidade do perfil social). */
+  framed?: boolean;
+  children: ReactNode;
+}
+
+export function ProfileSection({ id, title, className, framed = true, children }: ProfileSectionProps) {
   return (
     <section aria-labelledby={id} className={cn("flex animate-guf-rise flex-col gap-2", className)}>
       <h2 id={id} className="mt-2 ml-1 scroll-mt-[calc(64px+env(safe-area-inset-top))] text-lg leading-6 font-semibold tracking-[-0.015em]">
         {title}
       </h2>
-      <div className="flex flex-col rounded-lg border border-border bg-surface shadow-e1">{children}</div>
+      {framed ? <div className="flex flex-col rounded-lg border border-border bg-surface shadow-e1">{children}</div> : children}
     </section>
   );
 }

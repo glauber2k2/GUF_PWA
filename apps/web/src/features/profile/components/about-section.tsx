@@ -1,10 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { ChevronRight, CircleHelp, FileText, Scale, Shield, Sparkles } from "lucide-react";
+import { ChevronRight, CircleHelp, Sparkles } from "lucide-react";
 import { Button, Icon, Logo } from "@/shared/components/ds";
-import { LegalDocLink } from "@/features/legal";
-import { useSignupDocuments } from "@/features/auth";
 import { useTour } from "@/features/onboarding";
 import { applyUpdate, usePwaState } from "@/store/global/pwa.store";
 import { cn } from "@/shared/helpers/class-names";
@@ -15,9 +12,8 @@ const APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 
 const ROW = "flex min-h-[52px] items-center gap-3 rounded-md px-2 text-[15px] font-medium text-fg no-underline hover:bg-surface-3";
 
-/** Tutorial, documentos legais (central e leitor no app), versão e "Nova versão disponível". */
+/** Tutorial, versão e "Nova versão disponível" (os documentos legais ficam em Configurações › Documentos). */
 export function AboutSection() {
-  const docs = useSignupDocuments();
   const { waitingWorker } = usePwaState();
   const tour = useTour();
 
@@ -29,21 +25,6 @@ export function AboutSection() {
           <span className="flex-1">Ver tutorial novamente</span>
           <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
         </button>
-        <Link href="/documentos" className={cn(ROW, "border-t border-border")}>
-          <Icon icon={Scale} size={18} className="text-fg-secondary" />
-          <span className="flex-1">Documentos legais</span>
-          <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
-        </Link>
-        <LegalDocLink docType="terms" url={docs.data?.terms.url} className={cn(ROW, "border-t border-border font-normal")}>
-          <Icon icon={FileText} size={18} className="text-fg-secondary" />
-          <span className="flex-1">Termos de Uso</span>
-          <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
-        </LegalDocLink>
-        <LegalDocLink docType="privacy" url={docs.data?.privacy.url} className={cn(ROW, "border-t border-border font-normal")}>
-          <Icon icon={Shield} size={18} className="text-fg-secondary" />
-          <span className="flex-1">Política de Privacidade</span>
-          <Icon icon={ChevronRight} size={18} className="text-fg-muted" />
-        </LegalDocLink>
         <div className="flex min-h-14 items-center gap-3 border-t border-border p-2">
           <Logo size="sm" />
           <span className="flex-1 text-sm text-fg-secondary tabular-nums">Versão {APP_VERSION}</span>

@@ -7,8 +7,8 @@ import { ScreenPortal } from "@/shared/components/ds";
 import { useAuth } from "@/features/auth";
 import { LegalReader } from "@/features/legal/components/legal-reader";
 
-/** Perfil › Privacidade (exportar, excluir conta, revogar consentimento). */
-export const PRIVACY_SETTINGS_PATH = "/configuracoes#pf-privacy";
+/** Configurações › Privacidade (exportar, excluir conta, revogar consentimento). */
+export const PRIVACY_SETTINGS_PATH = "/configuracoes/privacidade";
 
 interface OpenReader {
   key: number;
