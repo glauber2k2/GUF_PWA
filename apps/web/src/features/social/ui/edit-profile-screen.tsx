@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Controller } from "react-hook-form";
-import { Camera, ChevronLeft, CircleCheck, LoaderCircle, Lock, Mail, type LucideIcon } from "lucide-react";
+import { ChevronLeft, CircleCheck, LoaderCircle, Lock, Mail, Pencil, type LucideIcon } from "lucide-react";
 import {
   BIO_MAX_LENGTH,
   EXPERIENCE_LEVEL_LABELS,
@@ -48,10 +48,11 @@ interface PhotoStatus {
   className: string;
 }
 
-function photoStatus(phase: RingPhase, isSaving: boolean, hasPhoto: boolean): PhotoStatus {
+/** Linha abaixo do nome: o que está acontecendo com o perfil (a foto e os campos gravam o mesmo perfil). */
+function photoStatus(phase: RingPhase, isSaving: boolean): PhotoStatus {
   if (phase === "fill") return { text: isSaving ? "Salvando perfil…" : "Enviando foto…", icon: LoaderCircle, className: "text-fg-secondary" };
-  if (phase === "done") return { text: isSaving ? "Perfil salvo" : "Foto atualizada", icon: CircleCheck, className: "text-accent-text" };
-  return { text: hasPhoto ? "Alterar foto" : "Adicionar foto", icon: Camera, className: "text-accent-text" };
+  if (phase === "done") return { text: "Perfil atualizado", icon: CircleCheck, className: "text-accent-text" };
+  return { text: "Alterar perfil", icon: Pencil, className: "text-accent-text" };
 }
 
 function SectionTitle({ id, children }: { id: string; children: string }) {
@@ -180,7 +181,7 @@ function EditProfileForm({
   const p = hero.progress;
   const orbSize = Math.round(ORB_OPEN_PX - (ORB_OPEN_PX - ORB_COLLAPSE_PX) * p);
   const displayName = values.name?.trim() || "Seu nome";
-  const status = photoStatus(ring.phase, isSaving, Boolean(shownAvatar));
+  const status = photoStatus(ring.phase, isSaving);
   const handleError = errors.handle?.message ?? (availability === "taken" ? "Esse nome de usuário já está em uso. Tente outro." : undefined);
 
   const requestBack = () => (isDirty ? setLeaveOpen(true) : onBack());
@@ -229,7 +230,7 @@ function EditProfileForm({
               className="absolute grid size-[34px] place-items-center rounded-pill border-[3px] border-background bg-accent text-accent-foreground transition-[scale,right,bottom] duration-[380ms] ease-overshoot"
               style={{ right: Math.round(2 - 4 * p), bottom: Math.round(2 - 4 * p), scale: 1 - p * 0.25 }}
             >
-              <Icon icon={Camera} size={15} />
+              <Icon icon={Pencil} size={15} />
             </span>
           </button>
           <div
