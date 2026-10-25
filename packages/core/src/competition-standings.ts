@@ -8,6 +8,8 @@ import type { RankedCompetitor } from "./competition-ranking";
 
 /** Pessoas por página no ranking (o banco aceita até 50). */
 export const COMPETITION_PAGE_SIZE = 10;
+/** Pessoas por página ao escolher o adversário do duelo (o banco aceita até 20). */
+export const RIVAL_PAGE_SIZE = 5;
 /** Quantas posições à frente e atrás vêm com a sua (cartão "Sua posição"; empates pedem folga). */
 export const STANDINGS_NEAR_RADIUS = 3;
 /** Pessoas do topo que aparecem no gráfico da corrida junto com você e o adversário. */

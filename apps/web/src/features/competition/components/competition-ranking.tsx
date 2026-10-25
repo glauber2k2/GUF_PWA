@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeftRight, Check, ChevronDown, Crown } from "lucide-react";
+import { ArrowLeftRight, ChevronDown, Crown } from "lucide-react";
 import { formatNumber, metricValue, rankLabel, type CompetitorTotals, type RankedCompetitor } from "@guf/core";
-import { Avatar, BottomSheet, Icon, StreakFlame } from "@/shared/components/ds";
+import { Avatar, Icon, StreakFlame } from "@/shared/components/ds";
 import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
 import { PODIUM_TONE_STYLES, podiumTone } from "@/features/competition/constants/podium-tones";
 import { cn } from "@/shared/helpers/class-names";
@@ -157,86 +156,48 @@ function RivalSide({ rival }: { rival: RankedCompetitor }) {
   );
 }
 
-/** Adversário que pode ser trocado por outra pessoa do ranking (tela geral da competição). */
-function RivalPicker({ rival, candidates, onPick }: { rival: RankedCompetitor; candidates: RankedCompetitor[]; onPick: (userId: string) => void }) {
-  const [open, setOpen] = useState(false);
+/** Adversário com o botão de trocar (abre o seletor, que fica fora do cartão: RivalPickerSheet). */
+function RivalTrigger({ rival, onChange }: { rival: RankedCompetitor; onChange: () => void }) {
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={`Duelando com ${firstName(rival)}. Trocar adversário`}
-        className="flex min-w-0 cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border-strong px-1 pt-2 pb-2.5 text-fg hover:bg-surface-3 active:scale-[0.97]"
-      >
-        <span className="relative grid rounded-pill border-2 border-data p-0.5">
-          <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
-          <span className="absolute -right-1 -bottom-1 grid size-6 place-items-center rounded-pill border border-border-strong bg-surface-elevated">
-            <Icon icon={ArrowLeftRight} size={13} />
-          </span>
+    <button
+      type="button"
+      onClick={onChange}
+      aria-label={`Duelando com ${firstName(rival)}. Trocar adversário`}
+      aria-haspopup="dialog"
+      className="flex min-w-0 cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-dashed border-border-strong px-1 pt-2 pb-2.5 text-fg hover:bg-surface-3 active:scale-[0.97]"
+    >
+      <span className="relative grid rounded-pill border-2 border-data p-0.5">
+        <Avatar src={rival.avatarUrl} name={rival.name ?? rival.handle} size="lg" />
+        <span className="absolute -right-1 -bottom-1 grid size-6 place-items-center rounded-pill border border-border-strong bg-surface-elevated">
+          <Icon icon={ArrowLeftRight} size={13} />
         </span>
-        <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
-        <span className="flex items-center gap-0.5 text-xs leading-4 font-semibold text-data">
-          Trocar
-          <Icon icon={ChevronDown} size={14} />
-        </span>
-      </button>
-
-      <BottomSheet placement="screen" open={open} onClose={() => setOpen(false)} title="Duelar com">
-        <div role="radiogroup" aria-label="Escolher adversário" className="flex max-h-[60vh] flex-col gap-1.5 overflow-y-auto">
-          {candidates.map((c) => {
-            const on = c.userId === rival.userId;
-            return (
-              <button
-                key={c.userId}
-                type="button"
-                role="radio"
-                aria-checked={on}
-                onClick={() => {
-                  onPick(c.userId);
-                  setOpen(false);
-                }}
-                className={cn(
-                  "flex min-h-16 cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-left text-fg active:scale-[0.98]",
-                  on ? "border-[1.5px] border-data bg-surface-elevated" : "border border-border",
-                )}
-              >
-                <span className="w-[22px] flex-none text-center font-display text-lg font-bold text-fg-muted tabular-nums">{c.rank}</span>
-                <Avatar src={c.avatarUrl} name={c.name ?? c.handle} size="md" />
-                <span className="min-w-0 flex-1 truncate text-[15px] leading-5 font-semibold">{c.name ?? `@${c.handle}`}</span>
-                <span className={cn("grid size-6 flex-none place-items-center rounded-pill", on ? "bg-data text-accent-foreground" : "border-[1.5px] border-border-strong")}>
-                  {on && <Icon icon={Check} size={14} />}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </BottomSheet>
-    </>
+      </span>
+      <span className="max-w-full truncate text-sm leading-5 font-semibold">{firstName(rival)}</span>
+      <span className="flex items-center gap-0.5 text-xs leading-4 font-semibold text-data">
+        Trocar
+        <Icon icon={ChevronDown} size={14} />
+      </span>
+    </button>
   );
 }
 
 /** Menor fatia de um lado da barra do duelo (quem tem 0 ainda aparece). */
 const MIN_BAR_SHARE = 0.04;
 
-export interface DuelPicker {
-  candidates: RankedCompetitor[];
-  onPick: (userId: string) => void;
-}
-
 /**
  * Duelo: você contra uma pessoa em cada métrica.
- * @param picker sem ele, o adversário é fixo (duelo aberto pelo perfil da pessoa)
+ * @param onChangeRival sem ele, o adversário é fixo (duelo aberto pelo perfil da pessoa)
  */
 export function DuelCard({
   me,
   rival,
   formatVolume,
-  picker,
+  onChangeRival,
 }: {
   me: RankedCompetitor;
   rival: RankedCompetitor;
   formatVolume: (value: number) => string;
-  picker?: DuelPicker;
+  onChangeRival?: () => void;
 }) {
   const count = (value: number) => formatNumber(value, 0);
   const pick = (totals: CompetitorTotals, key: "points" | "workouts" | "volume" | "records") => metricValue(totals, key);
@@ -266,7 +227,7 @@ export function DuelCard({
           <span className="text-xs leading-4 text-fg-muted">{rankLabel(me.rank)} lugar</span>
         </div>
         <span className="font-display text-2xl font-bold text-fg-muted">VS</span>
-        {picker ? <RivalPicker rival={rival} candidates={picker.candidates} onPick={picker.onPick} /> : <RivalSide rival={rival} />}
+        {onChangeRival ? <RivalTrigger rival={rival} onChange={onChangeRival} /> : <RivalSide rival={rival} />}
       </div>
       <div className="flex flex-col gap-3.5">
         {rows.map((r) => {

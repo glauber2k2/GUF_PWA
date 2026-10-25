@@ -1,5 +1,6 @@
 import {
   COMPETITION_PAGE_SIZE,
+  RIVAL_PAGE_SIZE,
   type CompetitionDayStat,
   type CompetitionMetric,
   type CompetitionParameters,
@@ -39,6 +40,8 @@ export interface CompetitionApi {
   getStandingsNearMe: (client: GufClient, query: StandingsQuery & { radius: number }) => Result<CompetitionStandingsPage>;
   /** Pessoas específicas com a posição na classificação geral (até 10). */
   getStandingsOf: (client: GufClient, query: StandingsQuery & { userIds: string[] }) => Result<CompetitionStanding[]>;
+  /** Adversários possíveis (todos menos você), buscando por nome ou @, 5 por página, com o total do filtro. */
+  searchRivals: (client: GufClient, query: StandingsQuery & { search: string; page: number }) => Result<CompetitionStandingsPage>;
   /** Semanas e dias só das pessoas pedidas (até 10). */
   getCompetitionSeries: (client: GufClient, query: CompetitionRange & { userIds: string[] }) => Result<CompetitionSeries>;
   /** Parâmetros vigentes na temporada da data (regras públicas da pontuação). */
@@ -169,6 +172,20 @@ export const getStandingsOf: CompetitionApi["getStandingsOf"] = (client, { from,
     (rows) => (rows ?? []).map((row) => toStanding(client, row)),
   );
 
+export const searchRivals: CompetitionApi["searchRivals"] = (client, { from, to, metric, search, page }) =>
+  runStandings(
+    () =>
+      client.rpc("search_competition_rivals", {
+        p_from: from,
+        p_to: to,
+        p_metric: metric,
+        p_query: search.trim() || undefined,
+        p_offset: (Math.max(page, 1) - 1) * RIVAL_PAGE_SIZE,
+        p_limit: RIVAL_PAGE_SIZE,
+      }),
+    (rows) => toPage(client, rows),
+  );
+
 export const getCompetitionSeries: CompetitionApi["getCompetitionSeries"] = async (client, { from, to, userIds }) => {
   if (userIds.length === 0) return { data: { weeks: [], days: [] }, error: null };
   try {
@@ -283,6 +300,7 @@ export const competitionApi = {
   getCompetitionStandings,
   getStandingsNearMe,
   getStandingsOf,
+  searchRivals,
   getCompetitionSeries,
   getCompetitionParameters,
   getPointsStatement,

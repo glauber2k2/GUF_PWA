@@ -1,7 +1,7 @@
 "use client";
 
 import { LocateFixed } from "lucide-react";
-import { pageOfPosition, paginationSlots, standingsPageCount, standingsPageLabel } from "@guf/core";
+import { COMPETITION_PAGE_SIZE, pageOfPosition, paginationSlots, standingsPageCount, standingsPageLabel } from "@guf/core";
 import { Icon } from "@/shared/components/ds";
 import {
   Pagination,
@@ -13,23 +13,26 @@ import {
   PaginationPrevious,
 } from "@/shared/components/ui/pagination";
 
-interface RankingPaginationProps {
+interface StandingsPaginationProps {
   page: number;
   total: number;
-  /** Sua posição na classificação (para o atalho "Ir para a minha posição"). */
-  myPosition: number | null;
+  /** Pessoas por página (ranking 10, escolha do adversário 5). */
+  pageSize?: number;
+  /** Sua posição na classificação: mostra o atalho "Ir para a minha posição" (só no ranking). */
+  myPosition?: number | null;
   isFetching: boolean;
   onPage: (page: number) => void;
 }
 
 /**
- * Páginas do ranking (10 pessoas cada, pedidas ao banco): anterior/próxima, a primeira, a última e as
- * vizinhas da atual, e o atalho para a página em que você está. Some com uma página só.
+ * Páginas de uma lista da competição pedida ao banco (ranking ou escolha do adversário): anterior/
+ * próxima, a primeira, a última e as vizinhas da atual e, no ranking, o atalho para a sua página.
+ * Some com uma página só.
  */
-export function RankingPagination({ page, total, myPosition, isFetching, onPage }: RankingPaginationProps) {
-  const pages = standingsPageCount(total);
+export function StandingsPagination({ page, total, pageSize = COMPETITION_PAGE_SIZE, myPosition = null, isFetching, onPage }: StandingsPaginationProps) {
+  const pages = standingsPageCount(total, pageSize);
   if (pages <= 1) return null;
-  const myPage = myPosition ? pageOfPosition(myPosition) : null;
+  const myPage = myPosition ? pageOfPosition(myPosition, pageSize) : null;
 
   return (
     <div className="flex flex-col items-center gap-2" aria-busy={isFetching || undefined}>
@@ -58,7 +61,7 @@ export function RankingPagination({ page, total, myPosition, isFetching, onPage 
       </Pagination>
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[13px] text-fg-muted">
         <span aria-live="polite" className="tabular-nums">
-          {standingsPageLabel(page, total)}
+          {standingsPageLabel(page, total, pageSize)}
         </span>
         {myPage && myPage !== page && (
           <button
