@@ -5,8 +5,39 @@ import { ArrowLeftRight, Check, ChevronDown, Crown } from "lucide-react";
 import { formatNumber, metricValue, rankLabel, type CompetitorTotals, type RankedCompetitor } from "@guf/core";
 import { Avatar, BottomSheet, Icon, StreakFlame } from "@/shared/components/ds";
 import { CompetitorAvatar } from "@/features/competition/components/competitor-avatar";
+import { PODIUM_TONE_STYLES, podiumTone } from "@/features/competition/constants/podium-tones";
 import { cn } from "@/shared/helpers/class-names";
 import { firstName, movementOf } from "@/features/competition/components/position-card";
+
+interface PodiumPlaceProps {
+  competitor: RankedCompetitor;
+  /** Lugar do centro (o mais alto, com a coroa). */
+  isCenter: boolean;
+  heightClass: string;
+  format: (value: number) => string;
+}
+
+/** Um lugar do pódio: foto, nome, valor e o degrau, com o destaque do tom (podiumTone). */
+function PodiumPlace({ competitor: c, isCenter, heightClass, format }: PodiumPlaceProps) {
+  const tone = PODIUM_TONE_STYLES[podiumTone(c.rank, c.isMe)];
+  return (
+    <div className="flex min-w-0 flex-col items-center gap-2">
+      <div className="relative grid place-items-center pt-[18px]">
+        {isCenter && <Icon icon={Crown} size={22} className={cn("absolute top-0", tone.crown)} />}
+        <span className={cn("grid rounded-pill border-2 p-0.5", tone.ring)}>
+          <CompetitorAvatar competitor={c} size={isCenter ? "lg" : "md"} />
+        </span>
+      </div>
+      <div className="flex w-full min-w-0 flex-col items-center">
+        <span className="max-w-full truncate text-[13px] leading-[18px] font-semibold">{firstName(c)}</span>
+        <span className="font-display text-xl leading-6 font-semibold text-fg-secondary tabular-nums">{format(c.value)}</span>
+      </div>
+      <div className={cn("grid w-full place-items-start justify-center rounded-t-md pt-2 transition-[height] duration-300 ease-standard", heightClass, tone.step)}>
+        <span className="font-display text-[32px] leading-9 font-bold">{c.rank}</span>
+      </div>
+    </div>
+  );
+}
 
 /** Pódio: 2º, 1º e 3º com degraus de alturas diferentes. */
 export function Podium({ ranking, label, format }: { ranking: RankedCompetitor[]; label: string; format: (value: number) => string }) {
@@ -20,31 +51,7 @@ export function Podium({ ranking, label, format }: { ranking: RankedCompetitor[]
       </div>
       <div className="grid grid-cols-3 items-end gap-2">
         {order.map((c, i) =>
-          c ? (
-            <div key={c.userId} className="flex min-w-0 flex-col items-center gap-2">
-              <div className="relative grid place-items-center pt-[18px]">
-                {i === 1 && <Icon icon={Crown} size={22} className="absolute top-0 text-accent-text" />}
-                <span className={cn("grid rounded-pill border-2 p-0.5", c.isMe ? "border-accent" : i === 1 ? "border-accent-text" : "border-transparent")}>
-                  <CompetitorAvatar competitor={c} size={i === 1 ? "lg" : "md"} />
-                </span>
-              </div>
-              <div className="flex w-full min-w-0 flex-col items-center">
-                <span className="max-w-full truncate text-[13px] leading-[18px] font-semibold">{firstName(c)}</span>
-                <span className="font-display text-xl leading-6 font-semibold text-fg-secondary tabular-nums">{format(c.value)}</span>
-              </div>
-              <div
-                className={cn(
-                  "grid w-full place-items-start justify-center rounded-t-md pt-2 transition-[height] duration-300 ease-standard",
-                  heights[i],
-                  c.isMe || i === 1 ? "bg-accent text-accent-foreground" : "bg-surface-3 text-fg-secondary",
-                )}
-              >
-                <span className="font-display text-[32px] leading-9 font-bold">{c.rank}</span>
-              </div>
-            </div>
-          ) : (
-            <div key={`vazio-${i}`} />
-          ),
+          c ? <PodiumPlace key={c.userId} competitor={c} isCenter={i === 1} heightClass={heights[i] ?? ""} format={format} /> : <div key={`vazio-${i}`} />,
         )}
       </div>
     </section>
