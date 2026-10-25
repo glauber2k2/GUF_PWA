@@ -4,8 +4,9 @@ import { useState, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, CircleAlert, ScrollText } from "lucide-react";
 import type { ApiError } from "@guf/api";
 import type { AdminUserDetail } from "@guf/api/admin";
-import { describeReason, isReasonComplete, type ChangeReason } from "@guf/core";
+import { describeReason, isConfirmationTyped, isReasonComplete, type ChangeReason } from "@guf/core";
 import { Banner, Button, Icon } from "@guf/ui";
+import { ConfirmationWordField } from "@/features/people/components/confirmation-word-field";
 import { ReasonFields } from "@/features/people/components/reason-fields";
 import { displayName } from "@/features/people/helpers/people";
 import { Dialog, DialogActions } from "@/shared/components/dialog";
@@ -31,7 +32,13 @@ interface AccountChangeDialogProps {
   onSaved: (message: string) => void;
   /** Aviso de sucesso. */
   doneMessage: string;
+  /** Palavra a digitar na revisão antes de confirmar (mudança sensível, ex.: plano). */
+  confirmationWord?: string;
+  /** Texto abaixo do resumo (o que acontece ao confirmar). */
+  reviewNotice?: string;
 }
+
+const DEFAULT_REVIEW_NOTICE = "A mudança vale na hora, a pessoa recebe um aviso no app e fica registrada na auditoria com seu nome.";
 
 /**
  * Moldura comum de "Editar @", "Editar nome" e "Mudar plano" (protótipo 5a–5e): valor novo, motivo
@@ -50,6 +57,8 @@ export function AccountChangeDialog({
   onClose,
   onSaved,
   doneMessage,
+  confirmationWord,
+  reviewNotice = DEFAULT_REVIEW_NOTICE,
 }: AccountChangeDialogProps) {
   const [stage, setStage] = useState<"form" | "review">("form");
   const [reason, setReason] = useState<ChangeReason | null>(null);
@@ -57,6 +66,9 @@ export function AccountChangeDialog({
   const [tried, setTried] = useState(false);
   const [isSaving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<ApiError | null>(null);
+  const [typedWord, setTypedWord] = useState("");
+  const [triedConfirm, setTriedConfirm] = useState(false);
+  const isWordTyped = !confirmationWord || isConfirmationTyped(typedWord, confirmationWord);
   const isReasonValid = isReasonComplete(reason, note);
 
   const toReview = () => {
@@ -65,7 +77,8 @@ export function AccountChangeDialog({
   };
 
   const confirm = async () => {
-    if (!reason) return;
+    setTriedConfirm(true);
+    if (!reason || !isWordTyped) return;
     setSaving(true);
     setSaveError(null);
     try {
@@ -121,8 +134,16 @@ export function AccountChangeDialog({
           </Panel>
           <span className="flex items-start gap-2 text-[13px] text-fg-secondary">
             <Icon icon={ScrollText} size={15} className="mt-0.5 flex-none" />
-            A mudança vale na hora, a pessoa recebe um aviso no app e fica registrada na auditoria com seu nome.
+            {reviewNotice}
           </span>
+          {confirmationWord && (
+            <ConfirmationWordField
+              word={confirmationWord}
+              value={typedWord}
+              onChange={setTypedWord}
+              error={triedConfirm && !isWordTyped ? `Digite ${confirmationWord} para confirmar.` : undefined}
+            />
+          )}
           {saveError && <Banner tone="danger">{saveError.message}</Banner>}
           <DialogActions>
             <Button variant="secondary" size="tall" fullWidth icon={ArrowLeft} onClick={() => setStage("form")} disabled={isSaving}>

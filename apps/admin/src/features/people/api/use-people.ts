@@ -59,7 +59,7 @@ export function useUpdateName() {
 
 export function useSetPlan() {
   const { apis } = useAdminApi();
-  return useAccountMutation((input: ReasonInput & { userId: string; planCode: string; validUntil: string | null }) =>
+  return useAccountMutation((input: ReasonInput & { userId: string; planCode: string; validUntil: string | null; notify: boolean }) =>
     apis.users.setPlan(getSupabaseClient(), input),
   );
 }

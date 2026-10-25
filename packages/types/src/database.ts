@@ -1624,6 +1624,7 @@ export type Database = {
       admin_set_plan: {
         Args: {
           p_note?: string
+          p_notify?: boolean
           p_plan_code: string
           p_reason: string
           p_user_id: string

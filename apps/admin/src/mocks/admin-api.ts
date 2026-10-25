@@ -175,7 +175,7 @@ export const mockAdminUsersApi = {
     audit("staff_changed_name", userId, `@${found.handle}`, { reason, field: "name" });
     return { data: null, error: null };
   },
-  async setPlan(client, { userId, planCode, validUntil, reason }) {
+  async setPlan(client, { userId, planCode, validUntil, reason, notify }) {
     const denied = await guard(client, "change_plan");
     if (denied) return fail(denied);
     const found = getMockDb().people.find((p) => p.userId === userId);
@@ -184,7 +184,7 @@ export const mockAdminUsersApi = {
     if (planCode === "pro") {
       found.planGrants.unshift({ id: crypto.randomUUID(), planCode, planName: "Pro", source: "manual", validFrom: new Date().toISOString(), validUntil, revokedAt: null });
     }
-    audit("staff_changed_plan", userId, `@${found.handle}`, { reason, plan: planCode });
+    audit("staff_changed_plan", userId, `@${found.handle}`, { reason, plan: planCode, notified: notify });
     return { data: null, error: null };
   },
   async unlinkLogin(client, { userId, provider }) {
@@ -277,8 +277,8 @@ export const mockAdminUsersApi = {
     ignoreClient(client);
     return {
       data: [
-        { code: "free", name: "Free", isDefault: true },
-        { code: "pro", name: "Pro", isDefault: false },
+        { code: "free", name: "Free", isDefault: true, rank: 0 },
+        { code: "pro", name: "Pro", isDefault: false, rank: 20 },
       ],
       error: null,
     };

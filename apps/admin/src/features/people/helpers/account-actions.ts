@@ -1,5 +1,5 @@
 import { Ban, CalendarClock, CalendarX, Crown, KeyRound, ShieldCheck, Trash2, Unlink, type LucideIcon } from "lucide-react";
-import type { ChangeReason, StaffPermission } from "@guf/core";
+import { STAFF_CONFIRMATION_WORD, type ChangeReason, type StaffPermission } from "@guf/core";
 
 /** Ações de conta que valem para uma pessoa ou para várias selecionadas (cada uma vai ao banco à parte). */
 export type AccountActionKind = "plan" | "unlink_social" | "reset_password" | "ban" | "unban" | "delete" | "schedule_deletion" | "cancel_deletion";
@@ -10,7 +10,7 @@ interface Reasoned {
 }
 
 export type AccountActionInput =
-  | ({ kind: "plan"; planCode: string; validUntil: string | null } & Reasoned)
+  | ({ kind: "plan"; planCode: string; validUntil: string | null; notify: boolean } & Reasoned)
   | { kind: "unlink_social"; note: string }
   | ({ kind: "reset_password" } & Reasoned)
   | ({ kind: "ban"; endsAt: string | null } & Reasoned)
@@ -30,6 +30,8 @@ export interface AccountActionMeta {
   tone: ActionTone;
   /** O que acontece com a pessoa (texto do diálogo). */
   consequence: string;
+  /** Palavra que a equipe digita para confirmar (mudança sensível); sem ela, confirma direto. */
+  confirmationWord?: string;
 }
 
 /** neutral = comum · caution = muda o acesso da pessoa · destructive = não tem volta. */
@@ -58,7 +60,8 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     icon: Crown,
     permission: "change_plan",
     tone: "neutral",
-    consequence: "O plano muda na hora e a pessoa recebe um aviso no app. Contas com assinatura paga ativa não mudam.",
+    consequence: "O plano muda na hora. Contas com assinatura paga ativa não mudam.",
+    confirmationWord: STAFF_CONFIRMATION_WORD,
   },
   unlink_social: {
     label: "Desvincular logins sociais",
@@ -106,6 +109,7 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     tone: "destructive",
     consequence:
       "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer. Por violação dos Termos, use \"Agendar exclusão\" (avisa a pessoa e dá tempo de exportar); excluir agora só a pedido da pessoa ou em caso grave.",
+    confirmationWord: "EXCLUIR",
   },
   schedule_deletion: {
     label: "Agendar exclusão",
@@ -133,8 +137,6 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
  */
 export const BULK_ACTIONS: AccountActionKind[] = ["plan", "unlink_social", "ban", "schedule_deletion", "delete"];
 
-/** Palavra que a equipe digita para confirmar a exclusão imediata. */
-export const DELETE_CONFIRM_WORD = "EXCLUIR";
 
 /** Alvo de uma ação: id e o nome que aparece no resultado. */
 export interface AccountTarget {
