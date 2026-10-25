@@ -29,6 +29,8 @@ export * from "./competition-statement";
 export * from "./ai";
 export * from "./set-metrics";
 export * from "./cardio";
+export * from "./cardio-records";
+export * from "./image-crop";
 export * from "./plans";
 export * from "./plan-import";
 export * from "./body-measurements";

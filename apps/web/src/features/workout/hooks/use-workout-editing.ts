@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { ArrowLeftRight, NotepadText, Plus, Trash2 } from "lucide-react";
 import type { ActiveWorkout, ExerciseContext, LibraryExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
-import { markRecordSets, MAX_SET_DURATION_SECONDS, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
+import { buildExerciseRecord, EMPTY_SET_VALUES, formatRecordValue, markExerciseRecordSets, MAX_SET_DURATION_SECONDS, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
 import type { ToastOptions } from "@/features/app-shell";
 import { buildWorkoutExercise } from "@/features/workout/helpers/workout-builders";
 import {
@@ -37,6 +37,8 @@ export interface SetEditTarget {
   exerciseId: string;
   setIndex: number;
   field: EditableField;
+  /** Série nova do cardio digitada na folha: entra concluída ao terminar com tempo; sem tempo, é descartada. */
+  isNewCardioSet?: boolean;
 }
 
 /** Série de cardio registrada pelo cronômetro ou digitada (km opcional). */
@@ -122,6 +124,13 @@ export function useWorkoutEditing({
 
   /* ---------- Séries ---------- */
 
+  /** Toast de recorde quando a série `setIndex` passou a ser a do recorde do exercício. */
+  const announceRecord = (ex: ExerciseView, sets: readonly WorkoutSet[], setIndex: number, haptic: boolean) => {
+    const built = buildExerciseRecord(ex, sets);
+    if (!built || built.setIndex !== setIndex) return;
+    showToast("Recorde pessoal", { tone: "pr", message: `${ex.name} – ${formatRecordValue(built.record, unit)}`, haptic });
+  };
+
   const toggleSet = (exerciseIndex: number, setIndex: number) => {
     const ex = state.exercises[exerciseIndex];
     const set = ex?.sets[setIndex];
@@ -134,7 +143,7 @@ export function useWorkoutEditing({
       return;
     }
     const nextSets = ex.sets.map((s, i) => (i === setIndex ? { ...s, isCompleted: true } : s));
-    const isRecord = markRecordSets(nextSets, ex.best1RmKg)[setIndex] ?? false;
+    const isRecord = markExerciseRecordSets(ex, nextSets)[setIndex] ?? false;
     vibrate(isRecord ? [20, 40, 20] : 15);
     setPopped(`${ex.id}:${setIndex}`);
     onSetCompleted?.(
@@ -142,10 +151,8 @@ export function useWorkoutEditing({
       exerciseIndex,
       setIndex,
     );
-    if (isRecord) {
-      // A conclusão da série já vibrou com o padrão de recorde.
-      showToast("Recorde pessoal", { tone: "pr", message: `${ex.name} – ${setMetricFor(ex.muscleGroup).formatFull(set, unit)}`, haptic: false });
-    }
+    // A conclusão da série já vibrou com o padrão de recorde.
+    if (isRecord) announceRecord(ex, nextSets, setIndex, false);
   };
 
   const cycleType = (ex: ExerciseView, setIndex: number) => {
@@ -206,8 +213,44 @@ export function useWorkoutEditing({
     dispatch({ type: "setField", exerciseId: edit.exerciseId, setIndex: edit.setIndex, field, value: stored });
   };
 
+  // A série aberta já era a do recorde? Terminar a edição só avisa recorde novo (corrigir um valor não repete o aviso).
+  const editStartedAsRecord = useRef(false);
+
+  const startEdit = (target: SetEditTarget) => {
+    const ex = state.exercises.find((e) => e.id === target.exerciseId);
+    editStartedAsRecord.current = ex ? (markExerciseRecordSets(ex, ex.sets)[target.setIndex] ?? false) : false;
+    setEdit(target);
+  };
+
+  /** Cardio "Manual": abre a folha numa série nova (vazia, ainda fora da lista) no campo do tempo. */
+  const addManualCardioSet = (ex: ExerciseView) => {
+    const set: WorkoutSet = { ...newSetFrom(ex), ...EMPTY_SET_VALUES, isCompleted: false };
+    dispatch({ type: "addSet", exerciseId: ex.id, set });
+    editStartedAsRecord.current = false;
+    setEdit({ exerciseId: ex.id, setIndex: ex.sets.length, field: "durationSeconds", isNewCardioSet: true });
+  };
+
+  /** Série nova do cardio: registrada só com tempo (como o cronômetro); sem tempo, sai sem gravar nada. */
+  const finishNewCardioSet = (ex: ExerciseView, set: WorkoutSet, setIndex: number) => {
+    if (!set.durationSeconds) {
+      dispatch({ type: "removeSet", exerciseId: ex.id, setIndex });
+      return;
+    }
+    const completed = { ...set, isCompleted: true };
+    dispatch({ type: "replaceSet", exerciseId: ex.id, setIndex, set: completed });
+    sink.saveSet(ex.id, completed);
+    vibrate([20, 40, 20]);
+    announceRecord(ex, ex.sets.map((s, i) => (i === setIndex ? completed : s)), setIndex, false);
+  };
+
   const finishEdit = () => {
-    if (editExercise && editSet) sink.saveSet(editExercise.id, editSet);
+    if (edit && editExercise && editSet) {
+      if (edit.isNewCardioSet) finishNewCardioSet(editExercise, editSet, edit.setIndex);
+      else {
+        sink.saveSet(editExercise.id, editSet);
+        if (!editStartedAsRecord.current) announceRecord(editExercise, editExercise.sets, edit.setIndex, true);
+      }
+    }
     setEdit(null);
   };
 
@@ -227,18 +270,10 @@ export function useWorkoutEditing({
     else dispatch({ type: "addSet", exerciseId, set });
     sink.saveSet(exerciseId, set);
     vibrate([20, 40, 20]);
+    const setIndex = open ? openIndex : ex.sets.length;
+    const nextSets = open ? ex.sets.map((s, i) => (i === openIndex ? set : s)) : [...ex.sets, set];
+    announceRecord(ex, nextSets, setIndex, false);
     return set.id;
-  };
-
-  /** Distância (km) completada depois numa série de cardio; null apaga. */
-  const setDistance = (exerciseId: string, setId: string, distanceKm: number | null) => {
-    const ex = state.exercises.find((e) => e.id === exerciseId);
-    const setIndex = ex?.sets.findIndex((s) => s.id === setId) ?? -1;
-    const set = ex?.sets[setIndex];
-    if (!ex || !set || set.distanceKm === distanceKm) return;
-    const next = { ...set, distanceKm };
-    dispatch({ type: "replaceSet", exerciseId, setIndex, set: next });
-    sink.saveSet(exerciseId, next);
   };
 
   /* ---------- Exercícios ---------- */
@@ -336,12 +371,12 @@ export function useWorkoutEditing({
     addSet,
     removeSet,
     logCardioSet,
-    setDistance,
+    addManualCardioSet,
     edit,
     editSet,
     editMetric,
     setEditTitle,
-    startEdit: (target: SetEditTarget) => setEdit(target),
+    startEdit,
     changeEditField,
     changeEditValue,
     finishEdit,

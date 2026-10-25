@@ -1,5 +1,6 @@
 import { addDays, addMonths, differenceInCalendarDays, format, getDaysInMonth, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { mergeCardioBests, type CardioBest } from "./cardio-records";
 import { fromLocalISODate, startOfLocalWeek, toLocalISODate, weekdayPosition } from "./dates";
 
 /**
@@ -244,12 +245,12 @@ export interface ExerciseSessionBest {
 }
 
 /** Treinos concluídos ANTES de `sessionId`: dias anteriores e, no mesmo dia, os que terminaram antes. */
-function sessionsBefore(
-  history: readonly ExerciseSessionBest[],
+function sessionsBefore<T extends { sessionId: string; performedOn: string }>(
+  history: readonly T[],
   sessionId: string,
   performedOn: string,
   earlierSameDay: ReadonlySet<string>,
-): ExerciseSessionBest[] {
+): T[] {
   return history.filter(
     (h) => h.sessionId !== sessionId && (h.performedOn < performedOn || (h.performedOn === performedOn && earlierSameDay.has(h.sessionId))),
   );
@@ -291,6 +292,25 @@ export function previousBest1Rm(
     }
   }
   return best;
+}
+
+/** Melhores marcas de cardio de um treino concluído (ver cardio-records.ts). */
+export interface CardioSessionBest extends CardioBest {
+  sessionId: string;
+  performedOn: string;
+}
+
+/**
+ * Melhores marcas de cardio ANTES do treino (mesma janela do sessionRecord1Rm): o recorde a bater.
+ * @returns null = primeira vez do exercício (sem recorde).
+ */
+export function previousCardioBest(
+  history: readonly CardioSessionBest[],
+  sessionId: string,
+  performedOn: string,
+  earlierSameDay: ReadonlySet<string>,
+): CardioBest | null {
+  return mergeCardioBests(sessionsBefore(history, sessionId, performedOn, earlierSameDay));
 }
 
 /* ---------------------------------------------------------------------

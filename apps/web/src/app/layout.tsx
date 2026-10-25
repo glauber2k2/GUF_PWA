@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { ServiceWorkerUpdater } from "@/features/pwa";
 import { THEME_BOOT_SCRIPT } from "@/shared/preferences/theme";
 import { Providers } from "./providers";
+import { StatusBarBackdrop } from "@/shared/components/status-bar-backdrop";
 import "./globals.css";
 
 // Fontes do design system (subset latin: cobre todo o português). Arquivos em ./fonts.
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col">
+        <StatusBarBackdrop />
         <Providers>{children}</Providers>
         <ServiceWorkerUpdater />
       </body>

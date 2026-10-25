@@ -17,7 +17,7 @@ export interface CardioTimerControls {
   start: () => void;
   pause: () => void;
   resume: () => void;
-  /** Para e registra a série; devolve o id dela (para abrir o campo de km). */
+  /** Para e registra a série; devolve o id dela (null quando nada foi registrado). */
   stop: () => string | null;
   /** Descarta o tempo sem registrar. */
   discard: () => void;

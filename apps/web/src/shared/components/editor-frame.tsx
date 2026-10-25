@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { ChevronLeft, ClipboardList, type LucideIcon } from "lucide-react";
 import { Icon, IconButton } from "@/shared/components/ds";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 
 export interface EditorFrameProps {
   title: string;
@@ -38,7 +39,7 @@ export function EditorFrame({ title, projectName, onBack, backIcon = ChevronLeft
       </header>
       <div className="flex animate-guf-rise flex-col gap-4 px-4 pt-4">{children}</div>
       {bottomBar && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
           <div className="mx-auto max-w-[430px] px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">{bottomBar}</div>
         </div>
       )}

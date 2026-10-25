@@ -14,13 +14,14 @@ import {
 } from "@guf/core";
 import type { ApiError } from "@guf/api";
 import { Banner, Chip, ConfirmDialog, Icon, IconButton, SegmentedControl, Skeleton, TextAreaField, TextField } from "@/shared/components/ds";
-import { useAppShell, useRaisedToast } from "@/features/app-shell";
+import { useAppShell } from "@/features/app-shell";
 import { useCanEditProfile, useProfile } from "@/features/profile";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { cn } from "@/shared/helpers/class-names";
 import { useCanUseSocial, useMySocial } from "@/features/social/api/use-social";
 import { ProfilePhotoOrb } from "@/features/social/components/profile-photo-orb";
 import { ProfilePhotoSheet } from "@/features/social/components/profile-photo-sheet";
+import { AvatarCropDialog } from "@/features/social/components/avatar-crop-dialog";
 import { EditProfileSaveBar } from "@/features/social/components/edit-profile-save-bar";
 import { TRAINING_GOAL_ICONS } from "@/features/social/constants/training-goal-icons";
 import { useEditProfileForm, type EditProfileInitial } from "@/features/social/hooks/use-edit-profile-form";
@@ -165,14 +166,14 @@ function EditProfileForm({
   const canEdit = canEditProfile && canUseSocial;
   const ring = useRingPhase();
   const hero = useHeroCollapse();
-  const { inputRef: photoInputRef, pick: pickPhoto, onFile: onPhotoFile, removePhoto, changed: changedPhoto, isBusy: isPhotoBusy } = useAvatarChange(ring.run);
+  const photo = useAvatarChange(ring.run);
+  const { inputRef: photoInputRef, pick: pickPhoto, onFile: onPhotoFile, removePhoto, changed: changedPhoto, isBusy: isPhotoBusy } = photo;
   const { form, values, availability, changes, canSave, discard, save } = useEditProfileForm(initial);
   const [isSaving, setIsSaving] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
   const { errors } = form.formState;
   const isDirty = changes > 0;
-  useRaisedToast(isDirty || isSaving);
 
   const shownAvatar = changedPhoto ? changedPhoto.url : avatarUrl;
   const canRemovePhoto = changedPhoto ? changedPhoto.isUploaded : hasUploadedPhoto;
@@ -340,6 +341,10 @@ function EditProfileForm({
         onDiscard={discard}
         onSave={() => void submit()}
       />
+
+      {photo.cropSource && (
+        <AvatarCropDialog src={photo.cropSource} isSaving={photo.isPreparing} onCancel={photo.cancelCrop} onConfirm={(crop) => void photo.confirmCrop(crop)} />
+      )}
 
       <ProfilePhotoSheet
         open={sheetOpen}

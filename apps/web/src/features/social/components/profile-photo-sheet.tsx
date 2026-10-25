@@ -21,7 +21,7 @@ export function ProfilePhotoSheet({ open, canRemove, onClose, onPick, onRemove }
   return (
     <BottomSheet placement="screen" open={open} onClose={onClose} title="Foto de perfil">
       <div className="flex flex-col gap-2">
-        <SheetOption icon={ImageIcon} title="Escolher da galeria" subtitle="JPG ou PNG, quadrada fica melhor" onClick={choose(() => onPick("gallery"))} />
+        <SheetOption icon={ImageIcon} title="Escolher da galeria" subtitle="JPG ou PNG; você ajusta o recorte em seguida" onClick={choose(() => onPick("gallery"))} />
         <SheetOption icon={Camera} title="Tirar foto" subtitle="Usa a câmera frontal" onClick={choose(() => onPick("camera"))} />
         {canRemove && (
           <SheetOption icon={Trash2} title="Remover foto" subtitle="Volta para a foto da conta Google ou para a sua inicial" onClick={choose(onRemove)} />

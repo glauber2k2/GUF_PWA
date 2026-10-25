@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Archive, ChevronLeft, CircleCheck, Ellipsis, ListPlus, Plus, SearchX } from "lucide-react";
 import { groupProjects, highlightedRoutine, projectMeta, toLocalISODate } from "@guf/core";
 import type { Project, ProjectsOverview } from "@guf/api";
-import { useRaisedToast } from "@/features/app-shell";
 import { Banner, Button, EmptyState, IconButton, SheetOption, Skeleton } from "@/shared/components/ds";
 import { useProjectsOverview, useProjectsSource } from "@/features/projects/api/use-projects";
 import { OfflineEditBanner } from "@/features/projects/components/offline-edit-banner";
@@ -14,6 +13,7 @@ import { ActiveBadge, SectionLabel } from "@/features/projects/components/projec
 import { useProjectFlows } from "@/features/projects/components/project-flows";
 import { RoutineList } from "@/features/projects/components/routine-list";
 import { useProjectActions, type ProjectActions } from "@/features/projects/hooks/use-project-actions";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 
 /** /projetos/detalhe?id=… — rotinas do projeto (ordem, criar, renomear, arquivar) e ativação. */
 export function ProjectDetailScreen() {
@@ -90,7 +90,6 @@ function DetailContent({
   const showActivateBar = !project.isActive;
 
   // Barra "Ativar este projeto" fixa acima do menu: o toast sobe para não cobri-la.
-  useRaisedToast(showActivateBar);
 
   return (
     <DetailFrame
@@ -177,7 +176,7 @@ function DetailFrame({
       </header>
       <div className="flex animate-guf-rise flex-col gap-3 px-4 pt-3">{children}</div>
       {bottomBar && (
-        <div className="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[8] border-t border-border bg-background/92 backdrop-blur-[12px]">
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-0 bottom-[calc(76px+env(safe-area-inset-bottom))] z-[8] border-t border-border bg-background/92 backdrop-blur-[12px]">
           <div className="mx-auto max-w-[430px] px-4 py-3">{bottomBar}</div>
         </div>
       )}

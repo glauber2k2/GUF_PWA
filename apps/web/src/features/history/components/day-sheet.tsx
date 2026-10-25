@@ -4,11 +4,11 @@ import { Activity, ChevronRight, Trophy } from "lucide-react";
 import {
   formatElapsed,
   formatNumber,
+  formatRecordValue,
   formatShortDate,
   fromLocalISODate,
   plural,
   routineLetter,
-  TIMES_SIGN,
   toDisplayWeight,
   type WeightUnit,
 } from "@guf/core";
@@ -16,9 +16,8 @@ import type { DaySession } from "@guf/api";
 import { Banner, BottomSheet, Icon, Skeleton } from "@/shared/components/ds";
 import { useDaySessions } from "@/features/history/api/use-history";
 
-/** Volume sem casas (12.480 kg); carga com até 1 casa (82,5 kg). */
+/** Volume sem casas (12.480 kg). */
 const volumeText = (kg: number, unit: WeightUnit) => `${formatNumber(toDisplayWeight(kg, unit) ?? 0, 0)} ${unit}`;
-const loadText = (kg: number, unit: WeightUnit) => `${formatNumber(toDisplayWeight(kg, unit) ?? 0)} ${unit}`;
 
 export interface DaySheetProps {
   /** Dia aberto ("yyyy-MM-dd"); null = folha fechada. */
@@ -102,8 +101,7 @@ function DaySessionItem({
           </span>
           {records.map((r) => (
             <span key={r.exerciseName} className="text-[13px] leading-[18px] font-medium tabular-nums">
-              {r.exerciseName} · {loadText(r.weightKg, unit)}
-              {r.reps ? ` ${TIMES_SIGN} ${r.reps}` : ""}
+              {r.exerciseName} · {formatRecordValue(r, unit)}
             </span>
           ))}
         </span>

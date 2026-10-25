@@ -1,5 +1,6 @@
-import { pickSetValues, type ActivePeriod, type SetType, type SetValues, type WeightUnit } from "@guf/core";
+import { pickSetValues, type ActivePeriod, type CardioBest, type RecordValue, type SetType, type SetValues, type WeightUnit } from "@guf/core";
 import type { Database } from "@guf/types";
+import { fetchCardioBests } from "./cardio-history";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { fetchBestE1rm } from "./shared";
@@ -58,6 +59,8 @@ export interface WorkoutExercise {
   note: string | null;
   /** Maior 1RM estimado antes deste treino (o recorde a bater); null = primeira vez (sem PR). */
   best1RmKg: number | null;
+  /** Cardio: melhores marcas (ritmo e distância) antes deste treino; null = primeira vez (sem PR). */
+  cardioBest: CardioBest | null;
   sets: WorkoutSet[];
 }
 
@@ -77,11 +80,8 @@ export interface ActiveWorkout {
   exercises: WorkoutExercise[];
 }
 
-export interface PersonalRecord {
-  exerciseName: string;
-  weightKg: number;
-  reps: number;
-}
+/** Recorde batido no treino: de carga (a série que bateu o 1RM) ou de cardio (ritmo/velocidade ou distância). */
+export type PersonalRecord = { exerciseName: string } & RecordValue;
 
 /** Resumo devolvido ao finalizar (finish_workout). */
 export interface FinishedWorkoutSummary {
@@ -99,6 +99,7 @@ export interface FinishedWorkoutSummary {
 export interface ExerciseContext {
   previous: PreviousSet[];
   best1RmKg: number | null;
+  cardioBest: CardioBest | null;
   restSeconds: number;
   routineNote: string | null;
 }
@@ -238,14 +239,16 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
   try {
     const ids = [...new Set(exerciseIds)];
     if (ids.length === 0) return { data: {}, error: null };
-    const [lastRes, routineRes, bests] = await Promise.all([
+    const [lastRes, routineRes, bests, cardioBests] = await Promise.all([
       client.rpc("get_last_performance", { p_exercise_ids: ids }),
       routineId
         ? client.from("routine_exercises").select("exercise_id, rest_seconds, notes").eq("routine_id", routineId)
         : Promise.resolve({ data: [] as { exercise_id: string; rest_seconds: number | null; notes: string | null }[], error: null }),
       Promise.all(ids.map((id) => fetchBest1RmKg(client, id))),
+      fetchCardioBests(client, ids),
     ]);
     if (lastRes.error) return { data: null, error: toApiError(lastRes.error) };
+    if (cardioBests.error) return { data: null, error: cardioBests.error };
     if (routineRes.error) return { data: null, error: toApiError(routineRes.error) };
 
     const context: Record<string, ExerciseContext> = {};
@@ -256,6 +259,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
           .filter((p) => p.exercise_id === id)
           .map((p) => ({ setNumber: p.set_number, setType: asSetType(p.set_type), ...toSetValues(p) })),
         best1RmKg: bests[i] ?? null,
+        cardioBest: cardioBests.data.get(id) ?? null,
         restSeconds: planned?.rest_seconds ?? DEFAULT_REST_SECONDS,
         routineNote: planned?.notes ?? null,
       };
@@ -313,6 +317,7 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
           restSeconds: ctx?.restSeconds ?? DEFAULT_REST_SECONDS,
           note: se.notes ?? ctx?.routineNote ?? null,
           best1RmKg: ctx?.best1RmKg ?? null,
+          cardioBest: ctx?.cardioBest ?? null,
           sets: se.set_logs.map((l) => {
             const prev = ctx?.previous.find((p) => p.setNumber === l.set_number);
             return {
@@ -512,7 +517,7 @@ export const finishWorkout: FinishWorkout = async (client, { sessionId }) => {
         // Recorde medido pelo 1RM estimado; a tela mostra a série que o bateu (carga × repetições).
         personalRecords: (json.personal_records ?? [])
           .filter((p) => p.pr_type === "best_e1rm")
-          .map((p) => ({ exerciseName: p.name, weightKg: Number(p.weight ?? 0), reps: p.reps ?? 0 })),
+          .map((p) => ({ exerciseName: p.name, metric: "load", weightKg: Number(p.weight ?? 0), reps: p.reps ?? 0 })),
       },
       error: null,
     };

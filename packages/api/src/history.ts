@@ -1,4 +1,19 @@
-import { sessionRecord1Rm, sessionTotals, type ExerciseSessionBest, type LoggedSet, type WeightUnit } from "@guf/core";
+import {
+  buildCardioRecord,
+  cardioActivityFor,
+  previousCardioBest,
+  recordSetIndex,
+  sessionRecord1Rm,
+  sessionTotals,
+  setMetricKind,
+  type CardioBest,
+  type ExerciseSessionBest,
+  type LoggedSet,
+  type RecordValue,
+  type SetValues,
+  type WeightUnit,
+} from "@guf/core";
+import { fetchCardioHistories } from "./cardio-history";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -37,11 +52,8 @@ export interface HistoryOverview {
 }
 
 /** Recorde de carga batido num treino. */
-export interface DayRecord {
-  exerciseName: string;
-  weightKg: number;
-  reps: number | null;
-}
+/** Recorde de um treino do dia: a série de carga que bateu o 1RM ou a marca de cardio. */
+export type DayRecord = { exerciseName: string } & RecordValue;
 
 /** Treino concluído de um dia (folha do calendário). */
 export interface DaySession {
@@ -113,15 +125,20 @@ export const getHistoryOverview: GetHistoryOverview = async (client, range) => {
 interface DayExercise {
   exerciseId: string;
   name: string;
-  sets: LoggedSet[];
+  muscleGroup: string;
+  sets: (LoggedSet & Pick<SetValues, "distanceKm" | "durationSeconds">)[];
 }
 
-/** Maior repetição feita com a carga do recorde (como no finish_workout). */
-function repsAtLoad(sets: readonly LoggedSet[], weightKg: number): number | null {
-  const reps = sets
-    .filter((s) => s.isCompleted && s.setType !== "warmup" && s.weightKg === weightKg && s.reps !== null)
-    .map((s) => s.reps as number);
-  return reps.length ? Math.max(...reps) : null;
+/** Série do recorde de carga: a primeira com o 1RM do recorde (como no resumo). */
+function loadRecordValue(sets: DayExercise["sets"], record1RmKg: number | null): RecordValue | null {
+  const set = sets[recordSetIndex(sets, record1RmKg) ?? -1];
+  return set ? { metric: "load", weightKg: set.weightKg ?? 0, reps: set.reps } : null;
+}
+
+/** Recorde de cardio do exercício no treino (ritmo/velocidade ou distância). */
+function cardioRecordValue(exercise: DayExercise, previous: CardioBest | null): RecordValue | null {
+  const built = buildCardioRecord(exercise.sets, previous, cardioActivityFor(exercise.name).rate);
+  return built && { metric: "cardio", cardio: built.record };
 }
 
 /** Histórico por treino de cada exercício (get_exercise_history), para achar os recordes do dia. */
@@ -154,7 +171,7 @@ export const getDaySessions: GetDaySessions = async (client, { performedOn }) =>
     const { data, error } = await client
       .from("workout_sessions")
       .select(
-        "id, name, routine_id, started_at, finished_at, active_seconds, session_exercises(exercise_id, exercises(name), set_logs(set_type, weight_kg, reps, is_completed))",
+        "id, name, routine_id, started_at, finished_at, active_seconds, session_exercises(exercise_id, exercises(name, muscle_group), set_logs(set_type, weight_kg, reps, distance_km, duration_seconds, is_completed))",
       )
       .eq("status", "completed")
       .eq("performed_on", performedOn)
@@ -166,21 +183,30 @@ export const getDaySessions: GetDaySessions = async (client, { performedOn }) =>
       exercises: s.session_exercises.map<DayExercise>((se) => ({
         exerciseId: se.exercise_id,
         name: se.exercises?.name ?? "Exercício",
-        sets: toLoggedSets(se.set_logs),
+        muscleGroup: se.exercises?.muscle_group ?? "",
+        sets: toLoggedSets(se.set_logs).map((set, i) => ({
+          ...set,
+          distanceKm: se.set_logs[i]?.distance_km ?? null,
+          durationSeconds: se.set_logs[i]?.duration_seconds ?? null,
+        })),
       })),
     }));
 
     const exerciseIds = [...new Set(sessions.flatMap((s) => s.exercises.map((e) => e.exerciseId)))];
-    const histories = await exerciseHistories(client, exerciseIds);
+    const [histories, cardioHistories] = await Promise.all([exerciseHistories(client, exerciseIds), fetchCardioHistories(client, exerciseIds)]);
     if (histories.error) return { data: null, error: histories.error };
+    if (cardioHistories.error) return { data: null, error: cardioHistories.error };
 
     return {
       data: sessions.map(({ row, exercises }, index) => {
         // Treinos do mesmo dia que terminaram antes deste (a lista está em ordem de término).
         const earlierSameDay = new Set(sessions.slice(0, index).map((s) => s.row.id));
         const records = exercises.flatMap<DayRecord>((e) => {
-          const load = sessionRecord1Rm(histories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay);
-          return load === null ? [] : [{ exerciseName: e.name, weightKg: load, reps: repsAtLoad(e.sets, load) }];
+          const record =
+            setMetricKind(e.muscleGroup) === "cardio"
+              ? cardioRecordValue(e, previousCardioBest(cardioHistories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay))
+              : loadRecordValue(e.sets, sessionRecord1Rm(histories.data.get(e.exerciseId) ?? [], row.id, performedOn, earlierSameDay));
+          return record ? [{ exerciseName: e.name, ...record }] : [];
         });
         const totals = sessionTotals(exercises.flatMap((e) => e.sets));
         return {

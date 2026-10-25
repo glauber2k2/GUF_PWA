@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import type { SetField } from "@guf/core";
 import { History, Pencil, Timer } from "lucide-react";
-import { cardioActivityFor, cardioSetCountLabel, cardioTotals } from "@guf/core";
+import { cardioActivityFor, cardioSetCountLabel, cardioTotals, markExerciseRecordSets } from "@guf/core";
 import { Icon, SegmentedControl, Tag } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { CardioCollapsedSummary } from "@/features/workout/components/cardio/cardio-collapsed-summary";
@@ -13,7 +14,6 @@ import { ExerciseCardShell, type ExerciseCardFrameProps } from "@/features/worko
 import { CARDIO_ACTIVITY_ICONS } from "@/features/workout/constants/cardio-activity-icons";
 import type { ExerciseView } from "@/features/workout/helpers/workout-state";
 import type { CardioTimerControls } from "@/features/workout/hooks/use-cardio-timer-controls";
-import type { CardioSetEntry } from "@/features/workout/hooks/use-workout-editing";
 
 type CardioMode = "timer" | "manual";
 
@@ -26,15 +26,17 @@ export interface CardioExerciseCardProps extends ExerciseCardFrameProps {
   exercise: ExerciseView;
   /** Cronômetro do treino em andamento; sem ele (treino concluído), só o registro manual. */
   timer?: CardioTimerControls;
-  /** Registra uma série (tempo e km opcional); devolve o id dela. */
-  onLogSet: (entry: CardioSetEntry) => string | null;
-  onSaveDistance: (setId: string, distanceKm: number | null) => void;
+  /** Modo manual: abre a folha da série (teclado do app) numa série nova. */
+  onAddManualSet: () => void;
+  /** Abre a folha da série no campo tocado (tempo ou km), como na força. */
+  onEditField: (setIndex: number, field: SetField) => void;
   onRemoveSet: (index: number) => void;
 }
 
 /** Séries já registradas (concluídas); as planejadas em aberto não aparecem: o cardio registra o que foi feito. */
 function loggedSets(exercise: ExerciseView): CardioLoggedSet[] {
-  return exercise.sets.flatMap((set, index) => (set.isCompleted ? [{ set, index }] : []));
+  const records = markExerciseRecordSets(exercise, exercise.sets);
+  return exercise.sets.flatMap((set, index) => (set.isCompleted ? [{ set, index, isRecord: records[index] ?? false }] : []));
 }
 
 /**
@@ -42,9 +44,8 @@ function loggedSets(exercise: ExerciseView): CardioLoggedSet[] {
  * parar vira uma série) ou tempo e km digitados; tabela com ritmo ou velocidade conforme o aparelho;
  * recolhido, o total e os controles do cronômetro.
  */
-export function CardioExerciseCard({ exercise: e, timer, onLogSet, onSaveDistance, onRemoveSet, ...frame }: CardioExerciseCardProps) {
+export function CardioExerciseCard({ exercise: e, timer, onAddManualSet, onEditField, onRemoveSet, ...frame }: CardioExerciseCardProps) {
   const [mode, setMode] = useState<CardioMode>(timer ? "timer" : "manual");
-  const [editingSetId, setEditingSetId] = useState<string | null>(null);
   const activity = cardioActivityFor(e.name);
   const sets = loggedSets(e);
   const totals = cardioTotals(
@@ -52,15 +53,6 @@ export function CardioExerciseCard({ exercise: e, timer, onLogSet, onSaveDistanc
     activity.rate,
   );
   const isTimerActive = timer !== undefined && timer.phase !== "idle";
-  // Parar o cronômetro com o card aberto já abre o campo de km da série nova (opcional).
-  const timerWithDistancePrompt: CardioTimerControls | undefined = timer && {
-    ...timer,
-    stop: () => {
-      const setId = timer.stop();
-      if (setId && e.open) setEditingSetId(setId);
-      return setId;
-    },
-  };
 
   return (
     <ExerciseCardShell
@@ -85,9 +77,9 @@ export function CardioExerciseCard({ exercise: e, timer, onLogSet, onSaveDistanc
           )}
         </>
       )}
-      collapsedContent={<CardioCollapsedSummary timer={timerWithDistancePrompt} setCount={sets.length} totals={totals} />}
+      collapsedContent={<CardioCollapsedSummary timer={timer} setCount={sets.length} totals={totals} />}
     >
-      {timerWithDistancePrompt && (
+      {timer && (
         <div className="px-4 pb-3.5">
           <SegmentedControl
             label="Como registrar"
@@ -98,23 +90,21 @@ export function CardioExerciseCard({ exercise: e, timer, onLogSet, onSaveDistanc
           />
         </div>
       )}
-      {timerWithDistancePrompt && mode === "timer" ? (
+      {timer && mode === "timer" ? (
         <CardioTimerPanel
-          timer={timerWithDistancePrompt}
+          timer={timer}
           nextSetNumber={sets.length + 1}
           loggedSeconds={sets.reduce((sum, { set }) => sum + (set.durationSeconds ?? 0), 0)}
           lastSeconds={sets.at(-1)?.set.durationSeconds ?? null}
         />
       ) : (
-        <CardioManualForm onAdd={onLogSet} />
+        <CardioManualForm onAdd={onAddManualSet} />
       )}
       {sets.length > 0 && (
         <CardioSetTable
           sets={sets}
           rate={activity.rate}
-          editingSetId={editingSetId}
-          onEditDistance={setEditingSetId}
-          onSaveDistance={onSaveDistance}
+          onEditField={onEditField}
           onRemove={onRemoveSet}
         />
       )}

@@ -330,10 +330,11 @@ export async function mountBodyScene(container: HTMLElement, options: BodySceneO
   });
 
   // Destaques: Anime.js anima estes números e o shader lê uT a cada quadro.
-  const selectedLevel = new Array<number>(BODY_REGION_COUNT).fill(0);
-  const hoverLevel = new Array<number>(BODY_REGION_COUNT).fill(0);
+  // Um objeto por músculo: o Anime.js 4 trata uma lista como vários alvos (número não pode ser alvo).
+  const selectedLevel = Array.from({ length: BODY_REGION_COUNT }, () => ({ value: 0 }));
+  const hoverLevel = Array.from({ length: BODY_REGION_COUNT }, () => ({ value: 0 }));
   const paint = () => {
-    for (let i = 1; i < BODY_REGION_COUNT; i++) uniforms.uT.value[i] = Math.max(selectedLevel[i], hoverLevel[i] * 0.4);
+    for (let i = 1; i < BODY_REGION_COUNT; i++) uniforms.uT.value[i] = Math.max(selectedLevel[i].value, hoverLevel[i].value * 0.4);
   };
 
   function select(next: BodyRegion | null, fromUser: boolean) {
@@ -341,8 +342,8 @@ export async function mountBodyScene(container: HTMLElement, options: BodySceneO
     selected = next;
     for (let i = 1; i < BODY_REGION_COUNT; i++) {
       const on = BODY_REGIONS[i] === next ? 1 : 0;
-      if (reducedMotion) selectedLevel[i] = on;
-      else animate(selectedLevel, { [i]: on, duration: on ? 480 : 280, ease: on ? "outBack(1.4)" : "outQuad", onUpdate: paint });
+      if (reducedMotion) selectedLevel[i].value = on;
+      else animate(selectedLevel[i], { value: on, duration: on ? 480 : 280, ease: on ? "outBack(1.4)" : "outQuad", onUpdate: paint });
     }
     paint();
     if (next && !reducedMotion) {
@@ -379,9 +380,9 @@ export async function mountBodyScene(container: HTMLElement, options: BodySceneO
   let hovered: BodyRegion | null = null;
   const setHover = (key: BodyRegion | null) => {
     if (key === hovered) return;
-    if (hovered) animate(hoverLevel, { [BODY_REGIONS.indexOf(hovered)]: 0, duration: 180, ease: "outQuad", onUpdate: paint });
+    if (hovered) animate(hoverLevel[BODY_REGIONS.indexOf(hovered)], { value: 0, duration: 180, ease: "outQuad", onUpdate: paint });
     hovered = key;
-    if (key) animate(hoverLevel, { [BODY_REGIONS.indexOf(key)]: 1, duration: 180, ease: "outQuad", onUpdate: paint });
+    if (key) animate(hoverLevel[BODY_REGIONS.indexOf(key)], { value: 1, duration: 180, ease: "outQuad", onUpdate: paint });
     canvas.classList.toggle("cursor-pointer", Boolean(key));
   };
   const onPointerDown = (event: PointerEvent) => (pressed = { x: event.clientX, y: event.clientY });

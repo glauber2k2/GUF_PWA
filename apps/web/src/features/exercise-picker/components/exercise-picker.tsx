@@ -45,7 +45,8 @@ import {
   Skeleton,
   TextField,
 } from "@/shared/components/ds";
-import { useAppShell, useRaisedToast } from "@/features/app-shell";
+import { useAppShell } from "@/features/app-shell";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 import { enqueue } from "@/shared/offline/outbox";
 import { addToLibraryCache, loadExerciseLibrary } from "@/shared/offline/workout-repo";
 import { getSupabaseClient } from "@/shared/libs/supabase";
@@ -185,7 +186,6 @@ export function ExercisePicker({
   const [newEquipment, setNewEquipment] = useState<string>("maquina");
   const [nameError, setNameError] = useState<string | null>(null);
   // Barra "Adicionar N" fixa no rodapé: a pilha de avisos sobe para não cobri-la.
-  useRaisedToast(selected.length > 0 && !single);
 
   // Esc fecha o seletor (quando a folha de criar não está aberta).
   useEffect(() => {
@@ -465,7 +465,7 @@ export function ExercisePicker({
           </div>
         </div>
 
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
+        <div {...BOTTOM_BAR_PROPS} className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-background/92 backdrop-blur-[12px]">
           <div className="mx-auto flex max-w-[430px] flex-col gap-1 px-4 pt-2 pb-[calc(16px+env(safe-area-inset-bottom))]">
             {count > 0 && !single && (
               <div className="flex h-11 items-center justify-between">

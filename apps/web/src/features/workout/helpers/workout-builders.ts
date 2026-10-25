@@ -1,8 +1,8 @@
 import type { ActiveWorkout, ExerciseContext, FinishedWorkoutSummary, LibraryExercise, NewWorkoutExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
 import { DEFAULT_REST_SECONDS } from "@guf/api";
 import {
+  buildExerciseRecord,
   EMPTY_SET_VALUES,
-  markRecordSets,
   pauseCount,
   pickSetValues,
   sessionTotals,
@@ -43,6 +43,7 @@ export function buildWorkoutExercise(
     restSeconds: context?.restSeconds ?? DEFAULT_REST_SECONDS,
     note: context?.routineNote ?? null,
     best1RmKg: context?.best1RmKg ?? null,
+    cardioBest: context?.cardioBest ?? null,
     sets: Array.from({ length: total }, (_, i) => {
       const prev = previousFor(context, i + 1);
       return {
@@ -90,6 +91,7 @@ export function workoutSnapshot(base: ActiveWorkout, state: WorkoutViewState, cl
       restSeconds: e.restSeconds,
       note: e.note,
       best1RmKg: e.best1RmKg,
+      cardioBest: e.cardioBest,
       sets: e.sets,
     })),
   };
@@ -110,10 +112,17 @@ export function localSummary(state: WorkoutViewState, clock: WorkoutClock, now =
     volumeKg: totals.volumeKg,
     setCount: totals.setCount,
     personalRecords: state.exercises.flatMap((e) => {
-      const flags = markRecordSets(e.sets, e.best1RmKg);
-      return e.sets
-        .filter((_, i) => flags[i])
-        .map((s) => ({ exerciseName: e.name, weightKg: s.weightKg ?? 0, reps: s.reps ?? 0 }));
+      const built = buildExerciseRecord(e, e.sets);
+      return built ? [{ exerciseName: e.name, ...built.record }] : [];
     }),
   };
+}
+
+/**
+ * O finish_workout só conhece recordes de carga (1RM): os de cardio (ritmo/velocidade e distância)
+ * vêm do resumo calculado no aparelho, com as mesmas marcas anteriores que o treino mostrou.
+ */
+export function withDeviceCardioRecords(server: FinishedWorkoutSummary, device: FinishedWorkoutSummary): FinishedWorkoutSummary {
+  const cardio = device.personalRecords.filter((record) => record.metric === "cardio");
+  return cardio.length ? { ...server, personalRecords: [...server.personalRecords, ...cardio] } : server;
 }

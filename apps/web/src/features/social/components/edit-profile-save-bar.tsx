@@ -4,6 +4,7 @@ import { Check } from "lucide-react";
 import { saveChangesLabel } from "@guf/core";
 import { Button } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
+import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
 
 export interface EditProfileSaveBarProps {
   /** Aparece só com alterações (ou enquanto salva). */
@@ -19,6 +20,7 @@ export interface EditProfileSaveBarProps {
 export function EditProfileSaveBar({ visible, changes, saving, canSave, onDiscard, onSave }: EditProfileSaveBarProps) {
   return (
     <div
+      {...BOTTOM_BAR_PROPS}
       aria-hidden={!visible}
       inert={!visible}
       className={cn(

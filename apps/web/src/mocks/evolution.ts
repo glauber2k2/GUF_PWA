@@ -239,6 +239,7 @@ function toSummary(s: MockSession): WorkoutSummaryDetail {
     if (record1RmKg !== null && recordSet) {
       const previous = previousBest1Rm(history, s.id, s.performedOn, earlierSameDay);
       records.push({
+        metric: "load",
         exerciseId: exercise.id,
         exerciseName: exercise.name,
         weightKg: recordSet.weightKg ?? 0,

@@ -8,7 +8,6 @@ import { Banner, Button, MuscleIcon, SegmentedControl, Skeleton } from "@/shared
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { cn } from "@/shared/helpers/class-names";
-import { useRaisedToast } from "@/features/app-shell";
 import { useBodyMeasurements, useCanUseMeasurements, useMeasurementsSource } from "@/features/body-measurements/api/use-body-measurements";
 import { MeasurementChartCard } from "@/features/body-measurements/components/measurement-chart-card";
 import { MeasurementRecords } from "@/features/body-measurements/components/measurement-records";
@@ -33,8 +32,6 @@ export function MeasurementPartScreen() {
   const measurements = useBodyMeasurements();
   const canUse = useCanUseMeasurements();
   const data = measurements.data;
-  const isReady = Boolean(part && data?.hasConsent) && !dev.forceLoading;
-  useRaisedToast(isReady);
 
   // Sem autorização não há o que mostrar: a lista pede o consentimento.
   useEffect(() => {

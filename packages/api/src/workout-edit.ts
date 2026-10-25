@@ -1,4 +1,5 @@
-import { previousBest1Rm, type WeightUnit } from "@guf/core";
+import { previousBest1Rm, previousCardioBest, type WeightUnit } from "@guf/core";
+import { fetchCardioHistories } from "./cardio-history";
 import type { GufClient } from "./client";
 import { exerciseHistories } from "./history";
 import { apiError, toApiError, type ApiResult } from "./result";
@@ -22,8 +23,8 @@ export interface EditableWorkout {
   /** Unidade de exibição do usuário (o banco guarda kg). */
   weightUnit: WeightUnit;
   /**
-   * Exercícios com as séries concluídas. `best1RmKg` = melhor 1RM ANTES deste treino (marca os
-   * recordes como no resumo); `previous` vem vazio (o "anterior" é do treino em andamento).
+   * Exercícios com as séries concluídas. `best1RmKg` e `cardioBest` = melhores marcas ANTES deste
+   * treino (marcam os recordes como no resumo); `previous` vem vazio (o "anterior" é do treino em andamento).
    */
   exercises: WorkoutExercise[];
 }
@@ -88,15 +89,17 @@ export const getEditableWorkout: WorkoutEditApi["getEditableWorkout"] = async (c
     if (!s || s.status !== "completed") return { data: null, error: apiError("session_not_found") };
 
     const exerciseIds = [...new Set(s.session_exercises.map((se) => se.exercise_id))];
-    const [earlierRes, histories, routineRes] = await Promise.all([
+    const [earlierRes, histories, cardioHistories, routineRes] = await Promise.all([
       fetchEarlierSameDay(client, s.id, s.performed_on),
       exerciseHistories(client, exerciseIds),
+      fetchCardioHistories(client, exerciseIds),
       s.routine_id
         ? client.from("routine_exercises").select("exercise_id, rest_seconds").eq("routine_id", s.routine_id)
         : Promise.resolve({ data: [] as { exercise_id: string; rest_seconds: number | null }[], error: null }),
     ]);
     if (earlierRes.error) return { data: null, error: earlierRes.error };
     if (histories.error) return { data: null, error: histories.error };
+    if (cardioHistories.error) return { data: null, error: cardioHistories.error };
     if (routineRes.error) return { data: null, error: toApiError(routineRes.error) };
 
     const exercises = s.session_exercises
@@ -111,6 +114,7 @@ export const getEditableWorkout: WorkoutEditApi["getEditableWorkout"] = async (c
           restSeconds: routineRes.data?.find((r) => r.exercise_id === se.exercise_id)?.rest_seconds ?? DEFAULT_REST_SECONDS,
           note: se.notes,
           best1RmKg: previousBest1Rm(history, s.id, s.performed_on, earlierRes.data)?.oneRmKg ?? null,
+          cardioBest: previousCardioBest(cardioHistories.data.get(se.exercise_id) ?? [], s.id, s.performed_on, earlierRes.data),
           sets: se.set_logs
             .filter((l) => l.is_completed)
             .map((l) => ({

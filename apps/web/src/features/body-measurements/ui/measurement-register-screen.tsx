@@ -7,7 +7,6 @@ import { findMeasurementPart, measurementRecordFor, type BodyMeasurementDay, typ
 import { Banner, Button, ConfirmDialog, Skeleton } from "@/shared/components/ds";
 import { EditorFrame } from "@/shared/components/editor-frame";
 import { useGoBack } from "@/shared/hooks/use-go-back";
-import { useRaisedToast } from "@/features/app-shell";
 import { useBodyMeasurements, useCanUseMeasurements, useMeasurementsSource } from "@/features/body-measurements/api/use-body-measurements";
 import { MeasurementDateCard } from "@/features/body-measurements/components/measurement-date-card";
 import { MeasurementFieldCard } from "@/features/body-measurements/components/measurement-field-card";
@@ -67,7 +66,6 @@ function MeasurementRegisterForm({ days, focus, edit, onClose }: MeasurementRegi
   const canUse = useCanUseMeasurements();
   const form = useMeasurementRegister({ days, focus, edit, canUse, onSaved: onClose });
   const [confirmLeave, setConfirmLeave] = useState(false);
-  useRaisedToast(true);
 
   const close = () => (form.hasInput ? setConfirmLeave(true) : onClose());
 

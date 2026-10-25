@@ -3,7 +3,7 @@
  * Só em DESENVOLVIMENTO com ?estado= (o resumo leva o parâmetro junto ao abrir a edição).
  * Lê o treino do mock do Resumo (mesmos cenários) e "salvar" não grava nada.
  */
-import { apiError, DEFAULT_REST_SECONDS, type GufClient, type SummaryExercise, type WorkoutEditApi, type WorkoutExercise } from "@guf/api";
+import { apiError, DEFAULT_REST_SECONDS, type GufClient, type SummaryExercise, type WorkoutEditApi, type WorkoutExercise, type WorkoutSummaryRecord } from "@guf/api";
 import { pickSetValues } from "@guf/core";
 import { mockEvolutionApi } from "./evolution";
 
@@ -13,7 +13,7 @@ function ignoreClient(client: GufClient) {
   void client;
 }
 
-function toEditableExercise(exercise: SummaryExercise, best1RmKg: number | null): WorkoutExercise {
+function toEditableExercise(exercise: SummaryExercise, record: WorkoutSummaryRecord | undefined): WorkoutExercise {
   return {
     id: exercise.id,
     exerciseId: exercise.exerciseId,
@@ -22,7 +22,8 @@ function toEditableExercise(exercise: SummaryExercise, best1RmKg: number | null)
     equipment: "outro",
     restSeconds: DEFAULT_REST_SECONDS,
     note: exercise.note,
-    best1RmKg,
+    best1RmKg: record?.metric === "load" ? record.previous1RmKg : null,
+    cardioBest: null,
     sets: exercise.sets.map((s, i) => ({
       id: `${exercise.id}-serie-${i + 1}`,
       setNumber: s.setNumber,
@@ -47,7 +48,7 @@ export const mockWorkoutEditApi = {
         note: null,
         weightUnit: data.weightUnit,
         exercises: data.exercises.map((e) =>
-          toEditableExercise(e, data.records.find((r) => r.exerciseId === e.exerciseId)?.previous1RmKg ?? null),
+          toEditableExercise(e, data.records.find((r) => r.exerciseId === e.exerciseId)),
         ),
       },
       error: null,
