@@ -1,7 +1,10 @@
 import {
   ANNOUNCEMENT_DESTINATIONS,
   ANNOUNCEMENT_LIMITS,
+  CATALOG_EXERCISE_NAME_MAX,
   CHANGE_REASONS,
+  EQUIPMENT_CODES,
+  MUSCLE_GROUP_ORDER,
   REASON_NOTE_LIMITS,
   STAFF_ROLES,
   isPurposeAllowed,
@@ -92,3 +95,16 @@ export function staffInviteSchema(teamDomain: string) {
     role: z.enum(roleKeys),
   });
 }
+
+/** Exercício do catálogo do guf (painel; o banco confere de novo em admin_create_exercises). */
+export const catalogExerciseSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Dê um nome para o exercício.")
+    .max(CATALOG_EXERCISE_NAME_MAX, `Use até ${CATALOG_EXERCISE_NAME_MAX} caracteres.`),
+  muscleGroup: z.enum(MUSCLE_GROUP_ORDER, "Escolha o grupo muscular."),
+  equipment: z.enum(EQUIPMENT_CODES, "Escolha o equipamento."),
+});
+
+export type CatalogExerciseInput = z.infer<typeof catalogExerciseSchema>;

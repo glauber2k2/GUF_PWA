@@ -1477,12 +1477,23 @@ export type Database = {
         Args: { p_handle: string; p_user_id: string }
         Returns: string
       }
+      admin_create_exercises: {
+        Args: { p_exercises: Json; p_source?: string }
+        Returns: {
+          name: string
+          status: string
+        }[]
+      }
       admin_delete_user: {
         Args: { p_note?: string; p_reason: string; p_user_id: string }
         Returns: undefined
       }
       admin_duplicate_announcement: { Args: { p_id: string }; Returns: string }
       admin_end_announcement: { Args: { p_id: string }; Returns: undefined }
+      admin_existing_exercise_names: {
+        Args: { p_names: string[] }
+        Returns: string[]
+      }
       admin_get_announcement: { Args: { p_id: string }; Returns: Json }
       admin_get_user: { Args: { p_user_id: string }; Returns: Json }
       admin_list_announcements: {
@@ -1523,6 +1534,22 @@ export type Database = {
           occurred_at: string
           subject_id: string
           subject_label: string
+        }[]
+      }
+      admin_list_exercises: {
+        Args: {
+          p_limit?: number
+          p_muscle_groups?: string[]
+          p_offset?: number
+          p_query?: string
+        }
+        Returns: {
+          created_at: string
+          equipment: string
+          id: string
+          muscle_group: string
+          name: string
+          total_count: number
         }[]
       }
       admin_list_staff: {
@@ -1861,6 +1888,7 @@ export type Database = {
       effective_plan: { Args: never; Returns: string }
       ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
       execute_scheduled_account_deletions: { Args: never; Returns: undefined }
+      exercise_name_key: { Args: { p_name: string }; Returns: string }
       export_my_data: { Args: never; Returns: Json }
       feature_limit: { Args: { p_feature: string }; Returns: number }
       feature_limit_of: {
@@ -2081,6 +2109,7 @@ export type Database = {
         }
         Returns: string
       }
+      guard_suspended_account: { Args: never; Returns: undefined }
       has_feature: { Args: { p_feature: string }; Returns: boolean }
       has_feature_of: {
         Args: { p_feature: string; p_user_id: string }

@@ -1,4 +1,4 @@
-import { House, Megaphone, ScrollText, UserCog, Users, type LucideIcon } from "lucide-react";
+import { Dumbbell, House, Megaphone, ScrollText, UserCog, Users, type LucideIcon } from "lucide-react";
 import type { StaffPermission } from "@guf/core";
 
 export interface AdminNavItem {
@@ -16,6 +16,7 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { label: "Início", icon: House, path: "/" },
   { label: "Pessoas", icon: Users, path: "/pessoas", hasShortcut: true },
   { label: "Comunicados", icon: Megaphone, path: "/comunicados" },
+  { label: "Exercícios", icon: Dumbbell, path: "/exercicios" },
   { label: "Auditoria", icon: ScrollText, path: "/auditoria", permission: "view_audit" },
   { label: "Equipe", icon: UserCog, path: "/equipe", permission: "manage_team" },
 ];
@@ -27,6 +28,8 @@ export const PAGE_TITLES: Record<string, string> = {
   "/comunicados": "Comunicados",
   "/comunicados/editar": "Comunicado",
   "/comunicados/resultado": "Resultado",
+  "/exercicios": "Exercícios",
+  "/exercicios/importar": "Importar exercícios",
   "/auditoria": "Auditoria",
   "/equipe": "Equipe",
 };
@@ -35,6 +38,7 @@ export const PAGE_TITLES: Record<string, string> = {
 export const BACK_PATHS: Record<string, string> = {
   "/comunicados/editar": "/comunicados",
   "/comunicados/resultado": "/comunicados",
+  "/exercicios/importar": "/exercicios",
 };
 
 export function isNavActive(item: AdminNavItem, pathname: string): boolean {

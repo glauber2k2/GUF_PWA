@@ -4,6 +4,7 @@ import {
   CalendarClock,
   CalendarX,
   Crown,
+  Dumbbell,
   KeyRound,
   Eye,
   Megaphone,
@@ -52,10 +53,19 @@ export const AUDIT_ICONS: Record<string, LucideIcon> = {
   staff_scheduled_deletion: CalendarClock,
   staff_cancelled_deletion: CalendarX,
   staff_sent_password_reset: KeyRound,
+  staff_created_exercises: Dumbbell,
 };
 
 export function auditIcon(action: string): LucideIcon {
   return AUDIT_ICONS[action] ?? ScrollText;
+}
+
+/** "12 cadastrados · 3 já existiam · por arquivo" (cadastro no catálogo de exercícios). */
+function exerciseCreationDetail(created: number, skipped: unknown, source: unknown): string {
+  const parts = [`${formatCount(created)} cadastrados`];
+  if (typeof skipped === "number" && skipped > 0) parts.push(`${formatCount(skipped)} já existiam`);
+  if (source === "file") parts.push("por arquivo");
+  return parts.join(" · ");
 }
 
 /** Motivo e detalhe a partir dos metadados gravados (nunca valores pessoais antigos). */
@@ -69,6 +79,7 @@ export function auditDetail(entry: AuditEntry): { reason: string; detail: string
   if (typeof d.format === "string" && d.format in ANNOUNCEMENT_FORMATS) parts.push(`Formato: ${ANNOUNCEMENT_FORMATS[d.format as AnnouncementFormat].label}`);
   if ("ends_at" in d) parts.push(typeof d.ends_at === "string" ? `Suspensa até ${formatStaffDateTime(d.ends_at)}` : "Suspensa por tempo indeterminado");
   if (typeof d.scheduled_for === "string") parts.push(`Exclusão em ${formatStaffDateTime(d.scheduled_for)}`);
+  if (typeof d.created === "number") parts.push(exerciseCreationDetail(d.created, d.skipped, d.source));
   if (typeof d.reach === "number") parts.push(`${formatCount(d.reach)} pessoas`);
   return { reason, detail: parts.join(" · ") || "Sem outros detalhes." };
 }

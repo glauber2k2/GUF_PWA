@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@guf/schemas";
+import { PRIVACY_CONTACT_EMAIL } from "@guf/core";
 import { Banner, Button, GoogleButton, Logo, PasswordField, TextDivider, TextField } from "@/shared/components/ds";
 import { oauthReturnError, signInWithEmail } from "@guf/api";
 import { getSupabaseClient } from "@/shared/libs/supabase";
@@ -27,6 +28,8 @@ export function LoginForm() {
     }) ?? initError;
   // Volta da exclusão de conta (Perfil → Excluir minha conta).
   const accountDeleted = searchParams.get("conta-excluida") === "1";
+  // Saída pelo aviso de conta suspensa (AccountSuspendedGate).
+  const accountSuspended = searchParams.get("conta-suspensa") === "1";
   const google = useGoogleSignIn(setFormError);
   const startGoogle = () => {
     setReturnErrorDismissed(true);
@@ -71,6 +74,11 @@ export function LoginForm() {
         {accountDeleted && (
           <Banner tone="success" title="Sua conta foi excluída.">
             Seus dados foram apagados. Você pode criar uma nova conta quando quiser.
+          </Banner>
+        )}
+        {accountSuspended && (
+          <Banner tone="danger" title="Sua conta está suspensa.">
+            Para saber o motivo ou contestar, escreva para {PRIVACY_CONTACT_EMAIL}.
           </Banner>
         )}
         {returnError && !returnErrorDismissed && <Banner tone="danger">{returnError.message}</Banner>}

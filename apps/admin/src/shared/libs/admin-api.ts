@@ -3,14 +3,16 @@
 import {
   adminUsersApi,
   announcementsAdminApi,
+  exerciseCatalogAdminApi,
   staffSessionApi,
   staffTeamApi,
   type AdminUsersApi,
   type AnnouncementsAdminApi,
+  type ExerciseCatalogAdminApi,
   type StaffSessionApi,
   type StaffTeamApi,
 } from "@guf/api/admin";
-import { mockAdminUsersApi, mockAnnouncementsAdminApi, mockStaffSessionApi, mockStaffTeamApi } from "@/mocks/admin-api";
+import { mockAdminUsersApi, mockAnnouncementsAdminApi, mockExerciseCatalogAdminApi, mockStaffSessionApi, mockStaffTeamApi } from "@/mocks/admin-api";
 import { setAdminMockScenario } from "@/mocks/admin-data";
 import { useDevAdminState, type DevAdminState } from "@/shared/hooks/use-dev-admin-state";
 
@@ -19,10 +21,23 @@ export interface AdminApis {
   users: AdminUsersApi;
   announcements: AnnouncementsAdminApi;
   team: StaffTeamApi;
+  exercises: ExerciseCatalogAdminApi;
 }
 
-const REAL: AdminApis = { session: staffSessionApi, users: adminUsersApi, announcements: announcementsAdminApi, team: staffTeamApi };
-const MOCK: AdminApis = { session: mockStaffSessionApi, users: mockAdminUsersApi, announcements: mockAnnouncementsAdminApi, team: mockStaffTeamApi };
+const REAL: AdminApis = {
+  session: staffSessionApi,
+  users: adminUsersApi,
+  announcements: announcementsAdminApi,
+  team: staffTeamApi,
+  exercises: exerciseCatalogAdminApi,
+};
+const MOCK: AdminApis = {
+  session: mockStaffSessionApi,
+  users: mockAdminUsersApi,
+  announcements: mockAnnouncementsAdminApi,
+  team: mockStaffTeamApi,
+  exercises: mockExerciseCatalogAdminApi,
+};
 
 /**
  * Ponto único de escolha dos contratos: dados reais por padrão; em DESENVOLVIMENTO com ?estado=,

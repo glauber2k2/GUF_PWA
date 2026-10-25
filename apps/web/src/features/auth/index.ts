@@ -1,4 +1,5 @@
 export { useSignupDocuments } from "./api/use-pending-documents";
+export { AccountSuspendedGate } from "./components/account-suspended-gate";
 export { AuthSplash, RedirectIfAuthenticated, RequireAuth } from "./components/guards";
 export { AuthProvider, useAuth } from "./providers/auth-provider";
 export { ConsentForm } from "./ui/consent-form";

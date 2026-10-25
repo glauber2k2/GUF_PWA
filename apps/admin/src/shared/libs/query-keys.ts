@@ -5,3 +5,4 @@ export const PLANS_KEY = "plans";
 export const ANNOUNCEMENTS_KEY = "announcements";
 export const AUDIT_KEY = "audit";
 export const TEAM_KEY = "team";
+export const EXERCISE_CATALOG_KEY = "exercise-catalog";

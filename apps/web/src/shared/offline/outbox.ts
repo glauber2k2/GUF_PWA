@@ -108,12 +108,20 @@ async function execute(op: OutboxOp): Promise<{ error: ApiError | null }> {
 }
 
 /**
+ * Falhas que não são da operação: sem internet, sem sessão ou conta suspensa (o aviso sai da conta).
+ * Nenhuma conta tentativa, para a operação não ser descartada por um problema passageiro.
+ */
+function shouldRetryLater(error: ApiError): boolean {
+  return isNetworkError(error) || error.code === "not_authenticated" || error.code === "account_suspended";
+}
+
+/**
  * O treino ainda está em andamento no servidor? Encerrado → descarta tudo dele no aparelho e avisa.
  * "retry" = sem internet/sessão (tenta depois).
  */
 async function ensureOpen(sessionId: string): Promise<"open" | "closed" | "retry"> {
   const res = await getWorkoutStatus(getSupabaseClient(), { sessionId });
-  if (res.error) return isNetworkError(res.error) || res.error.code === "not_authenticated" ? "retry" : "open";
+  if (res.error) return shouldRetryLater(res.error) ? "retry" : "open";
   if (res.data.status === "in_progress") return "open";
   const droppedChanges = await dropWorkoutLocally(sessionId);
   const info: ServerClosedWorkout = { sessionId, status: res.data.status, autoFinished: res.data.autoFinished, droppedChanges };
@@ -153,7 +161,7 @@ async function runFlush() {
         if (state === "retry") break;
         if (state === "closed") continue;
       }
-      if (isNetworkError(error) || error.code === "not_authenticated") break; // tenta depois
+      if (shouldRetryLater(error)) break; // tenta depois
       const attempts = entry.attempts + 1;
       if (attempts >= MAX_ATTEMPTS) {
         await db.outbox.delete(entry.seq);

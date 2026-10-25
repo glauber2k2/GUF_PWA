@@ -10,7 +10,7 @@ export type StaffRole = "viewer" | "support" | "admin";
 export const STAFF_ROLES: Record<StaffRole, { label: string; description: string; rank: number }> = {
   viewer: { label: "Leitura", description: "Só consulta contas e comunicados.", rank: 1 },
   support: { label: "Suporte", description: "Edita @ e nome, desvincula login, redefine senha e cria rascunhos.", rank: 2 },
-  admin: { label: "Admin", description: "Tudo, incluindo plano, suspensão e exclusão de contas, publicação, auditoria e equipe.", rank: 3 },
+  admin: { label: "Admin", description: "Tudo, incluindo plano, suspensão e exclusão de contas, publicação, catálogo de exercícios, auditoria e equipe.", rank: 3 },
 };
 
 export type StaffPermission =
@@ -25,7 +25,8 @@ export type StaffPermission =
   | "draft_announcements"
   | "publish_announcements"
   | "view_audit"
-  | "manage_team";
+  | "manage_team"
+  | "manage_exercises";
 
 /** Papel mínimo de cada ação (igual ao `require_staff` de cada função do banco). */
 export const STAFF_PERMISSIONS: Record<StaffPermission, StaffRole> = {
@@ -41,6 +42,7 @@ export const STAFF_PERMISSIONS: Record<StaffPermission, StaffRole> = {
   publish_announcements: "admin",
   view_audit: "admin",
   manage_team: "admin",
+  manage_exercises: "admin",
 };
 
 export function canStaff(role: StaffRole, permission: StaffPermission): boolean {
@@ -106,6 +108,7 @@ export const AUDIT_ACTIONS: Record<string, string> = {
   staff_scheduled_deletion: "Agendou a exclusão",
   staff_cancelled_deletion: "Cancelou a exclusão agendada",
   staff_sent_password_reset: "Enviou link de senha nova",
+  staff_created_exercises: "Cadastrou exercícios",
   scheduled_deletion_executed: "Exclusão agendada executada",
   account_deleted: "Conta excluída",
 };
