@@ -9,6 +9,8 @@
 import {
   addLocalDays,
   COMPETITION_PAGE_SIZE,
+  normalizeSearch,
+  RIVAL_PAGE_SIZE,
   rankCompetitors,
   toStandings,
   fromLocalISODate,
@@ -242,6 +244,18 @@ export const mockCompetitionApi = {
     await wait();
     if (scenario === "erro") return { data: null, error: apiError("network_error") };
     return { data: standings({ from, to }, metric).filter((s) => userIds.includes(s.userId)), error: null };
+  },
+  async searchRivals(client, { from, to, metric, search, page }) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    const key = normalizeSearch(search);
+    const handle = key.replace(/^@/, "");
+    const matches = standings({ from, to }, metric).filter(
+      (s) => !s.isMe && (!key || normalizeSearch(s.name ?? "").includes(key) || s.handle.startsWith(handle)),
+    );
+    const start = (Math.max(page, 1) - 1) * RIVAL_PAGE_SIZE;
+    return { data: { items: matches.slice(start, start + RIVAL_PAGE_SIZE), total: matches.length }, error: null };
   },
   async getCompetitionSeries(client, { from, to, userIds }) {
     ignoreClient(client);

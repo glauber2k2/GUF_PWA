@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import type { CompetitionMetric } from "@guf/core";
 import { useRouter } from "next/navigation";
+import type { StandingsQuery } from "@guf/api";
 import { ReceiptText, UserPlus, Users } from "lucide-react";
 import { AppHeader, EmptyState, Icon } from "@/shared/components/ds";
 import { withDevState } from "@/shared/helpers/dev-state-path";
@@ -12,7 +13,8 @@ import { POINTS_STATEMENT_PATH } from "@/features/competition/constants/point-so
 import { useCompetitionFilters } from "@/features/competition/hooks/use-competition-filters";
 import { useMetricFormat } from "@/features/competition/hooks/use-metric-format";
 import { useStandingsView, type StandingsView } from "@/features/competition/hooks/use-standings-view";
-import { RankingPagination } from "@/features/competition/components/ranking-pagination";
+import { RivalPickerSheet } from "@/features/competition/components/rival-picker-sheet";
+import { StandingsPagination } from "@/features/competition/components/standings-pagination";
 import { CompetitionBoard, PeriodCaption } from "@/features/competition/components/competition-board";
 import { PositionCard } from "@/features/competition/components/position-card";
 import { DuelCard, Podium, RankingList } from "@/features/competition/components/competition-ranking";
@@ -21,9 +23,14 @@ import { TOUR_TARGETS } from "@/features/onboarding";
 
 const SEARCH_PEOPLE_PATH = "/buscar-pessoas";
 
-/** Pódio, corrida, ranking paginado e duelo com o adversário escolhido (padrão: quem está logo à frente ou atrás). */
-function FullRanking({ view, metric }: { view: StandingsView; metric: CompetitionMetric }) {
+/**
+ * Sua posição, pódio, corrida, duelo (adversário padrão: quem está logo à frente ou atrás) e, por
+ * último, o ranking paginado (a lista mais longa fica no fim da tela).
+ */
+function FullRanking({ view, query }: { view: StandingsView; query: StandingsQuery }) {
+  const { metric } = query;
   const { unitLabel, format, formatVolume } = useMetricFormat(metric);
+  const [isPickingRival, setPickingRival] = useState(false);
   const { context, rival } = view;
   if (!context) return null;
   const rivalId = rival?.userId ?? null;
@@ -33,16 +40,10 @@ function FullRanking({ view, metric }: { view: StandingsView; metric: Competitio
       <PositionCard context={context} metric={metric} unit={unitLabel} format={format} />
       <Podium ranking={view.top} label={METRICS[metric].label} format={format} />
       <RaceChart lines={view.race.lines} dates={view.race.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} onSelect={view.chooseRival} />
+      {rival && <DuelCard me={context.me} rival={rival} formatVolume={formatVolume} onChangeRival={() => setPickingRival(true)} />}
       <RankingList ranking={view.page.items} total={view.page.total} rivalId={rivalId} unit={unitLabel} format={format} onSelect={view.chooseRival} />
-      <RankingPagination page={view.page.number} total={view.page.total} myPosition={context.me.position} isFetching={view.page.isFetching} onPage={view.goToPage} />
-      {rival && (
-        <DuelCard
-          me={context.me}
-          rival={rival}
-          formatVolume={formatVolume}
-          picker={{ candidates: view.page.items.filter((c) => !c.isMe), onPick: view.chooseRival }}
-        />
-      )}
+      <StandingsPagination page={view.page.number} total={view.page.total} myPosition={context.me.position} isFetching={view.page.isFetching} onPage={view.goToPage} />
+      <RivalPickerSheet open={isPickingRival} query={query} rivalId={rivalId} onPick={view.chooseRival} onClose={() => setPickingRival(false)} />
     </>
   );
 }
@@ -115,7 +116,7 @@ export function CompetitionScreen() {
           />
         }
       >
-        <FullRanking view={view} metric={filters.metric} />
+        <FullRanking view={view} query={filters.query} />
       </CompetitionBoard>
     </main>
   );

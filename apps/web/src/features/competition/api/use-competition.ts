@@ -68,6 +68,17 @@ export function useStandingsOf(query: StandingsQuery, userIds: string[]) {
   });
 }
 
+/** Adversários para o duelo: busca e página feitas no banco (5 por vez). */
+export function useRivalSearch(query: StandingsQuery, search: string, page: number, enabled: boolean) {
+  const { api, key, enabled: canQuery } = useStandingsBase(query);
+  return useQuery({
+    queryKey: [...key, "rivals", search, page],
+    enabled: canQuery && enabled,
+    placeholderData: keepPreviousData,
+    queryFn: async () => unwrap(await api.searchRivals(getSupabaseClient(), { ...query, search, page })),
+  });
+}
+
 /** Semanas e dias só das pessoas do gráfico ou do duelo. */
 export function useCompetitionSeries(range: CompetitionRange, userIds: string[]) {
   const { user } = useAuth();

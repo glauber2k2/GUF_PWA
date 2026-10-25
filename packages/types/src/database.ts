@@ -2494,6 +2494,35 @@ export type Database = {
         }
         Returns: undefined
       }
+      search_competition_rivals: {
+        Args: {
+          p_from: string
+          p_limit?: number
+          p_metric: string
+          p_offset?: number
+          p_query?: string
+          p_to: string
+        }
+        Returns: {
+          avatar_url: string
+          current_streak: number
+          fulfilled_weeks: number
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          position: number
+          previous_rank: number
+          rank: number
+          records: number
+          total_count: number
+          user_id: string
+          valid_sessions: number
+          value: number
+          volume_kg: number
+          workouts: number
+        }[]
+      }
       search_social_profiles: {
         Args: { p_query: string }
         Returns: {
@@ -2506,6 +2535,7 @@ export type Database = {
           visibility: string
         }[]
       }
+      search_text_key: { Args: { p_text: string }; Returns: string }
       session_cardio_records: {
         Args: { p_user_id: string }
         Returns: {
