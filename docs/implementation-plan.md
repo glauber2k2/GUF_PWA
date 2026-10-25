@@ -81,7 +81,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 
 ### Editar perfil (2026-10-23, `refactor/design`)
 - Tela `/perfil/editar` (protótipo `Editar Perfil.dc.html`) no lugar da folha: foto enviada (bucket `avatars`), nome, @ com verificação de disponibilidade, bio, objetivos e experiência; migrations `20261024120000_edit_profile` e `20261024120100_legal_docs_edit_profile` (Termos 1.1, Política 1.2), RIPD social v0.7.
-- Lacunas: o painel ainda não apaga a foto no Storage ao excluir uma conta (GA015 bloqueia quem tem foto enviada; a exclusão pelo app já apaga); a bio não aparece no painel (moderação de bio ofensiva só pelo banco); recorte manual da foto (hoje: centro da imagem); envio testado só com o mock até a migration ser aplicada.
+- Lacunas: o painel ainda não apaga a foto no Storage ao excluir uma conta (GA015 bloqueia quem tem foto enviada; a exclusão pelo app já apaga); a bio não aparece no painel (moderação de bio ofensiva só pelo banco); recorte manual da foto (hoje: centro da imagem); migrations aplicadas em 2026-10-24 (envio real da foto ainda não testado no aparelho).
 
 ## 2. Próximas etapas (ordem recomendada)
 

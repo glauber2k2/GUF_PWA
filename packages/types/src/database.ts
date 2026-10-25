@@ -2012,7 +2012,7 @@ export type Database = {
           workouts_count: number
         }[]
       }
-      get_member_workout:{ Args: { p_session_id: string }; Returns: Json }
+      get_member_workout: { Args: { p_session_id: string }; Returns: Json }
       get_member_workout_unrestricted: {
         Args: { p_session_id: string }
         Returns: Json
