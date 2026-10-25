@@ -5,6 +5,7 @@ import { Info, ReceiptText } from "lucide-react";
 import { POINT_SOURCE_LABELS, seasonMonthName, toLocalISODate } from "@guf/core";
 import { Banner, EmptyState, Icon, SegmentedControl, Skeleton } from "@/shared/components/ds";
 import { DetailHeader } from "@/shared/components/detail-header";
+import { DetailScreen } from "@/shared/components/detail-screen";
 import { useGoBack } from "@/shared/hooks/use-go-back";
 import { ScoringRulesSheet } from "@/features/competition/components/scoring-rules-sheet";
 import { StatementMonthNav } from "@/features/competition/components/statement-month-nav";
@@ -88,9 +89,9 @@ export function PointsStatementScreen() {
   const [rulesOpen, setRulesOpen] = useState(false);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-[430px] flex-col pb-[calc(32px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       <DetailHeader title="Extrato de pontos" onBack={goBack} menuIcon={Info} menuLabel="Como os pontos funcionam" onMenu={() => setRulesOpen(true)} />
-      <div className="flex flex-col gap-5 px-4 pt-3">
+      <div className="flex flex-col gap-5 pt-3">
         <SegmentedControl options={VIEW_OPTIONS} value={view.view} onChange={(v) => view.setView(v as StatementView)} label="Visualização" />
         {view.error ? (
           <Banner tone="danger" title="Não foi possível carregar o extrato." actionLabel="Tentar de novo" onAction={view.retry}>
@@ -114,6 +115,6 @@ export function PointsStatementScreen() {
         </button>
       </div>
       <ScoringRulesSheet open={rulesOpen} onClose={() => setRulesOpen(false)} season={toLocalISODate(view.season)} />
-    </main>
+    </DetailScreen>
   );
 }

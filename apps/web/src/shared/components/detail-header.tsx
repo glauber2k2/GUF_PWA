@@ -21,7 +21,11 @@ export interface DetailHeaderProps {
   menuIcon?: LucideIcon;
 }
 
-/** Cabeçalho fixo das telas internas (resumo, evolução, busca): voltar, título centralizado e menu. */
+/**
+ * Cabeçalho fixo das telas internas (resumo, evolução, busca): voltar, título centralizado e menu.
+ * Fica dentro do `DetailScreen` (shared/components/detail-screen.tsx): o -mx-4 desfaz o recuo dela
+ * para o fundo ir de borda a borda. Fora dela, o cabeçalho passaria 32 px da largura da tela.
+ */
 export function DetailHeader({ title, overline, subtitle, position, loading = false, onBack, menuLabel, onMenu, menuIcon = Ellipsis }: DetailHeaderProps) {
   const scrolled = useScrolled(8);
   return (

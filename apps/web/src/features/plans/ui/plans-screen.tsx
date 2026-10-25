@@ -12,6 +12,7 @@ import { usePlanCatalog, useStartSubscription, useSubscriptionDocuments } from "
 import { PlanComparison } from "@/features/plans/components/plan-comparison";
 import { SubscribePanel } from "@/features/plans/components/subscribe-panel";
 import { usePlanGate } from "@/features/plans/hooks/use-plan-gate";
+import { DetailScreen } from "@/shared/components/detail-screen";
 
 /** /planos?recurso=<funcionalidade> — plano atual, comparação e assinatura do Pro. */
 export function PlansScreen() {
@@ -43,7 +44,7 @@ export function PlansScreen() {
     );
 
   return (
-    <main className="flex flex-col px-4 pb-[calc(48px+env(safe-area-inset-bottom))]">
+    <DetailScreen>
       <DetailHeader title="Planos" onBack={goBack} />
       <div className="flex flex-col gap-4 pt-2">
         {!online && (
@@ -73,7 +74,7 @@ export function PlansScreen() {
           />
         )}
       </div>
-    </main>
+    </DetailScreen>
   );
 }
 
