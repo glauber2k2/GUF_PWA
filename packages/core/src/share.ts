@@ -15,6 +15,7 @@ import {
 import { formatNumber, formatSigned, TIMES_SIGN } from "./format";
 import type { SetType } from "./training";
 import { toDisplayWeight, type WeightUnit } from "./units";
+import { buildStoryCardio, type StoryCardio, type StoryCardioInput } from "./share-cardio";
 import { liftEffort, pickWeightComparison, type LiftEffort, type WeightComparison } from "./weight-comparison";
 
 /*
@@ -105,6 +106,8 @@ export interface StoryInput {
       previousOn: string | null;
     }>;
   };
+  /** Exercícios de cardio do treino (fora de `summary.exercises`, que é só de força) e os recordes deles. */
+  cardio: StoryCardioInput;
   /** Treinos concluídos até este (inclusive) e a data do primeiro. */
   history: { totalWorkouts: number; firstWorkoutOn: string | null };
   /** Exercício em destaque (recorde ou maior volume) nas últimas 8 semanas; null sem histórico. */
@@ -284,6 +287,8 @@ export interface StoryData {
     /** Calendário do mês do treino: null = espaço antes do dia 1 (até o domingo). */
     calendar: Array<StoryCalendarDay | null>;
   };
+  /** Cardio do treino: tempo, distância e ritmo ou velocidade (null sem cardio). */
+  cardio: StoryCardio | null;
   /** Comparação de peso do volume (null abaixo de 20 kg). */
   comparison: StoryComparison | null;
   /** Descanso médio entre séries do treino ("1:32"); null sem horários suficientes. */
@@ -616,6 +621,7 @@ export function buildStoryData(input: StoryInput): StoryData {
       shares,
       calendar: storyMonthCalendar(day, trainingDays),
     },
+    cardio: buildStoryCardio(input.cardio),
     comparison: comparison ? { ...comparison, effort: liftEffort(summary.volumeKg) } : null,
     restAverage: storyRestAverage(summary.exercises),
     topMuscle: top ? { label: MUSCLE_FIGURE_LABELS[top[0]], ...top[1] } : null,

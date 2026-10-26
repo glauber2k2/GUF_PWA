@@ -39,3 +39,4 @@ export * from "./announcements";
 export * from "./staff";
 export * from "./account-suspension";
 export * from "./exercise-catalog";
+export * from "./share-cardio";

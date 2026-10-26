@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Download } from "lucide-react";
 import { Button, SegmentedControl } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
-import { mockStoryData } from "@/mocks/share";
+import { mockStoryData, type StoryMockWorkout } from "@/mocks/share";
 import { FitPreview } from "@/features/share/components/fit-preview";
 import { StoryArt } from "@/features/share/components/story-art";
 import { STORY_FORMAT_LABELS, STORY_MODELS, STORY_STYLES, type StoryModel } from "@/features/share/constants/story-catalog";
@@ -17,6 +17,11 @@ const PREVIEW_HEIGHT = 288;
 const THEME_OPTIONS = [
   { value: "dark", label: "Escuro" },
   { value: "light", label: "Claro" },
+];
+const WORKOUT_OPTIONS = [
+  { value: "forca", label: "Força" },
+  { value: "cardio", label: "Cardio" },
+  { value: "misto", label: "Força + cardio" },
 ];
 const OPACITY_OPTIONS = [
   { value: "100", label: "100%" },
@@ -34,7 +39,8 @@ const GROUPS = STORY_STYLES.map((style, index) => ({ style, models: STORY_MODELS
  * mostra também os modelos que, com dados reais, só aparecem quando o dado existe.
  */
 export function StoryGalleryScreen() {
-  const [data] = useState(mockStoryData);
+  const [workout, setWorkout] = useState<StoryMockWorkout>("forca");
+  const data = useMemo(() => mockStoryData(workout), [workout]);
   const [theme, setTheme] = useState<StoryTheme>("dark");
   const [opacity, setOpacity] = useState(100);
 
@@ -44,10 +50,11 @@ export function StoryGalleryScreen() {
         <div className="flex flex-col gap-1">
           <h1 className="m-0 text-2xl leading-8 font-bold tracking-[-0.02em]">PNGs exportáveis</h1>
           <p className="m-0 text-sm text-fg-secondary">
-            {STORY_MODELS.length} modelos em {GROUPS.length} grupos · dados de exemplo · só em desenvolvimento
+            {STORY_MODELS.length} modelos em {GROUPS.length} grupos · dados de exemplo (o cardio aparece com “Cardio” ou “Força + cardio”) · só em desenvolvimento
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <SegmentedControl label="Dados de exemplo" size="sm" options={WORKOUT_OPTIONS} value={workout} onChange={(v) => setWorkout(v as StoryMockWorkout)} />
           <SegmentedControl label="Tema da imagem" size="sm" options={THEME_OPTIONS} value={theme} onChange={(v) => setTheme(v as StoryTheme)} />
           <SegmentedControl label="Opacidade" size="sm" options={OPACITY_OPTIONS} value={String(opacity)} onChange={(v) => setOpacity(Number(v))} />
         </div>

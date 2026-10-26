@@ -1,6 +1,6 @@
 import { buildStoryData, setMetricKind, storyContextRange, storyFeaturedFrom, type SetType, type StoryData, type StoryInput } from "@guf/core";
 import type { GufClient } from "./client";
-import { getWorkoutSummary, type LoadSummaryRecord } from "./evolution";
+import { getWorkoutSummary, type CardioSummaryRecord, type LoadSummaryRecord } from "./evolution";
 import { currentUserId, fetchTrainingTotals, toStreakSummary, toTrainingDay } from "./shared";
 import { apiError, toApiError, type ApiResult } from "./result";
 
@@ -72,7 +72,7 @@ export const getShareStoryData: GetShareStoryData = async (client, { sessionId }
         volumeKg: s.volumeKg,
         setCount: s.setCount,
         weightUnit: s.weightUnit,
-        // Cardio fica fora das imagens até ter modelos próprios (distância, tempo e ritmo).
+        // Só força: o cardio vai à parte (`cardio`), para não entrar no volume, nas séries e no boneco.
         exercises: s.exercises.filter((e) => setMetricKind(e.muscleGroup) !== "cardio").map((e) => ({
           name: e.name,
           muscleGroup: e.muscleGroup,
@@ -86,6 +86,12 @@ export const getShareStoryData: GetShareStoryData = async (client, { sessionId }
           volumeKg: e.volumeKg,
         })),
         records: s.records.filter((r): r is LoadSummaryRecord => r.metric === "load"),
+      },
+      cardio: {
+        exercises: s.exercises
+          .filter((e) => setMetricKind(e.muscleGroup) === "cardio")
+          .map((e) => ({ name: e.name, sets: e.sets.map((x) => ({ setType: x.setType as SetType, distanceKm: x.distanceKm, durationSeconds: x.durationSeconds })) })),
+        records: s.records.filter((r): r is CardioSummaryRecord => r.metric === "cardio"),
       },
       streak: toStreakSummary(streakRes.data?.[0]),
       weeklyGoal: profileRes.data?.weekly_goal ?? null,

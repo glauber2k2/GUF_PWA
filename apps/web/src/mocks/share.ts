@@ -4,18 +4,37 @@ import type { GufClient } from "@guf/api";
 
 /*
  * Mock dos stories (mesma assinatura de packages/api/src/share.ts): o treino do design
- * ("Treino A – Peito e Tríceps", 12.480 kg, 2 recordes, 12 semanas de sequência).
+ * ("Treino A – Peito e Tríceps", 12.480 kg, 2 recordes, 12 semanas de sequência); com ?estado=cardio
+ * (esteira e bike) ou misto (força + esteira), o cardio para o modelo próprio.
  * Tudo é gerado sob demanda (nada no carregamento do módulo), para o build descartar o mock.
  */
 
 const ignoreClient = (client: GufClient) => void client;
 const wait = (ms = 500) => new Promise((resolve) => setTimeout(resolve, ms));
 
-type Scenario = "padrao" | "sem-recordes" | "erro" | "novo";
+type Scenario = "padrao" | "sem-recordes" | "erro" | "novo" | "cardio" | "misto";
+const SCENARIOS: readonly Scenario[] = ["padrao", "sem-recordes", "erro", "novo", "cardio", "misto"];
 let scenario: Scenario = "padrao";
 /** ?estado= da tela que abriu a folha (só desenvolvimento). */
 export function setShareMockScenario(value: string | null | undefined) {
-  scenario = value === "sem-recordes" || value === "erro" || value === "novo" ? value : "padrao";
+  scenario = SCENARIOS.find((s) => s === value) ?? "padrao";
+}
+
+/** Tipo do treino de exemplo: só força (o do design), só cardio ou os dois. */
+export type StoryMockWorkout = "forca" | "cardio" | "misto";
+
+const workoutOf = (s: Scenario): StoryMockWorkout => (s === "cardio" || s === "misto" ? s : "forca");
+
+/** Esteira com recorde de ritmo e bike (cardio) ou só a esteira depois da força (misto). */
+function sampleCardio(workout: StoryMockWorkout, withRecords: boolean): StoryInput["cardio"] {
+  if (workout === "forca") return { exercises: [], records: [] };
+  const run = { setType: "normal" as const, distanceKm: 5.2, durationSeconds: 32 * 60 + 10 };
+  const treadmill = { name: "Esteira", sets: [run] };
+  const bike = { name: "Bike ergométrica", sets: [{ setType: "normal" as const, distanceKm: 6.1, durationSeconds: 15 * 60 }] };
+  const records = withRecords
+    ? [{ exerciseName: "Esteira", cardio: { kind: "rate" as const, rate: "pace" as const, distanceKm: run.distanceKm, durationSeconds: run.durationSeconds, previousValue: 382 } }]
+    : [];
+  return { exercises: workout === "cardio" ? [treadmill, bike] : [treadmill], records };
 }
 
 const set = (weightKg: number | null, reps: number, setType: "normal" | "warmup" = "normal") => ({
@@ -25,7 +44,8 @@ const set = (weightKg: number | null, reps: number, setType: "normal" | "warmup"
   completedAt: null as string | null,
 });
 
-function sampleInput(today: Date): StoryInput {
+function sampleInput(today: Date, workout: StoryMockWorkout): StoryInput {
+  const isCardioOnly = workout === "cardio";
   const performedOn = toLocalISODate(today);
   // Séries concluídas a cada ~1:32 (descanso médio do exemplo).
   let clock = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 40).getTime();
@@ -35,7 +55,7 @@ function sampleInput(today: Date): StoryInput {
     const working = sets.filter((s) => s.setType !== "warmup");
     return { name, muscleGroup, sets, setCount: working.length, volumeKg: working.reduce((n, s) => n + (s.weightKg ?? 0) * s.reps, 0) };
   };
-  const exercises = [
+  const strength = [
     ex("Supino reto com barra", "peito", [set(40, 12, "warmup"), set(80, 8), set(80, 8), set(80, 8), set(80, 8)]),
     ex("Supino inclinado", "peito", [set(28, 10), set(28, 10), set(28, 10)]),
     ex("Crucifixo na máquina", "peito", [set(45, 12), set(45, 12), set(45, 12)]),
@@ -44,9 +64,10 @@ function sampleInput(today: Date): StoryInput {
     ex("Tríceps francês", "triceps", [set(20, 10), set(20, 10), set(20, 10)]),
     ex("Elevação lateral", "ombros", [set(10, 12), set(10, 12)]),
   ];
+  const exercises = isCardioOnly ? [] : strength;
   const lastMonth = toLocalISODate(addLocalDays(today, -34));
   const records =
-    scenario === "sem-recordes" || scenario === "novo"
+    isCardioOnly || scenario === "sem-recordes" || scenario === "novo"
       ? []
       : [
           { exerciseName: "Supino reto com barra", weightKg: 80, reps: 8, oneRmKg: 101.3, previous1RmKg: 95, previousOn: lastMonth },
@@ -65,16 +86,17 @@ function sampleInput(today: Date): StoryInput {
   }));
   return {
     summary: {
-      name: "Treino A – Peito e Tríceps",
+      name: isCardioOnly ? "Cardio – Esteira e Bike" : "Treino A – Peito e Tríceps",
       performedOn,
       startedAt: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 18, 40).toISOString(),
-      durationSeconds: 72 * 60,
+      durationSeconds: (isCardioOnly ? 47 : 72) * 60,
       volumeKg: exercises.reduce((n, e) => n + e.volumeKg, 0),
       setCount: exercises.reduce((n, e) => n + e.setCount, 0),
       weightUnit: "kg",
       exercises,
       records,
     },
+    cardio: sampleCardio(workout, scenario !== "sem-recordes" && scenario !== "novo"),
     streak: scenario === "novo" ? { currentStreak: 1, bestStreak: 1 } : { currentStreak: 12, bestStreak: 12 },
     weeklyGoal: 4,
     trainingDays,
@@ -101,12 +123,12 @@ export const getShareStoryData: ShareApi["getShareStoryData"] = async (client) =
   await wait();
   if (scenario === "erro")
     return { data: null, error: { code: "network_error", message: "Sem conexão. Verifique a internet e tente de novo." } };
-  return { data: buildStoryData(sampleInput(fromLocalISODate(toLocalISODate(new Date())))), error: null };
+  return { data: buildStoryData(sampleInput(fromLocalISODate(toLocalISODate(new Date())), workoutOf(scenario))), error: null };
 };
 
 export const mockShareApi = { getShareStoryData } satisfies ShareApi;
 
-/** Dados de exemplo prontos (vitrine e pré-visualização em desenvolvimento). */
-export function mockStoryData() {
-  return buildStoryData(sampleInput(new Date()));
+/** Dados de exemplo prontos (vitrine e galeria de PNGs em desenvolvimento), pelo tipo do treino. */
+export function mockStoryData(workout: StoryMockWorkout = "forca") {
+  return buildStoryData(sampleInput(new Date(), workout));
 }

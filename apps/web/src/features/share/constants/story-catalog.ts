@@ -11,6 +11,7 @@ import { StoryF01, StoryF02, StoryF03, StoryF04, StoryF05, StoryF06, StoryF07, S
 import { Story01, Story02, Story03 } from "@/features/share/components/models/muscle-map";
 import { Story04, Story05, Story06 } from "@/features/share/components/models/numbers";
 import { Story08 } from "@/features/share/components/models/rat";
+import { StoryCardio01 } from "@/features/share/components/models/cardio";
 import { Story10, Story11, Story12 } from "@/features/share/components/models/record";
 import { StoryS01, StoryS02, StoryS03, StoryS04, StoryS05, StoryS06, StoryS07, StoryS08, StoryS09, StoryS10, StoryS11 } from "@/features/share/components/models/stickers-a";
 import { StoryS12, StoryS13, StoryS14, StoryS15, StoryS16, StoryS17, StoryS18, StoryS19, StoryS20, StoryS22 } from "@/features/share/components/models/stickers-b";
@@ -33,6 +34,7 @@ export const STORY_STYLES = [
   "Cartões",
   "Tela cheia",
   "Stickers",
+  "Cardio",
 ] as const;
 
 /** Formato exibido na folha, ao lado do estilo. */
@@ -70,6 +72,9 @@ const hasFeatured = (d: StoryData) => d.featured !== null;
 const hasProject = (d: StoryData) => d.project !== null;
 const hasRest = (d: StoryData) => d.restAverage !== null;
 const hasTopMuscle = (d: StoryData) => d.topMuscle !== null;
+const hasCardio = (d: StoryData) => d.cardio !== null;
+/** Estilo Cardio: vem primeiro no carrossel quando o treino é só de cardio. */
+const CARDIO_STYLE = STORY_STYLES.indexOf("Cardio");
 
 /**
  * Modelos na ordem do carrossel: os 37 do design (ShareSheetScreen.dc.html · ALL), a comparação de peso
@@ -170,12 +175,16 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   { name: "Marco de treinos", style: 13, hasCards: true, Component: StoryS19, format: "sticker" },
   { name: "Números e bonecos", style: 13, hasCards: true, Component: StoryS20, format: "sticker" },
   { name: "Ficha lateral com bonecos", style: 13, hasCards: true, Component: StoryS22, format: "sticker" },
+  // Cardio (no fim do catálogo para não mudar o número dos modelos que já existiam)
+  { name: "Tempo, distância e ritmo", style: CARDIO_STYLE, hasCards: true, Component: StoryCardio01, available: hasCardio },
 ];
 
 /** Catálogo com os números sequenciais (01, 02…). */
 export const STORY_MODELS: readonly StoryModel[] = MODELS.map((model, i) => ({ ...model, id: String(i + 1).padStart(2, "0") }));
 
-/** Modelos que fazem sentido para este treino (sem recorde, some o estilo Recorde etc.). */
+/** Modelos que fazem sentido para este treino (sem recorde, some o estilo Recorde etc.); só cardio = Cardio primeiro. */
 export function availableStoryModels(d: StoryData): StoryModel[] {
-  return STORY_MODELS.filter((m) => !m.available || m.available(d));
+  const models = STORY_MODELS.filter((m) => !m.available || m.available(d));
+  if (!d.cardio || d.exerciseCount > 0) return models;
+  return [...models.filter((m) => m.style === CARDIO_STYLE), ...models.filter((m) => m.style !== CARDIO_STYLE)];
 }
