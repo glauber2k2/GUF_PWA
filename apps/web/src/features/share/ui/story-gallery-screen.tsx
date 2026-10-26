@@ -23,6 +23,8 @@ const WORKOUT_OPTIONS = [
   { value: "cardio", label: "Cardio" },
   { value: "misto", label: "Força + cardio" },
 ];
+/** Treino de exemplo com todos os dados; também desenha o modelo que o treino escolhido não oferece. */
+const COMPLETE_WORKOUT: StoryMockWorkout = "misto";
 const OPACITY_OPTIONS = [
   { value: "100", label: "100%" },
   { value: "50", label: "50%" },
@@ -39,8 +41,10 @@ const GROUPS = STORY_STYLES.map((style, index) => ({ style, models: STORY_MODELS
  * mostra também os modelos que, com dados reais, só aparecem quando o dado existe.
  */
 export function StoryGalleryScreen() {
-  const [workout, setWorkout] = useState<StoryMockWorkout>("forca");
+  // Força + cardio tem todos os dados (recordes, sequência, cardio): nenhum modelo fica em branco.
+  const [workout, setWorkout] = useState<StoryMockWorkout>(COMPLETE_WORKOUT);
   const data = useMemo(() => mockStoryData(workout), [workout]);
+  const completeData = useMemo(() => mockStoryData(COMPLETE_WORKOUT), []);
   const [theme, setTheme] = useState<StoryTheme>("dark");
   const [opacity, setOpacity] = useState(100);
 
@@ -50,7 +54,7 @@ export function StoryGalleryScreen() {
         <div className="flex flex-col gap-1">
           <h1 className="m-0 text-2xl leading-8 font-bold tracking-[-0.02em]">PNGs exportáveis</h1>
           <p className="m-0 text-sm text-fg-secondary">
-            {STORY_MODELS.length} modelos em {GROUPS.length} grupos · dados de exemplo (o cardio aparece com “Cardio” ou “Força + cardio”) · só em desenvolvimento
+            {STORY_MODELS.length} modelos em {GROUPS.length} grupos · dados de exemplo · só em desenvolvimento
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -78,7 +82,15 @@ export function StoryGalleryScreen() {
           </h2>
           <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,162px)] gap-4 p-0">
             {group.models.map((model) => (
-              <StoryGalleryItem key={model.id} model={model} theme={theme} opacity={opacity} data={data} isAvailable={model.available?.(data) ?? true} />
+              <StoryGalleryItem
+                key={model.id}
+                model={model}
+                theme={theme}
+                opacity={opacity}
+                data={data}
+                completeData={completeData}
+                isAvailable={model.available?.(data) ?? true}
+              />
             ))}
           </ul>
         </section>
@@ -92,12 +104,15 @@ function StoryGalleryItem({
   theme,
   opacity,
   data,
+  completeData,
   isAvailable,
 }: {
   model: StoryModel;
   theme: StoryTheme;
   opacity: number;
   data: ReturnType<typeof mockStoryData>;
+  /** Usado quando o treino escolhido não tem o dado do modelo (ex.: cardio no treino só de força). */
+  completeData: ReturnType<typeof mockStoryData>;
   isAvailable: boolean;
 }) {
   const [busy, setBusy] = useState(false);
@@ -125,7 +140,7 @@ function StoryGalleryItem({
         style={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}
       >
         <FitPreview width={PREVIEW_WIDTH} height={PREVIEW_HEIGHT}>
-          <StoryArt ref={setArtNode} model={model} data={data} backgroundOpacity={opacity} theme={theme} />
+          <StoryArt ref={setArtNode} model={model} data={isAvailable ? data : completeData} backgroundOpacity={opacity} theme={theme} />
         </FitPreview>
       </div>
       <div className="flex flex-col gap-0.5">
@@ -137,7 +152,7 @@ function StoryGalleryItem({
           {model.hasCards ? " · com cartões" : ""}
         </span>
         <span className={cn("text-xs", isAvailable ? "text-fg-muted" : "text-warning")}>
-          {isAvailable ? "Disponível com estes dados" : "Só aparece quando o dado existe"}
+          {isAvailable ? "Disponível com estes dados" : "Este treino não oferece · prévia com Força + cardio"}
         </span>
       </div>
       <Button variant="secondary" size="md" icon={Download} loading={busy} disabled={!artNode} onClick={() => void download()}>
