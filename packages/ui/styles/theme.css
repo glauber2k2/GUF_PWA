@@ -182,6 +182,8 @@
   /* Sombras e2/e3 dentro dos stories (acompanham a opacidade da arte). */
   --shadow-story-e2: var(--shadow-story-2);
   --shadow-story-e3: var(--shadow-story-3);
+  /* Semana atual na linha de semanas (story 14): anel e brilho volt, na opacidade da arte. */
+  --shadow-story-ring: 0 0 0 8px color-mix(in oklab, var(--accent) calc(28% * var(--story-detail, 1)), transparent), 0 0 32px color-mix(in oklab, var(--accent) calc(45% * var(--story-detail, 1)), transparent);
 
   /* Movimento */
   --ease-standard: var(--ease-standard);

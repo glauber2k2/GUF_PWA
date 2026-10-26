@@ -8,7 +8,8 @@
   --shadow-e2: var(--shadow-2); /* surface-elevated · barras flutuantes, timer */
   --shadow-e3: var(--shadow-3); /* sheet, modal, toast, FAB */
   --focus-ring: 0 0 0 3px color-mix(in oklab, var(--focus) 30%, transparent);
-  --shadow-pr-glow: 0 0 32px color-mix(in oklab, var(--pr) 25%, transparent);
+  /* Nos stories, segue a opacidade da arte (--story-detail); no resto do app vale 1. */
+  --shadow-pr-glow: 0 0 32px color-mix(in oklab, var(--pr) calc(25% * var(--story-detail, 1)), transparent);
 }
 :root {
   --blur-bar: 12px;
