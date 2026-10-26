@@ -32,18 +32,24 @@ function colorAt(color: string, percent: number): string {
  *   bordas seguem a opacidade. Em 0% só os elementos aparecem (a regra [data-story-art][data-flat]
  *   do base.css tira também bordas coloridas e sombras);
  * - modelo sem cartões: a opacidade vale para o fundo da imagem.
+ * Nos dois casos, linhas divisórias, bordas (inclusive as coloridas e as molduras), sombras e brilhos
+ * seguem a mesma opacidade: `--story-detail` (0–1) é lido pelos tokens `story-*` do tema.
  */
 export function storyArtColors(opacity: number, theme: StoryTheme, hasCards: boolean): CSSProperties {
   const o = Math.max(0, Math.min(100, opacity));
-  if (!hasCards) return { background: colorAt("var(--background)", o) };
   const s = SURFACES[theme];
+  const details = {
+    "--story-detail": o / 100,
+    "--border": colorAt(s.border, o),
+    "--border-strong": colorAt(s.borderStrong, o),
+  };
+  if (!hasCards) return { background: colorAt("var(--background)", o), ...details } as CSSProperties;
   return {
+    ...details,
     background: "transparent",
     "--surface": colorAt(s.surface, o),
     "--surface-elevated": colorAt(s.elevated, o),
     "--surface-3": colorAt(s.third, o),
-    "--border": colorAt(s.border, o),
-    "--border-strong": colorAt(s.borderStrong, o),
   } as CSSProperties;
 }
 

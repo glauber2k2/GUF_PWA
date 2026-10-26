@@ -12,7 +12,7 @@ export function Story10({ d }: StoryModelProps) {
           <span className="text-[28px] text-fg">{d.date}</span>
         </div>
         <div className="relative mt-[24px] h-[420px] flex justify-center items-center">
-          <div className="absolute left-1/2 top-1/2 w-[680px] h-[680px] mt-[-340px] mr-0 mb-0 ml-[-340px] rounded-full bg-radial from-pr/26 to-transparent to-62%"></div>
+          <div className="absolute left-1/2 top-1/2 w-[680px] h-[680px] mt-[-340px] mr-0 mb-0 ml-[-340px] rounded-full bg-radial from-story-pr/26 to-transparent to-62%"></div>
           <div className="relative">
             <GufRat occasion="personalRecord" size={380} animated={false} label={null} />
           </div>
@@ -29,7 +29,7 @@ export function Story10({ d }: StoryModelProps) {
           {d.records.slice(0, 3).map((r) => (
             <div
               key={r.exerciseName}
-              className="py-[32px] px-[40px] rounded-[32px] bg-surface border-[2px] border-pr-text/36 flex items-center justify-between gap-[24px]"
+              className="py-[32px] px-[40px] rounded-[32px] bg-surface border-[2px] border-story-pr-text/36 flex items-center justify-between gap-[24px]"
             >
               <div className="flex min-w-0 flex-col gap-[4px]">
                 <span className="truncate text-[28px] font-semibold text-fg">{r.exerciseName}</span>
@@ -111,7 +111,7 @@ export function Story12({ d }: StoryModelProps) {
       <div className="absolute right-[96px] top-[220px]">
         <Logo className="h-[88px]" />
       </div>
-      <div className="absolute left-[64px] right-[64px] bottom-[260px] p-[40px] rounded-[48px] bg-surface border-[2px] border-pr-text/40 shadow-story-pr flex items-center gap-[36px]">
+      <div className="absolute left-[64px] right-[64px] bottom-[260px] p-[40px] rounded-[48px] bg-surface border-[2px] border-story-pr-text/40 shadow-story-pr flex items-center gap-[36px]">
         <div className="flex-none w-[160px] h-[160px] rounded-full bg-pr/18 text-pr-text flex items-center justify-center">
           <Trophy size={80} aria-hidden="true" />
         </div>

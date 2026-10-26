@@ -100,7 +100,7 @@ function DateHeader({ d, feed }: { d: StoryData; feed: boolean }) {
 function RecordBadge({ label, feed, className = "" }: { label: string; feed: boolean; className?: string }) {
   return (
     <div
-      className={`flex items-center rounded-full border-[2px] border-pr-text/50 bg-pr/14 font-semibold text-pr-text ${
+      className={`flex items-center rounded-full border-[2px] border-story-pr-text/50 bg-pr/14 font-semibold text-pr-text ${
         feed ? "h-[48px] gap-[10px] px-[20px] text-[30px]" : "h-[56px] gap-[12px] px-[24px] text-[32px]"
       } ${className}`}
     >
@@ -367,7 +367,7 @@ function SummaryRecords({ d, v, feed }: { d: StoryData; v: CardValues; feed: boo
       {feed ? (
         <div className="mt-[32px] flex items-center gap-[40px]">
           <div className="relative flex h-[280px] w-[280px] flex-none items-center justify-center">
-            <div className="absolute left-[-80px] top-[-80px] h-[440px] w-[440px] rounded-full bg-radial from-pr/24 to-transparent to-62%"></div>
+            <div className="absolute left-[-80px] top-[-80px] h-[440px] w-[440px] rounded-full bg-radial from-story-pr/24 to-transparent to-62%"></div>
             <div className="relative">
               <GufRat occasion="personalRecord" size={260} animated={false} label={null} />
             </div>
@@ -383,7 +383,7 @@ function SummaryRecords({ d, v, feed }: { d: StoryData; v: CardValues; feed: boo
       ) : (
         <>
           <div className="relative mt-[32px] flex h-[360px] items-center justify-center">
-            <div className="absolute left-1/2 top-1/2 ml-[-300px] mt-[-300px] h-[600px] w-[600px] rounded-full bg-radial from-pr/24 to-transparent to-62%"></div>
+            <div className="absolute left-1/2 top-1/2 ml-[-300px] mt-[-300px] h-[600px] w-[600px] rounded-full bg-radial from-story-pr/24 to-transparent to-62%"></div>
             <div className="relative">
               <GufRat occasion="personalRecord" size={340} animated={false} label={null} />
             </div>
@@ -422,7 +422,7 @@ function SummaryRecords({ d, v, feed }: { d: StoryData; v: CardValues; feed: boo
           return feed ? (
             <div
               key={r.exerciseName}
-              className="flex items-center justify-between gap-[24px] rounded-[24px] border-[2px] border-pr-text/36 bg-surface px-[32px] py-[24px]"
+              className="flex items-center justify-between gap-[24px] rounded-[24px] border-[2px] border-story-pr-text/36 bg-surface px-[32px] py-[24px]"
             >
               <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
                 <span className="truncate text-[32px] font-semibold text-fg">{r.exerciseName}</span>
@@ -433,7 +433,7 @@ function SummaryRecords({ d, v, feed }: { d: StoryData; v: CardValues; feed: boo
           ) : (
             <div
               key={r.exerciseName}
-              className="flex flex-col gap-[12px] rounded-[32px] border-[2px] border-pr-text/36 bg-surface px-[40px] py-[32px]"
+              className="flex flex-col gap-[12px] rounded-[32px] border-[2px] border-story-pr-text/36 bg-surface px-[40px] py-[32px]"
             >
               <span className="truncate text-[34px] font-semibold text-fg">{r.exerciseName}</span>
               <div className="flex items-end justify-between gap-[24px]">

@@ -6,7 +6,7 @@ import { STORY_SIGNATURE, type StoryModelProps } from "@/features/share/type";
 export function Story28({ d }: StoryModelProps) {
   return (
     <>
-      <div className="absolute left-[64px] right-[64px] top-[220px] bottom-[260px] border-[6px] border-accent rounded-[56px]"></div>
+      <div className="absolute left-[64px] right-[64px] top-[220px] bottom-[260px] border-[6px] border-story-accent rounded-[56px]"></div>
       <div className="absolute left-[120px] top-[164px] py-[12px] px-[28px] rounded-full bg-surface border border-border flex items-center gap-[12px]">
         <Logo className="h-[88px]" />
       </div>
@@ -39,7 +39,7 @@ export function Story29({ d }: StoryModelProps) {
         <div className="absolute right-[24px] top-[-230px]">
           <GufRat occasion="saved" size={260} animated={false} label={null} />
         </div>
-        <div className="relative rounded-[40px] bg-surface border border-border-strong shadow-e3 flex flex-col">
+        <div className="relative rounded-[40px] bg-surface border border-border-strong shadow-story-e3 flex flex-col">
           <div className="pt-[44px] pr-[48px] pb-[36px] pl-[48px] flex flex-col gap-[12px]">
             <span className="text-[22px] font-semibold tracking-[.08em] text-accent-text">TREINO CONCLUÍDO · {d.date.toUpperCase()}</span>
             <span className="text-[48px] leading-[56px] font-bold tracking-[-.02em]">{d.title}</span>
@@ -99,10 +99,10 @@ export function Story30({ d }: StoryModelProps) {
 export function Story31({ d }: StoryModelProps) {
   return (
     <>
-      <div className="absolute left-[64px] top-[220px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-0"></div>
-      <div className="absolute right-[64px] top-[220px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-90"></div>
-      <div className="absolute right-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-180"></div>
-      <div className="absolute left-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-accent border-l-[8px] border-accent rounded-tl-[40px] rotate-270"></div>
+      <div className="absolute left-[64px] top-[220px] w-[140px] h-[140px] border-t-[8px] border-story-accent border-l-[8px] border-story-accent rounded-tl-[40px] rotate-0"></div>
+      <div className="absolute right-[64px] top-[220px] w-[140px] h-[140px] border-t-[8px] border-story-accent border-l-[8px] border-story-accent rounded-tl-[40px] rotate-90"></div>
+      <div className="absolute right-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-story-accent border-l-[8px] border-story-accent rounded-tl-[40px] rotate-180"></div>
+      <div className="absolute left-[64px] bottom-[260px] w-[140px] h-[140px] border-t-[8px] border-story-accent border-l-[8px] border-story-accent rounded-tl-[40px] rotate-270"></div>
       <div className="absolute left-[120px] top-[276px]">
         <Logo className="h-[88px]" />
       </div>
@@ -126,7 +126,7 @@ export function Story31({ d }: StoryModelProps) {
 export function Story32({ d }: StoryModelProps) {
   return (
     <>
-      <div className="absolute left-[64px] right-[64px] top-[220px] bottom-[260px] border-solid border-surface border-t-[40px] border-x-[40px] border-b-[340px] rounded-[24px] shadow-e3"></div>
+      <div className="absolute left-[64px] right-[64px] top-[220px] bottom-[260px] border-solid border-story-surface border-t-[40px] border-x-[40px] border-b-[340px] rounded-[24px] shadow-story-e3"></div>
       <div className="absolute left-[104px] right-[104px] top-[1392px] bottom-[300px] flex flex-col justify-center gap-[16px]">
         <div className="flex justify-between items-center">
           <span className="text-[52px] font-bold tracking-[-.02em]">Treino pago.</span>

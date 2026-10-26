@@ -72,6 +72,9 @@
   --shadow-1: none;
   --shadow-2: none;
   --shadow-3: 0 16px 40px rgb(0 0 0 / 0.5);
+  /* Sombras dos cartões dos stories: mesmas do tema, na opacidade escolhida na arte (--story-detail, 0–1). */
+  --shadow-story-2: none;
+  --shadow-story-3: 0 16px 40px rgb(0 0 0 / calc(0.5 * var(--story-detail, 1)));
   --shadow-control: 0 1px 3px rgb(0 0 0 / 0.25);
   --shadow-thumb: 0 1px 3px rgb(0 0 0 / 0.3);
   --scrim: rgb(0 0 0 / 0.6);
@@ -106,6 +109,8 @@
   --shadow-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
   --shadow-2: 0 4px 12px rgb(16 24 40 / 0.08), 0 2px 4px rgb(16 24 40 / 0.05);
   --shadow-3: 0 16px 40px rgb(16 24 40 / 0.16);
+  --shadow-story-2: 0 4px 12px rgb(16 24 40 / calc(0.08 * var(--story-detail, 1))), 0 2px 4px rgb(16 24 40 / calc(0.05 * var(--story-detail, 1)));
+  --shadow-story-3: 0 16px 40px rgb(16 24 40 / calc(0.16 * var(--story-detail, 1)));
   --shadow-control: 0 1px 3px rgb(16 24 40 / 0.18);
   --shadow-thumb: 0 1px 3px rgb(16 24 40 / 0.3);
   --scrim: rgb(14 17 22 / 0.45);
