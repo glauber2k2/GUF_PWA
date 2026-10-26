@@ -11,7 +11,7 @@ import { CardioManualForm } from "@/features/workout/components/cardio/cardio-ma
 import { CardioSetTable, type CardioLoggedSet } from "@/features/workout/components/cardio/cardio-set-table";
 import { CardioTimerPanel } from "@/features/workout/components/cardio/cardio-timer-panel";
 import { ExerciseCardShell, type ExerciseCardFrameProps } from "@/features/workout/components/exercise-card-shell";
-import { CARDIO_ACTIVITY_ICONS } from "@/features/workout/constants/cardio-activity-icons";
+import { CARDIO_ACTIVITY_ICONS } from "@/shared/constants/cardio-activity-icons";
 import type { ExerciseView } from "@/features/workout/helpers/workout-state";
 import type { CardioTimerControls } from "@/features/workout/hooks/use-cardio-timer-controls";
 
