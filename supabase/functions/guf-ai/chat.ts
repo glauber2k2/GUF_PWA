@@ -14,18 +14,20 @@ import {
 import { buildDataTools, type WeightUnit } from "./data-tools.ts";
 import { textResponse } from "./http.ts";
 import { buildInstructions } from "./instructions.ts";
-import { buildLanguageModel } from "./model.ts";
+import { buildLanguageModel, THINKING_BUDGET_TOKENS } from "./model.ts";
 import { buildPlanImportTool } from "./plan-import.ts";
 import { redactPersonalData } from "./privacy.ts";
 import { logProviderError, MAX_RETRIES, TIMEOUT, toProviderErrorMessage } from "./provider-errors.ts";
 import { checkDailyQuota } from "./quota.ts";
+import { guardEmptyReply } from "./reply-guard.ts";
 
 // Mantido igual a packages/core/src/ai.ts (a Edge Function não importa os pacotes do monorepo).
 const AI_MESSAGE_MAX_CHARS = 2000;
 const HISTORY_MESSAGES = 20;
 const TITLE_MAX_CHARS = 80;
 const MAX_STEPS = 6;
-const MAX_OUTPUT_TOKENS = 1200;
+// Texto da resposta + raciocínio do modelo (o provedor conta os dois no mesmo limite).
+const MAX_OUTPUT_TOKENS = 1200 + THINKING_BUDGET_TOKENS;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ChatRequest {
@@ -138,30 +140,29 @@ export async function handleChat(body: unknown, { db, userId, cors, signal }: Ha
     abortSignal: signal,
   });
 
-  return createUIMessageStreamResponse({
-    headers: cors,
-    stream: toUIMessageStream({
-      stream: result.stream,
-      generateMessageId: () => crypto.randomUUID(),
-      // O raciocínio interno do modelo não vai para a tela (deixava a resposta parada em "pensando").
-      sendReasoning: false,
-      onError: toProviderErrorMessage,
-      onEnd: async ({ responseMessage }) => {
-        const text = responseMessage.parts
-          .flatMap((part) => (part.type === "text" ? [part.text] : []))
-          .join("")
-          .trim();
-        if (!text) return;
-        const { error } = await db.from("ai_messages").insert({
-          id: responseMessage.id,
-          conversation_id: request.conversationId,
-          user_id: userId,
-          role: "assistant",
-          content: text.slice(0, 12000),
-          used_history: responseMessage.parts.some((part) => part.type.startsWith("tool-")),
-        });
-        if (error) console.error("GUF AI: resposta não gravada", { code: error.code });
-      },
-    }),
+  const uiStream = toUIMessageStream({
+    stream: result.stream,
+    generateMessageId: () => crypto.randomUUID(),
+    // O raciocínio interno do modelo não vai para a tela (deixava a resposta parada em "pensando").
+    sendReasoning: false,
+    onError: toProviderErrorMessage,
+    onEnd: async ({ responseMessage }) => {
+      const text = responseMessage.parts
+        .flatMap((part) => (part.type === "text" ? [part.text] : []))
+        .join("")
+        .trim();
+      if (!text) return;
+      const { error } = await db.from("ai_messages").insert({
+        id: responseMessage.id,
+        conversation_id: request.conversationId,
+        user_id: userId,
+        role: "assistant",
+        content: text.slice(0, 12000),
+        used_history: responseMessage.parts.some((part) => part.type.startsWith("tool-")),
+      });
+      if (error) console.error("GUF AI: resposta não gravada", { code: error.code });
+    },
   });
+
+  return createUIMessageStreamResponse({ headers: cors, stream: uiStream.pipeThrough(guardEmptyReply(signal)) });
 }

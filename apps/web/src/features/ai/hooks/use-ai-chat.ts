@@ -1,13 +1,20 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import type { AiChatRequest, AiConversation } from "@guf/api";
+import { apiError, type AiChatRequest, type AiConversation } from "@guf/api";
 import { aiThinkingPhrases } from "@guf/core";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { useAiSource } from "@/features/ai/api/use-ai";
-import { getAiPhase, getMessageText, getPendingToolName, toAiChatRequest, toUIMessages } from "@/features/ai/helpers/ai-messages";
+import {
+  getAiPhase,
+  getMessageText,
+  getPendingToolName,
+  hasReplyContent,
+  toAiChatRequest,
+  toUIMessages,
+} from "@/features/ai/helpers/ai-messages";
 import { AiRequestError } from "@/features/ai/helpers/ai-request-error";
 import type { AiUIMessage } from "@/features/ai/type";
 
@@ -20,6 +27,9 @@ const STREAM_THROTTLE_MS = 50;
  */
 export function useAiChat(conversation: AiConversation) {
   const { api } = useAiSource();
+  // Fim sem resposta e sem erro do stream (conexão caiu, resposta vazia): o useChat não acusa erro.
+  const [silentEndError, setSilentEndError] = useState<AiRequestError | null>(null);
+  const isStoppedByUser = useRef(false);
 
   const transport = useMemo(
     () =>
@@ -43,6 +53,12 @@ export function useAiChat(conversation: AiConversation) {
     transport,
     generateId: () => crypto.randomUUID(),
     experimental_throttle: STREAM_THROTTLE_MS,
+    onFinish: ({ message, isError }) => {
+      const wasStoppedByUser = isStoppedByUser.current;
+      isStoppedByUser.current = false;
+      if (isError || wasStoppedByUser || hasReplyContent(message)) return;
+      setSilentEndError(new AiRequestError(apiError("ai_unavailable")));
+    },
   });
 
   const last = chat.messages[chat.messages.length - 1];
@@ -51,26 +67,38 @@ export function useAiChat(conversation: AiConversation) {
   const send = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || phase !== "idle") return;
+    setSilentEndError(null);
     void chat.sendMessage({ text: trimmed });
+  };
+
+  const regenerate = () => {
+    setSilentEndError(null);
+    void chat.regenerate();
   };
 
   /** Depois de um erro: refaz a resposta (havia resposta parcial) ou reenvia a mesma pergunta. */
   const retry = () => {
     if (!last) return;
-    if (last.role === "assistant") return void chat.regenerate();
+    if (last.role === "assistant") return regenerate();
+    setSilentEndError(null);
     void chat.sendMessage({ text: getMessageText(last), messageId: last.id });
+  };
+
+  const stop = () => {
+    isStoppedByUser.current = true;
+    void chat.stop();
   };
 
   return {
     messages: chat.messages,
     phase,
     thinkingPhrases: aiThinkingPhrases(phase === "thinking" && last?.role === "assistant" ? getPendingToolName(last) : null),
-    error: chat.error ?? null,
+    error: chat.error ?? silentEndError,
     /** As perguntas do plano acabaram (outro plano libera mais): a tela oferece o Pro. */
     isPlanLimited: chat.error instanceof AiRequestError && chat.error.apiError.code === "plan_limit",
     send,
-    stop: () => void chat.stop(),
-    regenerate: () => void chat.regenerate(),
+    stop,
+    regenerate,
     retry,
   };
 }

@@ -10,6 +10,11 @@ const DEFAULT_FALLBACK_MODEL = "gemini-flash-lite-latest";
 /** Sobrecarregado (503) ou sem cota (429): vale tentar o modelo reserva na hora. */
 const FALLBACK_STATUS = new Set([429, 503]);
 
+// O alias "latest" passou a apontar para um modelo que raciocina sem limite: o raciocínio gastava o
+// teto de tokens e o tempo da função antes do texto, e a resposta chegava vazia. Com teto, responde
+// rápido; o limite de saída de quem chama precisa somar este valor (o Gemini conta os dois juntos).
+export const THINKING_BUDGET_TOKENS = 1024;
+
 const statusOf = (error: unknown) => (error as { statusCode?: number } | null)?.statusCode;
 
 /** Modelo do GUF AI: o principal e, se ele recusar por sobrecarga ou cota, o reserva. */
@@ -21,6 +26,13 @@ export function buildLanguageModel() {
     model: primary,
     middleware: {
       specificationVersion: "v4",
+      transformParams: async ({ params }) => ({
+        ...params,
+        providerOptions: {
+          ...params.providerOptions,
+          google: { ...params.providerOptions?.google, thinkingConfig: { thinkingBudget: THINKING_BUDGET_TOKENS } },
+        },
+      }),
       wrapStream: async ({ doStream, params }) => {
         try {
           return await doStream();
