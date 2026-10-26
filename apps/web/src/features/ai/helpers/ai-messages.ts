@@ -35,6 +35,11 @@ export function getPlanImportDrafts(message: AiUIMessage): PlanImportDraft[] {
   });
 }
 
+/** A resposta trouxe algo para mostrar: texto ou o cartão da ficha convertida. */
+export function hasReplyContent(message: AiUIMessage): boolean {
+  return message.role === "assistant" && (getMessageText(message).trim().length > 0 || getPlanImportDrafts(message).length > 0);
+}
+
 /** Ferramenta ainda sem resultado na resposta em andamento (para o texto do "pensando"). */
 export function getPendingToolName(message: AiUIMessage | undefined): string | null {
   const pending = message?.parts.filter(isToolUIPart).findLast((part) => part.state !== "output-available");
