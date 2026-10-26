@@ -6,7 +6,7 @@ import { STORY_SIGNATURE, STORY_SIGNATURE_LEAD, STORY_DOMAIN, type StoryModelPro
 export function Story16({ d }: StoryModelProps) {
   return (
     <>
-      <div className="absolute left-0 right-0 bottom-[260px] pt-[40px] pr-[96px] pb-[48px] pl-[96px] bg-surface border-t-[4px] border-accent flex flex-col gap-[28px]">
+      <div className="absolute left-0 right-0 bottom-[260px] pt-[40px] pr-[96px] pb-[48px] pl-[96px] bg-surface border-t-[4px] border-story-accent flex flex-col gap-[28px]">
         <div className="flex justify-between items-center">
           <div className="flex flex-col gap-[6px]">
             <span className="text-[30px] font-semibold">{d.title}</span>

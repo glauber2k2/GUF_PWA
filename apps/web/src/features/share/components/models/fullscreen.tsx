@@ -141,7 +141,7 @@ export function StoryF02({ d }: StoryModelProps) {
           <GufRat occasion="streak" size={240} animated={false} label={null} />
         </div>
       </div>
-      <div className="mt-[48px] p-[44px] rounded-[40px] bg-surface border-[2px] border-border shadow-e2 flex flex-col gap-[24px]">
+      <div className="mt-[48px] p-[44px] rounded-[40px] bg-surface border-[2px] border-border shadow-story-e2 flex flex-col gap-[24px]">
         <div className="flex justify-between">
           <span className="text-[30px] font-semibold tracking-[.08em] text-fg">ÚLTIMAS 5 SEMANAS</span>
           <span className="text-[32px] font-semibold text-accent-text">{plural(trainedDays, "treino", "treinos")}</span>
@@ -158,7 +158,7 @@ export function StoryF02({ d }: StoryModelProps) {
               className={cn(
                 "w-[72px] h-[72px] rounded-full box-border flex items-center justify-center text-accent-foreground",
                 c.trained ? "bg-accent" : "bg-surface-3",
-                c.today && "border-[6px] border-accent-text",
+                c.today && "border-[6px] border-story-accent-text",
                 c.future && "opacity-40",
               )}
             >
@@ -239,7 +239,7 @@ export function StoryF04({ d }: StoryModelProps) {
       <div className="mt-[48px] self-stretch flex items-end justify-between gap-[24px]">
         <div
           className={cn(
-            "flex-1 min-w-0 py-[36px] px-[40px] rounded-[40px] bg-surface border-[2px] border-border shadow-e2 grid gap-[24px]",
+            "flex-1 min-w-0 py-[36px] px-[40px] rounded-[40px] bg-surface border-[2px] border-border shadow-story-e2 grid gap-[24px]",
             r.previousLoad ? "grid-cols-2" : "grid-cols-1",
           )}
         >
@@ -334,7 +334,7 @@ export function StoryF06({ d }: StoryModelProps) {
       <span className="mt-[12px] text-[84px] leading-[92px] font-bold tracking-[-.02em]">
         {plural(month.workouts, "treino", "treinos")} em {month.name.toLowerCase()}
       </span>
-      <div className="mt-[48px] p-[40px] rounded-[40px] bg-surface border-[2px] border-border shadow-e2 grid grid-cols-7 gap-[14px]">
+      <div className="mt-[48px] p-[40px] rounded-[40px] bg-surface border-[2px] border-border shadow-story-e2 grid grid-cols-7 gap-[14px]">
         {WEEKDAY_INITIALS.map((w, i) => (
           <span key={`h${i}`} className="text-center text-[30px] font-semibold text-fg">
             {w}
@@ -489,7 +489,7 @@ export function StoryF08({ d }: StoryModelProps) {
         <span className="text-[34px] font-bold tracking-[.08em]">PROJETO</span>
         <span className="font-display font-bold text-[112px] leading-[104px] tracking-[-.01em]">{p.name}</span>
         <span className="text-[34px] font-semibold">{plural(p.weeks, "semana", "semanas")} de projeto</span>
-        <div className="mt-[24px] pt-[32px] border-t-[2px] border-accent-foreground grid grid-cols-[auto_1fr_auto] gap-[40px]">
+        <div className="mt-[24px] pt-[32px] border-t-[2px] border-story-accent-foreground grid grid-cols-[auto_1fr_auto] gap-[40px]">
           {stats.map((s) => (
             <div key={s.label} className="flex flex-col gap-[4px]">
               <span className="font-display font-bold text-[72px] leading-[72px]">{s.value}</span>

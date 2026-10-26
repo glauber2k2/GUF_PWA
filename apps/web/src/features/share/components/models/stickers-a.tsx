@@ -91,7 +91,7 @@ export function StoryS01({ d }: StoryModelProps) {
 /** S02 · Streak em selo redondo. */
 export function StoryS02({ d }: StoryModelProps) {
   return (
-    <div className="flex size-[580px] flex-col items-center justify-center gap-[4px] rounded-full border-[6px] border-accent bg-surface text-center text-fg">
+    <div className="flex size-[580px] flex-col items-center justify-center gap-[4px] rounded-full border-[6px] border-story-accent bg-surface text-center text-fg">
       <StickerLogo />
       <div className="mt-[12px] flex items-center gap-[8px] text-accent-text">
         <StreakFlame size={96} />
@@ -279,7 +279,7 @@ export function StoryS09({ d }: StoryModelProps) {
   const r = d.records[0];
   if (!r) return null;
   return (
-    <div className="flex w-[620px] flex-col items-center gap-[8px] rounded-[48px] border-[4px] border-pr bg-surface px-[40px] pt-[44px] pb-[40px] text-center text-fg shadow-sticker-pr">
+    <div className="flex w-[620px] flex-col items-center gap-[8px] rounded-[48px] border-[4px] border-story-pr bg-surface px-[40px] pt-[44px] pb-[40px] text-center text-fg shadow-sticker-pr">
       <StickerLogo />
       <div className="mt-[28px] flex size-[128px] items-center justify-center rounded-[36px] bg-pr/18 text-pr-text shadow-sticker-trophy">
         <Trophy size={72} aria-hidden="true" />

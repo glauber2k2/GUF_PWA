@@ -106,7 +106,7 @@ function StatCard({ label, value, unit, isHighlighted = false }: { label: string
 
 function CardioRecordCard({ record }: { record: NonNullable<StoryCardio["record"]> }) {
   return (
-    <div className="mt-[24px] flex items-center gap-[32px] rounded-[40px] border-[2px] border-pr-text/40 bg-surface px-[40px] py-[32px] shadow-story-pr">
+    <div className="mt-[24px] flex items-center gap-[32px] rounded-[40px] border-[2px] border-story-pr-text/40 bg-surface px-[40px] py-[32px] shadow-story-pr">
       <span className="grid size-[88px] flex-none place-items-center rounded-full bg-pr-highlight text-pr-text">
         <Trophy size={44} aria-hidden="true" />
       </span>

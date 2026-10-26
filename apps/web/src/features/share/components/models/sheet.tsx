@@ -182,7 +182,7 @@ export function Story20C({ d }: StoryModelProps) {
               key={e.name}
               className={cn(
                 "py-[28px] px-[32px] rounded-[28px] bg-surface flex flex-col gap-[12px]",
-                e.isRecord ? "border-[2px] border-pr-text/40" : "border border-border",
+                e.isRecord ? "border-[2px] border-story-pr-text/40" : "border border-border",
               )}
             >
               <div className="flex justify-between gap-[8px]">
