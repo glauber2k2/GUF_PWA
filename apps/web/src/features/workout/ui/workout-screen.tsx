@@ -67,8 +67,14 @@ const PENDING_TOAST: [string, ToastOptions] = [
   { tone: "warning", icon: CloudOff, message: "Ele aparece no histórico quando a internet voltar." },
 ];
 
+/** O que a rota liga de fora: a evolução importa o treino, então o caminho vem pronto de app/. */
+export interface WorkoutScreenProps {
+  /** Caminho da evolução de um exercício do catálogo (tocar no quadro do card). */
+  exercisePathFor?: (exerciseId: string) => string;
+}
+
 /** Rota /treino?id=… — carrega o treino e mostra o estado certo. */
-export function WorkoutScreen() {
+export function WorkoutScreen({ exercisePathFor }: WorkoutScreenProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const sessionId = searchParams.get("id");
@@ -87,10 +93,10 @@ export function WorkoutScreen() {
       </main>
     );
   }
-  return <WorkoutLoader key={sessionId} sessionId={sessionId} dev={dev} />;
+  return <WorkoutLoader key={sessionId} sessionId={sessionId} dev={dev} exercisePathFor={exercisePathFor} />;
 }
 
-function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet<DevWorkoutFlag> }) {
+function WorkoutLoader({ sessionId, dev, exercisePathFor }: WorkoutScreenProps & { sessionId: string; dev: ReadonlySet<DevWorkoutFlag> }) {
   const router = useRouter();
   const online = useOnlineStatus();
   const { active, clear } = useActiveWorkout();
@@ -118,7 +124,7 @@ function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet
 
   const data = freeWorkout ? { workout: freeWorkout, source: "device" as const } : workout.data;
   if (data && !dev.has("carregando")) {
-    return <WorkoutView workout={data.workout} source={data.source} persist={!demo} offline={offline} dev={dev} />;
+    return <WorkoutView workout={data.workout} source={data.source} persist={!demo} offline={offline} dev={dev} exercisePathFor={exercisePathFor} />;
   }
 
   const notFound = (workout.error as { code?: string } | null)?.code === "workout_not_found";
@@ -181,7 +187,7 @@ function WorkoutLoader({ sessionId, dev }: { sessionId: string; dev: ReadonlySet
 
 type Sheet = { kind: "workout-menu" } | { kind: "timer" } | null;
 
-interface WorkoutViewProps {
+interface WorkoutViewProps extends WorkoutScreenProps {
   workout: ActiveWorkout;
   source: DataSource;
   /** false = demonstração (não grava). */
@@ -213,7 +219,7 @@ function outboxSink(sessionId: string, queue: (op: OutboxOp) => void): WorkoutCh
   };
 }
 
-function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProps) {
+function WorkoutView({ workout, source, persist, offline, dev, exercisePathFor }: WorkoutViewProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const shell = useAppShell();
@@ -478,6 +484,7 @@ function WorkoutView({ workout, source, persist, offline, dev }: WorkoutViewProp
           offline={offline}
           persist={persist}
           stopwatch={stopwatch}
+          onOpenExercise={exercisePathFor && ((exerciseId) => router.push(exercisePathFor(exerciseId)))}
         />
       </main>
 

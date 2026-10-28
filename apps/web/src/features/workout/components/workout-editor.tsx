@@ -26,6 +26,8 @@ export interface WorkoutEditorProps {
   persist: boolean;
   /** Cronômetro do cardio: só no treino em andamento (na edição de treino concluído não existe). */
   stopwatch?: CardioStopwatch;
+  /** Tocar no quadro do exercício abre a evolução dele (id do catálogo); sem isso, o quadro só abre/recolhe o card. */
+  onOpenExercise?: (exerciseId: string) => void;
 }
 
 /**
@@ -33,7 +35,7 @@ export interface WorkoutEditorProps {
  * adicionar exercício, folha de carga/repetições, menu do exercício, observação e seletor.
  * Não sabe se o treino está em andamento ou concluído: o estado e as ações vêm de useWorkoutEditing.
  */
-export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, offline, persist, stopwatch }: WorkoutEditorProps) {
+export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, offline, persist, stopwatch, onOpenExercise }: WorkoutEditorProps) {
   const { state, unit, sheet } = editing;
 
   const cardioTimerFor = useCardioTimerControls(stopwatch, editing);
@@ -83,6 +85,7 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
                     : undefined,
                   onToggleOpen: () => editing.toggleOpen(ex.id),
                   onOpenMenu: () => editing.openExerciseMenu(ex.id),
+                  onOpenExercise: onOpenExercise && (() => onOpenExercise(ex.exerciseId)),
                 },
               })}
             </LayoutItem>

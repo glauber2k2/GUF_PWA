@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WorkoutScreen } from "@/features/workout";
+import { WorkoutRoute } from "./workout-route";
 
 export const metadata: Metadata = {
   title: "Treino · Guf",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 
 /** Treino em andamento: /treino?id=<sessão> (rota fixa com query string). */
 export default function WorkoutPage() {
-  return <WorkoutScreen />;
+  return <WorkoutRoute />;
 }
