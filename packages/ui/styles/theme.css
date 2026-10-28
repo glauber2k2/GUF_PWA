@@ -88,6 +88,7 @@
   --color-story-accent-foreground: color-mix(in oklab, var(--accent-foreground) calc(var(--story-detail, 1) * 100%), transparent);
   --color-story-pr: color-mix(in oklab, var(--pr) calc(var(--story-detail, 1) * 100%), transparent);
   --color-story-pr-text: color-mix(in oklab, var(--pr-text) calc(var(--story-detail, 1) * 100%), transparent);
+  --color-story-danger: color-mix(in oklab, var(--danger) calc(var(--story-detail, 1) * 100%), transparent);
   --color-story-surface: color-mix(in oklab, var(--surface) calc(var(--story-detail, 1) * 100%), transparent);
   /* Leitor de documentos legais */
   --color-accent-tile: color-mix(in oklab, var(--accent) 12%, var(--surface-3));

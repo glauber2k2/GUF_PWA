@@ -5,9 +5,11 @@ import { Download } from "lucide-react";
 import { Button, SegmentedControl } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { mockStoryData, type StoryMockWorkout } from "@/mocks/share";
+import { mockCompetitionStories } from "@/mocks/competition";
 import { FitPreview } from "@/features/share/components/fit-preview";
 import { StoryArt } from "@/features/share/components/story-art";
 import { STORY_FORMAT_LABELS, STORY_MODELS, STORY_STYLES, type StoryModel } from "@/features/share/constants/story-catalog";
+import { COMPETITION_STORY_MODELS, COMPETITION_STORY_STYLES } from "@/features/share/constants/competition-story-catalog";
 import { downloadImage, storyToPng } from "@/features/share/helpers/story-export";
 import type { StoryTheme } from "@/features/share/type";
 
@@ -34,6 +36,12 @@ const OPACITY_OPTIONS = [
 const GROUPS = STORY_STYLES.map((style, index) => ({ style, models: STORY_MODELS.filter((m) => m.style === index) })).filter(
   (group) => group.models.length > 0,
 );
+/** Competição (folha própria, aberta na tela da competição): nomes com prefixo para não repetir os do treino. */
+const COMPETITION_GROUPS = COMPETITION_STORY_STYLES.map((style, index) => ({
+  style: `Competição · ${style}`,
+  models: COMPETITION_STORY_MODELS.filter((m) => m.style === index),
+}));
+const ALL_GROUP_LINKS = [...GROUPS, ...COMPETITION_GROUPS];
 
 /**
  * Galeria de TODOS os PNGs exportáveis (modelos dos stories, cartões, telas cheias e stickers), por
@@ -45,6 +53,7 @@ export function StoryGalleryScreen() {
   const [workout, setWorkout] = useState<StoryMockWorkout>(COMPLETE_WORKOUT);
   const data = useMemo(() => mockStoryData(workout), [workout]);
   const completeData = useMemo(() => mockStoryData(COMPLETE_WORKOUT), []);
+  const competitionSamples = useMemo(() => mockCompetitionStories(), []);
   const [theme, setTheme] = useState<StoryTheme>("dark");
   const [opacity, setOpacity] = useState(100);
 
@@ -54,7 +63,8 @@ export function StoryGalleryScreen() {
         <div className="flex flex-col gap-1">
           <h1 className="m-0 text-2xl leading-8 font-bold tracking-[-0.02em]">PNGs exportáveis</h1>
           <p className="m-0 text-sm text-fg-secondary">
-            {STORY_MODELS.length} modelos em {GROUPS.length} grupos · dados de exemplo · só em desenvolvimento
+            {STORY_MODELS.length + COMPETITION_STORY_MODELS.length} modelos em {ALL_GROUP_LINKS.length} grupos · dados de exemplo · só em
+            desenvolvimento
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -63,7 +73,7 @@ export function StoryGalleryScreen() {
           <SegmentedControl label="Opacidade" size="sm" options={OPACITY_OPTIONS} value={String(opacity)} onChange={(v) => setOpacity(Number(v))} />
         </div>
         <nav aria-label="Grupos" className="flex w-full flex-wrap gap-1.5">
-          {GROUPS.map((group) => (
+          {ALL_GROUP_LINKS.map((group) => (
             <a
               key={group.style}
               href={`#grupo-${group.style}`}
@@ -81,17 +91,47 @@ export function StoryGalleryScreen() {
             {group.style} <span className="font-normal text-fg-muted">· {group.models.length}</span>
           </h2>
           <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,162px)] gap-4 p-0">
-            {group.models.map((model) => (
-              <StoryGalleryItem
-                key={model.id}
-                model={model}
-                theme={theme}
-                opacity={opacity}
-                data={data}
-                completeData={completeData}
-                isAvailable={model.available?.(data) ?? true}
-              />
-            ))}
+            {group.models.map((model) => {
+              const isAvailable = model.available?.(data) ?? true;
+              return (
+                <StoryGalleryItem
+                  key={model.id}
+                  model={model}
+                  theme={theme}
+                  opacity={opacity}
+                  // Sem o dado no treino escolhido (ex.: cardio no treino só de força), a prévia usa Força + cardio.
+                  data={isAvailable ? data : completeData}
+                  note={isAvailable ? "Disponível com estes dados" : "Este treino não oferece · prévia com Força + cardio"}
+                  isWarning={!isAvailable}
+                  fileName={`guf-story-${model.id}-${theme}.png`}
+                />
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+
+      {COMPETITION_GROUPS.map((group) => (
+        <section key={group.style} id={`grupo-${group.style}`} aria-label={group.style} className="flex scroll-mt-40 flex-col gap-3">
+          <h2 className="m-0 text-lg leading-6 font-semibold">
+            {group.style} <span className="font-normal text-fg-muted">· {group.models.length}</span>
+          </h2>
+          <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,162px)] gap-4 p-0">
+            {group.models.map((model) => {
+              // Cada modelo usa a primeira situação de exemplo em que ele aparece (líder ou subindo).
+              const sample = competitionSamples.find((s) => model.available?.(s.story) ?? true) ?? competitionSamples[0]!;
+              return (
+                <StoryGalleryItem
+                  key={model.id}
+                  model={model}
+                  theme={theme}
+                  opacity={opacity}
+                  data={sample.story}
+                  note={`Exemplo: ${sample.label}`}
+                  fileName={`guf-competicao-${model.id}-${theme}.png`}
+                />
+              );
+            })}
           </ul>
         </section>
       ))}
@@ -99,21 +139,23 @@ export function StoryGalleryScreen() {
   );
 }
 
-function StoryGalleryItem({
+function StoryGalleryItem<T>({
   model,
   theme,
   opacity,
   data,
-  completeData,
-  isAvailable,
+  note,
+  isWarning = false,
+  fileName,
 }: {
-  model: StoryModel;
+  model: StoryModel<T>;
   theme: StoryTheme;
   opacity: number;
-  data: ReturnType<typeof mockStoryData>;
-  /** Usado quando o treino escolhido não tem o dado do modelo (ex.: cardio no treino só de força). */
-  completeData: ReturnType<typeof mockStoryData>;
-  isAvailable: boolean;
+  data: T;
+  /** De onde vêm os dados da prévia. */
+  note: string;
+  isWarning?: boolean;
+  fileName: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -124,7 +166,7 @@ function StoryGalleryItem({
     setBusy(true);
     setFailed(false);
     try {
-      downloadImage(await storyToPng(artNode), `guf-story-${model.id}-${theme}.png`);
+      downloadImage(await storyToPng(artNode), fileName);
     } catch {
       setFailed(true);
     } finally {
@@ -140,7 +182,7 @@ function StoryGalleryItem({
         style={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}
       >
         <FitPreview width={PREVIEW_WIDTH} height={PREVIEW_HEIGHT}>
-          <StoryArt ref={setArtNode} model={model} data={isAvailable ? data : completeData} backgroundOpacity={opacity} theme={theme} />
+          <StoryArt ref={setArtNode} model={model} data={data} backgroundOpacity={opacity} theme={theme} />
         </FitPreview>
       </div>
       <div className="flex flex-col gap-0.5">
@@ -151,9 +193,7 @@ function StoryGalleryItem({
           {model.Component.displayName ?? model.Component.name} · {STORY_FORMAT_LABELS[model.format ?? "story"]}
           {model.hasCards ? " · com cartões" : ""}
         </span>
-        <span className={cn("text-xs", isAvailable ? "text-fg-muted" : "text-warning")}>
-          {isAvailable ? "Disponível com estes dados" : "Este treino não oferece · prévia com Força + cardio"}
-        </span>
+        <span className={cn("text-xs", isWarning ? "text-warning" : "text-fg-muted")}>{note}</span>
       </div>
       <Button variant="secondary" size="md" icon={Download} loading={busy} disabled={!artNode} onClick={() => void download()}>
         {failed ? "Falhou · tentar de novo" : "Baixar PNG"}

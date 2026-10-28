@@ -1,16 +1,18 @@
-import { forwardRef, type CSSProperties } from "react";
+import type { CSSProperties, Ref } from "react";
 import type { StoryData } from "@guf/core";
 import { cn } from "@/shared/helpers/class-names";
 import type { StoryModel } from "@/features/share/constants/story-catalog";
 import type { StoryFormat, StoryTheme } from "@/features/share/type";
 
-export interface StoryArtProps {
-  model: StoryModel;
-  data: StoryData;
+export interface StoryArtProps<T = StoryData> {
+  model: StoryModel<T>;
+  data: T;
   /** Opacidade escolhida (0–100): dos cartões no modelo com cartões (a imagem fica sem fundo) ou do fundo da imagem nos demais. */
   backgroundOpacity: number;
   /** Tema da imagem (escolhido na folha; independe do tema do app). */
   theme: StoryTheme;
+  /** Elemento que vira PNG (a cópia em tamanho real fora da tela). */
+  ref?: Ref<HTMLDivElement>;
 }
 
 /** Superfícies e bordas de cada tema (cartões da arte), nos valores de base dos tokens. */
@@ -63,7 +65,7 @@ const FORMAT_BOX: Record<StoryFormat, string> = {
 /**
  * Arte em tamanho real. A folha mostra em escala e a exportação para PNG captura este mesmo elemento.
  */
-export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function StoryArt({ model, data, backgroundOpacity, theme }, ref) {
+export function StoryArt<T = StoryData>({ model, data, backgroundOpacity, theme, ref }: StoryArtProps<T>) {
   const { Component } = model;
   const format = model.format ?? "story";
   // Opacidade escolhida (valores dinâmicos): fundo da imagem ou cartões, conforme o modelo. Sticker:
@@ -85,4 +87,4 @@ export const StoryArt = forwardRef<HTMLDivElement, StoryArtProps>(function Story
       <Component d={data} />
     </div>
   );
-});
+}

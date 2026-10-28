@@ -35,23 +35,23 @@ function useStandingsBase(query: StandingsQuery) {
   };
 }
 
-/** Uma página da classificação (o banco ordena e pagina). */
-export function useCompetitionStandings(query: StandingsQuery, page: number) {
+/** Uma página da classificação (o banco ordena e pagina); com isActive = false, espera (ex.: folha fechada). */
+export function useCompetitionStandings(query: StandingsQuery, page: number, isActive = true) {
   const { api, key, enabled } = useStandingsBase(query);
   return useQuery({
     queryKey: [...key, "page", page],
-    enabled,
+    enabled: enabled && isActive,
     placeholderData: keepPreviousData,
     queryFn: async () => unwrap(await api.getCompetitionStandings(getSupabaseClient(), { ...query, page })),
   });
 }
 
 /** Você e as posições vizinhas (cartão "Sua posição" e adversário padrão). */
-export function useStandingsNearMe(query: StandingsQuery) {
+export function useStandingsNearMe(query: StandingsQuery, isActive = true) {
   const { api, key, enabled } = useStandingsBase(query);
   return useQuery({
     queryKey: [...key, "near-me"],
-    enabled,
+    enabled: enabled && isActive,
     placeholderData: keepPreviousData,
     queryFn: async () => unwrap(await api.getStandingsNearMe(getSupabaseClient(), { ...query, radius: STANDINGS_NEAR_RADIUS })),
   });
@@ -104,12 +104,12 @@ export function useCompetitionParameters(season: string) {
 }
 
 /** Extrato dos seus pontos no período (semanas com as partes e os treinos). */
-export function usePointsStatement(range: CompetitionRange) {
+export function usePointsStatement(range: CompetitionRange, isActive = true) {
   const { user } = useAuth();
   const { api, dev } = useCompetitionSource();
   return useQuery({
     queryKey: [COMPETITION_KEY, "statement", user?.id, range.from, range.to, dev.competitionScenario],
-    enabled: Boolean(user) || dev.competitionScenario !== null,
+    enabled: isActive && (Boolean(user) || dev.competitionScenario !== null),
     placeholderData: keepPreviousData,
     queryFn: async () => unwrap(await api.getPointsStatement(getSupabaseClient(), range)),
   });
