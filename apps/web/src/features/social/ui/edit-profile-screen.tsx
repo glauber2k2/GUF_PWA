@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { Controller } from "react-hook-form";
 import { ChevronLeft, CircleCheck, LoaderCircle, Lock, Mail, Pencil, type LucideIcon } from "lucide-react";
 import {
@@ -82,6 +83,7 @@ export function EditProfileScreen() {
   const profile = useProfile();
   const social = useMySocial();
   const goBack = useGoBack(SOCIAL_PROFILE_PATH);
+  const router = useRouter();
 
   if (profile.isPending || social.isPending) {
     return (
@@ -118,6 +120,8 @@ export function EditProfileScreen() {
       avatarUrl={profile.data.avatarUrl}
       hasUploadedPhoto={profile.data.hasUploadedPhoto}
       onBack={goBack}
+      // Salvou: mostra o perfil como os outros veem (replace: o voltar não reabre a edição).
+      onSaved={() => router.replace(SOCIAL_PROFILE_PATH)}
     />
   );
 }
@@ -154,12 +158,14 @@ function EditProfileForm({
   avatarUrl,
   hasUploadedPhoto,
   onBack,
+  onSaved,
 }: {
   initial: EditProfileInitial;
   email: string | null;
   avatarUrl: string | null;
   hasUploadedPhoto: boolean;
   onBack: () => void;
+  onSaved: () => void;
 }) {
   const { showToast } = useAppShell();
   const canEditProfile = useCanEditProfile();
@@ -194,7 +200,9 @@ function EditProfileForm({
     setIsSaving(true);
     try {
       const ok = await ring.run(save);
-      if (ok) showToast("Perfil atualizado", { tone: "success", haptic: false });
+      if (!ok) return;
+      showToast("Perfil atualizado", { tone: "success", haptic: false });
+      onSaved();
     } catch (e) {
       showToast("Perfil não salvo", { tone: "error", message: (e as ApiError).message });
     } finally {
