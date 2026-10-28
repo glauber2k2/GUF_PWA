@@ -14,7 +14,7 @@ import {
 import { buildDataTools, type WeightUnit } from "./data-tools.ts";
 import { textResponse } from "./http.ts";
 import { buildInstructions } from "./instructions.ts";
-import { buildLanguageModel, THINKING_BUDGET_TOKENS } from "./model.ts";
+import { buildLanguageModel, THINKING_RESERVE_TOKENS } from "./model.ts";
 import { buildPlanImportTool } from "./plan-import.ts";
 import { redactPersonalData } from "./privacy.ts";
 import { logProviderError, MAX_RETRIES, TIMEOUT, toProviderErrorMessage } from "./provider-errors.ts";
@@ -27,7 +27,7 @@ const HISTORY_MESSAGES = 20;
 const TITLE_MAX_CHARS = 80;
 const MAX_STEPS = 6;
 // Texto da resposta + raciocínio do modelo (o provedor conta os dois no mesmo limite).
-const MAX_OUTPUT_TOKENS = 1200 + THINKING_BUDGET_TOKENS;
+const MAX_OUTPUT_TOKENS = 1200 + THINKING_RESERVE_TOKENS;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 interface ChatRequest {
@@ -117,11 +117,14 @@ export async function handleChat(body: unknown, { db, userId, cors, signal }: Ha
 
   if (!(await recordTurn(db, userId, request))) return textResponse("Não foi possível salvar a conversa. Tente de novo.", 500, cors);
 
-  const { data: profile } = await db.from("profiles").select("weight_unit, timezone").eq("id", userId).maybeSingle();
+  // Independentes: em paralelo, para a resposta começar antes.
+  const [{ data: profile }, history] = await Promise.all([
+    db.from("profiles").select("weight_unit, timezone").eq("id", userId).maybeSingle(),
+    loadHistory(db, request.conversationId),
+  ]);
   const unit: WeightUnit = profile?.weight_unit === "lb" ? "lb" : "kg";
   const today = localToday(profile?.timezone ?? null);
   const model = buildLanguageModel();
-  const history = await loadHistory(db, request.conversationId);
 
   const result = streamText({
     model,
