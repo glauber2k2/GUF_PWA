@@ -1,8 +1,8 @@
 import type { StoryData } from "@guf/core";
 
-/** Props de todos os modelos de story (arte 1080 × 1920). */
-export interface StoryModelProps {
-  d: StoryData;
+/** Props de todos os modelos de imagem: os dados do que se compartilha (treino por padrão, ou a competição). */
+export interface StoryModelProps<T = StoryData> {
+  d: T;
 }
 
 /** Tema da imagem (escolhido na folha; padrão escuro). */

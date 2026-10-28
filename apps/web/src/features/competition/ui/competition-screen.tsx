@@ -4,13 +4,16 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { StandingsQuery } from "@guf/api";
-import { ReceiptText, UserPlus, Users } from "lucide-react";
+import { ReceiptText, Share2, UserPlus, Users } from "lucide-react";
 import { AppHeader, EmptyState, Icon } from "@/shared/components/ds";
+import { useAppShell } from "@/features/app-shell";
+import { ShareCompetitionSheet, STORY_SAVED_TOAST } from "@/features/share";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { METRICS } from "@/features/competition/constants/competition-labels";
 import { POINTS_STATEMENT_PATH } from "@/features/competition/constants/point-sources";
 import { useCompetitionFilters } from "@/features/competition/hooks/use-competition-filters";
+import { useCompetitionStory } from "@/features/competition/hooks/use-competition-story";
 import { useMetricFormat } from "@/features/competition/hooks/use-metric-format";
 import { useStandingsView, type StandingsView } from "@/features/competition/hooks/use-standings-view";
 import { RivalPickerSheet } from "@/features/competition/components/rival-picker-sheet";
@@ -57,6 +60,9 @@ export function CompetitionScreen() {
   const router = useRouter();
   const filters = useCompetitionFilters();
   const view = useStandingsView(filters);
+  const { showToast } = useAppShell();
+  const [isSharing, setSharing] = useState(false);
+  const share = useCompetitionStory(isSharing);
 
   return (
     <main className="flex flex-col px-4">
@@ -67,6 +73,9 @@ export function CompetitionScreen() {
             collapsed
             trailing={
               <span className="flex">
+                <button type="button" aria-label="Compartilhar a competição" onClick={() => setSharing(true)} className="grid size-11 cursor-pointer place-items-center rounded-md bg-transparent text-fg">
+                  <Icon icon={Share2} size={20} />
+                </button>
                 <Link href={withDevState(POINTS_STATEMENT_PATH)} aria-label="Ver extrato de pontos" className="grid size-11 place-items-center rounded-md text-fg">
                   <Icon icon={ReceiptText} size={20} />
                 </Link>
@@ -84,6 +93,14 @@ export function CompetitionScreen() {
           <PeriodCaption filters={filters} />
         </div>
         <span className="flex flex-none gap-2">
+        <button
+          type="button"
+          aria-label="Compartilhar a competição"
+          onClick={() => setSharing(true)}
+          className="grid size-11 flex-none cursor-pointer place-items-center rounded-md border border-border-strong bg-surface-3 text-fg hover:bg-surface-elevated"
+        >
+          <Icon icon={Share2} size={20} />
+        </button>
         <Link
           href={withDevState(POINTS_STATEMENT_PATH)}
           aria-label="Ver extrato de pontos"
@@ -118,6 +135,15 @@ export function CompetitionScreen() {
       >
         <FullRanking view={view} query={filters.query} />
       </CompetitionBoard>
+
+      <ShareCompetitionSheet
+        open={isSharing}
+        onClose={() => setSharing(false)}
+        story={share.story}
+        error={share.error}
+        onRetry={share.retry}
+        onSaved={() => showToast(...STORY_SAVED_TOAST)}
+      />
     </main>
   );
 }

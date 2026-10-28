@@ -5,7 +5,8 @@ import { formatNumber, pointsDeltaLabel, POINT_SOURCE_LABELS, POINT_SOURCES, typ
 import { Icon } from "@/shared/components/ds";
 import { useCountUp } from "@/shared/hooks/use-count-up";
 import { cn } from "@/shared/helpers/class-names";
-import { POINT_SOURCE_STYLES, PointSourceIcon } from "@/features/competition/constants/point-sources";
+import { POINT_SOURCE_STYLES } from "@/features/competition/constants/point-sources";
+import { PointSourceIcon } from "@/shared/components/point-source-icon";
 
 interface StatementSummaryProps {
   title: string;

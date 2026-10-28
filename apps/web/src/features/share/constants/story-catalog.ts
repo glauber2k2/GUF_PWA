@@ -12,6 +12,7 @@ import { Story01, Story02, Story03 } from "@/features/share/components/models/mu
 import { Story04, Story05, Story06 } from "@/features/share/components/models/numbers";
 import { Story08 } from "@/features/share/components/models/rat";
 import { StoryCardio01 } from "@/features/share/components/models/cardio";
+import { StoryK01, StoryK02, StoryK03, StoryK07, StoryK09, StoryK11, StoryK12, StoryK14, StoryK18, StoryK19 } from "@/features/share/components/models/cardio-stickers";
 import { Story10, Story11, Story12 } from "@/features/share/components/models/record";
 import { StoryS01, StoryS02, StoryS03, StoryS04, StoryS05, StoryS06, StoryS07, StoryS08, StoryS09, StoryS10, StoryS11 } from "@/features/share/components/models/stickers-a";
 import { StoryS12, StoryS13, StoryS14, StoryS15, StoryS16, StoryS17, StoryS18, StoryS19, StoryS20, StoryS22 } from "@/features/share/components/models/stickers-b";
@@ -35,6 +36,7 @@ export const STORY_STYLES = [
   "Tela cheia",
   "Stickers",
   "Cardio",
+  "Cardio intenso",
 ] as const;
 
 /** Formato exibido na folha, ao lado do estilo. */
@@ -44,14 +46,14 @@ export const STORY_FORMAT_LABELS: Record<StoryFormat, string> = {
   sticker: "Adesivo sem fundo",
 };
 
-export interface StoryModel {
+export interface StoryModel<T = StoryData> {
   /** Número do modelo na folha ("01", "02"…), sequencial pela ordem do carrossel. */
   id: string;
   /** Título exibido na folha (o estilo e o formato aparecem abaixo dele). */
   name: string;
-  /** Índice em STORY_STYLES. */
+  /** Índice na lista de estilos do catálogo (STORY_STYLES no treino). */
   style: number;
-  Component: ComponentType<StoryModelProps>;
+  Component: ComponentType<StoryModelProps<T>>;
   /** Formato da imagem (padrão: story 1080 × 1920). */
   format?: StoryFormat;
   /**
@@ -61,7 +63,7 @@ export interface StoryModel {
    */
   hasCards?: boolean;
   /** Só aparece quando o dado existe (ex.: recorde, sequência). */
-  available?: (d: StoryData) => boolean;
+  available?: (d: T) => boolean;
 }
 
 const hasRecord = (d: StoryData) => d.records.length > 0;
@@ -73,8 +75,15 @@ const hasProject = (d: StoryData) => d.project !== null;
 const hasRest = (d: StoryData) => d.restAverage !== null;
 const hasTopMuscle = (d: StoryData) => d.topMuscle !== null;
 const hasCardio = (d: StoryData) => d.cardio !== null;
-/** Estilo Cardio: vem primeiro no carrossel quando o treino é só de cardio. */
+const hasCardioDistance = (d: StoryData) => Boolean(d.cardio?.distance);
+const hasCardioSpeed = (d: StoryData) => d.cardio?.speedKmh != null;
+const hasCardioRate = (d: StoryData) => Boolean(d.cardio?.rate);
+const hasCardioPace = (d: StoryData) => d.cardio?.rateKind === "pace" && hasCardioRate(d);
+const hasCardioRecord = (d: StoryData) => Boolean(d.cardio?.record);
+/** Estilos de cardio: vêm primeiro no carrossel quando o treino é só de cardio. */
 const CARDIO_STYLE = STORY_STYLES.indexOf("Cardio");
+const CARDIO_INTENSE_STYLE = STORY_STYLES.indexOf("Cardio intenso");
+const CARDIO_STYLES = new Set([CARDIO_STYLE, CARDIO_INTENSE_STYLE]);
 
 /**
  * Modelos na ordem do carrossel: os 37 do design (ShareSheetScreen.dc.html · ALL), a comparação de peso
@@ -177,6 +186,17 @@ const MODELS: readonly Omit<StoryModel, "id">[] = [
   { name: "Ficha lateral com bonecos", style: 13, hasCards: true, Component: StoryS22, format: "sticker" },
   // Cardio (no fim do catálogo para não mudar o número dos modelos que já existiam)
   { name: "Tempo, distância e ritmo", style: CARDIO_STYLE, hasCards: true, Component: StoryCardio01, available: hasCardio },
+  // Stickers de cardio (PNGs Competicao e Cardio.dc.html · K01–K19), só com cardio no treino
+  { name: "Distância em velocidade", style: CARDIO_STYLE, hasCards: true, Component: StoryK01, format: "sticker", available: hasCardioDistance },
+  { name: "Cronômetro fechado", style: CARDIO_STYLE, hasCards: true, Component: StoryK02, format: "sticker", available: hasCardio },
+  { name: "Velocímetro", style: CARDIO_STYLE, hasCards: true, Component: StoryK03, format: "sticker", available: hasCardioSpeed },
+  { name: "Faixa diagonal", style: CARDIO_STYLE, hasCards: true, Component: StoryK07, format: "sticker", available: hasCardioDistance },
+  { name: "Suor com Guf Rat", style: CARDIO_STYLE, hasCards: true, Component: StoryK09, format: "sticker", available: hasCardioDistance },
+  { name: "Ritmo em chamas", style: CARDIO_INTENSE_STYLE, hasCards: true, Component: StoryK11, format: "sticker", available: hasCardioPace },
+  { name: "Sem freio", style: CARDIO_INTENSE_STYLE, hasCards: true, Component: StoryK12, format: "sticker", available: hasCardioRate },
+  { name: "Superação", style: CARDIO_INTENSE_STYLE, hasCards: true, Component: StoryK14, format: "sticker", available: hasCardioRecord },
+  { name: "Eco: mais rápido", style: CARDIO_INTENSE_STYLE, hasCards: true, Component: StoryK18, format: "sticker", available: hasCardioRate },
+  { name: "Recorde de cardio", style: CARDIO_INTENSE_STYLE, hasCards: true, Component: StoryK19, format: "sticker", available: hasCardioRecord },
 ];
 
 /** Catálogo com os números sequenciais (01, 02…). */
@@ -186,5 +206,5 @@ export const STORY_MODELS: readonly StoryModel[] = MODELS.map((model, i) => ({ .
 export function availableStoryModels(d: StoryData): StoryModel[] {
   const models = STORY_MODELS.filter((m) => !m.available || m.available(d));
   if (!d.cardio || d.exerciseCount > 0) return models;
-  return [...models.filter((m) => m.style === CARDIO_STYLE), ...models.filter((m) => m.style !== CARDIO_STYLE)];
+  return [...models.filter((m) => CARDIO_STYLES.has(m.style)), ...models.filter((m) => !CARDIO_STYLES.has(m.style))];
 }

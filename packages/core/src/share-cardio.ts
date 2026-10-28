@@ -1,5 +1,5 @@
 import { CARDIO_RATES, cardioActivityFor, formatDistance, type CardioActivityKey, type CardioRateKind } from "./cardio";
-import { formatCardioRecord, type CardioRecord, type CardioRecordDisplay } from "./cardio-records";
+import { formatCardioRecord, type CardioRecord, type CardioRecordDisplay, type CardioRecordKind } from "./cardio-records";
 import { formatElapsed } from "./session";
 import type { SetValues } from "./set-metrics";
 import type { SetType } from "./training";
@@ -43,18 +43,35 @@ export interface StoryCardioExercise extends StoryCardioTotals {
 export interface StoryCardio extends StoryCardioTotals {
   /** Aparelho do exercício com mais tempo (ícone e etiqueta da arte). */
   activity: CardioActivityKey;
+  /** Como o aparelho principal mostra o desempenho: ritmo (min/km) ou velocidade (km/h). */
+  rateKind: CardioRateKind;
+  /** Velocidade média em km/h nos exercícios do mesmo tipo (velocímetro); null sem distância. */
+  speedKmh: number | null;
+  /** Tempo total em minutos inteiros ("42 MIN"). */
+  minutes: number;
   tag: string;
   /** Nome do exercício principal (o de mais tempo). */
   title: string;
   exercises: StoryCardioExercise[];
   /** Primeiro recorde de cardio do treino, com o exercício. */
-  record: (CardioRecordDisplay & { exerciseName: string }) | null;
+  record: (CardioRecordDisplay & { exerciseName: string; kind: CardioRecordKind }) | null;
 }
 
 const RATE_LABELS: Record<CardioRateKind, string> = {
   pace: "RITMO MÉDIO",
   speed: "VELOCIDADE MÉDIA",
 };
+
+const SECONDS_PER_HOUR = 3600;
+const SECONDS_PER_MINUTE = 60;
+
+/** Velocidade média (km/h) das séries com distância e tempo; null sem nenhuma. */
+function averageSpeedKmh(sets: readonly StoryCardioSetInput[]): number | null {
+  const withDistance = sets.filter((s) => s.setType !== "warmup" && s.distanceKm && s.durationSeconds);
+  const km = withDistance.reduce((n, s) => n + (s.distanceKm ?? 0), 0);
+  const seconds = withDistance.reduce((n, s) => n + (s.durationSeconds ?? 0), 0);
+  return km > 0 && seconds > 0 ? km / (seconds / SECONDS_PER_HOUR) : null;
+}
 
 /** Soma o tempo de todas as séries e calcula o desempenho só com as séries que têm distância. */
 function cardioTotalsOf(sets: readonly StoryCardioSetInput[], rate: CardioRateKind): { seconds: number; totals: StoryCardioTotals } {
@@ -92,7 +109,7 @@ export function buildStoryCardio(input: StoryCardioInput): StoryCardio | null {
   if (!main) return null;
 
   const mainActivity = cardioActivityFor(main.exercise.name);
-  const { totals } = cardioTotalsOf(input.exercises.flatMap((e) => e.sets), mainActivity.rate);
+  const { seconds, totals } = cardioTotalsOf(input.exercises.flatMap((e) => e.sets), mainActivity.rate);
   // Ritmo e velocidade só se comparam no mesmo tipo de aparelho: os km da bike não entram no ritmo da esteira.
   const sameRateSets = input.exercises.filter((e) => cardioActivityFor(e.name).rate === mainActivity.rate).flatMap((e) => e.sets);
   const record = input.records[0];
@@ -100,9 +117,12 @@ export function buildStoryCardio(input: StoryCardioInput): StoryCardio | null {
     ...totals,
     rate: cardioTotalsOf(sameRateSets, mainActivity.rate).totals.rate,
     activity: mainActivity.key,
+    rateKind: mainActivity.rate,
+    speedKmh: averageSpeedKmh(sameRateSets),
+    minutes: Math.round(seconds / SECONDS_PER_MINUTE),
     tag: mainActivity.tag,
     title: main.exercise.name,
     exercises: exercises.map((e) => e.exercise),
-    record: record ? { exerciseName: record.exerciseName, ...formatCardioRecord(record.cardio) } : null,
+    record: record ? { exerciseName: record.exerciseName, kind: record.cardio.kind, ...formatCardioRecord(record.cardio) } : null,
   };
 }

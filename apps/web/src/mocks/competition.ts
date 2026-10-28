@@ -8,6 +8,8 @@
  */
 import {
   addLocalDays,
+  buildCompetitionStory,
+  seasonOf,
   COMPETITION_PAGE_SIZE,
   normalizeSearch,
   RIVAL_PAGE_SIZE,
@@ -20,6 +22,7 @@ import {
   type CompetitionMetric,
   type CompetitionRange,
   type CompetitionStanding,
+  type CompetitionStory,
   type CompetitionParticipant,
   type CompetitionWeekScore,
   type PointsStatement,
@@ -292,3 +295,82 @@ export const mockCompetitionApi = {
     };
   },
 } satisfies CompetitionApi;
+
+/** Semanas de exemplo da temporada (pontos e partes coerentes), para a galeria de PNGs. */
+function sampleStoryWeeks(season: Date): StatementWeek[] {
+  const rows = [
+    { points: 110, constancy: 60, bonus: 5, records: 10, volume: 15, sessions: 4 },
+    { points: 135, constancy: 75, bonus: 10, records: 20, volume: 15, sessions: 5 },
+    { points: 98, constancy: 45, bonus: 15, records: 25, volume: 13, sessions: 3 },
+    { points: 160, constancy: 90, bonus: 20, records: 35, volume: 15, sessions: 6 },
+  ];
+  const first = startOfLocalWeek(season);
+  return rows.map((r, i) => ({
+    weekStart: toLocalISODate(addLocalDays(first, i * 7)),
+    points: r.points,
+    constancyPoints: r.constancy,
+    bonusPoints: r.bonus,
+    recordPoints: r.records,
+    volumePoints: r.volume,
+    validSessions: r.sessions,
+    weeklyVolumeKg: 12_000 + i * 900,
+    records: r.records / 5,
+    fulfilled: r.sessions >= 3,
+  }));
+}
+
+function sampleStanding(userId: string, rank: number, previousRank: number, value: number, isMe: boolean): CompetitionStanding {
+  return {
+    userId,
+    handle: isMe ? "voce" : "amigo",
+    name: null,
+    avatarUrl: null,
+    isMe,
+    currentStreak: 0,
+    totals: { points: value, workouts: 0, volumeKg: 0, records: 0, fulfilledWeeks: 0, validSessions: 0 },
+    value,
+    rank,
+    previousRank,
+    position: rank,
+  };
+}
+
+/**
+ * Duas situações da competição para a galeria de PNGs (só desenvolvimento): você liderando por pouco no
+ * último dia da temporada e você subindo, ainda atrás do 1º. Gerado sob demanda.
+ */
+export function mockCompetitionStories(): Array<{ label: string; story: CompetitionStory }> {
+  const now = new Date();
+  const season = seasonOf(now);
+  const weeks = sampleStoryWeeks(season);
+  const points = weeks.reduce((n, w) => n + w.points, 0);
+  const lastDay = new Date(season.getFullYear(), season.getMonth() + 1, 0);
+  const lastSaturday = addLocalDays(lastDay, -((lastDay.getDay() + 1) % 7));
+  const endOfSeasonEvening = new Date(lastSaturday.getFullYear(), lastSaturday.getMonth(), lastSaturday.getDate(), 21, 45, 23);
+  return [
+    {
+      label: "Liderando no último dia",
+      story: buildCompetitionStory({
+        me: sampleStanding("me", 1, 3, points, true),
+        leader: sampleStanding("me", 1, 3, points, true),
+        runnerUp: sampleStanding("rival", 2, 1, points - 12, false),
+        total: 8,
+        weeks,
+        season,
+        now: endOfSeasonEvening,
+      }),
+    },
+    {
+      label: "Subindo, atrás do 1º",
+      story: buildCompetitionStory({
+        me: sampleStanding("me", 2, 5, points, true),
+        leader: sampleStanding("leader", 1, 1, points + 80, false),
+        runnerUp: sampleStanding("rival", 3, 2, points - 30, false),
+        total: 8,
+        weeks,
+        season,
+        now,
+      }),
+    },
+  ];
+}
