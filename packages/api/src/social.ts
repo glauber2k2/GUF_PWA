@@ -8,6 +8,7 @@ import {
   type SocialVisibility,
   type TrainingGoal,
   type WeightUnit,
+  type WorkoutFeedExercise,
 } from "@guf/core";
 import type { GufClient } from "./client";
 import type { WorkoutSummaryBase, WorkoutSummaryRecord } from "./evolution";
@@ -105,6 +106,17 @@ export interface MemberWorkout {
   records: number;
 }
 
+/**
+ * Treino no feed do perfil (card 2a): o do histórico + exercícios, edição, observação (só o dono vê)
+ * e pontos na competição (só o dono e quem compete com ele; senão null).
+ */
+export interface WorkoutFeedItem extends MemberWorkout {
+  editedAt: string | null;
+  note: string | null;
+  points: number | null;
+  exercises: WorkoutFeedExercise[];
+}
+
 /** Treino concluído de outra pessoa (ou o seu): o resumo, sem observações, projeto nem rotina. */
 export interface MemberWorkoutDetail extends WorkoutSummaryBase {
   owner: PersonCard;
@@ -131,7 +143,8 @@ export interface SocialApi {
   /** userId nulo = você. */
   getMemberProfile: (client: GufClient, userId: string | null) => Result<MemberProfile>;
   getMemberEvolution: (client: GufClient, input: { userId: string | null; weeks: number }) => Result<EvolutionWeek[]>;
-  listMemberWorkouts: (client: GufClient, input: { userId: string | null; before?: string | null; limit?: number }) => Result<MemberWorkout[]>;
+  /** Página do feed de treinos do perfil (cursor = fim do último treino carregado). */
+  listWorkoutFeed: (client: GufClient, input: { userId: string | null; before?: string | null; limit?: number }) => Result<WorkoutFeedItem[]>;
   /** Detalhe de um treino do histórico (session_not_found = inexistente ou sem permissão; history_hidden). */
   getMemberWorkout: (client: GufClient, input: { sessionId: string }) => Result<MemberWorkoutDetail>;
 }
@@ -321,9 +334,33 @@ export const getMemberEvolution: SocialApi["getMemberEvolution"] = async (client
   }
 };
 
-export const listMemberWorkouts: SocialApi["listMemberWorkouts"] = async (client, { userId, before, limit }) => {
+interface FeedExerciseRow {
+  name: string;
+  muscle_group: string;
+  sets: number;
+  best_weight_kg: number | null;
+  best_reps: number | null;
+  best_distance_km: number | null;
+  best_duration_seconds: number | null;
+  is_record: boolean;
+}
+
+function toFeedExercise(row: FeedExerciseRow): WorkoutFeedExercise {
+  return {
+    name: row.name,
+    muscleGroup: row.muscle_group,
+    sets: Number(row.sets),
+    bestWeightKg: row.best_weight_kg === null ? null : Number(row.best_weight_kg),
+    bestReps: row.best_reps,
+    bestDistanceKm: row.best_distance_km === null ? null : Number(row.best_distance_km),
+    bestDurationSeconds: row.best_duration_seconds,
+    isRecord: row.is_record,
+  };
+}
+
+export const listWorkoutFeed: SocialApi["listWorkoutFeed"] = async (client, { userId, before, limit }) => {
   try {
-    const { data, error } = await client.rpc("list_member_workouts", {
+    const { data, error } = await client.rpc("list_member_workout_feed", {
       ...(userId ? { p_user_id: userId } : {}),
       ...(before ? { p_before: before } : {}),
       ...(limit ? { p_limit: limit } : {}),
@@ -339,6 +376,10 @@ export const listMemberWorkouts: SocialApi["listMemberWorkouts"] = async (client
         sets: row.sets,
         volumeKg: Number(row.volume_kg),
         records: row.records,
+        editedAt: row.edited_at ?? null,
+        note: row.note ?? null,
+        points: row.points ?? null,
+        exercises: ((row.exercises ?? []) as unknown as FeedExerciseRow[]).map(toFeedExercise),
       })),
       error: null,
     };
@@ -431,6 +472,6 @@ export const socialApi = {
   findByHandle,
   getMemberProfile,
   getMemberEvolution,
-  listMemberWorkouts,
+  listWorkoutFeed,
   getMemberWorkout,
 } satisfies SocialApi;

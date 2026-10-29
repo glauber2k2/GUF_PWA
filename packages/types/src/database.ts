@@ -2305,6 +2305,23 @@ export type Database = {
           volume_kg: number
         }[]
       }
+      list_member_workout_feed: {
+        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
+        Returns: {
+          duration_seconds: number
+          edited_at: string
+          exercises: Json
+          finished_at: string
+          name: string
+          note: string
+          performed_on: string
+          points: number
+          records: number
+          session_id: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
       list_member_workouts_unrestricted: {
         Args: { p_before?: string; p_limit?: number; p_user_id?: string }
         Returns: {

@@ -13,6 +13,7 @@ import {
   type ExperienceLevel,
   type SocialVisibility,
   type TrainingGoal,
+  type WorkoutFeedExercise,
 } from "@guf/core";
 import {
   apiError,
@@ -23,6 +24,7 @@ import {
   type MemberWorkout,
   type MemberWorkoutDetail,
   type MySocial,
+  type WorkoutFeedItem,
   type SocialApi,
 } from "@guf/api";
 import { mockEvolutionApi } from "@/mocks/evolution";
@@ -221,6 +223,52 @@ function workouts(p: MockPerson, limit: number): MemberWorkout[] {
   });
 }
 
+/** Treinos no feed do mock (o bastante para rolar e carregar mais páginas). */
+const FEED_TOTAL = 24;
+
+const FEED_EXERCISES: WorkoutFeedExercise[][] = [
+  [
+    { name: "Puxada frontal na polia", muscleGroup: "costas", sets: 4, bestWeightKg: 67.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Remada curvada com barra", muscleGroup: "costas", sets: 4, bestWeightKg: 70, bestReps: 8, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
+    { name: "Rosca direta com barra", muscleGroup: "biceps", sets: 3, bestWeightKg: 30, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Rosca martelo", muscleGroup: "biceps", sets: 3, bestWeightKg: 14, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Esteira", muscleGroup: "cardio", sets: 1, bestWeightKg: null, bestReps: null, bestDistanceKm: 3.2, bestDurationSeconds: 1200, isRecord: false },
+  ],
+  [
+    { name: "Supino reto com barra", muscleGroup: "peito", sets: 4, bestWeightKg: 90, bestReps: 6, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
+    { name: "Supino inclinado com halteres", muscleGroup: "peito", sets: 3, bestWeightKg: 32, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Crucifixo na máquina", muscleGroup: "peito", sets: 3, bestWeightKg: 45, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Tríceps na polia com corda", muscleGroup: "triceps", sets: 3, bestWeightKg: 27.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
+    { name: "Tríceps francês com halter", muscleGroup: "triceps", sets: 3, bestWeightKg: 18, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Elevação lateral", muscleGroup: "ombros", sets: 3, bestWeightKg: 10, bestReps: 15, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+  ],
+  [
+    { name: "Agachamento livre", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 97.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Leg press 45°", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 220, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Stiff", muscleGroup: "posterior", sets: 3, bestWeightKg: 60, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+  ],
+];
+
+const FEED_NOTE = "Ombro esquerdo incomodou no inclinado, baixei a carga na última série. Corda rendeu muito hoje, subir para 30 kg na próxima.";
+
+/** Feed do perfil: os treinos do histórico com exercícios; pontos só seus ou de quem compete com você, observação só sua. */
+function feedItems(p: MockPerson): WorkoutFeedItem[] {
+  const isSelf = p.userId === MOCK_ME;
+  const seesPoints = isSelf || (status(MOCK_ME, p.userId) === "accepted" && status(p.userId, MOCK_ME) === "accepted");
+  return workouts(p, FEED_TOTAL).map((w, i) => {
+    const exercises = FEED_EXERCISES[i % FEED_EXERCISES.length] ?? [];
+    const records = exercises.filter((e) => e.isRecord).length;
+    return {
+      ...w,
+      records,
+      editedAt: i === 0 ? new Date(Date.now() - 2 * 3_600_000).toISOString() : null,
+      note: isSelf && i % 2 === 0 ? FEED_NOTE : null,
+      points: seesPoints ? 15 + records * 3 : null,
+      exercises,
+    };
+  });
+}
+
 /** Dono do treino pelo id do mock (`<userId>-w<n>`, gerado em `workouts`). */
 function workoutOwner(sessionId: string): MockPerson | undefined {
   const userId = sessionId.replace(/-w\d+$/, "");
@@ -390,15 +438,17 @@ export const mockSocialApi = {
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     return { data: evolution(p, weeks), error: null };
   },
-  async listMemberWorkouts(client, { userId, limit }) {
+  async listWorkoutFeed(client, { userId, before, limit }) {
     ignoreClient(client);
     await wait();
     const p = find(userId);
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
-    // Mesma regra do banco: de outra pessoa, só os treinos do mês atual.
     const from = p.userId === MOCK_ME ? "" : memberHistoryFrom(new Date());
-    return { data: workouts(p, limit ?? 3).filter((w) => w.performedOn >= from), error: null };
+    const page = feedItems(p)
+      .filter((w) => w.performedOn >= from && (!before || w.finishedAt < before))
+      .slice(0, limit ?? 10);
+    return { data: page, error: null };
   },
   async getMemberWorkout(client, { sessionId }) {
     await wait();

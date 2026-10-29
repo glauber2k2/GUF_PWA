@@ -12,7 +12,7 @@ import {
   useCanUseSocial,
   useMemberEvolution,
   useMemberProfile,
-  useMemberWorkouts,
+  useWorkoutFeed,
   useSocialSource,
 } from "@/features/social/api/use-social";
 import { LockedProfile, ProfileCounts, ProfileEvolution, ProfileHistory, ProfileStreak } from "@/features/social/components/profile-sections";
@@ -60,7 +60,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const isSelf = userId === null || data?.isSelf;
   const evolutionPeriod = useProfileEvolutionPeriod(Boolean(isSelf));
   const evolution = useMemberEvolution(userId, EVOLUTION_WEEKS[evolutionPeriod.period], unlocked);
-  const workouts = useMemberWorkouts(userId, unlocked && Boolean(data?.historyVisible));
+  const workouts = useWorkoutFeed(userId, unlocked && Boolean(data?.historyVisible));
   const loading = dev.forceLoading || profile.isPending;
   const { entitlements } = usePlanGate();
 

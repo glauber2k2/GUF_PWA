@@ -78,16 +78,16 @@ export function useMemberEvolution(userId: string | null, weeks: number, enabled
   });
 }
 
-/** Histórico de treinos paginado pelo fim do último treino carregado. */
-export function useMemberWorkouts(userId: string | null, enabled: boolean) {
+/** Feed de treinos do perfil (cards), 10 por página, pelo fim do último treino carregado. */
+export function useWorkoutFeed(userId: string | null, enabled: boolean) {
   const { user } = useAuth();
   const { api, dev } = useSocialSource();
   return useInfiniteQuery({
-    queryKey: [SOCIAL_KEY, "workouts", user?.id, userId, dev.scenario],
+    queryKey: [SOCIAL_KEY, "workout-feed", user?.id, userId, dev.scenario],
     enabled: (Boolean(user) || dev.scenario !== null) && enabled,
     initialPageParam: null as string | null,
     queryFn: async ({ pageParam }) =>
-      unwrap(await api.listMemberWorkouts(getSupabaseClient(), { userId, before: pageParam, limit: MEMBER_WORKOUTS_PAGE })),
+      unwrap(await api.listWorkoutFeed(getSupabaseClient(), { userId, before: pageParam, limit: MEMBER_WORKOUTS_PAGE })),
     getNextPageParam: (page) => (page.length === MEMBER_WORKOUTS_PAGE ? (page.at(-1)?.finishedAt ?? null) : null),
   });
 }
