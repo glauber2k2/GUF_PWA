@@ -105,6 +105,9 @@ function random(seed: string): () => number {
   };
 }
 
+/** Parâmetros da pontuação vigentes no servidor (competition_parameters). */
+const RULE = { perDay: 15, minMinutes: 20, bonusPerWeek: 5, bonusMax: 20, recordPoints: 3, volumeMax: 15, fulfilledDays: 3 };
+
 function simulate(range: { from: string; to: string }) {
   const days: CompetitionDayStat[] = [];
   const weeks: CompetitionWeekScore[] = [];
@@ -127,13 +130,13 @@ function simulate(range: { from: string; to: string }) {
           days.push({ userId: c.userId, day: iso, workouts: 1, volumeKg: Math.round(c.volume * (0.85 + next() * 0.3)), records: record });
         }
       }
-      const fulfilled = sessions >= 3;
+      const fulfilled = sessions >= RULE.fulfilledDays;
       consecutive = fulfilled ? consecutive + 1 : 0;
       // Mesma regra do servidor (competition_week_scores), com volume simulado perto da média.
-      const constancyPoints = Math.min(sessions, 3) * 20;
-      const bonusPoints = fulfilled ? Math.min(20, 5 * consecutive) : 0;
-      const recordPoints = Math.min(25, records * 5);
-      const volumePoints = sessions > 0 ? Math.round(15 * Math.min(1, 0.7 + next() * 0.4) * 100) / 100 : 0;
+      const constancyPoints = sessions * RULE.perDay;
+      const bonusPoints = fulfilled ? Math.min(RULE.bonusMax, RULE.bonusPerWeek * consecutive) : 0;
+      const recordPoints = records * RULE.recordPoints;
+      const volumePoints = sessions > 0 ? Math.round(RULE.volumeMax * Math.min(1, 0.7 + next() * 0.4) * 100) / 100 : 0;
       weeks.push({
         userId: c.userId,
         weekStart: toLocalISODate(week),
@@ -152,7 +155,6 @@ function simulate(range: { from: string; to: string }) {
 
 const LATENCY_MS = 400;
 const WORKOUT_NAMES = ["Treino A – Peito e Tríceps", "Treino B – Costas e Bíceps", "Treino C – Pernas", "Treino D – Ombros e Abdômen", "Full-body"];
-const RULE = { perDay: 15, minMinutes: 20, bonusPerWeek: 5, bonusMax: 20, recordPoints: 5, recordsMax: 25, volumeMax: 15, fulfilledDays: 3 };
 
 /** Seus treinos e semanas no período, pela mesma regra do servidor (sob demanda, nunca no carregamento). */
 function simulateStatement(range: { from: string; to: string }): PointsStatement {
@@ -188,7 +190,7 @@ function simulateStatement(range: { from: string; to: string }): PointsStatement
     const weeklyVolumeKg = weekSessions.reduce((sum, x) => sum + x.volumeKg, 0);
     const constancyPoints = validSessions * RULE.perDay;
     const bonusPoints = fulfilled ? Math.min(RULE.bonusMax, RULE.bonusPerWeek * streak) : 0;
-    const recordPoints = Math.min(RULE.recordsMax, records * RULE.recordPoints);
+    const recordPoints = records * RULE.recordPoints;
     const volumePoints = weeklyVolumeKg > 0 ? Math.round(RULE.volumeMax * Math.min(1, weeklyVolumeKg / averageVolume) * 100) / 100 : 0;
     if (weeklyVolumeKg > 0) averageVolume = (averageVolume * 3 + weeklyVolumeKg) / 4;
     sessions.push(...weekSessions);
@@ -286,8 +288,8 @@ export const mockCompetitionApi = {
         maxMinutes: 120,
         bonusPerWeek: 5,
         bonusMax: 20,
-        recordPoints: 5,
-        recordsMax: 25,
+        recordPoints: 3,
+        recordsMax: null,
         volumeMax: 15,
         volumeWindowWeeks: 4,
       },

@@ -444,7 +444,7 @@ export type Database = {
           max_minutes: number
           min_minutes: number
           record_points: number
-          records_max: number
+          records_max: number | null
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number
@@ -466,7 +466,7 @@ export type Database = {
           max_minutes: number
           min_minutes: number
           record_points?: number
-          records_max?: number
+          records_max?: number | null
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number
@@ -488,7 +488,7 @@ export type Database = {
           max_minutes?: number
           min_minutes?: number
           record_points?: number
-          records_max?: number
+          records_max?: number | null
           reference_load?: number
           rpe_gap?: number
           rpe_high_cap?: number
@@ -1834,7 +1834,7 @@ export type Database = {
           max_minutes: number
           min_minutes: number
           record_points: number
-          records_max: number
+          records_max: number | null
           reference_load: number
           rpe_gap: number
           rpe_high_cap: number

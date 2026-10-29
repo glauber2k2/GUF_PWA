@@ -219,7 +219,7 @@ export const getCompetitionParameters: CompetitionApi["getCompetitionParameters"
         bonusPerWeek: Number(data.bonus_per_week),
         bonusMax: Number(data.bonus_max),
         recordPoints: Number(data.record_points),
-        recordsMax: Number(data.records_max),
+        recordsMax: data.records_max === null ? null : Number(data.records_max),
         volumeMax: Number(data.volume_max),
         volumeWindowWeeks: data.volume_window_weeks,
       },
