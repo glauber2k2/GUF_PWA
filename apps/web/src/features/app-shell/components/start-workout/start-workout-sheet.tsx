@@ -1,8 +1,10 @@
 "use client";
 
+import type { Ref } from "react";
 import { ListPlus, Play, Plus } from "lucide-react";
 import { plural, startedAgoLabel } from "@guf/core";
 import { Banner, BottomSheet, Icon, SheetOption, Skeleton } from "@/shared/components/ds";
+import { usePeekSheetHeight } from "@/features/app-shell/hooks/use-peek-sheet-height";
 import { useStartWorkoutSheet, type StartWorkoutSheetState } from "@/features/app-shell/hooks/use-start-workout-sheet";
 import { ProjectPickerList } from "./project-picker-list";
 import { ProjectSwitchButton } from "./project-switch-button";
@@ -29,31 +31,39 @@ export interface StartWorkoutSheetProps {
 }
 
 /**
- * Folha "Iniciar treino" (Claude Design "Iniciar Treino" · alternativa 2): 60% da tela com as rotinas do
- * projeto ativo, a próxima em destaque, troca de projeto e "Começar treino vazio" fixo embaixo.
+ * Folha "Iniciar treino" (Claude Design "Iniciar Treino" · alternativa 2): rotinas do projeto ativo
+ * (altura pelo conteúdo, até 85% da tela, com a última rotina visível pela metade quando há mais), a próxima em destaque, troca de projeto e "Começar treino vazio" fixo embaixo.
  * Iniciar fecha a folha na hora (sem contagem). Quem abre decide o que iniciar e retomar.
  */
 export function StartWorkoutSheet({ open, onClose, inProgress, hasTrainedToday, onResume, onStart, onCreateRoutine }: StartWorkoutSheetProps) {
   const sheet = useStartWorkoutSheet(open && !inProgress, hasTrainedToday);
   const isPickingProject = !inProgress && sheet.view === "projects";
   const title = inProgress ? "Treino em andamento" : isPickingProject ? "Escolher projeto" : "Iniciar treino";
+  const { sheetRef, listRef } = usePeekSheetHeight(open && !inProgress ? routinesMeasureKey(sheet) : null, !inProgress);
 
   return (
     <BottomSheet
       placement="screen"
+      ref={sheetRef}
       open={open}
       onClose={onClose}
       title={title}
       header={<StartSheetHeader title={title} onBack={isPickingProject ? sheet.showRoutines : undefined} onClose={onClose} />}
-      className={inProgress ? undefined : "h-[60dvh] grid-rows-[auto_minmax(0,1fr)]"}
+      className={inProgress ? undefined : "h-[60dvh] max-h-[85dvh] grid-rows-[auto_minmax(0,1fr)]"}
     >
       {inProgress ? (
         <InProgressBody workout={inProgress} onResume={onResume} />
       ) : (
-        <StartBody sheet={sheet} onStart={onStart} onCreateRoutine={onCreateRoutine} />
+        <StartBody sheet={sheet} listRef={listRef} onStart={onStart} onCreateRoutine={onCreateRoutine} />
       )}
     </BottomSheet>
   );
+}
+
+/** Muda quando a lista de rotinas pronta muda; null enquanto carrega ou fora da lista. */
+function routinesMeasureKey(sheet: StartWorkoutSheetState): string | null {
+  if (sheet.view !== "routines" || sheet.status.isPending) return null;
+  return [sheet.project?.id ?? "", ...(sheet.project?.routines ?? []).map((r) => r.id)].join(":");
 }
 
 function InProgressBody({ workout, onResume }: { workout: InProgressWorkout; onResume: (sessionId: string) => void }) {
@@ -67,10 +77,12 @@ function InProgressBody({ workout, onResume }: { workout: InProgressWorkout; onR
 
 function StartBody({
   sheet,
+  listRef,
   onStart,
   onCreateRoutine,
 }: {
   sheet: StartWorkoutSheetState;
+  listRef: Ref<HTMLDivElement>;
   onStart: StartWorkoutSheetProps["onStart"];
   onCreateRoutine: StartWorkoutSheetProps["onCreateRoutine"];
 }) {
@@ -84,7 +96,7 @@ function StartBody({
   return (
     <div className="flex min-h-0 animate-guf-from-left flex-col gap-2">
       {sheet.project && <ProjectSwitchButton name={sheet.project.name} isActive={sheet.project.isActive} onClick={sheet.showProjects} />}
-      <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 pt-1 pb-3 [mask-image:linear-gradient(to_bottom,transparent_0,#000_10px,#000_calc(100%-18px),transparent_100%)]">
+      <div ref={listRef} className="relative -mx-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain px-4 pt-1 pb-3 [mask-image:linear-gradient(to_bottom,transparent_0,#000_10px,#000_calc(100%-18px),transparent_100%)]">
         <RoutineList sheet={sheet} onStart={onStart} onCreateRoutine={onCreateRoutine} />
       </div>
       <button

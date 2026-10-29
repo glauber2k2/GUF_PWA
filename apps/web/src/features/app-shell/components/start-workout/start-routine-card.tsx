@@ -3,6 +3,7 @@ import { formatPlannedSets, muscleGroupLabel, routineLetter, routineMeta, routin
 import type { ProjectRoutine } from "@guf/api";
 import { Button, Collapse, Icon, IconButton, MuscleIcon, muscleIconKey } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
+import { PEEK_ITEM_PROPS } from "@/features/app-shell/helpers/peek-height";
 
 /** Atraso entre os selos de músculo ao abrir (a silhueta acende em sequência). */
 const MUSCLE_STAGGER_MS = 140;
@@ -26,6 +27,7 @@ export function StartRoutineCard({ routine, isNext, isOpen, index, onToggle, onS
   const startLabel = `Iniciar ${routineShortName(routine.name)}`;
   return (
     <div
+      {...PEEK_ITEM_PROPS}
       className={cn(
         "flex-none animate-guf-rise-fast overflow-hidden rounded-lg transition-[border-color,background-color] duration-200 ease-standard",
         isHighlighted ? "border-[1.5px] border-accent-text" : "border border-border",
