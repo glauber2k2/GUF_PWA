@@ -881,6 +881,7 @@ export type Database = {
           name: string | null
           onboarded_at: string | null
           product_announcements_opt_out: boolean
+          profile_setup_completed_at: string | null
           timezone: string
           tour_completed_version: number | null
           training_goals: string[]
@@ -898,6 +899,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           product_announcements_opt_out?: boolean
+          profile_setup_completed_at?: string | null
           timezone?: string
           tour_completed_version?: number | null
           training_goals?: string[]
@@ -915,6 +917,7 @@ export type Database = {
           name?: string | null
           onboarded_at?: string | null
           product_announcements_opt_out?: boolean
+          profile_setup_completed_at?: string | null
           timezone?: string
           tour_completed_version?: number | null
           training_goals?: string[]

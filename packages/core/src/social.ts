@@ -49,6 +49,41 @@ export function isValidHandle(handle: string): boolean {
   return HANDLE_PATTERN.test(handle);
 }
 
+/** Quantas sugestões de @ o cadastro mostra. */
+const HANDLE_SUGGESTIONS = 3;
+
+/** Nome sem acento, em minúsculas, só letras e números, em palavras. */
+function nameWords(name: string): string[] {
+  return name
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+/**
+ * Sugestões de @ a partir do nome (cadastro em passos): "glauber.monteiro", "glaubermonteiro"…; sem nome,
+ * variações do @ em uso. Só formatos válidos; a disponibilidade é conferida quando a pessoa escolhe.
+ * @param name nome digitado
+ * @param takenHandle @ que já está em uso (fica de fora e serve de base sem nome)
+ */
+export function suggestHandles(name: string, takenHandle: string | null = null): string[] {
+  const words = nameWords(name);
+  const options: string[] = [];
+  if (words.length > 0) {
+    const first = words[0]!;
+    const last = words.length > 1 ? words[words.length - 1]! : "";
+    if (last) options.push(`${first}.${last}`, `${first}${last}`, `${first}_${last[0]}`);
+    options.push(`${first}.treina`, `${first}${((name.length * 7) % 90) + 10}`);
+  } else if (takenHandle) {
+    options.push(`${takenHandle}.fit`, `${takenHandle}.treina`, `${takenHandle}_${new Date().getFullYear() % 100}`);
+  }
+  return [...new Set(options)].filter((h) => isValidHandle(h) && h !== takenHandle).slice(0, HANDLE_SUGGESTIONS);
+}
+
 /** "gui.silva" → "@gui.silva" */
 export function formatHandle(handle: string): string {
   return `@${handle}`;
