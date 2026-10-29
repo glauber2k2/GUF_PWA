@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode, type Ref } from "react";
 import { Play, Plus, type LucideIcon } from "lucide-react";
 import { useSheetDrag } from "../hooks/use-sheet-drag";
 import { cn } from "../helpers/class-names";
+import { assignRef } from "../helpers/refs";
 import { BOTTOM_BAR_PROPS } from "./bottom-bar";
 import { Icon } from "./brand";
 import { ScreenPortal } from "./portal";
@@ -25,6 +26,8 @@ export interface BottomSheetProps {
   placement?: "container" | "screen";
   children?: ReactNode;
   className?: string;
+  /** Elemento da folha (ex.: medir a altura). */
+  ref?: Ref<HTMLDivElement>;
 }
 
 export function BottomSheet({
@@ -36,6 +39,7 @@ export function BottomSheet({
   placement = "container",
   children,
   className,
+  ref,
 }: BottomSheetProps) {
   const screen = placement === "screen";
   const { sheetRef, offset, progress, dragProps } = useSheetDrag(onClose);
@@ -73,7 +77,10 @@ export function BottomSheet({
         )}
       />
       <div
-        ref={sheetRef}
+        ref={(node) => {
+          sheetRef.current = node;
+          assignRef(ref, node);
+        }}
         // Barra do rodapé enquanto está na tela: a pilha de avisos sobe junto e fica acima da folha.
         {...BOTTOM_BAR_PROPS}
         role="dialog"
