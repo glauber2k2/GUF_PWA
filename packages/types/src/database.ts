@@ -2292,19 +2292,6 @@ export type Database = {
         Returns: boolean
       }
       is_premium: { Args: never; Returns: boolean }
-      list_member_workouts: {
-        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
-        Returns: {
-          duration_seconds: number
-          finished_at: string
-          name: string
-          performed_on: string
-          records: number
-          session_id: string
-          sets: number
-          volume_kg: number
-        }[]
-      }
       list_member_workout_feed: {
         Args: { p_before?: string; p_limit?: number; p_user_id?: string }
         Returns: {
@@ -2316,6 +2303,19 @@ export type Database = {
           note: string
           performed_on: string
           points: number
+          records: number
+          session_id: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
+      list_member_workouts: {
+        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
+        Returns: {
+          duration_seconds: number
+          finished_at: string
+          name: string
+          performed_on: string
           records: number
           session_id: string
           sets: number
