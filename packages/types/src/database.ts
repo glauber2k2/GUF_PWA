@@ -2004,6 +2004,19 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_competition_season_podium: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          rank: number
+          season: string
+          user_id: string
+        }[]
+      }
       get_competition_series: {
         Args: { p_from: string; p_to: string; p_user_ids: string[] }
         Returns: Json

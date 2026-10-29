@@ -9,6 +9,7 @@ import {
   type CompetitionStandingsPage,
   type CompetitionWeekScore,
   type PointsStatement,
+  type SeasonPodium,
 } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
@@ -48,6 +49,8 @@ export interface CompetitionApi {
   getCompetitionParameters: (client: GufClient, season: string) => Result<CompetitionParameters>;
   /** Extrato dos SEUS pontos no período: semanas com as partes e os treinos (o plano limita como no ranking). */
   getPointsStatement: (client: GufClient, range: CompetitionRange) => Result<PointsStatement>;
+  /** Pódio final da temporada encerrada, só nos 3 primeiros dias da atual (o servidor decide); null fora disso ou sem pontos. */
+  getSeasonPodium: (client: GufClient) => Result<SeasonPodium | null>;
 }
 
 /* =====================================================================
@@ -296,6 +299,33 @@ export const getPointsStatement: CompetitionApi["getPointsStatement"] = async (c
   }
 };
 
+export const getSeasonPodium: CompetitionApi["getSeasonPodium"] = async (client) => {
+  try {
+    const { data, error } = await client.rpc("get_competition_season_podium");
+    if (error) return { data: null, error: toApiError(error) };
+    const rows = data ?? [];
+    const season = rows[0]?.season;
+    if (!season) return { data: null, error: null };
+    return {
+      data: {
+        season,
+        places: rows.map((row) => ({
+          userId: row.user_id,
+          handle: row.handle,
+          name: row.name ?? null,
+          avatarUrl: resolveAvatarUrl(client, row.avatar_url, null),
+          isMe: row.is_me,
+          points: Number(row.points),
+          rank: Number(row.rank),
+        })),
+      },
+      error: null,
+    };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const competitionApi = {
   getCompetitionStandings,
   getStandingsNearMe,
@@ -304,4 +334,5 @@ export const competitionApi = {
   getCompetitionSeries,
   getCompetitionParameters,
   getPointsStatement,
+  getSeasonPodium,
 } satisfies CompetitionApi;

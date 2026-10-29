@@ -14,12 +14,12 @@ export interface DevSocialState {
 
 const NONE: DevSocialState = { scenario: null, competitionScenario: null, forceLoading: false, forceOffline: false };
 const SOCIAL_SCENARIOS: SocialMockScenario[] = ["padrao", "vazio", "erro"];
-const COMPETITION_SCENARIOS: CompetitionMockScenario[] = ["padrao", "vazio", "erro", "lider", "muitos"];
+const COMPETITION_SCENARIOS: CompetitionMockScenario[] = ["padrao", "vazio", "erro", "lider", "muitos", "campeao"];
 
 /**
  * ?estado= do Perfil social, seguidores, busca e Competição — SÓ EM DESENVOLVIMENTO (eliminado do
  * build de produção). Ex.: /perfil?estado=padrao · /pessoa?u=marina.lift&estado=padrao ·
- * /competicao?estado=lider · ?estado=vazio · ?estado=erro · ?estado=carregando · ?estado=offline.
+ * /competicao?estado=lider · ?estado=campeao (pódio do campeão) · ?estado=vazio · ?estado=erro · ?estado=carregando · ?estado=offline.
  */
 export function useDevSocialState(): DevSocialState {
   const searchParams = useSearchParams();

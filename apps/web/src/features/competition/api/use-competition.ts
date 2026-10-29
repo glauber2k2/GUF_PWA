@@ -19,6 +19,8 @@ export function useCompetitionSource(): { api: CompetitionApi; dev: DevSocialSta
   return { api: competitionApi, dev };
 }
 
+const SEASON_PODIUM_STALE_MS = 60 * 60 * 1000;
+
 function unwrap<T>(result: { data: T; error: null } | { data: null; error: ApiError }): T {
   if (result.error) throw result.error;
   return result.data as T;
@@ -88,6 +90,22 @@ export function useCompetitionSeries(range: CompetitionRange, userIds: string[])
     enabled: (Boolean(user) || dev.competitionScenario !== null) && userIds.length > 0,
     placeholderData: keepPreviousData,
     queryFn: async () => unwrap(await api.getCompetitionSeries(getSupabaseClient(), { ...range, userIds })),
+  });
+}
+
+/**
+ * Pódio final da temporada encerrada: o servidor só devolve nos 3 primeiros dias da temporada atual
+ * (null fora disso). Vale por 1 hora; depois, abrir a tela ou voltar ao app consulta de novo e o
+ * pódio normal volta quando a janela acaba.
+ */
+export function useSeasonPodium(isActive: boolean) {
+  const { user } = useAuth();
+  const { api, dev } = useCompetitionSource();
+  return useQuery({
+    queryKey: [COMPETITION_KEY, "season-podium", user?.id, dev.competitionScenario],
+    enabled: isActive && (Boolean(user) || dev.competitionScenario !== null),
+    staleTime: SEASON_PODIUM_STALE_MS,
+    queryFn: async () => unwrap(await api.getSeasonPodium(getSupabaseClient())),
   });
 }
 
