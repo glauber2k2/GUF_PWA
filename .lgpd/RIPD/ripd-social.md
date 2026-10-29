@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.8 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-29
+**Versão**: v0.9 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-29
+
+> **v0.9**: observações do treino e dos exercícios passam a fazer parte do treino (decisão de produto, migration `20261029150000_workout_notes_visible`): mesmo público do histórico (titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto; de outra pessoa, só o mês atual) e escondidas junto quando o titular oculta o histórico. Texto livre escrito pelo titular, que pode conter dado de saúde (dor, lesão): por isso as observações já escritas, feitas sob a promessa de serem privadas, só aparecem para outras pessoas depois que o titular aceita os Termos 1.3 (`workout_notes_shared`; `requires_reaccept = true`, Termos 1.3 e Política 1.4 com "O que mudou"), e os Termos pedem para não escrever dados de saúde nem de outras pessoas nelas. Continuam fora do GUF AI e do painel. Risco R007 revisto (residual pode subir se observações trouxerem dado de saúde ⚖).
 
 > **v0.8**: cards do feed de treinos no perfil (`list_member_workout_feed`, migration `20261029140000_member_workout_feed`). Mesmo público do histórico (quem já via a lista e o detalhe de cada treino) e os mesmos dados do detalhe (exercícios, séries, melhor série e recordes). Novo: os **pontos de cada treino na competição**, só para o titular e para quem compete com ele (seguimento mútuo, que já vê os pontos da semana no ranking); visitante não recebe. A observação do treino continua só do titular. Riscos R001 e R007 sem mudança.
 

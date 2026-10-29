@@ -107,8 +107,8 @@ export interface MemberWorkout {
 }
 
 /**
- * Treino no feed do perfil (card 2a): o do histórico + exercícios, edição, observação (só o dono vê)
- * e pontos na competição (só o dono e quem compete com ele; senão null).
+ * Treino no feed do perfil (card 2a): o do histórico + exercícios (com observações), edição, observação
+ * do treino (mesma visibilidade do treino) e pontos na competição (só o dono e quem compete com ele; senão null).
  */
 export interface WorkoutFeedItem extends MemberWorkout {
   editedAt: string | null;
@@ -117,7 +117,7 @@ export interface WorkoutFeedItem extends MemberWorkout {
   exercises: WorkoutFeedExercise[];
 }
 
-/** Treino concluído de outra pessoa (ou o seu): o resumo, sem observações, projeto nem rotina. */
+/** Treino concluído de outra pessoa (ou o seu): o resumo com as observações dos exercícios, sem projeto nem rotina. */
 export interface MemberWorkoutDetail extends WorkoutSummaryBase {
   owner: PersonCard;
 }
@@ -343,6 +343,8 @@ interface FeedExerciseRow {
   best_distance_km: number | null;
   best_duration_seconds: number | null;
   is_record: boolean;
+  /** Ausente antes da migration workout_notes_visible. */
+  note?: string | null;
 }
 
 function toFeedExercise(row: FeedExerciseRow): WorkoutFeedExercise {
@@ -355,6 +357,7 @@ function toFeedExercise(row: FeedExerciseRow): WorkoutFeedExercise {
     bestDistanceKm: row.best_distance_km === null ? null : Number(row.best_distance_km),
     bestDurationSeconds: row.best_duration_seconds,
     isRecord: row.is_record,
+    note: row.note ?? null,
   };
 }
 
@@ -408,6 +411,8 @@ interface MemberWorkoutRow {
     record_e1rm: number | null;
     previous_e1rm: number | null;
     previous_on: string | null;
+    /** Observação do exercício (mesma visibilidade do treino; ausente antes da migration workout_notes_visible). */
+    note?: string | null;
     sets: CompletedSetRow[];
   }>;
 }
@@ -417,7 +422,7 @@ function toMemberWorkout(client: GufClient, row: MemberWorkoutRow, weightUnit: W
   const exercises = row.exercises.map((e) => {
     const record1RmKg = e.record_e1rm === null ? null : Number(e.record_e1rm);
     const previous = e.previous_e1rm === null || e.previous_on === null ? null : { oneRmKg: Number(e.previous_e1rm), performedOn: e.previous_on };
-    const exercise = buildSummaryExercise({ id: e.id, exerciseId: e.exercise_id, name: e.name, muscleGroup: e.muscle_group, note: null, sets: e.sets }, record1RmKg);
+    const exercise = buildSummaryExercise({ id: e.id, exerciseId: e.exercise_id, name: e.name, muscleGroup: e.muscle_group, note: e.note ?? null, sets: e.sets }, record1RmKg);
     const record = buildSummaryRecord(exercise, record1RmKg, previous);
     if (record) records.push(record);
     return exercise;

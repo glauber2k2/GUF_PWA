@@ -236,7 +236,6 @@ export function ProfileHistory({
               owner={owner}
               unit={unit}
               canAnimate={i === 0}
-              isOwnWorkout={profile.isSelf}
               onOpen={() => onOpenWorkout?.(w.sessionId)}
             />
           ))}

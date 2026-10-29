@@ -228,30 +228,30 @@ const FEED_TOTAL = 24;
 
 const FEED_EXERCISES: WorkoutFeedExercise[][] = [
   [
-    { name: "Puxada frontal na polia", muscleGroup: "costas", sets: 4, bestWeightKg: 67.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Remada curvada com barra", muscleGroup: "costas", sets: 4, bestWeightKg: 70, bestReps: 8, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
-    { name: "Rosca direta com barra", muscleGroup: "biceps", sets: 3, bestWeightKg: 30, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Rosca martelo", muscleGroup: "biceps", sets: 3, bestWeightKg: 14, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Esteira", muscleGroup: "cardio", sets: 1, bestWeightKg: null, bestReps: null, bestDistanceKm: 3.2, bestDurationSeconds: 1200, isRecord: false },
+    { name: "Puxada frontal na polia", muscleGroup: "costas", sets: 4, bestWeightKg: 67.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Remada curvada com barra", muscleGroup: "costas", sets: 4, bestWeightKg: 70, bestReps: 8, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true, note: null },
+    { name: "Rosca direta com barra", muscleGroup: "biceps", sets: 3, bestWeightKg: 30, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Rosca martelo", muscleGroup: "biceps", sets: 3, bestWeightKg: 14, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Esteira", muscleGroup: "cardio", sets: 1, bestWeightKg: null, bestReps: null, bestDistanceKm: 3.2, bestDurationSeconds: 1200, isRecord: false, note: null },
   ],
   [
-    { name: "Supino reto com barra", muscleGroup: "peito", sets: 4, bestWeightKg: 90, bestReps: 6, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
-    { name: "Supino inclinado com halteres", muscleGroup: "peito", sets: 3, bestWeightKg: 32, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Crucifixo na máquina", muscleGroup: "peito", sets: 3, bestWeightKg: 45, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Tríceps na polia com corda", muscleGroup: "triceps", sets: 3, bestWeightKg: 27.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true },
-    { name: "Tríceps francês com halter", muscleGroup: "triceps", sets: 3, bestWeightKg: 18, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Elevação lateral", muscleGroup: "ombros", sets: 3, bestWeightKg: 10, bestReps: 15, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Supino reto com barra", muscleGroup: "peito", sets: 4, bestWeightKg: 90, bestReps: 6, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true, note: null },
+    { name: "Supino inclinado com halteres", muscleGroup: "peito", sets: 3, bestWeightKg: 32, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: "Ombro esquerdo incomodou, baixei a carga na última série." },
+    { name: "Crucifixo na máquina", muscleGroup: "peito", sets: 3, bestWeightKg: 45, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Tríceps na polia com corda", muscleGroup: "triceps", sets: 3, bestWeightKg: 27.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: true, note: null },
+    { name: "Tríceps francês com halter", muscleGroup: "triceps", sets: 3, bestWeightKg: 18, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Elevação lateral", muscleGroup: "ombros", sets: 3, bestWeightKg: 10, bestReps: 15, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
   ],
   [
-    { name: "Agachamento livre", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 97.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Leg press 45°", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 220, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
-    { name: "Stiff", muscleGroup: "posterior", sets: 3, bestWeightKg: 60, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false },
+    { name: "Agachamento livre", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 97.5, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Leg press 45°", muscleGroup: "quadriceps", sets: 4, bestWeightKg: 220, bestReps: 12, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
+    { name: "Stiff", muscleGroup: "posterior", sets: 3, bestWeightKg: 60, bestReps: 10, bestDistanceKm: null, bestDurationSeconds: null, isRecord: false, note: null },
   ],
 ];
 
 const FEED_NOTE = "Ombro esquerdo incomodou no inclinado, baixei a carga na última série. Corda rendeu muito hoje, subir para 30 kg na próxima.";
 
-/** Feed do perfil: os treinos do histórico com exercícios; pontos só seus ou de quem compete com você, observação só sua. */
+/** Feed do perfil: os treinos do histórico com exercícios e observações; pontos só seus ou de quem compete com você. */
 function feedItems(p: MockPerson): WorkoutFeedItem[] {
   const isSelf = p.userId === MOCK_ME;
   const seesPoints = isSelf || (status(MOCK_ME, p.userId) === "accepted" && status(p.userId, MOCK_ME) === "accepted");
@@ -262,7 +262,7 @@ function feedItems(p: MockPerson): WorkoutFeedItem[] {
       ...w,
       records,
       editedAt: i === 0 ? new Date(Date.now() - 2 * 3_600_000).toISOString() : null,
-      note: isSelf && i % 2 === 0 ? FEED_NOTE : null,
+      note: i % 3 === 0 ? FEED_NOTE : null,
       points: seesPoints ? 15 + records * 3 : null,
       exercises,
     };
@@ -275,7 +275,7 @@ function workoutOwner(sessionId: string): MockPerson | undefined {
   return userId === sessionId ? undefined : find(userId);
 }
 
-/** Detalhe do treino: o exemplo do mock do Resumo, sem o que outra pessoa não vê (observações, projeto). */
+/** Detalhe do treino: o exemplo do mock do Resumo, sem o que outra pessoa não vê (projeto e rotina). */
 async function memberWorkout(client: GufClient, sessionId: string, p: MockPerson): Promise<MemberWorkoutDetail | null> {
   const base = await mockEvolutionApi.getWorkoutSummary(client, { sessionId: "" });
   if (!base.data) return null;
@@ -285,7 +285,6 @@ async function memberWorkout(client: GufClient, sessionId: string, p: MockPerson
   return {
     ...summary,
     id: sessionId,
-    exercises: base.data.exercises.map((e) => ({ ...e, note: null })),
     daySessionIds: [sessionId],
     owner: { userId: p.userId, handle: p.handle, name: p.name, avatarUrl: null },
   };

@@ -24,6 +24,8 @@ export interface WorkoutFeedExercise {
   bestDurationSeconds: number | null;
   /** A melhor série bateu o recorde do exercício (só força). */
   isRecord: boolean;
+  /** Observação do exercício (faz parte do treino: mesma visibilidade dele). */
+  note: string | null;
 }
 
 const MINUTES_PER_HOUR = 60;
@@ -72,17 +74,20 @@ export function feedMuscleLevels(exercises: readonly WorkoutFeedExercise[]): Mus
   return muscleLevelsFromSets(exercises.map((e) => ({ muscleGroup: e.muscleGroup, sets: e.sets })));
 }
 
-/** Observação vazia no seu treino. */
+/** Treino sem nenhuma observação. */
 export const FEED_EMPTY_NOTE = "Nada escrito em observação";
 
-/** Treino de outra pessoa: a observação nunca é compartilhada (só o dono vê). */
-export const FEED_PRIVATE_NOTE = "Observações ficam só com quem treinou";
+/** Observações dos exercícios numa linha: "Supino reto: ombro incomodou · Remada: subir carga". */
+function exerciseNotesLine(exercises: readonly WorkoutFeedExercise[]): string | null {
+  const notes = exercises.filter((e) => e.note?.trim()).map((e) => `${e.name}: ${e.note?.trim()}`);
+  return notes.length > 0 ? notes.join(" · ") : null;
+}
 
 /**
- * Texto do quadro de observação, que aparece sempre (o card mantém o mesmo desenho): a observação,
- * ou um texto de apoio quando não há (seu treino) ou não pode ser vista (de outra pessoa).
+ * Texto do quadro de observação, que aparece sempre (o card mantém o mesmo desenho): a observação do
+ * treino, senão as dos exercícios, senão o texto de apoio. Observações seguem a visibilidade do treino.
  */
-export function feedNoteText(note: string | null, isOwnWorkout: boolean): { text: string; isPlaceholder: boolean } {
-  if (note) return { text: note, isPlaceholder: false };
-  return { text: isOwnWorkout ? FEED_EMPTY_NOTE : FEED_PRIVATE_NOTE, isPlaceholder: true };
+export function feedNoteText(workoutNote: string | null, exercises: readonly WorkoutFeedExercise[]): { text: string; isPlaceholder: boolean } {
+  const text = workoutNote?.trim() || exerciseNotesLine(exercises);
+  return text ? { text, isPlaceholder: false } : { text: FEED_EMPTY_NOTE, isPlaceholder: true };
 }
