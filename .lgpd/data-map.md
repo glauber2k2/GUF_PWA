@@ -390,9 +390,9 @@
 | Base legal | Proposta: Art. 7º, V — escolha do titular dentro do serviço (Termos 0.2 / Política 0.3, aceitos no cadastro); Art. 11, I se N1 confirmar dado de saúde ⚖ |
 | Categorias de titulares | Usuários com seguidores aprovados ou perfil aberto |
 | Sensíveis? | Não — ver nota \*\* (N1) ⚖ |
-| Dados | Número de treinos, 1º treino, sequência de semanas, evolução semanal (volume, carga máxima, horas); treinos: data, nome, duração, séries, volume e nº de recordes. **Nunca**: medidas, observações, RPE, e-mail |
+| Dados | Número de treinos, 1º treino, sequência de semanas, evolução semanal (volume, carga máxima, horas); treinos: data, nome, duração, séries, volume, nº de recordes, exercícios com a melhor série e **observações do treino e dos exercícios** (desde 2026-10-29, só de quem aceitou os Termos 1.3); **pontos de cada treino só para quem compete** (seguimento mútuo). **Nunca**: medidas, RPE, e-mail |
 | Fonte | Derivado de A004, A005, A007 |
-| Sistemas | Funções `get_member_profile`, `get_member_evolution`, `list_member_workouts` |
+| Sistemas | Funções `get_member_profile`, `get_member_evolution`, `list_member_workouts`, `list_member_workout_feed` (cards do feed), `get_member_workout`; portão das observações `workout_notes_shared` |
 | Operadores | Supabase |
 | Transferência intl. | Não |
 | Retenção | Calculado sob demanda; nada é copiado para o seguidor além do cache do app dele (apagado ao sair da conta) |

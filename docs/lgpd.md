@@ -8,9 +8,11 @@ Este documento tem como finalidade resumir para o time o que a LGPD exige do guf
 | --- | --- |
 | Data de Criação | 17/10/2026 |
 
-**Atualizado em**: 2026-10-23 · **Fase**: beta gratuito · **Controlador**: Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022) · **Encarregado**: não designado (dispensa do art. 11 da Res. 2/2022; canal `devglaubermonteiro@gmail.com`; ver [`.lgpd/encarregado.md`](../.lgpd/encarregado.md))
+**Atualizado em**: 2026-10-29 · **Fase**: beta gratuito · **Controlador**: Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022) · **Encarregado**: não designado (dispensa do art. 11 da Res. 2/2022; canal `devglaubermonteiro@gmail.com`; ver [`.lgpd/encarregado.md`](../.lgpd/encarregado.md))
 
 Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evidências e os testes ficam em [`.lgpd/`](../.lgpd/STATUS.md) (auditoria completa) e as regras de implementação no [`CLAUDE.md`](../CLAUDE.md).
+
+> **Antes do lançamento e da venda do Pro**, leia [`lgpd-riscos-e-lancamento.md`](lgpd-riscos-e-lancamento.md): riscos que ainda podem gerar multa ou processo, o que fazer de graça antes de abrir e o que falta para cobrar.
 
 > Documento técnico, **não é parecer jurídico**. Itens marcados com ⚖ precisam de advogado de proteção de dados antes do lançamento público.
 

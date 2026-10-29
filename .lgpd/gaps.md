@@ -85,3 +85,16 @@ Enquanto o app tiver **só o desenvolvedor e testadores convidados que sabem que
 ## Backlog
 16. Treinamento anual e programa de governança (G21) — Art. 50
 17. Revisão de segurança / pentest antes de monetizar
+
+## Atualização 2026-10-29 — pré-lançamento e venda do Pro
+
+Resumo para o controlador em [`docs/lgpd-riscos-e-lancamento.md`](../docs/lgpd-riscos-e-lancamento.md) (riscos que sobram, lista antes do lançamento e antes de vender o Pro).
+
+| # | Item | Status | Evidência | Severidade | Esforço | Norma |
+|---|---|---|---|---|---|---|
+| G27 | Observações passam a ser vistas por quem vê os treinos | GREEN | Migration `20261029150000_workout_notes_visible` (aplicada): as de cada pessoa só aparecem para outras depois do aceite dos Termos 1.3 (`workout_notes_shared`, testado: dono vê, outro não vê antes do aceite, vê depois). Termos 1.3 e Política 1.4 com novo aceite (`20261029150100`, aplicar depois do deploy) | alta | baixo | Arts. 6º, VI; 8º, § 2º; 9º |
+| G28 | Responsabilidades do usuário e limitação pelo CDC | GREEN | Termos 1.3: seção "Suas escolhas e responsabilidades"; limitação reescrita com o art. 14, § 3º, II do CDC (isenção genérica seria nula, art. 51, I) ⚖ | média | baixo | CDC arts. 14, 51; LGPD art. 9º |
+| G29 | Identificação do vendedor para vender o Pro | RED (bloqueia a venda) | Documentos sem CPF/CNPJ e endereço (decisão de privacidade); exigidos para comércio eletrônico. Decidir entre publicar CPF ou abrir MEI antes da 1ª cobrança | crítica (para vender) | médio | Decreto 7.962/2013, art. 2º |
+| G30 | E-mail de cadastro no SMTP padrão do Supabase | YELLOW | Limite baixo de envio, feito para testes; pode travar a confirmação de cadastro no lançamento. SMTP gratuito resolve | alta | baixo | Art. 46 (disponibilidade) |
+| G31 | Hospedagem em Vercel Hobby ao começar a vender | YELLOW | Uso comercial fora do contrato do plano; Cloudflare Pages gratuito permite | média | baixo | Contrato do provedor (não LGPD) |
+| G32 | Pontos por treino e pódio do mês anterior | GREEN | Pontos de cada treino só para o dono e quem compete (já via os pontos da semana); pódio do mês anterior por 3 dias para os competidores, em qualquer plano. Descritos nos Termos 1.3 e na Política 1.4; RIPD social v0.8 | baixa | baixo | Arts. 6º, III e VI |
