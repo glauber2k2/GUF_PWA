@@ -71,3 +71,18 @@ export function feedBestSetLabel(exercise: WorkoutFeedExercise, unit: WeightUnit
 export function feedMuscleLevels(exercises: readonly WorkoutFeedExercise[]): MuscleLevels {
   return muscleLevelsFromSets(exercises.map((e) => ({ muscleGroup: e.muscleGroup, sets: e.sets })));
 }
+
+/** Observação vazia no seu treino. */
+export const FEED_EMPTY_NOTE = "Nada escrito em observação";
+
+/** Treino de outra pessoa: a observação nunca é compartilhada (só o dono vê). */
+export const FEED_PRIVATE_NOTE = "Observações ficam só com quem treinou";
+
+/**
+ * Texto do quadro de observação, que aparece sempre (o card mantém o mesmo desenho): a observação,
+ * ou um texto de apoio quando não há (seu treino) ou não pode ser vista (de outra pessoa).
+ */
+export function feedNoteText(note: string | null, isOwnWorkout: boolean): { text: string; isPlaceholder: boolean } {
+  if (note) return { text: note, isPlaceholder: false };
+  return { text: isOwnWorkout ? FEED_EMPTY_NOTE : FEED_PRIVATE_NOTE, isPlaceholder: true };
+}

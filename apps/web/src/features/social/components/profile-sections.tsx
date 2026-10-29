@@ -19,6 +19,7 @@ import { cn } from "@/shared/helpers/class-names";
 import type { EvolutionPeriod } from "@/features/social/constants/profile-evolution";
 import { useLoadMoreOnScroll } from "@/shared/hooks/use-load-more-on-scroll";
 import { WorkoutFeedCard } from "@/features/social/components/workout-feed/workout-feed-card";
+import { FEED_SIZES } from "@/features/social/components/workout-feed/feed-layout";
 
 /** Seguidores e seguindo levam à lista; Treinos só mostra o número (traço se o perfil está fechado). */
 export function ProfileCounts({ profile }: { profile: MemberProfile }) {
@@ -167,7 +168,7 @@ export function ProfileEvolution({
 
 /**
  * Histórico de treinos: cards do feed (2a), 10 por vez; rolar até perto do fim busca os próximos 10.
- * Só o primeiro card anima ao abrir. Oculto para visitantes quando a pessoa escondeu; de outra pessoa,
+ * Só o primeiro card anima, quando a pessoa rola até ele. Oculto para visitantes quando a pessoa escondeu; de outra pessoa,
  * só o mês atual.
  */
 export function ProfileHistory({
@@ -222,7 +223,7 @@ export function ProfileHistory({
         </div>
       ) : loading ? (
         <div className="flex flex-col gap-3" aria-busy="true" aria-label="Carregando treinos">
-          <Skeleton className="aspect-[4/5] w-full rounded-lg" />
+          <Skeleton className={cn("w-full rounded-lg", FEED_SIZES.card)} />
         </div>
       ) : workouts.length === 0 ? (
         <p className="m-0 text-sm text-fg-secondary">{profile.isSelf ? "Nenhum treino concluído ainda." : "Nenhum treino concluído neste mês."}</p>
@@ -234,12 +235,13 @@ export function ProfileHistory({
               workout={w}
               owner={owner}
               unit={unit}
-              isAnimated={i === 0}
+              canAnimate={i === 0}
+              isOwnWorkout={profile.isSelf}
               onOpen={() => onOpenWorkout?.(w.sessionId)}
             />
           ))}
           <div ref={sentinelRef} aria-hidden="true" />
-          {loadingMore && <Skeleton className="aspect-[4/5] w-full rounded-lg" />}
+          {loadingMore && <Skeleton className={cn("w-full rounded-lg", FEED_SIZES.card)} />}
         </div>
       )}
     </section>

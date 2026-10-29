@@ -26,9 +26,9 @@ const STAT_TONES = {
 function FeedStat({ label, tone, icon, children }: { label: string; tone: keyof typeof STAT_TONES; icon?: LucideIcon; children: ReactNode }) {
   const styles = STAT_TONES[tone];
   return (
-    <div className={cn("flex min-w-0 flex-col gap-0.5 rounded-[12px] px-2.5 py-2", styles.box)}>
+    <div className={cn("flex min-w-0 flex-col justify-center gap-0.5 overflow-hidden rounded-[12px] px-2.5", styles.box)}>
       <span className="truncate text-[10px] leading-3 font-semibold tracking-[0.08em] text-fg-muted uppercase">{label}</span>
-      <span className={cn("flex items-center gap-1 font-display text-[22px] leading-6 font-bold tabular-nums", styles.value)}>
+      <span className={cn("flex min-w-0 items-center gap-1 overflow-hidden font-display text-[22px] leading-6 font-bold whitespace-nowrap tabular-nums", styles.value)}>
         {icon && <Icon icon={icon} size={14} />}
         {children}
       </span>
@@ -48,7 +48,7 @@ export interface FeedStatsProps {
 /** Volume, PRs e (para você e quem compete) os pontos do treino. */
 export function FeedStats({ volume, unit, records, points, isAnimated }: FeedStatsProps) {
   return (
-    <div className="grid auto-cols-fr grid-flow-col gap-1.5">
+    <div className="grid h-full auto-cols-fr grid-flow-col gap-1.5">
       <FeedStat label="Volume" tone="neutral">
         <span>
           <FeedNumber value={volume} isAnimated={isAnimated} />
