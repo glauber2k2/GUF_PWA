@@ -1,5 +1,6 @@
 "use client";
 
+import { ExerciseImage } from "@/shared/components/exercise-image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -416,9 +417,11 @@ export function ExercisePicker({
                               )}
                             </span>
                           </span>
-                          {/* Espaço da foto do exercício (fotos ainda não existem). */}
+                          {/* Imagem do exercício: a própria (aparelho no cardio) ou o músculo em zoom. */}
                           <span className="relative size-[76px] flex-none">
-                            <span aria-hidden="true" className="absolute inset-0 rounded-md border border-dashed border-border-strong bg-surface-3" />
+                            <span aria-hidden="true" className="absolute inset-0 grid place-items-center overflow-hidden rounded-md bg-surface-3 text-fg-secondary">
+                              <ExerciseImage name={e.name} muscleGroup={e.muscleGroup} size={76} />
+                            </span>
                             {isOn ? (
                               <span
                                 aria-hidden="true"

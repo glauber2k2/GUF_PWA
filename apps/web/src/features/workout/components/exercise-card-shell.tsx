@@ -1,7 +1,7 @@
 "use client";
 
 import type { HTMLAttributes, ReactNode } from "react";
-import { ChevronDown, Ellipsis, GripVertical, NotepadText, type LucideIcon } from "lucide-react";
+import { ChevronDown, Ellipsis, GripVertical, NotepadText } from "lucide-react";
 import { Collapse, Icon, IconButton } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 
@@ -38,7 +38,8 @@ export interface ExerciseCardShellProps extends ExerciseCardFrameProps {
   /** Destaque volt ao entrar (adicionado, trocado ou desfeito). */
   flash: boolean;
   note: string | null;
-  icon: LucideIcon;
+  /** Imagem do exercício no quadro do cabeçalho (ExerciseImage). */
+  image: ReactNode;
   /** Algo acontecendo agora no exercício (ex.: cronômetro do cardio contando): ícone e borda em volt. */
   isLive?: boolean;
   /** Linha de etiquetas abaixo do nome; `compact` = modo de reordenar (cabe numa linha). */
@@ -58,7 +59,7 @@ export function ExerciseCardShell({
   open,
   flash,
   note,
-  icon,
+  image,
   isLive = false,
   meta,
   collapsedContent,
@@ -73,11 +74,11 @@ export function ExerciseCardShell({
   const tile = (
     <span
       className={cn(
-        "grid size-11 flex-none place-items-center rounded-md transition-colors duration-[250ms] ease-standard",
+        "grid size-11 flex-none place-items-center overflow-hidden rounded-md transition-colors duration-[250ms] ease-standard",
         isLive ? "bg-accent text-accent-foreground" : "bg-surface-3 text-fg-secondary",
       )}
     >
-      <Icon icon={icon} size={20} />
+      {image}
     </span>
   );
   // Com destino, o quadro fica fora do botão de abrir/recolher (botão dentro de botão não é permitido).

@@ -1,5 +1,6 @@
 "use client";
 
+import { ExerciseImage } from "@/shared/components/exercise-image";
 import { useState } from "react";
 import type { SetField } from "@guf/core";
 import { History, Pencil, Timer } from "lucide-react";
@@ -11,7 +12,6 @@ import { CardioManualForm } from "@/features/workout/components/cardio/cardio-ma
 import { CardioSetTable, type CardioLoggedSet } from "@/features/workout/components/cardio/cardio-set-table";
 import { CardioTimerPanel } from "@/features/workout/components/cardio/cardio-timer-panel";
 import { ExerciseCardShell, type ExerciseCardFrameProps } from "@/features/workout/components/exercise-card-shell";
-import { CARDIO_ACTIVITY_ICONS } from "@/shared/constants/cardio-activity-icons";
 import type { ExerciseView } from "@/features/workout/helpers/workout-state";
 import type { CardioTimerControls } from "@/features/workout/hooks/use-cardio-timer-controls";
 
@@ -61,7 +61,7 @@ export function CardioExerciseCard({ exercise: e, timer, onAddManualSet, onEditF
       open={e.open}
       flash={e.flash}
       note={e.note}
-      icon={CARDIO_ACTIVITY_ICONS[activity.key]}
+      image={<ExerciseImage name={e.name} muscleGroup={e.muscleGroup} size={44} />}
       isLive={timer?.phase === "running"}
       meta={(compact) => (
         <>
