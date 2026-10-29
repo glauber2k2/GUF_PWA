@@ -1,6 +1,7 @@
 "use client";
 
-import { Dumbbell, Plus, NotepadText, Timer } from "lucide-react";
+import { ExerciseImage } from "@/shared/components/exercise-image";
+import { Plus, NotepadText, Timer } from "lucide-react";
 import {
   EMPTY_SET_VALUES,
   equipmentLabel,
@@ -73,7 +74,7 @@ export function WorkoutExerciseCard({
       open={e.open}
       flash={e.flash}
       note={e.note}
-      icon={Dumbbell}
+      image={<ExerciseImage name={e.name} muscleGroup={e.muscleGroup} size={44} />}
       meta={(compact) => (
         <>
           <Tag size="sm">{muscleGroupLabel(e.muscleGroup)}</Tag>
