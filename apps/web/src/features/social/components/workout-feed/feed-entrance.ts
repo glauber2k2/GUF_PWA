@@ -6,11 +6,27 @@ export const FEED_ENTRANCE_DELAYS_MS = { header: 120, body: 200, stats: 280, not
 export type FeedEntrancePart = keyof typeof FEED_ENTRANCE_DELAYS_MS;
 
 /**
- * Classe e atraso da entrada de uma parte do card. Só o card animado (o primeiro da lista, ao abrir)
- * recebe; os outros ficam parados, sem custo de animação.
+ * Entrada do card: "static" (sem animação, todos menos o primeiro), "waiting" (o primeiro, escondido
+ * até a pessoa rolar até ele, para não aparecer parado e depois piscar) e "playing" (entrou na tela).
  */
-export function feedEntrance(isAnimated: boolean, part: FeedEntrancePart): { className?: string; style?: CSSProperties } {
-  if (!isAnimated) return {};
+export type FeedEntranceState = "static" | "waiting" | "playing";
+
+/** Estado da entrada a partir de "pode animar" e "já entrou na tela". */
+export function feedEntranceState(canAnimate: boolean, hasEntered: boolean): FeedEntranceState {
+  if (!canAnimate) return "static";
+  return hasEntered ? "playing" : "waiting";
+}
+
+/** Classe e atraso da entrada de uma parte do card. */
+export function feedEntrance(state: FeedEntranceState, part: FeedEntrancePart): { className?: string; style?: CSSProperties } {
+  if (state === "static") return {};
+  if (state === "waiting") return { className: "opacity-0" };
   // Atraso escalonado (valor dinâmico).
   return { className: "animate-guf-up", style: { animationDelay: `${FEED_ENTRANCE_DELAYS_MS[part]}ms` } };
+}
+
+/** Classe da entrada do próprio card. */
+export function feedCardEntranceClass(state: FeedEntranceState): string | undefined {
+  if (state === "waiting") return "opacity-0";
+  return state === "playing" ? "animate-guf-rise" : undefined;
 }
