@@ -4,6 +4,18 @@ export interface PeekItem {
   height: number;
 }
 
+/** Atributo que marca os itens que contam para o corte (os outros filhos da lista, como títulos, não). */
+const PEEK_ITEM_ATTRIBUTE = "data-peek-item";
+
+/** Espalhar no item da lista que conta para o corte. */
+export const PEEK_ITEM_PROPS = { [PEEK_ITEM_ATTRIBUTE]: "" } as const;
+
+/** Seletor dos itens marcados, filhos diretos da lista. */
+export const PEEK_ITEM_SELECTOR = `:scope > [${PEEK_ITEM_ATTRIBUTE}]`;
+
+/** Teto padrão da folha: 85% da altura da tela. */
+export const DEFAULT_MAX_SHEET_SHARE = 0.85;
+
 /** Parte do último item que fica visível quando a lista não cabe (metade = "tem mais embaixo"). */
 export const PEEK_VISIBLE_SHARE = 0.5;
 

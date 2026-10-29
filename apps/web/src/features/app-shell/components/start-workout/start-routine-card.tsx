@@ -3,7 +3,7 @@ import { formatPlannedSets, muscleGroupLabel, routineLetter, routineMeta, routin
 import type { ProjectRoutine } from "@guf/api";
 import { Button, Collapse, Icon, IconButton, MuscleIcon, muscleIconKey } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
-import { PEEK_ITEM_PROPS } from "@/features/app-shell/hooks/use-peek-sheet-height";
+import { PEEK_ITEM_PROPS } from "@/features/app-shell/helpers/peek-height";
 
 /** Atraso entre os selos de músculo ao abrir (a silhueta acende em sequência). */
 const MUSCLE_STAGGER_MS = 140;
