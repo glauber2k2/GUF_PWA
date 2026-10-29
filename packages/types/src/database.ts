@@ -2004,6 +2004,19 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_competition_season_podium: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          handle: string
+          is_me: boolean
+          name: string
+          points: number
+          rank: number
+          season: string
+          user_id: string
+        }[]
+      }
       get_competition_series: {
         Args: { p_from: string; p_to: string; p_user_ids: string[] }
         Returns: Json
@@ -2279,6 +2292,23 @@ export type Database = {
         Returns: boolean
       }
       is_premium: { Args: never; Returns: boolean }
+      list_member_workout_feed: {
+        Args: { p_before?: string; p_limit?: number; p_user_id?: string }
+        Returns: {
+          duration_seconds: number
+          edited_at: string
+          exercises: Json
+          finished_at: string
+          name: string
+          note: string
+          performed_on: string
+          points: number
+          records: number
+          session_id: string
+          sets: number
+          volume_kg: number
+        }[]
+      }
       list_member_workouts: {
         Args: { p_before?: string; p_limit?: number; p_user_id?: string }
         Returns: {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { StandingsQuery } from "@guf/api";
+import type { SeasonPodium } from "@guf/core";
 import { ReceiptText, Share2, UserPlus, Users } from "lucide-react";
 import { AppHeader, EmptyState, Icon } from "@/shared/components/ds";
 import { useAppShell } from "@/features/app-shell";
@@ -12,6 +13,7 @@ import { withDevState } from "@/shared/helpers/dev-state-path";
 import { useScrolled } from "@/shared/hooks/use-scrolled";
 import { METRICS } from "@/features/competition/constants/competition-labels";
 import { POINTS_STATEMENT_PATH } from "@/features/competition/constants/point-sources";
+import { useSeasonPodium } from "@/features/competition/api/use-competition";
 import { useCompetitionFilters } from "@/features/competition/hooks/use-competition-filters";
 import { useCompetitionStory } from "@/features/competition/hooks/use-competition-story";
 import { useMetricFormat } from "@/features/competition/hooks/use-metric-format";
@@ -22,15 +24,17 @@ import { CompetitionBoard, PeriodCaption } from "@/features/competition/componen
 import { PositionCard } from "@/features/competition/components/position-card";
 import { DuelCard, Podium, RankingList } from "@/features/competition/components/competition-ranking";
 import { RaceChart } from "@/features/competition/components/race-chart";
+import { SeasonPodiumCard } from "@/features/competition/components/season-podium";
 import { TOUR_TARGETS } from "@/features/onboarding";
 
 const SEARCH_PEOPLE_PATH = "/buscar-pessoas";
 
 /**
  * Sua posição, pódio, corrida, duelo (adversário padrão: quem está logo à frente ou atrás) e, por
- * último, o ranking paginado (a lista mais longa fica no fim da tela).
+ * último, o ranking paginado (a lista mais longa fica no fim da tela). Com `seasonPodium` (3 primeiros
+ * dias da temporada), o pódio mostra o campeão da temporada encerrada no lugar do atual.
  */
-function FullRanking({ view, query }: { view: StandingsView; query: StandingsQuery }) {
+function FullRanking({ view, query, seasonPodium }: { view: StandingsView; query: StandingsQuery; seasonPodium: SeasonPodium | null }) {
   const { metric } = query;
   const { unitLabel, format, formatVolume } = useMetricFormat(metric);
   const [isPickingRival, setPickingRival] = useState(false);
@@ -41,7 +45,7 @@ function FullRanking({ view, query }: { view: StandingsView; query: StandingsQue
   return (
     <>
       <PositionCard context={context} metric={metric} unit={unitLabel} format={format} />
-      <Podium ranking={view.top} label={METRICS[metric].label} format={format} />
+      {seasonPodium ? <SeasonPodiumCard podium={seasonPodium} /> : <Podium ranking={view.top} label={METRICS[metric].label} format={format} />}
       <RaceChart lines={view.race.lines} dates={view.race.dates} rivalId={rivalId} caption={METRICS[metric].accumulated} format={format} onSelect={view.chooseRival} />
       {rival && <DuelCard me={context.me} rival={rival} formatVolume={formatVolume} onChangeRival={() => setPickingRival(true)} />}
       <RankingList ranking={view.page.items} total={view.page.total} rivalId={rivalId} unit={unitLabel} format={format} onSelect={view.chooseRival} />
@@ -60,6 +64,8 @@ export function CompetitionScreen() {
   const router = useRouter();
   const filters = useCompetitionFilters();
   const view = useStandingsView(filters);
+  // O campeão é o da temporada: só aparece em "Este mês".
+  const seasonPodium = useSeasonPodium(filters.period === "month");
   const { showToast } = useAppShell();
   const [isSharing, setSharing] = useState(false);
   const share = useCompetitionStory(isSharing);
@@ -133,7 +139,7 @@ export function CompetitionScreen() {
           />
         }
       >
-        <FullRanking view={view} query={filters.query} />
+        <FullRanking view={view} query={filters.query} seasonPodium={filters.period === "month" ? (seasonPodium.data ?? null) : null} />
       </CompetitionBoard>
 
       <ShareCompetitionSheet

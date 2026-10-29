@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.7 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-23
+**Versão**: v0.8 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-29
+
+> **v0.8**: cards do feed de treinos no perfil (`list_member_workout_feed`, migration `20261029140000_member_workout_feed`). Mesmo público do histórico (quem já via a lista e o detalhe de cada treino) e os mesmos dados do detalhe (exercícios, séries, melhor série e recordes). Novo: os **pontos de cada treino na competição**, só para o titular e para quem compete com ele (seguimento mútuo, que já vê os pontos da semana no ranking); visitante não recebe. A observação do treino continua só do titular. Riscos R001 e R007 sem mudança.
 
 > **v0.7**: Editar perfil (`/perfil/editar`, migration `20261024120000_edit_profile`). Dados novos, todos opcionais e escritos pelo próprio titular: **foto enviada** (bucket público `avatars`, pasta `<user_id>/`; recortada em quadrado, reduzida para 512 px e convertida em JPEG no aparelho, o que tira o EXIF, inclusive a localização da câmera; só o dono grava ou apaga; trocar apaga a anterior; excluir a conta apaga a pasta), **bio** (até 150 caracteres, no cartão: qualquer conta logada vê, como nome e foto) e **objetivos de treino** (catálogo fixo: hipertrofia, força, emagrecimento, condicionamento, saúde) e **experiência** (iniciante, intermediário, avançado), visíveis só para quem pode ver os treinos (`unlocked` em `get_member_profile`). Base Art. 7º, V, pela escolha do titular. Nada disso vai para o GUF AI, notificações ou painel (o painel não mostra a bio). Termos 1.1 e Política 1.2 (`requires_reaccept = false`). Riscos R014 e R015.
 

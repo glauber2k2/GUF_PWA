@@ -5,7 +5,6 @@ import { useState } from "react";
 import { EyeOff, Lock } from "lucide-react";
 import {
   formatDayMonth,
-  formatElapsed,
   formatNumber,
   fromLocalISODate,
   formatShortDate,
@@ -14,10 +13,12 @@ import {
   toDisplayWeight,
   type WeightUnit,
 } from "@guf/core";
-import type { EvolutionWeek, MemberProfile, MemberWorkout } from "@guf/api";
-import { Button, Icon, ProgressChart, SegmentedControl, Skeleton, StreakFlame, WorkoutSummaryCard } from "@/shared/components/ds";
+import type { EvolutionWeek, MemberProfile, WorkoutFeedItem } from "@guf/api";
+import { Icon, ProgressChart, SegmentedControl, Skeleton, StreakFlame } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import type { EvolutionPeriod } from "@/features/social/constants/profile-evolution";
+import { useLoadMoreOnScroll } from "@/shared/hooks/use-load-more-on-scroll";
+import { WorkoutFeedCard } from "@/features/social/components/workout-feed/workout-feed-card";
 
 /** Seguidores e seguindo levam à lista; Treinos só mostra o número (traço se o perfil está fechado). */
 export function ProfileCounts({ profile }: { profile: MemberProfile }) {
@@ -164,7 +165,11 @@ export function ProfileEvolution({
   );
 }
 
-/** Histórico de treinos: cartões; oculto para visitantes quando a pessoa escondeu. De outra pessoa, só o mês atual. */
+/**
+ * Histórico de treinos: cards do feed (2a), 10 por vez; rolar até perto do fim busca os próximos 10.
+ * Só o primeiro card anima ao abrir. Oculto para visitantes quando a pessoa escondeu; de outra pessoa,
+ * só o mês atual.
+ */
 export function ProfileHistory({
   profile,
   workouts,
@@ -176,7 +181,7 @@ export function ProfileHistory({
   unit,
 }: {
   profile: MemberProfile;
-  workouts: MemberWorkout[];
+  workouts: WorkoutFeedItem[];
   loading: boolean;
   hasMore: boolean;
   loadingMore: boolean;
@@ -185,6 +190,8 @@ export function ProfileHistory({
   unit: WeightUnit;
 }) {
   const first = profile.name?.split(" ")[0] ?? `@${profile.handle}`;
+  const owner = { name: profile.name ?? `@${profile.handle}`, avatarUrl: profile.avatarUrl };
+  const sentinelRef = useLoadMoreOnScroll({ hasMore, isLoading: loadingMore, onLoadMore: onMore });
   return (
     <section aria-label="Histórico de treinos" className="flex flex-col gap-3">
       <div className="flex min-h-11 items-center justify-between gap-3">
@@ -214,33 +221,25 @@ export function ProfileHistory({
           </div>
         </div>
       ) : loading ? (
-        <div className="flex flex-col gap-2.5">
-          <Skeleton className="h-[132px] w-full rounded-lg" />
-          <Skeleton className="h-[132px] w-full rounded-lg" />
+        <div className="flex flex-col gap-3" aria-busy="true" aria-label="Carregando treinos">
+          <Skeleton className="aspect-[4/5] w-full rounded-lg" />
         </div>
       ) : workouts.length === 0 ? (
         <p className="m-0 text-sm text-fg-secondary">{profile.isSelf ? "Nenhum treino concluído ainda." : "Nenhum treino concluído neste mês."}</p>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {workouts.map((w) => (
-            <WorkoutSummaryCard
+        <div className="flex flex-col gap-3">
+          {workouts.map((w, i) => (
+            <WorkoutFeedCard
               key={w.sessionId}
-              title={w.name ?? "Treino livre"}
-              date={formatShortDate(fromLocalISODate(w.performedOn))}
-              stats={[
-                { value: formatElapsed(w.durationSeconds), label: "Duração" },
-                { value: formatNumber(toDisplayWeight(w.volumeKg, unit) ?? 0, 0), label: `Volume ${unit}` },
-                { value: String(w.sets), label: "Séries" },
-              ]}
-              prs={w.records}
-              onClick={onOpenWorkout ? () => onOpenWorkout(w.sessionId) : undefined}
+              workout={w}
+              owner={owner}
+              unit={unit}
+              isAnimated={i === 0}
+              onOpen={() => onOpenWorkout?.(w.sessionId)}
             />
           ))}
-          {hasMore && (
-            <Button variant="ghost" loading={loadingMore} onClick={onMore} className="self-center">
-              Ver mais treinos
-            </Button>
-          )}
+          <div ref={sentinelRef} aria-hidden="true" />
+          {loadingMore && <Skeleton className="aspect-[4/5] w-full rounded-lg" />}
         </div>
       )}
     </section>

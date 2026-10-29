@@ -3,13 +3,14 @@
  *
  * Só para ver os estados do design em DESENVOLVIMENTO, via ?estado= (useDevSocialState):
  * padrao · vazio (só você, sem amigos) · erro · lider (você em 1º) · muitos (1000 competidores, para a
- * paginação). Dados gerados sob demanda e
+ * paginação) · campeao (padrão + pódio do campeão da temporada encerrada, como nos 3 primeiros dias). Dados gerados sob demanda e
  * determinísticos (a mesma semente gera os mesmos treinos).
  */
 import {
   addLocalDays,
   buildCompetitionStory,
   seasonOf,
+  shiftSeason,
   COMPETITION_PAGE_SIZE,
   normalizeSearch,
   RIVAL_PAGE_SIZE,
@@ -26,12 +27,13 @@ import {
   type CompetitionParticipant,
   type CompetitionWeekScore,
   type PointsStatement,
+  type SeasonPodium,
   type StatementSession,
   type StatementWeek,
 } from "@guf/core";
 import { apiError, type CompetitionApi, type GufClient } from "@guf/api";
 
-export type CompetitionMockScenario = "padrao" | "vazio" | "erro" | "lider" | "muitos";
+export type CompetitionMockScenario = "padrao" | "vazio" | "erro" | "lider" | "muitos" | "campeao";
 
 let scenario: CompetitionMockScenario = "padrao";
 
@@ -226,6 +228,19 @@ function standings(range: CompetitionRange, metric: CompetitionMetric): Competit
   return toStandings(rankCompetitors(participants(), weeks, days, metric, range));
 }
 
+/** Pódio final da temporada anterior (o servidor só devolve nos 3 primeiros dias da atual; aqui, com ?estado=campeao). */
+function seasonPodium(): SeasonPodium | null {
+  if (scenario !== "campeao") return null;
+  const currentStart = startOfLocalWeek(seasonOf(new Date()));
+  const season = shiftSeason(seasonOf(new Date()), -1);
+  const range = { from: toLocalISODate(startOfLocalWeek(season)), to: toLocalISODate(addLocalDays(currentStart, -1)) };
+  const places = standings(range, "points")
+    .filter((s) => s.totals.points > 0)
+    .slice(0, 3)
+    .map((s) => ({ userId: s.userId, handle: s.handle, name: s.name, avatarUrl: s.avatarUrl, isMe: s.isMe, points: s.totals.points, rank: s.rank }));
+  return places.length > 0 ? { season: toLocalISODate(season), places } : null;
+}
+
 export const mockCompetitionApi = {
   async getCompetitionStandings(client, { from, to, metric, page }) {
     ignoreClient(client);
@@ -275,6 +290,12 @@ export const mockCompetitionApi = {
     if (scenario === "erro") return { data: null, error: apiError("network_error") };
     if (scenario === "vazio") return { data: { visibleFrom: range.from, weeks: [], sessions: [] }, error: null };
     return { data: simulateStatement(range), error: null };
+  },
+  async getSeasonPodium(client) {
+    ignoreClient(client);
+    await wait();
+    if (scenario === "erro") return { data: null, error: apiError("network_error") };
+    return { data: seasonPodium(), error: null };
   },
   async getCompetitionParameters(client) {
     ignoreClient(client);
