@@ -18,6 +18,8 @@ export interface BottomSheetProps {
   open?: boolean;
   title?: string;
   subtitle?: string;
+  /** Cabeçalho próprio no lugar do título (ex.: voltar · título · fechar); o title continua como rótulo acessível. */
+  header?: ReactNode;
   onClose?: () => void;
   /** "container": dentro do pai (vitrine) · "screen": sobre a tela inteira (app). */
   placement?: "container" | "screen";
@@ -29,6 +31,7 @@ export function BottomSheet({
   open = true,
   title,
   subtitle,
+  header,
   onClose,
   placement = "container",
   children,
@@ -96,12 +99,13 @@ export function BottomSheet({
           className={cn("-mx-4 -mt-2 -mb-2 grid gap-2.5 px-4 pt-2 pb-2", onClose && "cursor-grab touch-none select-none active:cursor-grabbing")}
         >
           <span className="mb-1.5 h-[5px] w-9 justify-self-center rounded-pill bg-border-strong" />
-          {(title || subtitle) && (
-            <div className="flex items-baseline justify-between gap-2">
-              <strong className="text-lg">{title}</strong>
-              {subtitle && <span className="text-xs text-fg-muted">{subtitle}</span>}
-            </div>
-          )}
+          {header ??
+            ((title || subtitle) && (
+              <div className="flex items-baseline justify-between gap-2">
+                <strong className="text-lg">{title}</strong>
+                {subtitle && <span className="text-xs text-fg-muted">{subtitle}</span>}
+              </div>
+            ))}
         </div>
         {children}
       </div>

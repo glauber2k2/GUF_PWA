@@ -2,10 +2,10 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ListPlus, Play, Plus } from "lucide-react";
-import { fromLocalISODate, routineLetter, routineMeta, routineShortName, startedAgoLabel, todayPlan, toLocalISODate } from "@guf/core";
+import { Play } from "lucide-react";
+import { routineShortName, toLocalISODate } from "@guf/core";
 import type { RoutineSummary } from "@guf/api";
-import { BOTTOM_NAV_ITEMS, BottomNav, BottomSheet, LoadingScreen, SavingOverlay, ScreenPortal, SheetOption, ToastStack, type NavBadge, type NavItem } from "@/shared/components/ds";
+import { BOTTOM_NAV_ITEMS, BottomNav, LoadingScreen, SavingOverlay, ScreenPortal, ToastStack, type NavBadge, type NavItem } from "@/shared/components/ds";
 import { useDevHomeState } from "@/features/home";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { BOTTOM_BAR_PROPS, useBottomClearance } from "@/shared/hooks/use-bottom-clearance";
@@ -18,10 +18,11 @@ import { MiniWorkoutCard } from "@/features/workout";
 import { newRoutinePathFor } from "@/features/projects";
 import { useActiveWorkout } from "@/features/workout";
 import { useClosedWorkoutWatcher } from "@/features/app-shell/hooks/use-closed-workout-watcher";
+import { StartWorkoutSheet } from "@/features/app-shell/components/start-workout/start-workout-sheet";
 import { TOUR_TARGETS } from "@/features/onboarding";
 
 /** Telas cheias (com o próprio cabeçalho/rodapé), sem menu inferior. */
-const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/treino/editar", "/pessoa/treino", "/exercicio", "/exercicio/busca", "/planos", "/projetos/importar", "/medidas", "/medidas/musculo", "/medidas/registrar", "/competicao/extrato", "/perfil/editar"]);
+const IMMERSIVE_ROUTES = new Set(["/treino", "/rotina", "/treino/resumo", "/treino/editar", "/pessoa/treino", "/exercicio", "/exercicio/busca", "/planos", "/projetos/importar", "/medidas", "/medidas/musculo", "/medidas/registrar", "/competicao/extrato", "/perfil/editar", "/bem-vindo"]);
 
 /** Rotas de cada aba (índice do BottomNav) e das telas internas que mantêm a aba acesa. */
 const TAB_ROUTES: Array<{ path: string | null; name: string; inner?: string[] }> = [
@@ -262,14 +263,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     showToast(`${tab.name} chega em breve`, { tone: "info" });
   };
 
-  // Rotinas do projeto ativo, com a sugerida de hoje em destaque (se ainda não treinou hoje).
-  const data = summary.data;
+  // Já treinou hoje: a folha não destaca nenhuma rotina como "Próximo".
   const today = toLocalISODate(new Date());
-  const routines = data?.activeProject?.routines ?? [];
-  const trainedToday = data?.weekSessions.some((s) => s.performedOn === today) ?? false;
-  // Destaque = treino de hoje (pelos dias da semana ou, sem dias marcados, pela ordem); dia de descanso: nenhum.
-  const plan = todayPlan(routines, data?.lastFinishedRoutineId ?? null, fromLocalISODate(today));
-  const suggested = trainedToday || (plan.kind !== "scheduled" && plan.kind !== "sequence") ? null : plan.routine;
+  const trainedToday = summary.data?.weekSessions.some((s) => s.performedOn === today) ?? false;
 
   if (!booted) return <LoadingScreen />;
 
@@ -317,54 +313,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
       </div>
 
-      <BottomSheet
-        placement="screen"
+      <StartWorkoutSheet
         open={startOpen}
         onClose={() => setStartOpen(false)}
-        title={inProgress ? "Treino em andamento" : "Iniciar treino"}
-        subtitle={inProgress ? undefined : data?.activeProject?.name}
-      >
-        {inProgress ? (
-          // O banco aceita só 1 treino em andamento: oferecer retomar em vez de iniciar outro.
-          <>
-            <p className="m-0 text-sm leading-5 text-fg-secondary">
-              Finalize o treino aberto antes de começar outro.
-            </p>
-            <SheetOption
-              icon={Play}
-              title={inProgress.name}
-              subtitle={`Retomar · ${startedAgoLabel(inProgress.startedAt)}`}
-              highlighted
-              onClick={() => openWorkout(inProgress.id)}
-            />
-          </>
-        ) : (
-          <>
-            {routines.map((r) => (
-              <SheetOption
-                key={r.id}
-                letter={routineLetter(r.name)}
-                title={r.name}
-                subtitle={r.id === suggested?.id ? `Sugerida · ${routineMeta(r.exercises, r.averageDurationSeconds)}` : routineMeta(r.exercises, r.averageDurationSeconds)}
-                highlighted={r.id === suggested?.id}
-                onClick={() => startWorkoutFor(r)}
-              />
-            ))}
-            {routines.length === 0 && (
-              <SheetOption
-                icon={ListPlus}
-                title="Montar uma rotina"
-                subtitle="Crie um projeto com Treino A, B, C…"
-                onClick={() => {
-                  setStartOpen(false);
-                  router.push(newRoutinePathFor(data?.activeProject?.id));
-                }}
-              />
-            )}
-            <SheetOption icon={Plus} title="Treino vazio" dashed onClick={() => startWorkoutFor(null)} />
-          </>
-        )}
-      </BottomSheet>
+        inProgress={inProgress}
+        hasTrainedToday={trainedToday}
+        onResume={openWorkout}
+        onStart={startWorkoutFor}
+        onCreateRoutine={(projectId) => {
+          setStartOpen(false);
+          router.push(newRoutinePathFor(projectId));
+        }}
+      />
 
       <SavingOverlay open={startingWorkout} title="Iniciando treino" message="Preparando seus exercícios." variant={7} />
     </AppShellContext.Provider>

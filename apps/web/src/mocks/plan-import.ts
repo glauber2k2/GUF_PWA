@@ -85,7 +85,7 @@ export const mockPlanImportApi = {
     const project = destination.kind === "existing" ? { data: { id: destination.projectId }, error: null } : await createMockProject(client, draft, destination.activate);
     if (project.error) return { data: null, error: project.error };
     for (const routine of draft.routines) {
-      const planned = routine.exercises.map((e) => ({ targetSets: e.targetSets, restSeconds: e.restSeconds }));
+      const planned = routine.exercises.map((e) => ({ name: e.match.name, muscleGroup: e.match.muscleGroup, targetSets: e.targetSets, targetReps: e.targetReps || null, restSeconds: e.restSeconds }));
       // Rotina existente: os exercícios entram no fim e nome/dias dela continuam (como no banco).
       const into = routine.intoRoutineId ? findMockRoutine(routine.intoRoutineId) : null;
       if (routine.intoRoutineId && (!into || into.project.id !== project.data.id)) return { data: null, error: apiError("routine_not_found") };

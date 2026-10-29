@@ -1,5 +1,6 @@
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
+import type { PlannedExercise } from "./home";
 import { currentUserId, fetchTrainingTotals } from "./shared";
 
 /* =====================================================================
@@ -7,19 +8,14 @@ import { currentUserId, fetchTrainingTotals } from "./shared";
  * Edição de projetos e rotinas é SÓ ONLINE (sem fila offline): quem chama trata network_error.
  * ===================================================================== */
 
-/** Exercício planejado (só o que o resumo da rotina usa). */
-export interface PlannedSetup {
-  targetSets: number | null;
-  restSeconds: number | null;
-}
-
 export interface ProjectRoutine {
   id: string;
   name: string;
   position: number;
   /** Dias da semana (ISO: 1 = segunda … 7 = domingo); vazio = sem dia fixo. */
   weekdays: number[];
-  exercises: PlannedSetup[];
+  /** Exercícios planejados, na ordem (nome e grupo para a folha "Iniciar treino"). */
+  exercises: PlannedExercise[];
   /** Média (s) dos últimos 5 treinos concluídos com a rotina (average_duration_seconds no banco); null = nunca treinada. */
   averageDurationSeconds: number | null;
 }
@@ -96,10 +92,11 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
       client
         .from("projects")
         .select(
-          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, average_duration_seconds, routine_exercises(target_sets, rest_seconds))",
+          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, average_duration_seconds, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group)))",
         )
         .order("created_at", { ascending: false })
-        .order("position", { referencedTable: "routines", ascending: true }),
+        .order("position", { referencedTable: "routines", ascending: true })
+        .order("position", { referencedTable: "routines.routine_exercises", ascending: true }),
       // Histórico inteiro: a rotina sugerida não depende do que o plano mostra.
       fetchTrainingTotals(client),
     ]);
@@ -123,7 +120,13 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
               name: r.name,
               position: r.position,
               weekdays: r.weekdays,
-              exercises: r.routine_exercises.map((e) => ({ targetSets: e.target_sets, restSeconds: e.rest_seconds })),
+              exercises: r.routine_exercises.map((e) => ({
+                name: e.exercises?.name ?? "Exercício",
+                muscleGroup: e.exercises?.muscle_group ?? "",
+                targetSets: e.target_sets,
+                targetReps: e.target_reps,
+                restSeconds: e.rest_seconds,
+              })),
               averageDurationSeconds: r.average_duration_seconds ?? null,
             })),
         })),

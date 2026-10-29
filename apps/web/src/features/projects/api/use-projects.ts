@@ -22,13 +22,13 @@ export function useProjectsSource(): { api: ProjectsApi; dev: DevProjectsState }
   return { api: projectsApi, dev };
 }
 
-/** Projetos com rotinas e o último treino concluído (rotina sugerida). Sem cópia offline: edição só online. */
-export function useProjectsOverview() {
+/** Projetos com rotinas e o último treino concluído (rotina sugerida). Sem cópia offline: edição só online. Com isActive = false, espera (ex.: folha fechada). */
+export function useProjectsOverview(isActive = true) {
   const { user } = useAuth();
   const { api, dev } = useProjectsSource();
   return useQuery({
     queryKey: [PROJECTS_KEY, user?.id, dev.scenario],
-    enabled: Boolean(user),
+    enabled: isActive && Boolean(user),
     queryFn: async () => {
       const { data, error } = await api.getProjectsOverview(getSupabaseClient());
       if (error) throw error;
