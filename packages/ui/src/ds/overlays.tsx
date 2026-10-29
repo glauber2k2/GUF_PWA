@@ -82,7 +82,8 @@ export function BottomSheet({
         // Durante o arraste, a folha acompanha o dedo (valor dinâmico).
         style={dragging ? { translate: `0 ${offset}px` } : undefined}
         className={cn(
-          "absolute inset-x-0 bottom-0 grid gap-2.5 rounded-t-xl bg-surface-elevated px-4 pt-2 pb-5 shadow-e3",
+          // Coluna minmax(0,1fr): sem ela, texto com truncate alarga a coluna além da folha e come o recuo da direita.
+          "absolute inset-x-0 bottom-0 grid grid-cols-[minmax(0,1fr)] gap-2.5 rounded-t-xl bg-surface-elevated px-4 pt-2 pb-5 shadow-e3",
           screen && "mx-auto max-w-[430px] pb-[calc(20px+env(safe-area-inset-bottom))]",
           open ? "translate-y-0" : "translate-y-full",
           dragging

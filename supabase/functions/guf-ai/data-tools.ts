@@ -99,7 +99,8 @@ interface CompetitionParametersRow {
   bonus_per_week: number;
   bonus_max: number;
   record_points: number;
-  records_max: number;
+  // Nulo = sem teto de recordes na semana.
+  records_max: number | null;
   volume_max: number;
   volume_window_weeks: number;
 }
@@ -327,9 +328,9 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
           temporada: "o mês; uma semana pertence ao mês do sábado em que termina",
           constancia: `${p.constancy_points_per_day} pontos por dia com treino válido, todos os dias da semana (sem limite de dias); é o que mais pesa`,
           sequencia: `semana com ${p.sessions_for_max_constancy} ou mais dias de treino válido é "cumprida"; ${p.bonus_per_week} pontos × semanas cumpridas seguidas, até ${p.bonus_max}; zera numa semana não cumprida e continua entre temporadas`,
-          recordes: `${p.record_points} pontos por recorde batido na semana, até ${p.records_max}; força: maior 1RM estimado de um exercício (mais carga ou mais repetições com a mesma carga); cardio: melhor ritmo (séries de 1 km ou mais) ou maior distância de uma série, e treino só de cardio precisa de pelo menos ${p.min_minutes} minutos; a primeira vez de um exercício não é recorde`,
+          recordes: `${p.record_points} pontos por recorde batido na semana, ${p.records_max === null ? "sem limite de recordes" : `até ${p.records_max}`}; força: maior 1RM estimado de um exercício (mais carga ou mais repetições com a mesma carga); cardio: melhor ritmo (séries de 1 km ou mais) ou maior distância de uma série, e treino só de cardio precisa de pelo menos ${p.min_minutes} minutos; a primeira vez de um exercício não é recorde`,
           volume: `até ${p.volume_max} pontos: ${p.volume_max} × (volume da semana ÷ média das suas últimas ${p.volume_window_weeks} semanas com treino), limitado a ${p.volume_max}; sem histórico, ${p.volume_max} se treinou`,
-          limite_por_semana: "sem máximo: cada dia treinado soma; recordes e volume têm limite próprio",
+          limite_por_semana: "sem máximo: cada dia treinado e cada recorde somam; sequência e volume têm limite próprio",
           desempate: "mais semanas cumpridas, depois mais treinos válidos, depois mais volume",
         };
       },
