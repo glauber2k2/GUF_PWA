@@ -11,6 +11,7 @@ export * from "./units";
 export * from "./history";
 export * from "./projects";
 export * from "./schedule";
+export * from "./start-workout";
 export * from "./pwa";
 export * from "./profile";
 export * from "./public-profile";

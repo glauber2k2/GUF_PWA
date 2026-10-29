@@ -22,9 +22,14 @@ export function muscleGroupLabel(code: string): string {
   return MUSCLE_GROUP_LABELS[code] ?? code;
 }
 
+/** Códigos de grupo muscular distintos, na ordem em que aparecem (sem vazios), até max. */
+export function uniqueMuscleCodes(codes: readonly string[], max: number): string[] {
+  return [...new Set(codes.filter(Boolean))].slice(0, max);
+}
+
 /** Grupos musculares distintos, na ordem em que aparecem na rotina, já rotulados. */
 export function routineMuscleGroups(codes: readonly string[], max = 3): string[] {
-  return [...new Set(codes)].slice(0, max).map(muscleGroupLabel);
+  return uniqueMuscleCodes(codes, max).map(muscleGroupLabel);
 }
 
 /** Valores usados quando a rotina não define séries/descanso. */

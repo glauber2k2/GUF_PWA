@@ -3,7 +3,8 @@
  *
  * Usado SÓ em desenvolvimento com ?estado= (as telas de demonstração rodam sem gravar nada).
  * Começa concluído, para o tour não cobrir os estados do design a cada recarga; ?estado=tour
- * simula a conta nova (tour pendente). Guarda na memória: recarregar a página volta ao início.
+ * simula a conta nova (tour pendente); ?estado=cadastro, o cadastro em passos pendente. Guarda na memória:
+ * recarregar a página volta ao início.
  */
 import type { GufClient, OnboardingApi } from "@guf/api";
 
@@ -11,13 +12,15 @@ const LATENCY_MS = 300;
 const wait = (ms = LATENCY_MS) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let completedVersion: number | null = null;
+let isProfileSetupCompleted = true;
 let seeded = false;
 
 /** Define o ponto de partida uma vez por carregamento (pendente = conta nova). */
-export function seedTourMock(pending: boolean, currentVersion: number) {
+export function seedTourMock(pending: boolean, currentVersion: number, isProfileSetupPending = false) {
   if (seeded) return;
   seeded = true;
   completedVersion = pending ? null : currentVersion;
+  isProfileSetupCompleted = !isProfileSetupPending;
 }
 
 function ignoreClient(client: GufClient) {
@@ -34,6 +37,17 @@ export const mockOnboardingApi = {
     ignoreClient(client);
     await wait();
     completedVersion = version;
+    return { data: null, error: null };
+  },
+  async getProfileSetupStatus(client) {
+    ignoreClient(client);
+    await wait();
+    return { data: { isCompleted: isProfileSetupCompleted }, error: null };
+  },
+  async completeProfileSetup(client) {
+    ignoreClient(client);
+    await wait();
+    isProfileSetupCompleted = true;
     return { data: null, error: null };
   },
 } satisfies OnboardingApi;

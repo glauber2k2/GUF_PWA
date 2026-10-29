@@ -67,7 +67,7 @@ export const mockRoutinesApi = {
       projectId: draft.projectId,
       name: draft.name,
       weekdays: draft.weekdays,
-      exercises: draft.exercises.map((e) => ({ targetSets: e.targetSets, restSeconds: e.restSeconds })),
+      exercises: draft.exercises.map((e) => ({ name: e.name, muscleGroup: e.muscleGroup, targetSets: e.targetSets, targetReps: e.targetReps || null, restSeconds: e.restSeconds })),
     });
     if (!ok) return { data: null, error: apiError("project_not_found") };
     details.set(id, structuredClone(draft.exercises));

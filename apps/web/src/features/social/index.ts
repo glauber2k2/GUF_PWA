@@ -12,3 +12,4 @@ export { SocialProfileScreen } from "./ui/social-profile-screen";
 export { EditProfileScreen } from "./ui/edit-profile-screen";
 export { MemberWorkoutScreen } from "./ui/member-workout-screen";
 export { editProfilePath } from "./helpers/paths";
+export { ProfileSetupScreen } from "./ui/profile-setup-screen";

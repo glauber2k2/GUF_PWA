@@ -17,6 +17,9 @@ interface Sample {
  * (`offset` em px, `progress` 0–1 para clarear o fundo) e, ao soltar, chama `onClose` ou volta ao lugar.
  * Sem `onClose`, não faz nada.
  */
+/** Elementos que respondem ao toque dentro da área de arraste. */
+const INTERACTIVE_SELECTOR = "button, a, input, select, textarea";
+
 export function useSheetDrag(onClose?: () => void) {
   const [moved, setMoved] = useState<{ offset: number; height: number } | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -38,6 +41,8 @@ export function useSheetDrag(onClose?: () => void) {
       ? {
           onPointerDown: (e: PointerEvent<HTMLElement>) => {
             if (e.button !== 0) return;
+            // Toque num controle do cabeçalho (voltar, fechar) é clique, não arraste: a captura roubaria o clique.
+            if ((e.target as Element).closest(INTERACTIVE_SELECTOR)) return;
             e.currentTarget.setPointerCapture(e.pointerId);
             const sample = { y: e.clientY, t: e.timeStamp };
             const height = sheetRef.current?.offsetHeight || 1;

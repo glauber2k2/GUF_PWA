@@ -9,13 +9,13 @@ import { mockOnboardingApi, seedTourMock } from "@/mocks/onboarding";
 import { useAuth } from "@/features/auth";
 import { TOUR_VERSION } from "@/features/onboarding/constants/tour-steps";
 
-/** Dados reais por padrão; em DESENVOLVIMENTO com ?estado=, o mock (?estado=tour = conta nova). */
-function useOnboardingSource(): { api: OnboardingApi; mock: boolean } {
+/** Dados reais por padrão; em DESENVOLVIMENTO com ?estado=, o mock (?estado=tour = conta nova; cadastro = passos pendentes). */
+export function useOnboardingSource(): { api: OnboardingApi; mock: boolean } {
   const searchParams = useSearchParams();
   if (process.env.NODE_ENV === "development") {
     const values = (searchParams.get("estado") ?? "").split(",").map((v) => v.trim().toLowerCase());
     if (values.some(Boolean)) {
-      seedTourMock(values.includes("tour"), TOUR_VERSION);
+      seedTourMock(values.includes("tour"), TOUR_VERSION, values.includes("cadastro"));
       return { api: mockOnboardingApi, mock: true };
     }
   }

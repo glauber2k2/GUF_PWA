@@ -18,7 +18,19 @@ function ignoreClient(client: GufClient) {
   void client;
 }
 
-const planned = (count: number) => Array.from({ length: count }, () => ({ targetSets: 3, restSeconds: 90 }));
+/** Exercícios de exemplo de uma rotina (nome, grupo e meta, como o banco devolve). */
+const SAMPLE_EXERCISES = [
+  { name: "Supino reto", muscleGroup: "peito" },
+  { name: "Remada curvada", muscleGroup: "costas" },
+  { name: "Agachamento livre", muscleGroup: "quadriceps" },
+  { name: "Desenvolvimento com halteres", muscleGroup: "ombros" },
+  { name: "Rosca direta", muscleGroup: "biceps" },
+  { name: "Tríceps na polia", muscleGroup: "triceps" },
+  { name: "Stiff", muscleGroup: "posterior" },
+  { name: "Panturrilha em pé", muscleGroup: "panturrilha" },
+];
+const planned = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({ ...SAMPLE_EXERCISES[i % SAMPLE_EXERCISES.length]!, targetSets: 3, targetReps: "8-12", restSeconds: 90 }));
 const routine = (
   id: string,
   name: string,

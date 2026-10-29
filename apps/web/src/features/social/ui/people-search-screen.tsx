@@ -2,42 +2,15 @@
 
 import { useState } from "react";
 import { ChevronLeft, Share2, UserSearch } from "lucide-react";
-import { FOLLOW_BUTTON_LABELS, SOCIAL_SEARCH_MIN_LENGTH, followButtonState, normalizeHandle } from "@guf/core";
-import type { PersonSearchResult } from "@guf/api";
+import { SOCIAL_SEARCH_MIN_LENGTH, normalizeHandle } from "@guf/core";
 import { Banner, Button, EmptyState, IconButton, SearchField, Skeleton } from "@/shared/components/ds";
 import { useAppShell } from "@/features/app-shell";
 import { useGoBack } from "@/shared/hooks/use-go-back";
-import { useCanUseSocial, useMySocial, usePeopleSearch, useRequestFollow } from "@/features/social/api/use-social";
+import { useMySocial, usePeopleSearch } from "@/features/social/api/use-social";
+import { FollowCell } from "@/features/social/components/follow-cell";
 import { PersonRow } from "@/features/social/components/person-row";
 import { shareProfileLink } from "@/features/social/components/profile-actions";
 import { TOUR_TARGETS } from "@/features/onboarding";
-
-function FollowCell({ person }: { person: PersonSearchResult }) {
-  const { showToast } = useAppShell();
-  const canUse = useCanUseSocial();
-  const follow = useRequestFollow();
-  const state = followButtonState(person.relationship, person.followsYou, person.visibility);
-  if (state === "self") return null;
-  if (state === "following" || state === "requested") {
-    return <span className="text-[13px] font-semibold whitespace-nowrap text-fg-muted">{FOLLOW_BUTTON_LABELS[state]}</span>;
-  }
-  return (
-    <Button
-      size="md"
-      variant="primary"
-      disabled={!canUse}
-      loading={follow.isPending}
-      onClick={() =>
-        follow.mutate(person.userId, {
-          onSuccess: (status) => showToast(status === "accepted" ? "Seguindo" : "Solicitação enviada", { tone: "success" }),
-          onError: (error) => showToast(error.message, { tone: "error" }),
-        })
-      }
-    >
-      {state === "request" ? "Solicitar" : FOLLOW_BUTTON_LABELS[state]}
-    </Button>
-  );
-}
 
 /**
  * Busca simples de pessoas (por @ ou nome, a partir de 3 caracteres) e convite pelo link do perfil.
