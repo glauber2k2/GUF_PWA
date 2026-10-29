@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-23
+**Última atualização**: 2026-10-29
 **Encarregado**: não designado — dispensa da Res. CD/ANPD nº 2/2022, art. 11 (agente de pequeno porte de baixo risco); canal `devglaubermonteiro@gmail.com` (`encarregado.md`)
 **Controlador**: Glauber Monteiro, pessoa física, agente de pequeno porte — identificado nos documentos 1.0 (G1, G22)
 
@@ -234,3 +234,12 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 6. **Idade (G11 / ECA Digital):** o cadastro usa autodeclaração de 18+. Se houver sinal de público menor, rever antes de crescer (Lei 15.211/2025, art. 9º, § 1º veda autodeclaração quando o acesso por menores é provável) ⚖.
 7. **Comunicados de produto:** antes do primeiro, aprovar a LIA (`lia/a023-comunicados.md`); a opção de recusar já existe.
 8. **Revisão jurídica:** com os primeiros clientes pagantes, levar os documentos 1.0 e `encarregado.md` a um advogado; abrir empresa (cobrança exige emissão fiscal) e publicar nova versão com razão social e CNPJ.
+
+## Rodada 2026-10-29 — Pré-lançamento, observações e venda do Pro
+- **Pipeline:** C (híbrido), rodada de manutenção sobre os artefatos existentes; sem mudança de funcionalidade.
+- **Observações visíveis (G27):** função aplicada com portão de consentimento por pessoa; Termos 1.3 e Política 1.4 com novo aceite aguardam o deploy do app (`20261029150100`).
+- **Termos 1.3 (G28):** "Suas escolhas e responsabilidades" e limitação de responsabilidade pelo CDC (art. 14, § 3º, II). Transferir toda a responsabilidade ao usuário não é possível (CDC art. 51, I; LGPD arts. 42 a 44); o que vale é informar e documentar a escolha.
+- **Pontos por treino e pódio (G32):** descritos nos dois documentos; RIPD social v0.8 e v0.9.
+- **Venda do Pro (G29):** bloqueada pela identificação do vendedor (Decreto 7.962/2013, art. 2º); passos em `docs/lgpd-riscos-e-lancamento.md` § 5.
+- **Riscos residuais** (ECA Digital, Gemini gratuito, DPAs e cláusulas-padrão, sem revisão jurídica, observações com dado de saúde, infraestrutura gratuita) com o que reduz cada um sem custo: `docs/lgpd-riscos-e-lancamento.md` § 3.
+- ⏸ **CHECKPOINT:** os textos dos Termos 1.3 e da Política 1.4 precisam da sua leitura e aprovação antes do deploy (não vão para o banco antes disso).

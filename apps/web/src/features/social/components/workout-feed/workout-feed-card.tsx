@@ -26,17 +26,16 @@ export interface WorkoutFeedCardProps {
   unit: WeightUnit;
   /** Pode animar a entrada (só o primeiro card): anima quando a pessoa rola até ele; os outros aparecem parados. */
   canAnimate: boolean;
-  /** Treino seu: sem observação, o quadro diz que não há nada escrito (de outra pessoa, que é só dela). */
-  isOwnWorkout: boolean;
   onOpen: () => void;
 }
 
 /**
  * Card do treino no feed do perfil (Claude Design "Cards Feed de Treino" · 2a, altura fixa): quem e
  * quando, boneco com os músculos e os primeiros exercícios, volume, PRs, pontos (some para visitante),
- * observação (sempre com o quadro; vazio = texto de apoio) e o rodapé de edição. Tocar abre o resumo.
+ * observação do treino ou dos exercícios (sempre com o quadro; vazio = texto de apoio) e o rodapé de
+ * edição. Tocar abre o resumo.
  */
-export function WorkoutFeedCard({ workout, owner, unit, canAnimate, isOwnWorkout, onOpen }: WorkoutFeedCardProps) {
+export function WorkoutFeedCard({ workout, owner, unit, canAnimate, onOpen }: WorkoutFeedCardProps) {
   // Movimento reduzido: aparece parado como os outros (a regra global encurta a animação, mas não os atrasos).
   const shouldAnimate = canAnimate && !prefersReducedMotion();
   const { ref, hasEntered } = useInViewOnce<HTMLButtonElement>(shouldAnimate);
@@ -47,7 +46,7 @@ export function WorkoutFeedCard({ workout, owner, unit, canAnimate, isOwnWorkout
   const stats = feedEntrance(entrance, "stats");
   const note = feedEntrance(entrance, "note");
   const footer = feedEntrance(entrance, "footer");
-  const noteText = feedNoteText(workout.note, isOwnWorkout);
+  const noteText = feedNoteText(workout.note, workout.exercises);
   const levels = feedMuscleLevels(workout.exercises);
 
   return (

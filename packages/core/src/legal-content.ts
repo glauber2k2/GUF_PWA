@@ -177,6 +177,25 @@ const TERMS: LegalDocumentContent = {
           "Treinos, rotinas, notas e medidas que você registra são seus. O guf só os usa para prestar o serviço, como descrito na Política de Privacidade.",
         ),
         p("Não é permitido usar o app para enviar conteúdo ilegal, ofensivo ou que viole direitos de terceiros."),
+        p(
+          "Você é responsável pelo que escreve e decide mostrar: nome, foto, bio, nome dos treinos, observações e perguntas ao GUF AI. Não coloque nesses campos dados de saúde, documentos, contatos ou informações de outras pessoas.",
+        ),
+      ],
+    },
+    {
+      id: "suas-escolhas",
+      title: "Suas escolhas e responsabilidades",
+      blocks: [
+        p("O guf entrega as ferramentas; o que você registra, escreve e mostra é escolha sua. Ao usar o app, você concorda que:"),
+        ul(
+          "Você decide quem vê seus treinos (perfil privado ou aberto, aprovar seguidores, ocultar o histórico). Antes de abrir o perfil ou aprovar alguém, lembre que essas pessoas verão seus treinos, com as observações.",
+          "Depois que alguém vê algo no app, o guf não controla o que essa pessoa faz fora dele (por exemplo, uma captura de tela). Mostre só o que você aceita que seja visto.",
+          "Imagens que você compartilha (stories e stickers) saem do app por sua escolha e passam a seguir as regras de onde forem publicadas.",
+          "As informações que você declara, como idade, nome, cargas e medidas, devem ser verdadeiras. Declarar idade falsa viola estes termos.",
+          "Treinar, escolher cargas e seguir sugestões, inclusive do GUF AI, são decisões suas, de preferência com orientação profissional.",
+          "Proteger a senha e o aparelho é sua parte: o que for feito na sua conta com eles é tratado como feito por você até você avisar o guf de um acesso indevido.",
+          "Registrar treinos falsos para ganhar pontos na competição viola estes termos e pode levar à suspensão da conta.",
+        ),
       ],
     },
     {
@@ -190,14 +209,17 @@ const TERMS: LegalDocumentContent = {
           "Em Editar perfil você pode, se quiser, escrever uma bio, que aparece junto com o nome e a foto para qualquer pessoa com conta no guf, e marcar seus objetivos e sua experiência, que aparecem só para quem pode ver seus treinos. Não escreva na bio dados de saúde nem dados de outras pessoas.",
         ),
         p(
-          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência e histórico de treinos. Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
+          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência e histórico de treinos (com as observações que você escreve neles). Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
         ),
         ul(
           "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
           "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
           "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e de cardio e volume), pelas mesmas regras para todos, publicadas no app.",
-          "Medidas corporais e observações escritas por você nunca aparecem para outras pessoas.",
+          "No seu perfil, quem compete com você vê também os pontos de cada treino; quem só visita não vê pontos.",
+          "Nos 3 primeiros dias de cada mês, a competição mostra a todos os competidores o pódio do mês anterior (os 3 primeiros e os pontos), em qualquer plano.",
+          "As observações que você escreve no treino e nos exercícios fazem parte do treino: aparecem para quem pode ver seus treinos e ficam escondidas junto quando você oculta o histórico. Não escreva nelas dados de saúde nem dados de outras pessoas.",
+          "Medidas corporais nunca aparecem para outras pessoas.",
           "Não há chat nem mensagens entre usuários. Use o perfil com respeito: contas usadas para assediar outras pessoas podem ser encerradas.",
         ),
       ],
@@ -256,7 +278,10 @@ const TERMS: LegalDocumentContent = {
       title: "Limitação de responsabilidade",
       blocks: [
         p(
-          "O guf trabalha para manter o app disponível e seguro, mas não responde por lesões decorrentes da execução dos exercícios, por decisões tomadas a partir de respostas do GUF AI nem por indisponibilidades temporárias, nos limites do Código de Defesa do Consumidor.",
+          "O guf responde pelo serviço que presta, nos termos do Código de Defesa do Consumidor, e trabalha para manter o app disponível e seguro.",
+        ),
+        p(
+          "Como prevê o próprio Código (art. 14, § 3º, II), o guf não responde por danos causados só por você ou por terceiros, como lesões na execução dos exercícios, decisões tomadas a partir de respostas do GUF AI sem conferência, conteúdo publicado por outros usuários e o uso que outras pessoas fizerem, fora do app, do que você escolheu mostrar. Indisponibilidades temporárias, por manutenção ou falha, são corrigidas no menor prazo possível, sem perda dos dados já enviados.",
         ),
       ],
     },
@@ -272,6 +297,12 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.3": [
+      "Observações do treino e dos exercícios passam a fazer parte do treino: quem pode ver seus treinos vê também as observações, inclusive as que você já escreveu. Ocultar o histórico esconde as observações junto.",
+      "Nova seção “Suas escolhas e responsabilidades”: o que você escreve e decide mostrar, o que acontece fora do app, dados declarados, decisões de treino, segurança da conta e fraude na competição.",
+      "Quem compete com você vê os pontos de cada treino no seu perfil; nos 3 primeiros dias do mês, o pódio do mês anterior aparece para todos os competidores.",
+      "Limitação de responsabilidade reescrita com o que o Código de Defesa do Consumidor prevê.",
+    ],
     "1.2": ["Competição: recordes de cardio (melhor ritmo ou maior distância) passam a pontuar como os de carga."],
     "1.1": [
       "Editar perfil: bio opcional (visível com o nome e a foto) e objetivos e experiência opcionais (visíveis só para quem pode ver seus treinos).",
@@ -409,9 +440,12 @@ const PRIVACY: LegalDocumentContent = {
       title: "Perfil, seguidores e competição",
       blocks: [
         p(
-          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
+          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos, com as observações que você escreve no treino e nos exercícios, só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos, a partir dos treinos: constância, recordes de carga e de cardio e volume comparado à sua própria média. As regras ficam publicadas em Competição › Como funciona."),
+        p(
+          "Quem compete com você (vocês se seguem mutuamente) vê também os pontos de cada treino no seu perfil; quem só visita não vê pontos. Nos 3 primeiros dias de cada mês, os competidores veem o pódio do mês anterior, com os 3 primeiros e os pontos.",
+        ),
         p(
           "Se você ligar as notificações (Configurações › Preferências), o aparelho recebe um aviso quando alguém começa a seguir você, pede para seguir ou aceita o seu pedido, e quando um competidor fica a menos de 20 pontos de passar você no mês ou passa. O aviso mostra o nome e o @ da pessoa (e, na competição, a diferença de pontos), inclusive na tela bloqueada. Para evitar excesso, o mesmo aviso de seguidor sobre a mesma pessoa sai no máximo uma vez por dia. As notificações são ligadas em cada aparelho, começam desligadas e podem ser desligadas a qualquer momento, no app ou nas configurações do celular.",
         ),
@@ -574,6 +608,10 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.4": [
+      "Observações do treino e dos exercícios agora seguem a mesma regra dos treinos: aparecem para quem pode ver seus treinos (inclusive as já escritas) e ficam escondidas quando você oculta o histórico. Continuam fora do GUF AI e do painel da equipe.",
+      "Quem compete com você vê os pontos de cada treino; nos 3 primeiros dias do mês, o pódio do mês anterior aparece para os competidores.",
+    ],
     "1.3": ["Competição: os recordes de cardio (melhor ritmo ou maior distância, calculados das séries que você registra) passam a contar na pontuação, como os de carga."],
     "1.2": [
       "Editar perfil: foto enviada pelo app (reduzida no aparelho, sem os dados da câmera), bio, objetivos e experiência, todos opcionais. A bio aparece com o nome e a foto; objetivos e experiência, só para quem pode ver seus treinos. Nada disso vai para o GUF AI.",
