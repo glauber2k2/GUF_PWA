@@ -3,7 +3,7 @@
  * plans_and_entitlements. Usado SÓ em desenvolvimento com ?estado= (padrão: Free; `pro` = Pro).
  * Os dados são montados sob demanda (nada roda ao carregar o módulo, para o build descartar o mock).
  */
-import { apiError, type GufClient, type LegalDocument, type PlansApi } from "@guf/api";
+import { type GufClient, type LegalDocument, type PlansApi } from "@guf/api";
 import type { CatalogPlan, Entitlements, FeatureAccess, PlanFeature } from "@guf/core";
 
 export type PlansMockScenario = "free" | "pro";
@@ -92,6 +92,7 @@ export const mockPlansApi = {
   async startSubscription(client) {
     ignoreClient(client);
     await wait();
-    return { data: null, error: apiError("billing_unavailable") };
+    // Simula a volta do checkout já paga (no app real, o endereço é a página do gateway).
+    return { data: { checkoutUrl: "/planos/?estado=assinante-7dias,pro&assinatura=confirmando" }, error: null };
   },
 } satisfies PlansApi;

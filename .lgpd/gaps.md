@@ -98,3 +98,15 @@ Resumo para o controlador em [`docs/lgpd-riscos-e-lancamento.md`](../docs/lgpd-r
 | G30 | E-mail de cadastro no SMTP padrão do Supabase | YELLOW | Limite baixo de envio, feito para testes; pode travar a confirmação de cadastro no lançamento. SMTP gratuito resolve | alta | baixo | Art. 46 (disponibilidade) |
 | G31 | Hospedagem em Vercel Hobby ao começar a vender | YELLOW | Uso comercial fora do contrato do plano; Cloudflare Pages gratuito permite | média | baixo | Contrato do provedor (não LGPD) |
 | G32 | Pontos por treino e pódio do mês anterior | GREEN | Pontos de cada treino só para o dono e quem compete (já via os pontos da semana); pódio do mês anterior por 3 dias para os competidores, em qualquer plano. Descritos nos Termos 1.3 e na Política 1.4; RIPD social v0.8 | baixa | baixo | Arts. 6º, III e VI |
+
+## Atualização 2026-10-30 — pagamento pelo Stripe (planejado)
+
+Plano em [`docs/stripe-payments-plan.md`](../docs/stripe-payments-plan.md).
+
+| # | Item | Status | Evidência | Severidade | Esforço | Norma |
+|---|---|---|---|---|---|---|
+| G33 | DPA do Stripe e MFA na conta | RED (bloqueia a 1ª cobrança) | Ficha `vendors/stripe.md`; conta ainda não aberta | alta | baixo | Art. 39; Art. 46 |
+| G34 | Termos da Assinatura 1.1 e Política 1.5 com o Stripe, preço, reembolso e cancelamento | RED (bloqueia a 1ª cobrança) ⏸ checkpoint | Plano § 6.2; textos atuais dizem que a venda virá numa versão nova | crítica (para vender) | médio | CDC arts. 6º, III, 31, 46; LGPD art. 9º |
+| G35 | Exclusão da conta precisa cancelar a assinatura no Stripe | RED (bloqueia a 1ª cobrança) | Plano § 2.3; `delete-account` ainda não fala com o Stripe | alta | baixo | CDC art. 42; LGPD art. 18, VI |
+| G36 | Registros de pagamento após a exclusão (5 anos, sem identificação) | YELLOW ⚖ | Plano § 4.1; prazo fiscal a confirmar no NAF | média | baixo | Art. 7º, II; Art. 16, I |
+| G37 | Venda sem identificação do vendedor | RED aceito pelo controlador (R9) | `docs/lgpd-riscos-e-lancamento.md` § 5 | média | baixo para corrigir | Decreto 7.962/2013, art. 2º |

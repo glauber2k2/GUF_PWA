@@ -4,6 +4,8 @@
 // A exclusão do usuário em auth.users apaga todos os dados em cascata.
 // =====================================================================
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { cancelSubscriptionsForAccountDeletion } from "../_shared/billing/cancellation.ts";
+import { createSupabaseBillingStore } from "../_shared/billing/store.ts";
 
 // Sites autorizados a chamar a função (secret ALLOWED_ORIGINS, separados por vírgula):
 //   npx supabase secrets set ALLOWED_ORIGINS="https://<app>.vercel.app,http://localhost:3000"
@@ -58,6 +60,15 @@ Deno.serve(async (req) => {
   // on_auth_user_deleted_preserve_consents em consent_proofs antes da cascata
   // (migration consent_ledger_hardening; prazo de 5 anos a validar com o jurídico).
   // O registro de auditoria (account_deleted) é gravado pelo gatilho on_auth_user_deleted_audit.
+
+  // Assinatura paga: cancelar no gateway ANTES de apagar, senão ele continuaria cobrando quem já não tem
+  // conta (CDC, art. 42). Dentro dos 7 dias devolve tudo; depois, encerra agora. Falhou = não exclui.
+  try {
+    await cancelSubscriptionsForAccountDeletion(createSupabaseBillingStore(admin), user.id);
+  } catch (error) {
+    console.error("Falha ao cancelar a assinatura na exclusão da conta", { message: (error as Error).message });
+    return json({ error: "Não foi possível cancelar sua assinatura agora. Tente excluir a conta de novo em alguns minutos." }, 502);
+  }
 
   // Foto enviada (bucket "avatars", pasta <user_id>/): o Storage não apaga em cascata com a conta.
   // Bucket ainda inexistente (upload não implementado) = nada a apagar. Falha ao remover = não exclui

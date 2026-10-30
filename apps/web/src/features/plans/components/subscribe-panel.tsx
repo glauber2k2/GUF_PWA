@@ -2,13 +2,15 @@
 
 import { useState, type FormEvent } from "react";
 import { Crown } from "lucide-react";
-import { legalDocumentArticle, legalDocumentLabel, type CatalogPlan } from "@guf/core";
+import { formatPlanPrice, legalDocumentArticle, legalDocumentLabel, type CatalogPlan, type PlanPrice } from "@guf/core";
 import type { LegalDocument } from "@guf/api";
 import { Banner, Button, Checkbox } from "@/shared/components/ds";
 import { LegalDocLink } from "@/features/legal";
 
 export interface SubscribePanelProps {
   plan: CatalogPlan;
+  /** Preço à venda (null = ainda sem preço: a assinatura fica indisponível). */
+  price: PlanPrice | null;
   /** Documentos a aceitar agora (Termos da Assinatura + pendências do cadastro). */
   documents: LegalDocument[];
   documentsError: string | null;
@@ -24,6 +26,7 @@ export interface SubscribePanelProps {
  */
 export function SubscribePanel({
   plan,
+  price,
   documents,
   documentsError,
   onRetryDocuments,
@@ -43,9 +46,17 @@ export function SubscribePanel({
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-3 rounded-lg border border-border-strong bg-surface p-4">
       <h2 className="m-0 text-lg leading-6 font-bold">Assinar o {plan.name}</h2>
-      <p className="m-0 text-sm leading-5 text-fg-secondary">
-        O preço, a forma de cobrança e a renovação aparecem antes de qualquer cobrança. Cancele quando quiser.
-      </p>
+      {price ? (
+        <>
+          <p className="m-0 font-display text-2xl leading-8 font-bold tabular-nums">{formatPlanPrice(price)}</p>
+          <p className="m-0 text-sm leading-5 text-fg-secondary">
+            Renova automaticamente até você cancelar, aqui no app. Cancelando em até 7 dias da contratação, devolvemos o valor inteiro. O
+            pagamento é feito na página segura do Stripe.
+          </p>
+        </>
+      ) : (
+        <p className="m-0 text-sm leading-5 text-fg-secondary">A assinatura ainda não está disponível. Avisaremos quando o {plan.name} puder ser assinado.</p>
+      )}
       {documentsError ? (
         <Banner tone="danger" actionLabel="Tentar" onAction={onRetryDocuments}>
           {documentsError}
@@ -72,7 +83,7 @@ export function SubscribePanel({
         sheen
         icon={Crown}
         loading={subscribing}
-        disabled={!canSubscribe || documentsError !== null || (needsAcceptance && !accepted)}
+        disabled={!price || !canSubscribe || documentsError !== null || (needsAcceptance && !accepted)}
       >
         Assinar o {plan.name}
       </Button>

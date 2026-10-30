@@ -3,7 +3,7 @@
 **Projeto**: Guf App (PWA de evolução fitness)
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
-**Última atualização**: 2026-10-29
+**Última atualização**: 2026-10-30
 **Encarregado**: não designado — dispensa da Res. CD/ANPD nº 2/2022, art. 11 (agente de pequeno porte de baixo risco); canal `devglaubermonteiro@gmail.com` (`encarregado.md`)
 **Controlador**: Glauber Monteiro, pessoa física, agente de pequeno porte — identificado nos documentos 1.0 (G1, G22)
 
@@ -243,3 +243,12 @@ Parte gratuita concluída. Pendente com o desenvolvedor: ações da seção 4 do
 - **Venda do Pro (G29):** bloqueada pela identificação do vendedor (Decreto 7.962/2013, art. 2º); passos em `docs/lgpd-riscos-e-lancamento.md` § 5.
 - **Riscos residuais** (ECA Digital, Gemini gratuito, DPAs e cláusulas-padrão, sem revisão jurídica, observações com dado de saúde, infraestrutura gratuita) com o que reduz cada um sem custo: `docs/lgpd-riscos-e-lancamento.md` § 3.
 - ⏸ **CHECKPOINT:** os textos dos Termos 1.3 e da Política 1.4 precisam da sua leitura e aprovação antes do deploy (não vão para o banco antes disso).
+
+## Rodada 2026-10-30 — Pagamento do Pro pelo Stripe (planejado)
+- **Pipeline:** C (híbrido), feature nova; F14 (operador e transferência) adiantado para o Stripe.
+- **Plano:** `docs/stripe-payments-plan.md` (contratação, renovação, cancelar em 7 dias devolve tudo automaticamente, "Falar com o suporte" por escrito até o painel, reembolso de qualquer pagamento pelo Admin, contestação, auditoria, SOLID).
+- **Artefatos:** `vendors/stripe.md` (novo), `vendors/README.md`, `data-map.md` (A024), `legal-basis.md` (A024), `retention.md` (pagamentos, pedidos, eventos), `gaps.md` (G33–G37).
+- **Decisão do controlador:** venda inicial sem identificação (G37/R9), aceita ciente do risco.
+- **Pendente:** ROPA consolidado com A024 quando a feature for implementada.
+- ⏸ **CHECKPOINT:** textos dos Termos da Assinatura 1.1 e da Política 1.5 (G34) antes da primeira cobrança.
+- **Implementação (2026-10-30, branch `feat/assinatura-stripe`):** assinatura, webhook, cancelamento com devolução em 7 dias, devolução feita no painel do Stripe, contestação e exclusão da conta cancelando no gateway. Venda desligada até existir preço em `plan_prices` e os textos (G34) serem publicados. G35 resolvido no código (falta deploy). Pendente: `guf-export/8`, suporte e painel.

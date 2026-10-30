@@ -25,6 +25,10 @@ export type ApiErrorCode =
   | "plan_import_empty"
   | "plan_limit"
   | "billing_unavailable"
+  | "billing_provider_error"
+  | "subscription_not_found"
+  | "subscription_already_active"
+  | "subscription_documents_outdated"
   | "health_consent_required"
   | "measurement_date_invalid"
   | "measurement_invalid"
@@ -93,6 +97,10 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   plan_import_empty: "Não encontramos exercícios nesse texto. Cole a ficha com o nome dos exercícios, séries e repetições.",
   plan_limit: "Isso não está incluído no seu plano. Veja os planos para continuar.",
   billing_unavailable: "As assinaturas ainda não estão disponíveis. Avisaremos quando o Pro puder ser assinado.",
+  billing_provider_error: "O sistema de pagamento não respondeu. Nada foi cobrado: tente de novo em alguns minutos.",
+  subscription_not_found: "Não encontramos essa assinatura ativa. Atualize a tela e confira a situação do seu plano.",
+  subscription_already_active: "Você já tem uma assinatura ativa. Gerencie em Configurações › Plano.",
+  subscription_documents_outdated: "Os termos foram atualizados. Recarregue a tela, leia e aceite de novo para assinar.",
   health_consent_required: "Para registrar medidas, autorize o uso dos dados de saúde em Perfil › Medidas corporais.",
   measurement_date_invalid: "Escolha hoje ou um dia que já passou para a medição.",
   measurement_invalid: "Confira as medidas: use centímetros, de 0,1 a 299,9 (ex.: 38,5).",

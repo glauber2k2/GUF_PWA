@@ -843,6 +843,50 @@ export type Database = {
           },
         ]
       }
+      plan_prices: {
+        Row: {
+          amount_cents: number
+          billing_interval: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          plan_code: string
+          price_ref: string
+          provider: string
+        }
+        Insert: {
+          amount_cents: number
+          billing_interval: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          plan_code: string
+          price_ref: string
+          provider: string
+        }
+        Update: {
+          amount_cents?: number
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          plan_code?: string
+          price_ref?: string
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_prices_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       plans: {
         Row: {
           code: string
@@ -2369,6 +2413,7 @@ export type Database = {
           tone: string
         }[]
       }
+      my_billing: { Args: never; Returns: Json }
       my_entitlements: { Args: never; Returns: Json }
       normalize_handle: { Args: { p_handle: string }; Returns: string }
       notify_account_change: {

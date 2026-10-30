@@ -2,7 +2,7 @@
 
 | Feito por | Glauber (com Claude Code) |
 | --- | --- |
-| Data | 29/10/2026 |
+| Data | 29/10/2026 (venda do Pro decidida em 30/10/2026) |
 | Fase | Antes do lançamento público; Pro ainda não à venda |
 | Controlador | Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022), sem encarregado (art. 11 da mesma resolução), canal `devglaubermonteiro@gmail.com` |
 
@@ -31,7 +31,7 @@
   - falta de revisão jurídica;
   - observações com dados de saúde;
   - infraestrutura em planos gratuitos.
-- **Para vender o Pro**, a lei de comércio eletrônico exige mostrar CPF ou CNPJ e endereço do vendedor (seção 5). Hoje os documentos não mostram, de propósito. Isso precisa ser decidido antes da primeira cobrança.
+- **Para vender o Pro**, a lei de comércio eletrônico exige mostrar CPF ou CNPJ e endereço do vendedor. **Decisão (30/10):** lançar com o plano gratuito e, **no início, vender pelo Stripe comum sem CPF nem endereço**, aceitando o risco R9 (seção 3) com as medidas da seção 5. O caminho recomendado para regularizar depois é o CPF com o endereço comercial de uma empresa da família, só nas páginas de venda.
 
 ---
 
@@ -69,6 +69,7 @@ Escala: **probabilidade** de alguém reclamar ou a ANPD agir no tamanho atual do
 | R6 | **Infraestrutura gratuita**: Supabase Free (backups e logs curtos), Vercel Hobby (uso não comercial), e-mail padrão do Supabase (feito para testes) | LGPD, art. 46 (segurança); contrato da Vercel | Média | Baixo a médio | RLS, HTTPS, segundo fator no painel, chaves fora do front, cabeçalhos de segurança | Os planos pagos custam dinheiro. **Atenção:** o e-mail padrão do Supabase tem limite baixo de envio e pode travar a confirmação de cadastro no lançamento (seção 4). Vender o Pro hospedado no Vercel Hobby desrespeita o contrato da Vercel (Cloudflare Pages é gratuito e permite uso comercial) |
 | R7 | **Pedidos do titular e incidentes sem resposta no prazo** | LGPD, art. 18 e art. 19, II (15 dias; 30 dias para pequeno porte, Res. 2/2022 art. 14); art. 48 e Res. 15/2024 (incidente: 3 dias úteis, 6 para pequeno porte) | Baixa | Alto | Canal publicado, fluxo em `.lgpd/dsar/workflow.md`, runbook e modelos em `.lgpd/incidents/` | Depende de rotina: ler o e-mail do canal toda semana e seguir o runbook. Não há como automatizar sem custo |
 | R8 | **Aceite da versão nova aplicado antes do texto novo estar no ar** | LGPD, art. 8º, § 2º, e art. 9º | Baixa | Médio | As migrations de documentos avisam no cabeçalho e o `CLAUDE.md` registra a ordem | Erro humano possível; a ordem certa está na seção 4 |
+| R9 | **Vender o Pro sem identificar o vendedor** (sem CPF nem endereço), por decisão do controlador em 30/10/2026 | Decreto 7.962/2013, art. 2º; sanções do CDC, arts. 56 e 57 | Baixa (só aparece com reclamação) | Médio a alto: a multa do Procon não tem relação com o faturamento e sai dos bens pessoais | Medidas da seção 5 ("Venda inicial sem identificação"): aceite dos textos novos antes da cobrança, cancelamento pelo app, reembolso rápido, nome e e-mail visíveis | **Fora da lei enquanto durar.** Esconder os dados não impede Procon ou juiz de obtê-los com o Stripe. Zera com CPF e endereço comercial da família só nas páginas de venda, a custo zero |
 
 ---
 
@@ -101,14 +102,50 @@ O app recusa qualquer cobrança hoje (`billing_unavailable`, antes de gravar qua
 
 | Passo | Por quê | Norma |
 |---|---|---|
-| 1. **Identificar o vendedor** nos Termos da Assinatura e na tela de assinatura: nome, CPF (ou CNPJ, se abrir um MEI) e um endereço físico e eletrônico | Obrigatório para quem vende pela internet. Hoje os documentos não mostram CPF nem endereço, por privacidade | Decreto 7.962/2013, art. 2º, I e II |
-| 2. Escolher o **prestador de pagamento** (ex.: Mercado Pago, Stripe, Asaas) e aceitar o DPA dele | A Política e os Termos da Assinatura precisam dizer quem é | LGPD, arts. 9º, V, e 39 |
+| 1. **Identificar o vendedor** nos Termos da Assinatura e na tela de assinatura: nome, CPF, endereço para correspondência e e-mail. **Adiado por decisão do controlador** (ver "Venda inicial sem identificação" e o risco R9) | Obrigatório para quem vende pela internet. Hoje os documentos não mostram CPF nem endereço, por privacidade | Decreto 7.962/2013, art. 2º, I e II |
+| 2. **Stripe** como prestador de pagamento: aceitar o DPA dele e registrar a transferência internacional (EUA) na Política | A Política e os Termos da Assinatura precisam dizer quem é | LGPD, arts. 9º, V, e 39 |
 | 3. Nova versão dos **Termos da Assinatura** (preço, periodicidade, prestador, canal de cancelamento) e da **Política** (prestador, país, dados enviados) | Os textos atuais dizem que isso virá numa versão nova, aceita antes de qualquer cobrança | CDC, arts. 6º, III, e 31; LGPD, art. 9º |
 | 4. **Cancelamento tão fácil quanto a contratação**, pelo app | Exigido no comércio eletrônico | Decreto 7.962/2013, art. 5º |
-| 5. **Imposto sobre a receita**: como pessoa física, os recebimentos entram no carnê-leão e na declaração anual; um MEI simplifica e permite usar CNPJ em vez do CPF no passo 1 | Obrigação fiscal; não é LGPD. Confirmar com a Receita ou um contador quando houver receita | Legislação do imposto de renda |
-| 6. Gateway, Edge Functions de checkout e webhook, marcadores dos textos | Passo a passo técnico em [`plans-and-access.md`](plans-and-access.md) | — |
+| 5. **Imposto sobre a receita**: como pessoa física, lançar os recebimentos no Carnê-Leão (e-CAC) todo mês em que entrar dinheiro e na declaração anual | Obrigação fiscal; não é LGPD. Não declarar gera multa de 75% do imposto devido. Tirar dúvidas de graça no NAF (Receita + universidades) ou no Sebrae | Legislação do imposto de renda |
+| 6. Gateway, Edge Functions de checkout e webhook, reembolsos e painel | Plano completo em [`stripe-payments-plan.md`](stripe-payments-plan.md) | — |
 
-**Sugestão para não expor seu CPF e endereço:** abrir um **MEI** antes da primeira venda. Ele tem custo mensal baixo, mas não é zero; por isso fica como decisão sua. Com o MEI, o controlador vira a empresa: nova versão de Termos e Política com razão social e CNPJ, como já previsto em `.lgpd/gaps.md` (G22).
+### Decisão de 30/10/2026: venda inicial sem identificação, pelo Stripe
+
+O controlador decidiu, ciente do risco, **começar a vender pelo Stripe comum sem mostrar CPF nem endereço**. Isso descumpre o Decreto 7.962/2013 (art. 2º) enquanto durar: não há exceção para pessoa física nem para vendas pequenas. Ninguém fiscaliza sozinho; o problema aparece quando alguém reclama no Procon ou abre processo, e a falta de identificação vira agravante (CDC, arts. 56 e 57). Esconder os dados não impede que te achem: Procon e juiz os obtêm com o Stripe por ordem oficial.
+
+**Medidas obrigatórias para vender assim (todas gratuitas):**
+
+1. **Versão nova dos Termos da Assinatura e da Política com o Stripe, aceita antes da cobrança.** Não é opcional: sem ela, o contrato não obriga o consumidor (CDC, art. 46) e a cobrança pode ser devolvida em dobro (art. 42). É o risco mais caro. Os textos não podem afirmar conformidade com o decreto.
+2. **Cancelamento pelo app**, tão fácil quanto assinar (Decreto 7.962/2013, art. 5º).
+3. **Reembolso rápido:** devolver na hora quem pedir em até 7 dias (CDC, art. 49) e, na dúvida, também quem reclamar depois. Sem reclamação, a falta de identificação não vira multa, e reembolso evita contestação no cartão.
+4. **Nome e e-mail de contato visíveis** na página de assinatura, com resposta rápida. Não atende o decreto, mas mostra boa-fé.
+5. **Carnê-Leão** todo mês em que entrar dinheiro.
+6. **Hospedagem com uso comercial** (Cloudflare Pages, gratuito) antes da primeira cobrança.
+
+Com isso, a chance de problema fica baixa, mas não zera (risco R9, seção 3).
+
+**Quando regularizar:** na primeira reclamação, notificação ou pedido de identificação, ou assim que puder. O caminho recomendado continua sendo o abaixo, a custo zero.
+
+### Como regularizar depois: CPF e endereço comercial da família
+
+**Por que não MEI:** a venda de assinatura de app provavelmente não está na lista de ocupações permitidas ao MEI (Resolução CGSN 140/2018, Anexo XI). Abrir numa ocupação que não corresponde à atividade pode levar ao desenquadramento, com impostos de empresa cobrados desde o início, multa e juros. O MEI também não protege os bens pessoais e deixa o endereço público na Receita. **Conferir a lista no Portal do Empreendedor antes de mudar de ideia.**
+
+**Por que Stripe direto exige endereço:** no Stripe comum o vendedor é você; o Stripe só processa o pagamento. As alternativas em que a plataforma é a vendedora (Stripe Managed Payments, Lemon Squeezy, Paddle) dispensariam seu endereço, mas a disponibilidade para pessoa física no Brasil não foi confirmada.
+
+**Endereço comercial de uma empresa da família**, usado só como endereço de correspondência. O decreto pede um endereço onde o vendedor possa ser localizado e contatado, não a residência. Cuidados:
+
+1. **Autorização por escrito** do responsável pela empresa, permitindo usar o endereço para receber sua correspondência. Guardar uma cópia (fora do repositório).
+2. **A correspondência precisa chegar até você no mesmo dia** (ex.: foto pelo WhatsApp). Notificação do Procon, carta da ANPD ou citação de processo podem chegar ali; carta esquecida pode deixar um processo andar sem defesa.
+3. **O vendedor é você, não a empresa.** Nos documentos: "Vendedor: Glauber Monteiro, CPF …, endereço para correspondência: …", **sem o nome da empresa**, para ela não responder por reclamações do guf.
+4. **Só o público usa esse endereço.** No cadastro do Stripe (verificação de identidade) e na Receita, informar o endereço real; ali ele não é publicado.
+
+**A conferir ao criar a conta do Stripe:** se aceita CPF no Brasil (se exigir CNPJ, a decisão volta para o MEI ou para uma ME com contador) e se o Stripe Managed Payments está disponível para você (se estiver, dispensa a exibição do endereço).
+
+**Ordem:**
+1. Lançar com o plano gratuito: sem venda, o decreto não se aplica.
+2. Abrir a conta do Stripe (e, para regularizar, conseguir a autorização do endereço).
+3. Preparar a nova versão dos Termos da Assinatura e da Política (passos 1 a 3) e a integração (passo 6), publicando o app antes de aplicar a migration dos documentos.
+4. Mudar a hospedagem para um plano que permita uso comercial (seção 4, item 9) antes da primeira cobrança.
 
 ---
 

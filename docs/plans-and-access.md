@@ -189,24 +189,22 @@ Pedido do produto: não mostrar termos para aceitar toda hora. Os aceites ficam 
 - O aceite da assinatura só é gravado quando a assinatura acontece de fato (`startSubscription`
   recusa com `billing_unavailable` ANTES de registrar qualquer aceite enquanto não há pagamento).
 
-## Pagamento (preparado, ainda não implementado)
+## Pagamento (Stripe, atrás de uma interface de gateway)
 
-O que já existe: `subscriptions`, `apply_subscription_event`, `startSubscription` no contrato,
-tela `/planos` com a caixa de aceite e o botão "Assinar". O que falta, em ordem:
+Implementado na branch `feat/assinatura-stripe`; tudo em [`stripe-payments-plan.md`](stripe-payments-plan.md)
+(decisões, fluxos, proteções contra burla na seção 11.1 e como ligar na 11.4). Resumo:
 
-1. **Escolher o gateway** (web: Stripe ou Mercado Pago; app nativo: Apple/Google, que exigem a
-   compra pela loja). Para várias lojas, um agregador como o RevenueCat simplifica (é uma
-   biblioteca/serviço novo: aprovar antes).
-2. **Edge Function de checkout** (`create-checkout`): recebe o plano e os ids aceitos, registra os
-   aceites (`accept_documents` com `source = 'subscribe'`) e devolve a URL/sessão do gateway.
-   `startSubscription` passa a chamá-la.
-3. **Edge Function de webhook** (`billing-webhook`, `--no-verify-jwt`, assinatura do gateway
-   verificada): para cada evento, chama `apply_subscription_event(user, plan, provider, ref, status,
-   period_end)`. É a ÚNICA forma de um direito pago nascer.
-4. **Política e prestador**: preencher `[PRESTADOR DE PAGAMENTO]`, `[PREÇO]`, `[PERIODICIDADE]`,
-   `[PRAZO DE AVISO]` e `[CANAL DE CANCELAMENTO]`; avaliar o prestador em `.lgpd/vendors/` e a
-   transferência internacional, se houver.
-5. **App**: depois do retorno do checkout, `invalidateQueries([PLANS_KEY])` para o plano novo aparecer.
+- **Contratar:** `startSubscription` → Edge Function `billing` (ação `checkout`): confere o preço de
+  `plan_prices` no gateway, grava os aceites (`source = subscribe`) e devolve a página de pagamento
+  hospedada pelo Stripe. Sem preço ativo, `billing_unavailable` (a venda fica desligada).
+- **O Pro pago nasce e acaba só pelo webhook** (`billing-webhook`, assinatura conferida, objeto relido no
+  gateway, idempotente) → `billing_sync_subscription`, que escreve `subscriptions` e o `plan_grants`
+  ligado. A função antiga `apply_subscription_event` está sem permissão de execução.
+- **Cancelar:** ação `cancel`; o banco decide pelos 7 dias (`withdrawal_window`): dentro, devolve tudo e
+  encerra agora; depois, Pro até o fim do período (`cancel_at_period_end`).
+- **Gateway novo:** um adaptador em `supabase/functions/_shared/billing/providers/<gateway>/` que implementa
+  `BillingProvider` + uma entrada em `BILLING_PROVIDERS` + o valor no `check` de `provider` (migration).
+  Banco, telas e regras não mudam.
 
 ## Como acrescentar
 
