@@ -265,9 +265,13 @@ export const signInWithGoogle: SignInWithGoogle = async (client, { redirectTo })
   }
 };
 
+/**
+ * Sai só deste navegador. O padrão do Supabase ("global") encerrava as sessões da conta em todos os
+ * aparelhos: sair do painel derrubava o app no celular da mesma pessoa.
+ */
 export const signOut: SignOut = async (client) => {
   try {
-    const { error } = await client.auth.signOut();
+    const { error } = await client.auth.signOut({ scope: "local" });
     if (error) return { data: null, error: toAuthError(error) };
     return { data: null, error: null };
   } catch (e) {
@@ -290,10 +294,25 @@ export const setRecoverySession: SetRecoverySession = async (client, hash) => {
   }
 };
 
+/**
+ * Encerra as outras sessões da conta (todos os navegadores e aparelhos, menos este).
+ * Usado depois de trocar a senha: quem tinha a senha antiga não continua dentro.
+ * Falhar aqui não desfaz a troca: a senha nova já vale e a sessão atual continua.
+ */
+export async function signOutOtherSessions(client: GufClient): Promise<void> {
+  try {
+    await client.auth.signOut({ scope: "others" });
+  } catch {
+    // Sem rede neste instante: a troca de senha já foi gravada e não deve aparecer como erro.
+  }
+}
+
 export const updatePassword: UpdatePassword = async (client, password) => {
   try {
     const { error } = await client.auth.updateUser({ password });
-    return error ? { data: null, error: toAuthError(error) } : { data: null, error: null };
+    if (error) return { data: null, error: toAuthError(error) };
+    await signOutOtherSessions(client);
+    return { data: null, error: null };
   } catch (e) {
     return { data: null, error: toAuthError(e) };
   }
