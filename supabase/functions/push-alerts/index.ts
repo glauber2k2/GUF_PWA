@@ -10,6 +10,7 @@
 // =====================================================================
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import * as webpush from "jsr:@negrel/webpush@0.5.0";
+import { sameSecret } from "../_shared/http.ts";
 
 type FollowKind = "new_follower" | "follow_request" | "request_accepted";
 
@@ -57,14 +58,6 @@ const ALERT_TTL_SECONDS = 6 * 60 * 60;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-
-// Comparação em tempo constante, para o segredo não vazar pelo tempo de resposta.
-function sameSecret(received: string | null, expected: string): boolean {
-  if (!received || received.length !== expected.length) return false;
-  let diff = 0;
-  for (let i = 0; i < expected.length; i++) diff |= received.charCodeAt(i) ^ expected.charCodeAt(i);
-  return diff === 0;
-}
 
 function pointsLabel(points: number): string {
   return points === 1 ? "1 ponto" : `${points} pontos`;

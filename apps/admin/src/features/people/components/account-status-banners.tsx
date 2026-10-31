@@ -7,6 +7,12 @@ import { Banner } from "@guf/ui";
 import { useStaff } from "@/features/auth";
 import type { AccountActionKind } from "@/features/people/helpers/account-actions";
 
+/** Por que a última tentativa da exclusão agendada não excluiu (`account_deletion_schedules.last_error`). */
+const DELETION_ERROR_NOTES: Record<string, string> = {
+  account_has_files: " A última tentativa não excluiu: a conta tem foto guardada. Peça para a pessoa excluir pelo app.",
+  account_has_subscription: " A assinatura está sendo cancelada antes da exclusão; o sistema tenta de novo a cada 10 minutos.",
+};
+
 interface AccountStatusBannersProps {
   ban: AdminAccountBan | null;
   deletion: AdminDeletionSchedule | null;
@@ -38,9 +44,7 @@ export function AccountStatusBanners({ ban, deletion, onAction }: AccountStatusB
           onAction={() => onAction("cancel_deletion")}
         >
           Motivo: {describeReason(deletion.reason, deletion.note)}.
-          {deletion.lastError === "account_has_files"
-            ? " A última tentativa não excluiu: a conta tem foto guardada. Peça para a pessoa excluir pelo app."
-            : " A pessoa recebeu um aviso no app."}
+          {(deletion.lastError && DELETION_ERROR_NOTES[deletion.lastError]) ?? " A pessoa recebeu um aviso no app."}
         </Banner>
       )}
     </>

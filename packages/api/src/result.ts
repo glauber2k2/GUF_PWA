@@ -47,6 +47,7 @@ export type ApiErrorCode =
   | "staff_already_member"
   | "account_is_staff"
   | "account_has_files"
+  | "account_has_subscription"
   | "date_in_past"
   | "account_banned"
   | "account_without_email"
@@ -119,6 +120,8 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   staff_already_member: "Essa pessoa já faz parte da equipe.",
   account_is_staff: "Essa conta é sua ou de alguém da equipe. Tire o acesso dela em Equipe antes de suspender ou excluir.",
   account_has_files: "Essa conta tem foto guardada no aplicativo. Peça para a pessoa excluir a conta pelo app (Configurações › Privacidade).",
+  account_has_subscription:
+    "Essa conta tem assinatura ativa e ela não pôde ser cancelada agora. Tente de novo em alguns minutos; nada foi excluído.",
   date_in_past: "Escolha uma data e um horário no futuro.",
   account_banned: "Essa conta está suspensa: o link não funcionaria. Encerre a suspensão antes de redefinir a senha.",
   account_without_email: "Essa conta não tem e-mail para receber o link. A pessoa precisa entrar pelo login social.",
@@ -169,6 +172,7 @@ const ADMIN_ERROR_CODES: Record<string, ApiErrorCode> = {
   GA013: "staff_already_member",
   GA014: "account_is_staff",
   GA015: "account_has_files",
+  GA023: "account_has_subscription",
   GA016: "date_in_past",
   GA017: "account_banned",
   GA018: "account_without_email",

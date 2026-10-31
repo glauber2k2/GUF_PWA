@@ -421,3 +421,7 @@ verify_jwt = false
 # Webhook do gateway de pagamento: chamado pelo Stripe, sem JWT; a autenticidade vem da assinatura do evento.
 [functions.billing-webhook]
 verify_jwt = false
+
+# Exclusão de conta pelo painel: chamada pelo painel (token conferido pelo banco) e pelo job de exclusões agendadas (x-guf-secret), sem JWT.
+[functions.admin-delete-account]
+verify_jwt = false
