@@ -380,7 +380,7 @@ Testada em 30/10/2026 no banco remoto dentro de uma transação desfeita (32 ver
 
 - `packages/core/src/billing.ts`: tipos, `subscriptionViewOf`, `formatMoney`, `formatPlanPrice`, textos de situação, confirmação e resultado.
 - `packages/api/src/billing.ts` (`BillingApi`): `getPlanPrices`, `getMyBilling`, `cancelSubscription`, `reactivateSubscription`, `openBillingPortal`; `startSubscription` (`PlansApi`) agora devolve `{ checkoutUrl }`. Erros novos: `billing_provider_error`, `subscription_not_found`, `subscription_already_active`, `subscription_documents_outdated`.
-- `features/plans`: preço no `SubscribePanel`, `SubscriptionCard` (cancelar com a confirmação que muda pelos 7 dias, reativar, pagamento e recibos, concluir devolução), `PaymentHistory`, espera do pagamento na volta do checkout (`useCheckoutConfirmation`).
+- `features/plans`: preço na oferta e na barra `SubscribeBar` (também na tela do Pro), `SubscriptionManageList` (cancelar com a confirmação que muda pelos 7 dias, reativar, pagamento e recibos, concluir devolução), `PaymentHistory`, espera do pagamento na volta do checkout (`useCheckoutConfirmation`).
 - Mocks: `/planos?estado=` `assinante-7dias` · `assinante` · `cancelada` · `atraso` · `reembolsando` · `reembolsada` (junte `,pro` para o plano Pro).
 
 ### 11.4 Como ligar (modo de teste primeiro)

@@ -1,13 +1,11 @@
 import { formatDayMonthYear, formatMoney, paymentStatusLabel, type BillingPayment } from "@guf/core";
+import { PlanSection } from "@/features/plans/components/plan-section";
 
 /** Pagamentos da pessoa (valor, data e se houve devolução). Recibos completos ficam no portal do gateway. */
 export function PaymentHistory({ payments }: { payments: BillingPayment[] }) {
   if (payments.length === 0) return null;
   return (
-    <section aria-labelledby="payments-title" className="flex flex-col gap-2">
-      <h2 id="payments-title" className="m-0 ml-1 text-base leading-6 font-semibold">
-        Pagamentos
-      </h2>
+    <PlanSection id="plan-payments" title="Pagamentos">
       <ul className="m-0 flex list-none flex-col divide-y divide-border rounded-lg border border-border bg-surface p-0">
         {payments.map((payment) => (
           <li key={payment.id} className="flex items-center justify-between gap-3 px-4 py-3">
@@ -19,6 +17,6 @@ export function PaymentHistory({ payments }: { payments: BillingPayment[] }) {
           </li>
         ))}
       </ul>
-    </section>
+    </PlanSection>
   );
 }

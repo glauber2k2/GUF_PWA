@@ -134,8 +134,10 @@ função no banco antes).
 
 Decisão de produto: a pessoa **nunca vê cadeado antes de tentar**. Botões, formulários e períodos
 aparecem normalmente; ela preenche tudo e, **na hora de usar**, aparece a tela
-"Isso faz parte do Pro" (`ProUpsellScreen`) com o texto da funcionalidade (`planUpsellCopy`) e o
-botão "Conhecer o Pro" (abre `/planos?recurso=<funcionalidade>`, com a linha em destaque). Fechar
+"Isso faz parte do Pro" (`ProUpsellScreen`) com o texto da funcionalidade (`planUpsellCopy`), o preço,
+o que o plano acima libera a mais e a barra de assinar ali mesmo (mesmo aceite dos termos da tela de
+planos, `useProOffer`); "Ver todos os detalhes do plano" abre `/planos?recurso=<funcionalidade>`, com a
+linha em destaque. Fechar
 volta exatamente para onde estava, com o formulário preenchido.
 
 **Padrão dos textos da tela do Pro** (`planUpsellCopy`): título curto com o benefício e mensagem em duas

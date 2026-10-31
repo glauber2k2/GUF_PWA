@@ -96,6 +96,20 @@ export function formatMoney(cents: number, currency: string): string {
 
 const INTERVAL_LABELS: Record<BillingInterval, string> = { month: "por mês", year: "por ano" };
 
+const INTERVAL_SUFFIXES: Record<BillingInterval, string> = { month: "/mês", year: "/ano" };
+
+/** "/mês" — ao lado do valor em destaque. */
+export function formatIntervalSuffix(interval: BillingInterval): string {
+  return INTERVAL_SUFFIXES[interval];
+}
+
+const INTERVAL_NAMES: Record<BillingInterval, string> = { month: "mensal", year: "anual" };
+
+/** "Pro mensal" */
+export function formatPlanPeriodName(planName: string, interval: BillingInterval): string {
+  return `${planName} ${INTERVAL_NAMES[interval]}`;
+}
+
 /** "R$ 19,90 por mês" */
 export function formatPlanPrice(price: PlanPrice): string {
   return `${formatMoney(price.amountCents, price.currency)} ${INTERVAL_LABELS[price.interval]}`;
@@ -116,6 +130,21 @@ export function subscriptionStatusText(subscription: BillingSubscription): strin
     ended: subscription.canceledAt ? `Encerrada em ${formatIsoDay(subscription.canceledAt)}` : "Encerrada",
   };
   return texts[subscriptionViewOf(subscription)];
+}
+
+const SUBSCRIPTION_BADGE_LABELS: Record<SubscriptionView, string> = {
+  none: "Ativo",
+  withdrawable: "Ativo",
+  active: "Ativo",
+  canceling: "Cancelada",
+  past_due: "Pagamento pendente",
+  refunding: "Devolvendo",
+  ended: "Encerrada",
+};
+
+/** Selo do plano pago no cartão do plano atual ("none" = plano dado sem assinatura, ex.: cortesia). */
+export function subscriptionBadgeLabel(view: SubscriptionView): string {
+  return SUBSCRIPTION_BADGE_LABELS[view];
 }
 
 /** Aviso do prazo de desistência (só enquanto ele vale). */

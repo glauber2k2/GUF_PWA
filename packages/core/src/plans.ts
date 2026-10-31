@@ -183,6 +183,23 @@ function recentMonthsText(months: number | null): string {
   return `os últimos ${formatNumber(months, 0)} meses`;
 }
 
+/** `to` dá mais que `from`: liga a funcionalidade, sobe o limite ou tira o limite. */
+export function isAccessBetter(to: FeatureAccess, from: FeatureAccess): boolean {
+  if (!to.enabled) return false;
+  if (!from.enabled) return true;
+  if (to.kind === "flag") return false;
+  if (to.limit === null) return from.limit !== null;
+  return from.limit !== null && to.limit > from.limit;
+}
+
+/**
+ * Funcionalidades em que o plano `to` dá mais que o `from`, na ordem do catálogo (destaques da oferta).
+ * @returns lista vazia quando `to` não melhora nada
+ */
+export function improvedFeatures(from: CatalogPlan, to: CatalogPlan): PlanFeature[] {
+  return PLAN_FEATURES.filter((feature) => isAccessBetter(to.features[feature], from.features[feature]));
+}
+
 /** Nome da funcionalidade na comparação de planos. */
 export const PLAN_FEATURE_LABELS: Record<PlanFeature, string> = {
   custom_projects: "Projetos além do Favoritos",
@@ -201,6 +218,16 @@ export function formatFeatureAccess(feature: PlanFeature, access: FeatureAccess)
   if (feature === "measurement_chart_months") return capitalize(recentMonthsText(access.limit));
   if (access.limit === null) return "Sem limite";
   return `Até ${formatNumber(access.limit, 0)}`;
+}
+
+/** "No Pro: sem limite. No Free: até 3." — o que muda numa funcionalidade ao trocar de plano. */
+export function formatFeatureUpgrade(feature: PlanFeature, from: CatalogPlan, to: CatalogPlan): string {
+  const access = (plan: CatalogPlan) => lowercaseFirst(formatFeatureAccess(feature, plan.features[feature]));
+  return `No ${to.name}: ${access(to)}. No ${from.name}: ${access(from)}.`;
+}
+
+function lowercaseFirst(text: string): string {
+  return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
 function capitalize(text: string): string {
