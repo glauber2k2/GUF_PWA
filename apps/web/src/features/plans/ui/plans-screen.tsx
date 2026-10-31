@@ -93,7 +93,7 @@ export function PlansScreen() {
           <PlanSection id="plan-subscription" title="Assinatura">
             <SubscriptionManageList subscription={subscription} lastPayment={payments[0] ?? null} canManage={online} />
             <p className="m-0 px-1 text-xs leading-[17px] text-pretty text-fg-muted">
-              Pagamento pelo Stripe. Cancelando em até 7 dias da contratação, o valor volta inteiro; depois, o {subscription.planName} continua até o
+              Pagamento pelo Stripe. Cancelando em até 7 dias do primeiro pagamento, o valor volta inteiro; depois, o {subscription.planName} continua até o
               fim do período já pago.
             </p>
           </PlanSection>
