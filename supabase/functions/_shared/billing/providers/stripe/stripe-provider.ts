@@ -90,6 +90,16 @@ const toIso = (unixSeconds: number | null): string | null => (unixSeconds ? new 
 const stringField = (object: Record<string, unknown>, key: string): string | null =>
   typeof object[key] === "string" && object[key] ? (object[key] as string) : null;
 
+/**
+ * Assinatura da fatura no formato das versões da API a partir de 2025-03-31, onde `invoice.subscription` saiu:
+ * o aviso vem na versão escolhida no endpoint do webhook, não na fixada em `STRIPE_API_VERSION`.
+ */
+function invoiceParentSubscription(object: Record<string, unknown>): string | null {
+  const parent = object.parent as { subscription_details?: { subscription?: unknown } } | null | undefined;
+  const subscription = parent?.subscription_details?.subscription;
+  return typeof subscription === "string" && subscription ? subscription : null;
+}
+
 /** Tipos de evento do Stripe → evento normalizado (aberto/fechado: evento novo = uma entrada). */
 const EVENT_MAPPERS: Record<string, (object: Record<string, unknown>) => BillingEventPayload | null> = {
   "checkout.session.completed": (object) => {
@@ -101,7 +111,7 @@ const EVENT_MAPPERS: Record<string, (object: Record<string, unknown>) => Billing
   "customer.subscription.deleted": (object) => ({ kind: "subscription_changed", subscriptionRef: object.id as string }),
   "invoice.paid": (object) => ({ kind: "payment_succeeded", paymentRef: object.id as string }),
   "invoice.payment_failed": (object) => {
-    const subscriptionRef = stringField(object, "subscription");
+    const subscriptionRef = stringField(object, "subscription") ?? invoiceParentSubscription(object);
     return subscriptionRef ? { kind: "subscription_changed", subscriptionRef } : null;
   },
   "charge.refunded": (object) => ({ kind: "refund_changed", ref: object.id as string }),

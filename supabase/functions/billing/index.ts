@@ -46,7 +46,11 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const admin = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
     const { data: { user }, error: userError } = await admin.auth.getUser(token);
-    if (userError || !user) throw new BillingActionError("not_authenticated", 401);
+    if (userError || !user) {
+      // Sem o motivo no log, chave do projeto inválida e sessão vencida chegam iguais ao app.
+      console.error("Cobrança: sessão não confirmada", { status: userError?.status, message: userError?.message });
+      throw new BillingActionError("not_authenticated", 401);
+    }
 
     const appUrl = (Deno.env.get("APP_URL") ?? "").replace(/\/+$/, "");
     if (!appUrl.startsWith("https://") && !appUrl.startsWith("http://localhost")) {
