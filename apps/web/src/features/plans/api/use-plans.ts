@@ -9,7 +9,7 @@ import { getSupabaseClient } from "@/shared/libs/supabase";
 import { withDeviceCache } from "@/shared/offline/device-cache";
 import { mockPlansApi, setPlansMockScenario } from "@/mocks/plans";
 
-/** O plano muda pouco; a tela de planos e o webhook (futuro) recarregam na hora quando muda. */
+/** O plano muda pouco; a tela de planos recarrega na hora quando a assinatura muda. */
 const ENTITLEMENTS_STALE_MS = 5 * 60_000;
 
 /** Dados reais por padrão; em DESENVOLVIMENTO com ?estado=, o mock (Free; `pro` simula o Pro). */
@@ -75,14 +75,15 @@ export function useSubscriptionDocuments() {
   });
 }
 
-/** Inicia a assinatura (aceites + pagamento; hoje responde billing_unavailable). */
+/** Inicia a assinatura: grava os aceites e leva para a página de pagamento do gateway (mesma aba). */
 export function useStartSubscription() {
   const { api } = usePlansSource();
-  return useMutation<null, ApiError, StartSubscriptionInput>({
+  return useMutation<string, ApiError, StartSubscriptionInput>({
     mutationFn: async (input) => {
-      const { error } = await api.startSubscription(getSupabaseClient(), input);
+      const { data, error } = await api.startSubscription(getSupabaseClient(), input);
       if (error) throw error;
-      return null;
+      return data.checkoutUrl;
     },
+    onSuccess: (checkoutUrl) => window.location.assign(checkoutUrl),
   });
 }

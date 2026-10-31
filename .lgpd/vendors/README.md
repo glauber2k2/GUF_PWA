@@ -8,6 +8,7 @@
 | [Supabase](./supabase.md) | Operador (Art. 5º, VII; Art. 39) | **Crítico** | Brasil (`sa-east-1`) desde 2026-10-16; empresa e sub-operadores nos EUA | Free | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — **bloqueado para usuários reais** até DPA + base do Art. 33 |
 | [Vercel](./vercel.md) | Operador | Baixo/Médio | EUA (rede global) | Hobby | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — só para testes; trocar antes de monetizar |
 | [Serviços de push](./push-services.md) (Google FCM, Apple APNs, Mozilla) | Infraestrutura do navegador/sistema escolhida pelo titular; recebe só mensagem cifrada e metadados ⚖ | Baixo | EUA | — | Não se aplica ⚖ | Avaliar com o jurídico (G8) | Aprovado com ressalvas — informado na Política 0.4-dev |
+| [Stripe](./stripe.md) (planejado) | Operador; controlador independente para fraude e obrigações próprias ⚖ | **Alto** | EUA e Irlanda | — | Não aceito | DPA do Stripe (cláusulas-padrão próprias) | **Não contratado** — plano em `docs/stripe-payments-plan.md`; DPA e MFA antes da 1ª cobrança (G33) |
 | [Google (login)](./google.md) | **Controlador independente** (não é operador) | — | EUA | — | Não se aplica | Não se aplica (dados enviados pelo titular por escolha dele) | Aprovado — informar na política |
 
 **Totais**: 2 operadores (1 crítico, 1 baixo/médio) + 1 terceiro controlador · **0** com DPA e base de transferência adequados.

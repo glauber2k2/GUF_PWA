@@ -44,3 +44,4 @@ export * from "./account-suspension";
 export * from "./exercise-catalog";
 export * from "./share-cardio";
 export * from "./workout-feed";
+export * from "./billing";

@@ -7,6 +7,7 @@ import {
   type PlanFeature,
 } from "@guf/core";
 import type { Platform } from "./auth";
+import { invokeBilling, isSafeRedirectUrl } from "./billing";
 import type { GufClient } from "./client";
 import type { LegalDocument } from "./legal";
 import { apiError, toApiError, type ApiResult } from "./result";
@@ -33,8 +34,11 @@ export interface PlansApi {
   getPlanCatalog: (client: GufClient, input: null) => Result<CatalogPlan[]>;
   /** Documentos a aceitar para assinar: Termos da Assinatura + o que estiver pendente do cadastro. */
   getSubscriptionDocuments: (client: GufClient, input: null) => Result<LegalDocument[]>;
-  /** Inicia a assinatura (aceites + pagamento). Enquanto não houver pagamento: billing_unavailable. */
-  startSubscription: (client: GufClient, input: StartSubscriptionInput) => Result<null>;
+  /**
+   * Inicia a assinatura: grava os aceites e devolve a página de pagamento do gateway. O Pro só é
+   * liberado pelo webhook depois do pagamento confirmado (nunca por esta função).
+   */
+  startSubscription: (client: GufClient, input: StartSubscriptionInput) => Result<{ checkoutUrl: string }>;
 }
 
 /* =====================================================================
@@ -123,17 +127,12 @@ export const getSubscriptionDocuments: PlansApi["getSubscriptionDocuments"] = as
   }
 };
 
-/**
- * Pagamento ainda não integrado: recusa ANTES de gravar qualquer aceite, para não registrar
- * concordância com uma assinatura que não aconteceu. Ao integrar o gateway (docs/plans-and-access.md):
- * registrar os aceites (accept_documents, source "subscribe") e abrir o checkout; o direito Pro
- * chega pelo webhook (apply_subscription_event), nunca por esta função.
- */
-export const startSubscription: PlansApi["startSubscription"] = async () => ({
-  data: null,
-  error: apiError("billing_unavailable"),
-});
-
+export const startSubscription: PlansApi["startSubscription"] = async (client, { planCode, acceptedDocumentIds, platform }) => {
+  const { data, error } = await invokeBilling<{ url: string }>(client, { action: "checkout", planCode, acceptedDocumentIds, platform });
+  if (error) return { data: null, error };
+  if (!isSafeRedirectUrl(data.url)) return { data: null, error: apiError("billing_provider_error") };
+  return { data: { checkoutUrl: data.url }, error: null };
+};
 
 export const plansApi = {
   getEntitlements,

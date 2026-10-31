@@ -1,5 +1,5 @@
 import { isStaffRole, type StaffRole } from "@guf/core";
-import { signInWithEmail, signInWithGoogle as startGoogleSignIn, signOut as signOutSession, type AuthError } from "../auth";
+import { signInWithEmail, signInWithGoogle as startGoogleSignIn, signOut as signOutSession, signOutOtherSessions, type AuthError } from "../auth";
 import type { GufClient } from "../client";
 import { apiError, toApiError, type ApiResult } from "../result";
 
@@ -174,7 +174,9 @@ export const setSessionFromLink: StaffSessionApi["setSessionFromLink"] = async (
 export const setPassword: StaffSessionApi["setPassword"] = async (client, password) => {
   try {
     const { error } = await client.auth.updateUser({ password });
-    return error ? { data: null, error: toApiError(error) } : { data: null, error: null };
+    if (error) return { data: null, error: toApiError(error) };
+    await signOutOtherSessions(client);
+    return { data: null, error: null };
   } catch (e) {
     return { data: null, error: toApiError(e) };
   }

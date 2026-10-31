@@ -224,6 +224,18 @@
 - **Última revisão**: 2026-10-18
 ---
 
+## A024 — Pagamentos, assinaturas, reembolsos e suporte (planejado) <a id="a024"></a>
+- **Finalidade**: cobrar o Pro, liberar e encerrar o acesso, devolver valores, responder pedidos de suporte e guardar o registro fiscal.
+- **Dados tratados**: ver `data-map.md` (A024). Cartão e Pix ficam só com o Stripe.
+- **Sensíveis?**: Não (mensagem livre do suporte com aviso e eliminação do texto 180 dias após fechar).
+- **Base legal**: **Art. 7º, V** para assinatura, cobrança, cancelamento, reembolso e suporte (contrato pedido pelo titular); **Art. 7º, II** para manter valor, data e id da fatura por 5 anos após a exclusão da conta, sem identificação ⚖ (prazo fiscal: CTN, arts. 173 e 195, parágrafo único); **Art. 7º, VI** para guardar o registro de reembolsos e atendimentos como prova em reclamação de consumidor ⚖.
+- **Justificativa**: sem esses dados não há como cobrar nem devolver; o envio ao Stripe se limita ao pseudônimo e ao e-mail do recibo.
+- **Decisão automatizada**: cancelar em até 7 dias devolve tudo automaticamente (CDC, art. 49) — **só concede** um direito; nenhuma recusa é automática (outros reembolsos são decididos por uma pessoa, no painel do Stripe).
+- **Retenção**: `retention.md`.
+- **Controle do titular**: cancelar pelo app (com devolução em 7 dias) e falar com o suporte por escrito; exportar inclui assinatura, pagamentos, reembolsos e pedidos (`guf-export/8`).
+- **Última revisão**: 2026-10-30
+---
+
 ## Checagem das "cláusulas armadilha"
 - [x] Nenhuma caixa pré-marcada (cadastro, `/aceite`, saúde).
 - [x] Sem "concordo com tudo": Termos/Política, idade e saúde são confirmações separadas.

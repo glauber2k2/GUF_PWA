@@ -360,6 +360,154 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_customers: {
+        Row: {
+          created_at: string
+          customer_ref: string
+          provider: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_ref: string
+          provider: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_ref?: string
+          provider?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_events: {
+        Row: {
+          error_code: string | null
+          event_id: string
+          processed_at: string | null
+          provider: string
+          received_at: string
+          type: string
+        }
+        Insert: {
+          error_code?: string | null
+          event_id: string
+          processed_at?: string | null
+          provider: string
+          received_at?: string
+          type: string
+        }
+        Update: {
+          error_code?: string | null
+          event_id?: string
+          processed_at?: string | null
+          provider?: string
+          received_at?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      billing_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          paid_at: string
+          payment_ref: string | null
+          provider: string
+          provider_ref: string
+          refunded_cents: number
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency: string
+          id?: string
+          paid_at: string
+          payment_ref?: string | null
+          provider: string
+          provider_ref: string
+          refunded_cents?: number
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          paid_at?: string
+          payment_ref?: string | null
+          provider?: string
+          provider_ref?: string
+          refunded_cents?: number
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          origin: string
+          payment_id: string
+          provider_refund_ref: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          id?: string
+          origin: string
+          payment_id: string
+          provider_refund_ref?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          origin?: string
+          payment_id?: string
+          provider_refund_ref?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "billing_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -843,6 +991,50 @@ export type Database = {
           },
         ]
       }
+      plan_prices: {
+        Row: {
+          amount_cents: number
+          billing_interval: string
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          plan_code: string
+          price_ref: string
+          provider: string
+        }
+        Insert: {
+          amount_cents: number
+          billing_interval: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          plan_code: string
+          price_ref: string
+          provider: string
+        }
+        Update: {
+          amount_cents?: number
+          billing_interval?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          plan_code?: string
+          price_ref?: string
+          provider?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_prices_plan_code_fkey"
+            columns: ["plan_code"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       plans: {
         Row: {
           code: string
@@ -1278,34 +1470,43 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
           created_at: string
           current_period_end: string | null
           id: string
           plan_code: string
           provider: string
           provider_ref: string
+          started_at: string | null
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           id?: string
           plan_code: string
           provider: string
           provider_ref: string
+          started_at?: string | null
           status: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           id?: string
           plan_code?: string
           provider?: string
           provider_ref?: string
+          started_at?: string | null
           status?: string
           updated_at?: string
           user_id?: string
@@ -1776,6 +1977,81 @@ export type Database = {
         Returns: {
           error: true
         } & "the function public.average_duration_seconds with parameter or with a single unnamed json/jsonb parameter, but no matches were found in the schema cache"
+      }
+      billing_begin_cancellation: {
+        Args: { p_origin: string; p_subscription_id: string; p_user_id: string }
+        Returns: Json
+      }
+      billing_checkout_context: {
+        Args: { p_plan_code: string; p_provider: string; p_user_id: string }
+        Returns: Json
+      }
+      billing_event_begin: {
+        Args: { p_event_id: string; p_provider: string; p_type: string }
+        Returns: boolean
+      }
+      billing_event_finish: {
+        Args: { p_error_code?: string; p_event_id: string; p_provider: string }
+        Returns: undefined
+      }
+      billing_link_customer: {
+        Args: { p_customer_ref: string; p_provider: string; p_user_id: string }
+        Returns: string
+      }
+      billing_live_subscriptions: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          provider: string
+          provider_ref: string
+        }[]
+      }
+      billing_mark_refund: {
+        Args: {
+          p_provider_refund_ref: string
+          p_refund_id: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      billing_record_dispute: {
+        Args: { p_payment_ref: string; p_provider: string }
+        Returns: Json
+      }
+      billing_record_payment: {
+        Args: {
+          p_amount_cents: number
+          p_currency: string
+          p_customer_ref: string
+          p_paid_at: string
+          p_payment_ref: string
+          p_provider: string
+          p_provider_ref: string
+          p_subscription_ref: string
+        }
+        Returns: Json
+      }
+      billing_record_refunds: {
+        Args: {
+          p_payment_ref: string
+          p_provider: string
+          p_refunded_cents: number
+          p_refunds: Json
+        }
+        Returns: Json
+      }
+      billing_sync_subscription: {
+        Args: {
+          p_cancel_at_period_end: boolean
+          p_canceled_at: string
+          p_current_period_end: string
+          p_customer_ref: string
+          p_price_ref: string
+          p_provider: string
+          p_provider_ref: string
+          p_status: string
+        }
+        Returns: Json
       }
       block_user: { Args: { p_user_id: string }; Returns: undefined }
       build_follow_alert: {
@@ -2369,6 +2645,7 @@ export type Database = {
           tone: string
         }[]
       }
+      my_billing: { Args: never; Returns: Json }
       my_entitlements: { Args: never; Returns: Json }
       normalize_handle: { Args: { p_handle: string }; Returns: string }
       notify_account_change: {
@@ -2455,6 +2732,7 @@ export type Database = {
       purge_expired_ai_plan_imports: { Args: never; Returns: number }
       purge_expired_announcements: { Args: never; Returns: undefined }
       purge_expired_audit_log: { Args: never; Returns: number }
+      purge_expired_billing: { Args: never; Returns: undefined }
       purge_expired_consent_proofs: { Args: never; Returns: number }
       random_social_handle: { Args: never; Returns: string }
       register_staff_member: {
@@ -2636,6 +2914,15 @@ export type Database = {
           first_broken_id: number
         }[]
       }
+      withdrawal_window: {
+        Args: { p_subscription_id: string }
+        Returns: {
+          ends_at: string
+          is_within: boolean
+          refundable_cents: number
+        }[]
+      }
+      workout_notes_shared: { Args: { p_owner: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

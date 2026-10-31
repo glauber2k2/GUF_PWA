@@ -311,7 +311,7 @@
 | Sensíveis? | Sim, se houver medidas |
 | Dados | id do usuário; apaga tudo em cascata |
 | Fonte | Pedido do titular (digitar EXCLUIR) |
-| Sistemas | Edge Function `delete-account` → `auth.admin.deleteUser`; cascata em todas as tabelas |
+| Sistemas | Edge Function `delete-account` → cancela a assinatura no gateway (7 dias = devolução) → `auth.admin.deleteUser`; cascata em todas as tabelas, exceto pagamentos e devoluções (`user_id` nulo, 5 anos) |
 | Operadores | Supabase |
 | Transferência intl. | Provável (G8) |
 | Retenção | Imediata no banco (cascata); foto do Storage apagada pela função (G18, F8); prova dos aceites em `consent_proofs` (G6, F3); backups conforme o plano (G15) |
@@ -497,3 +497,23 @@
 - **N1** — Confirmar com o jurídico se cargas/reps/RPE (A007/A009) podem ser vistos como dado de saúde ⚖.
 - **N2** — Serviço de e-mail transacional (confirmação/recuperação) também é operador: mapear em L4.
 - **N3** — Campos de observação em texto livre podem receber dado sensível espontâneo; avaliar aviso discreto ou nada (baixo risco).
+
+### A024 — Pagamentos, assinaturas, reembolsos e suporte (assinatura IMPLEMENTADA em 2026-10-30, venda desligada; suporte PLANEJADO)
+
+| Campo | Valor |
+|---|---|
+| Slug | a024-pagamentos |
+| Finalidade | Cobrar a assinatura do Pro, liberar e encerrar o acesso, devolver valores (cancelar em até 7 dias devolve tudo automaticamente; demais reembolsos feitos pelo controlador no painel do Stripe; o painel do guf só recebe e responde os pedidos), atender pedidos de suporte escritos no app, cumprir obrigação fiscal |
+| Base legal | Art. 7º, V (contrato); Art. 7º, II (registros fiscais por 5 anos ⚖); Art. 7º, VI (prova em reclamação) |
+| Categorias de titulares | Assinantes; colaboradores (decisões no painel) |
+| Sensíveis? | Não. A mensagem livre do suporte pode conter dado sensível escrito pela pessoa: aviso na tela + eliminação do texto 180 dias após fechar |
+| Dados | `billing_customers` (id do Customer), `subscriptions` (situação, período, cancelamento), `billing_payments` (valor, data, situação, id da fatura), `billing_refunds` (origem, motivo, valor, colaborador), `support_requests` (assunto, mensagem e resposta ≤ 1000, situação), `billing_events` (id e tipo do evento, sem corpo). **Nunca**: cartão, 4 últimos dígitos, endereço de cobrança |
+| Fonte | Titular (checkout, cancelamento, pedido de suporte); Stripe (webhook); equipe (resposta no painel do guf); controlador (reembolso no painel do Stripe) |
+| Sistemas | Edge Functions `billing` (checkout, cancelar, reativar, portal) e `billing-webhook` (implementadas; `_shared/billing`); `delete-account` cancela no Stripe antes de apagar; funções `withdrawal_window`, `billing_*`, `my_billing` (migration `20261030120000_billing_stripe`); planejado: `create_support_request`, `admin_*` de cobrança e suporte. Logs só com tipo e id do evento |
+| Operadores | Stripe ([ficha](vendors/stripe.md)), Supabase |
+| Transferência intl. | Sim (Stripe: EUA, Irlanda) |
+| Retenção | Ver `retention.md` (pagamentos, reembolsos e registro dos pedidos 5 anos sem identificação após a exclusão; textos do suporte 180 dias; eventos 90 dias) |
+| Segurança | Checkout e portal hospedados pelo Stripe; chave restrita em secrets; webhook assinado e idempotente; painel com papel Admin + aal2 + motivo + auditoria |
+| Alto risco? | Não (Res. 2/2022 art. 4º); o automático só concede a devolução da desistência; qualquer recusa é humana. Suporte é um pedido e uma resposta, não chat |
+| Owner | Glauber |
+| Plano | [`docs/stripe-payments-plan.md`](../docs/stripe-payments-plan.md) |

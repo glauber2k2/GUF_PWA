@@ -17,6 +17,7 @@ export * from "./push";
 export * from "./workout-edit";
 export * from "./ai";
 export * from "./plans";
+export * from "./billing";
 export * from "./plan-import";
 export * from "./body-measurements";
 export * from "./announcements";

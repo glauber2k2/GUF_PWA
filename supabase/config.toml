@@ -417,3 +417,7 @@ enabled = true
 # Avisos no celular (competição e seguidores): chamada só pelo banco (pg_net) com o cabeçalho x-guf-secret, sem JWT.
 [functions.push-alerts]
 verify_jwt = false
+
+# Webhook do gateway de pagamento: chamado pelo Stripe, sem JWT; a autenticidade vem da assinatura do evento.
+[functions.billing-webhook]
+verify_jwt = false
