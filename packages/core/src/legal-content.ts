@@ -380,8 +380,8 @@ const PRIVACY: LegalDocumentContent = {
             ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
             [
               "Plano e assinatura",
-              "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, a situação da assinatura e o código dela no prestador de pagamento",
-              "O app e, se você assinar, o prestador de pagamento",
+              "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, o código do seu cadastro no Stripe, a situação e as datas da assinatura e o valor, a data e a situação de cada pagamento e devolução",
+              "O app e, se você assinar, o Stripe",
             ],
             ["Medidas corporais", "Circunferências do corpo, em centímetros", "Você, opcional e com consentimento"],
             ["Conversas com o GUF AI", "Suas perguntas, as respostas e se você marcou a resposta como útil", "Você, se usar o GUF AI"],
@@ -411,6 +411,11 @@ const PRIVACY: LegalDocumentContent = {
             ["Avisar no celular sobre seguidores (novo seguidor, pedido para seguir, pedido aceito) e quando um competidor está perto de passar você ou passa", "Avisos no celular, perfil social e pontuação da competição", "Execução de contrato (art. 7º, V), só se você ligar as notificações"],
             ["Liberar o que o seu plano inclui e gerir a assinatura do Pro", "Plano e assinatura", "Execução de contrato (art. 7º, V)"],
             ["Guardar os registros de pagamento exigidos pela lei fiscal", "Assinatura e pagamentos", "Obrigação legal (art. 7º, II)"],
+            [
+              "Devolver valores (desistência em 7 dias e pedidos), tratar cobranças indevidas e contestações no cartão",
+              "Assinatura, pagamentos e devoluções",
+              "Execução de contrato (art. 7º, V) e exercício regular de direitos (art. 7º, VI)",
+            ],
             ["Responder suas perguntas no GUF AI e converter fichas em rotinas", "Conversas, treinos e rotinas (sem identificação)", "Execução de contrato (art. 7º, V), só se você usar"],
             ["Avisos sobre o serviço e sobre estes documentos", "Comunicados", "Execução de contrato (art. 7º, V) e obrigação legal (art. 7º, II)"],
             ["Avisos de novidades do guf", "Comunicados", "Legítimo interesse (art. 7º, IX), com opção de desligar em Configurações › Preferências"],
@@ -480,6 +485,7 @@ const PRIVACY: LegalDocumentContent = {
           "O painel nunca mostra medidas corporais, observações, conversas com o GUF AI, séries ou cargas.",
           "Mostrar o e-mail completo e qualquer alteração ficam registrados, com o motivo e quem fez.",
           "A equipe pode corrigir o @ ou o nome (você recebe um aviso no app), mudar o plano, desvincular um login social a seu pedido, mandar um link para você criar uma senha nova (a equipe nunca vê nem escolhe a sua senha) e, por violação dos Termos, suspender ou excluir a conta.",
+          "Para tratar pedidos sobre a assinatura do Pro (devoluções, cobranças e contestações), a equipe usa o painel do Stripe, também protegido por segundo fator. Ele mostra a assinatura e os pagamentos, com o e-mail e o final do cartão; nunca o número completo.",
         ),
       ],
     },
@@ -505,7 +511,7 @@ const PRIVACY: LegalDocumentContent = {
           "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
           "Google (API do Gemini), se você usar o GUF AI: recebe a pergunta e os dados de treino sem identificação (veja a seção GUF AI).",
-          "Prestador de pagamento: o Pro ainda não está à venda. Quando estiver, uma nova versão desta política dirá qual é o prestador; ele receberá os dados de pagamento direto de você, e o guf não verá nem guardará o número do cartão.",
+          "Stripe, se você assinar o Pro: processa o pagamento, a renovação e as devoluções. Recebe do guf só o e-mail da sua conta (para o recibo) e um código interno da conta; os dados do cartão e o que mais a página de pagamento pedir você informa direto ao Stripe. O guf não vê nem guarda o número do cartão. Para prevenir fraudes e cumprir as próprias obrigações legais, o Stripe também trata esses dados por conta própria, conforme a política de privacidade dele.",
           "Serviço de notificações do seu navegador ou celular (Google, Apple ou Mozilla), se você ligar as notificações. O texto do aviso vai criptografado: só o seu aparelho consegue ler.",
           "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
@@ -517,7 +523,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações), o Stripe (só se você assinar o Pro; também em outros países onde ele mantém operações) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
         ),
       ],
     },
@@ -534,7 +540,13 @@ const PRIVACY: LegalDocumentContent = {
             ["Medidas corporais", "Até você revogar o consentimento ou excluir a conta"],
             ["Perfil social, seguidores e bloqueios", "Enquanto a conta existir; seguidores até você remover; bloqueios até desbloquear"],
             ["Avisos no celular", "Até você desligar as notificações, sair da conta no aparelho ou o aparelho deixar de aceitar notificações; o registro dos avisos de seguidores enviados, por 1 dia"],
-            ["Plano e assinatura", "Enquanto a conta existir; os registros de pagamento exigidos pela lei fiscal ficam com o prestador de pagamento pelo prazo legal"],
+            ["Plano e assinatura", "Enquanto a conta existir"],
+            [
+              "Pagamentos e devoluções do Pro",
+              "5 anos a contar do pagamento, pela lei fiscal. Se você excluir a conta antes, eles ficam sem ligação com você até o fim desse prazo",
+            ],
+            ["Avisos técnicos recebidos do Stripe (só o código e o tipo do aviso)", "90 dias"],
+            ["Dados de pagamento no Stripe", "Pelo prazo de retenção do Stripe"],
             ["Conversas com o GUF AI", "Até 180 dias depois da última mensagem, ou até excluir a conta"],
             ["Horário das conversões de ficha", "2 dias"],
             ["Registro dos comunicados que você viu", "Até 12 meses depois de o comunicado terminar"],
@@ -608,6 +620,11 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.5": [
+      "Assinatura do Pro pelo Stripe: o que o guf envia (só o e-mail e um código interno da conta), o que você informa direto ao Stripe e o que o guf guarda (situação da assinatura, pagamentos e devoluções; nunca o número do cartão).",
+      "Prazos: pagamentos e devoluções por 5 anos, pela lei fiscal (sem ligação com você se excluir a conta antes); avisos técnicos do Stripe por 90 dias.",
+      "A equipe trata devoluções, cobranças e contestações no painel do Stripe, com segundo fator.",
+    ],
     "1.4": [
       "Observações do treino e dos exercícios agora seguem a mesma regra dos treinos: aparecem para quem pode ver seus treinos (inclusive as já escritas) e ficam escondidas quando você oculta o histórico. Continuam fora do GUF AI e do painel da equipe.",
       "Quem compete com você vê os pontos de cada treino; nos 3 primeiros dias do mês, o pódio do mês anterior aparece para os competidores.",
@@ -760,10 +777,10 @@ const SUBSCRIPTION: LegalDocumentContent = {
   shortTitle: "Termos da Assinatura",
   icon: "file-text",
   summary: [
-    { icon: "target", text: "O Pro tira os limites do plano Free." },
-    { icon: "bell", text: "Preço, cobrança e renovação aparecem antes de você confirmar. Mudança de preço é avisada antes de valer." },
-    { icon: "circle-x", text: "Cancele quando quiser: o Pro continua até o fim do período já pago." },
-    { icon: "toggle-left", text: "Desistiu em até 7 dias da contratação? Você recebe o valor de volta." },
+    { icon: "target", text: "O Pro tira os limites do plano Free enquanto a assinatura estiver ativa." },
+    { icon: "bell", text: "O preço e a periodicidade aparecem na tela antes de você confirmar. O pagamento é feito na página segura do Stripe." },
+    { icon: "toggle-left", text: "Cancelou em até 7 dias do primeiro pagamento? O valor volta inteiro e o Pro termina na hora." },
+    { icon: "circle-x", text: "Depois disso, cancele quando quiser, no app: o Pro continua até o fim do período já pago, sem nova cobrança." },
     { icon: "folder-lock", text: "Quando o Pro termina, você volta ao Free sem perder nenhum dado." },
   ],
   sections: [
@@ -772,39 +789,77 @@ const SUBSCRIPTION: LegalDocumentContent = {
       title: "O que é a assinatura",
       blocks: [
         p(
-          `A assinatura do plano Pro do guf, mantido por ${CONTROLLER_DESCRIPTION}, libera as funcionalidades do Pro enquanto estiver ativa. A lista atualizada do que cada plano inclui fica na tela Planos do app.`,
+          `A assinatura do plano Pro do guf, mantido por ${CONTROLLER_DESCRIPTION}, libera as funcionalidades do Pro enquanto estiver ativa. A lista atualizada do que cada plano inclui fica em Configurações › Plano.`,
         ),
         p("Estes termos completam os Termos de Uso; em caso de conflito sobre a assinatura, valem estes."),
       ],
     },
     {
       id: "preco",
-      title: "Preço e cobrança",
+      title: "Preço, pagamento e renovação",
       blocks: [
-        {
-          kind: "note",
-          icon: "bell",
-          text: "O Pro ainda não está à venda e nada é cobrado. Antes de qualquer cobrança, uma nova versão destes termos informará o preço, a periodicidade, o prestador de pagamento e o canal de cancelamento, e você precisará aceitá-la.",
-        },
-        p("Quando a venda começar, o valor e a data da cobrança aparecerão na tela de assinatura antes da confirmação. Mudanças de preço serão avisadas no app e por e-mail antes de valer e só valerão a partir da renovação seguinte."),
+        p(
+          "O preço, a moeda e a periodicidade da cobrança aparecem na tela do plano antes de você confirmar. O pagamento é feito na página do Stripe, o prestador de pagamento do guf, com as formas de pagamento que essa página mostrar. Os dados do cartão vão direto para o Stripe.",
+        ),
+        p(
+          "O Pro é liberado quando o Stripe confirma o pagamento, o que costuma levar alguns segundos. A assinatura se renova automaticamente ao fim de cada período, na mesma forma de pagamento, até você cancelar. O recibo de cada cobrança é enviado pelo Stripe ao e-mail da sua conta e fica em Configurações › Plano › Pagamento e recibos.",
+        ),
+        p("Mudanças de preço são avisadas no app e por e-mail antes de valer e só valem a partir da renovação seguinte."),
       ],
     },
     {
-      id: "renovacao",
-      title: "Renovação e cancelamento",
+      id: "falha",
+      title: "Se a cobrança falhar",
       blocks: [
-        p("A assinatura se renova automaticamente ao fim de cada período, até você cancelar."),
         p(
-          "Você pode cancelar a qualquer momento, sem multa. O Pro continua até o fim do período já pago e não há nova cobrança. Se o pagamento falhar, o prestador tenta de novo por alguns dias; sem pagamento, o plano volta ao Free.",
+          "Se a renovação não for paga (cartão vencido ou sem limite, por exemplo), o Pro continua por até 14 dias enquanto o Stripe tenta cobrar de novo, e o app mostra um aviso para atualizar a forma de pagamento. Sem pagamento nesse prazo, a assinatura é encerrada e a conta volta ao Free.",
         ),
       ],
     },
     {
       id: "arrependimento",
-      title: "Direito de arrependimento",
+      title: "Desistir em até 7 dias",
       blocks: [
         p(
-          `Por ser uma contratação pela internet, você pode desistir em até 7 dias a contar da contratação e receber de volta o valor pago (art. 49 do Código de Defesa do Consumidor). O pedido pode ser feito pelo e-mail ${PRIVACY_CONTACT_EMAIL}.`,
+          "Por ser uma contratação pela internet, você pode desistir em até 7 dias a contar do primeiro pagamento da assinatura (art. 49 do Código de Defesa do Consumidor). Basta cancelar no app, em Configurações › Plano › Cancelar assinatura: o valor pago é devolvido inteiro, pela mesma forma de pagamento, e o Pro termina na hora.",
+        ),
+        p(
+          "A devolução é pedida ao Stripe automaticamente. O prazo para o valor aparecer na fatura ou na conta depende do banco ou da operadora do cartão. Se a devolução não for confirmada na hora, o app mostra o botão “Concluir devolução”, que repete o pedido sem devolver duas vezes.",
+        ),
+        p("A renovação da assinatura não reabre o prazo de 7 dias."),
+      ],
+    },
+    {
+      id: "cancelamento",
+      title: "Cancelar depois dos 7 dias",
+      blocks: [
+        p(
+          "Você pode cancelar quando quiser, sem multa, em Configurações › Plano. O Pro continua até o fim do período já pago e não há nova cobrança; até lá, dá para reativar a assinatura no mesmo lugar. O período já pago não é devolvido.",
+        ),
+      ],
+    },
+    {
+      id: "pedidos",
+      title: "Cobranças, devoluções e contestações",
+      blocks: [
+        p(
+          `Para cobrança indevida, cobrança em dobro, Pro que não foi liberado depois do pagamento ou qualquer outro problema com a assinatura, escreva para ${PRIVACY_CONTACT_EMAIL}. A resposta sai em até 5 dias úteis. Confirmada a cobrança indevida, o valor cobrado indevidamente é devolvido pela mesma forma de pagamento.`,
+        ),
+        p("Se a devolução feita pela equipe for do valor total do período atual, o Pro termina; numa devolução parcial, ele continua até o fim do período."),
+        p(
+          "Se você contestar uma cobrança no banco ou na operadora do cartão, a assinatura é cancelada na hora e o Pro termina, para não haver nova cobrança enquanto a contestação é analisada. O valor segue a decisão da contestação.",
+        ),
+      ],
+    },
+    {
+      id: "conta",
+      title: "Excluir ou suspender a conta",
+      blocks: [
+        p(
+          "Excluir a conta, pelo app ou pela equipe (a seu pedido ou por violação dos Termos de Uso), cancela a assinatura antes, para não haver nova cobrança. Dentro dos 7 dias do primeiro pagamento, o valor volta inteiro; depois disso, o restante do período já pago não é devolvido, porque a conta deixa de existir. Se quiser usar o Pro até o fim, cancele primeiro e exclua a conta depois.",
+        ),
+        p(
+          `A suspensão da conta pela equipe não cancela a assinatura. Como a conta suspensa não abre o app, o cancelamento durante a suspensão é feito pelo e-mail ${PRIVACY_CONTACT_EMAIL}.`,
         ),
       ],
     },
@@ -822,13 +877,18 @@ const SUBSCRIPTION: LegalDocumentContent = {
       title: "Seus dados na assinatura",
       blocks: [
         p(
-          "Os dados do cartão vão direto para o prestador de pagamento: o guf não os vê nem guarda. O guf recebe só a situação da assinatura (ativa, em atraso, cancelada) e o período pago. Detalhes na Política de Privacidade.",
+          "Os dados do cartão vão direto para o Stripe: o guf não vê nem guarda o número do cartão. O guf envia ao Stripe só o e-mail da sua conta (para o recibo) e um código interno da conta, e recebe a situação e as datas da assinatura e o valor, a data e a situação de cada pagamento e devolução. Detalhes e prazos de guarda na Política de Privacidade.",
         ),
         { kind: "link", doc: "privacidade", anchor: "compartilhamento", text: "Ler a Política de Privacidade" },
       ],
     },
   ],
   changes: {
+    "1.1": [
+      "O Pro passa a ser vendido: o preço aparece na tela antes de você confirmar e o pagamento é feito pelo Stripe, com renovação automática.",
+      "Desistir em até 7 dias do primeiro pagamento é feito no próprio app, em Configurações › Plano: o valor volta inteiro e o Pro termina na hora.",
+      "Regras escritas para cobrança que falha, devolução feita pela equipe, contestação no cartão, cobrança indevida (devolução do valor indevido) e exclusão ou suspensão da conta com assinatura ativa (excluir a conta cancela a assinatura antes).",
+    ],
     "1.0": [
       `Versão oficial, mantida por ${CONTROLLER_DESCRIPTION}.`,
       "O Pro ainda não está à venda: preço, prestador de pagamento e canal de cancelamento entram numa nova versão, que você aceita antes de qualquer cobrança.",

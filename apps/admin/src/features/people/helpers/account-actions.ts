@@ -108,7 +108,7 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     permission: "delete_accounts",
     tone: "destructive",
     consequence:
-      "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer. Por violação dos Termos, use \"Agendar exclusão\" (avisa a pessoa e dá tempo de exportar); excluir agora só a pedido da pessoa ou em caso grave.",
+      "A conta e todos os dados (treinos, rotinas, medidas, conversas) são apagados agora. Não dá para desfazer. Assinatura paga é cancelada antes: dentro dos 7 dias do primeiro pagamento o valor volta inteiro; depois, encerra sem devolver o restante. Por violação dos Termos, use \"Agendar exclusão\" (avisa a pessoa e dá tempo de exportar); excluir agora só a pedido da pessoa ou em caso grave.",
     confirmationWord: "EXCLUIR",
   },
   schedule_deletion: {
@@ -118,7 +118,7 @@ export const ACCOUNT_ACTIONS: Record<AccountActionKind, AccountActionMeta> = {
     icon: CalendarClock,
     permission: "delete_accounts",
     tone: "caution",
-    consequence: "A pessoa recebe um aviso no app com a data e pode exportar os dados antes. Dá para cancelar até lá.",
+    consequence: "A pessoa recebe um aviso no app com a data e pode exportar os dados antes. Dá para cancelar até lá. Na data, a assinatura paga é cancelada antes da exclusão (mesma regra dos 7 dias).",
   },
   cancel_deletion: {
     label: "Cancelar exclusão agendada",

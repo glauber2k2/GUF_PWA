@@ -330,10 +330,12 @@ export const unbanUser: AdminUsersApi["unbanUser"] = async (client, { userId, re
   return result.error ? result : { data: null, error: null };
 };
 
-export const deleteUser: AdminUsersApi["deleteUser"] = async (client, { userId, reason, note }) => {
-  const result = await runQuery(() => client.rpc("admin_delete_user", { p_user_id: userId, p_reason: reason, p_note: noteOrNull(note) ?? undefined }));
-  return result.error ? result : { data: null, error: null };
-};
+/**
+ * Exclui pela Edge Function admin-delete-account: o banco recusa conta com assinatura viva (GA023) e a
+ * função cancela no gateway antes (mesma regra da exclusão pelo app). Permissão e auditoria no banco.
+ */
+export const deleteUser: AdminUsersApi["deleteUser"] = async (client, { userId, reason, note }) =>
+  invokeAdminFunction(client, "admin-delete-account", { userId, reason, note: noteOrNull(note) });
 
 export const scheduleDeletion: AdminUsersApi["scheduleDeletion"] = async (client, { userId, at, reason, note }) => {
   const result = await runQuery(() =>
@@ -347,22 +349,26 @@ export const cancelDeletion: AdminUsersApi["cancelDeletion"] = async (client, { 
   return result.error ? result : { data: null, error: null };
 };
 
-/** Respostas da Edge Function admin-reset-password: { code } com o ApiErrorCode. */
+/** Respostas das Edge Functions do painel: { code } com o ApiErrorCode. */
 function isApiErrorCode(code: unknown): code is ApiErrorCode {
   return typeof code === "string" && code in API_ERROR_MESSAGES;
 }
 
-export const sendPasswordReset: AdminUsersApi["sendPasswordReset"] = async (client, { userId, reason, note }) => {
+/** Chama uma Edge Function do painel com o token do colaborador; erro vem como { code }. */
+async function invokeAdminFunction(client: GufClient, name: string, body: Record<string, unknown>): Promise<ApiResult<null>> {
   try {
-    const { error } = await client.functions.invoke("admin-reset-password", { body: { userId, reason, note: noteOrNull(note) } });
+    const { error } = await client.functions.invoke(name, { body });
     if (!error) return { data: null, error: null };
     const response = (error as { context?: Response }).context;
-    const body = response ? ((await response.json().catch(() => null)) as { code?: unknown } | null) : null;
-    return { data: null, error: isApiErrorCode(body?.code) ? apiError(body.code) : toApiError(error) };
+    const payload = response ? ((await response.json().catch(() => null)) as { code?: unknown } | null) : null;
+    return { data: null, error: isApiErrorCode(payload?.code) ? apiError(payload.code) : toApiError(error) };
   } catch (e) {
     return { data: null, error: toApiError(e) };
   }
-};
+}
+
+export const sendPasswordReset: AdminUsersApi["sendPasswordReset"] = async (client, { userId, reason, note }) =>
+  invokeAdminFunction(client, "admin-reset-password", { userId, reason, note: noteOrNull(note) });
 
 export const listPlans: AdminUsersApi["listPlans"] = async (client) => {
   const result = await runQuery(() => client.from("plans").select("code, name, is_default, rank").order("rank"));

@@ -11,7 +11,7 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
   {
     question: "Posso cancelar quando quiser?",
     answer:
-      "Sim, aqui no app e sem multa. Cancelando em até 7 dias da contratação, devolvemos o valor inteiro e o Pro termina na hora. Depois disso, o Pro continua até o fim do período já pago e não há nova cobrança.",
+      "Sim, aqui no app e sem multa. Cancelando em até 7 dias do primeiro pagamento, devolvemos o valor inteiro e o Pro termina na hora. Depois disso, o Pro continua até o fim do período já pago e não há nova cobrança.",
   },
   {
     question: "Como é feito o pagamento?",

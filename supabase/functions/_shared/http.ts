@@ -25,6 +25,14 @@ export function jsonResponse(body: unknown, status: number, headers: Record<stri
   return new Response(JSON.stringify(body), { status, headers: { ...headers, "Content-Type": "application/json; charset=utf-8" } });
 }
 
+/** Comparação em tempo constante (chamadas do banco com x-guf-secret): o segredo não vaza pelo tempo de resposta. */
+export function sameSecret(received: string | null, expected: string): boolean {
+  if (!received || received.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= received.charCodeAt(i) ^ expected.charCodeAt(i);
+  return diff === 0;
+}
+
 /** Token do cabeçalho Authorization (sem "Bearer "). */
 export function bearerToken(req: Request): string | null {
   const header = req.headers.get("Authorization") ?? "";

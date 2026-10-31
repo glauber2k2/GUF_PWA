@@ -405,7 +405,8 @@ Testada em 30/10/2026 no banco remoto dentro de uma transação desfeita (32 ver
 
 ### 11.5 Ainda falta antes de vender de verdade
 
-- ⏸ Termos da Assinatura 1.1 e Política 1.5 (seção 6.2): os textos atuais dizem que o Pro ainda não está à venda.
+- ⏸ Termos da Assinatura 1.1 e Política 1.5 (seção 6.2): **escritos** em `packages/core/src/legal-content.ts`, migration `20261031135255_legal_docs_subscription_stripe` (não aplicada; aplicar depois de o app com os textos estar no ar). Diferenças do plano: sem "Falar com o suporte" no app (fase 4 não feita), pedidos de cobrança pelo e-mail do canal em até 5 dias úteis; sem reenvio automático de devoluções, o texto descreve o botão "Concluir devolução"; sem Pix (só as formas mostradas na página do Stripe). Falta aprovar o texto.
+- **Exclusão pelo painel cancela a assinatura** (migration `20261031140000_account_deletion_cancels_subscription` + Edge Function `admin-delete-account`): o banco recusa excluir conta com assinatura viva (GA023); excluir agora e as exclusões agendadas passam pela função, que cancela com a regra da exclusão pelo app (7 dias: devolve tudo; depois, encerra sem devolver o restante). Cobrança indevida: devolve só o valor indevido (decisão do controlador, 31/10/2026; o CDC, art. 42, parágrafo único, prevê o dobro salvo engano justificável ⚖).
 - Exportação (`export_my_data` → `guf-export/8` com pagamentos e devoluções).
 - Reenvio automático de devoluções sem resposta (`retry_pending_refunds`); hoje a pessoa toca em "Concluir devolução" e a exclusão da conta não prossegue sem resposta do Stripe.
 - Fases 4 e 5 (suporte e painel) e a seção 8 (conta, DPA, MFA, hospedagem).
