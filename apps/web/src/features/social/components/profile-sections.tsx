@@ -8,7 +8,6 @@ import {
   formatNumber,
   fromLocalISODate,
   formatShortDate,
-  MEMBER_HISTORY_SCOPE_NOTE,
   plural,
   toDisplayWeight,
   type WeightUnit,
@@ -169,7 +168,7 @@ export function ProfileEvolution({
 /**
  * Histórico de treinos: cards do feed (2a), 10 por vez; rolar até perto do fim busca os próximos 10.
  * Só o primeiro card anima, quando a pessoa rola até ele. Oculto para visitantes quando a pessoa escondeu; de outra pessoa,
- * só o mês atual.
+ * todo o histórico (só o gráfico fica no mês atual).
  */
 export function ProfileHistory({
   profile,
@@ -207,7 +206,6 @@ export function ProfileHistory({
           </Link>
         )}
       </div>
-      {!profile.isSelf && profile.historyVisible && <p className="-mt-2 mb-0 text-[13px] leading-[18px] text-fg-secondary">{MEMBER_HISTORY_SCOPE_NOTE}</p>}
 
       {!profile.historyVisible ? (
         <div className="flex items-center gap-3.5 rounded-lg border border-dashed border-border-strong px-5 py-[18px]">

@@ -7,7 +7,6 @@
  */
 import {
   addLocalDays,
-  memberHistoryFrom,
   startOfLocalWeek,
   toLocalISODate,
   type ExperienceLevel,
@@ -443,9 +442,8 @@ export const mockSocialApi = {
     const p = find(userId);
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
-    const from = p.userId === MOCK_ME ? "" : memberHistoryFrom(new Date());
     const page = feedItems(p)
-      .filter((w) => w.performedOn >= from && (!before || w.finishedAt < before))
+      .filter((w) => !before || w.finishedAt < before)
       .slice(0, limit ?? 10);
     return { data: page, error: null };
   },

@@ -14,6 +14,8 @@ import type { CardioStopwatch } from "@/features/workout/hooks/use-cardio-stopwa
 import { useCardioTimerControls } from "@/features/workout/hooks/use-cardio-timer-controls";
 import type { WorkoutEditing } from "@/features/workout/hooks/use-workout-editing";
 
+const NOTE_PLACEHOLDER = "Ex.: pegada aberta, banco no 4";
+
 export interface WorkoutEditorProps {
   editing: WorkoutEditing;
   /** Título da folha de observação do treino (ex.: "Treino de hoje"). */
@@ -51,7 +53,10 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
 
   const menuExercise = sheet?.kind === "exercise-menu" ? state.exercises.find((e) => e.id === sheet.exerciseId) : undefined;
   const noteTarget = sheet?.kind === "note" ? sheet.target : null;
-  const noteTitle = noteTarget === "workout" ? workoutNoteTitle : state.exercises.find((e) => e.id === noteTarget)?.name;
+  const noteExercise = noteTarget && noteTarget !== "workout" ? state.exercises.find((e) => e.id === noteTarget) : undefined;
+  const noteTitle = noteTarget === "workout" ? workoutNoteTitle : noteExercise?.name;
+  // A observação do último treino não passa para este: aparece só como sugestão no campo vazio.
+  const notePlaceholder = noteExercise?.previousNote || NOTE_PLACEHOLDER;
 
   return (
     <>
@@ -132,7 +137,7 @@ export function WorkoutEditor({ editing, workoutNoteTitle, exerciseNoteHint, off
         <TextField
           label="Observação"
           value={editing.noteDraft}
-          placeholder="Ex.: pegada aberta, banco no 4"
+          placeholder={notePlaceholder}
           onChange={(e) => editing.setNoteDraft(e.target.value)}
         />
         <Button size="tall" fullWidth onClick={editing.saveNote}>

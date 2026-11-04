@@ -22,6 +22,7 @@ function toEditableExercise(exercise: SummaryExercise, record: WorkoutSummaryRec
     equipment: "outro",
     restSeconds: DEFAULT_REST_SECONDS,
     note: exercise.note,
+    previousNote: null,
     best1RmKg: record?.metric === "load" ? record.previous1RmKg : null,
     cardioBest: null,
     sets: exercise.sets.map((s, i) => ({

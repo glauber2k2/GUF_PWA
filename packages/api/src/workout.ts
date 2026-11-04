@@ -55,8 +55,10 @@ export interface WorkoutExercise {
   equipment: string;
   /** Descanso planejado na rotina (padrão 90s). */
   restSeconds: number;
-  /** Observação do exercício (do treino ou, se vazia, a salva na rotina). */
+  /** Observação do exercício neste treino (começa vazia: a de antes não passa para o treino novo). */
   note: string | null;
+  /** Observação salva na rotina (a do último treino com ela): só aparece como sugestão no campo. */
+  previousNote: string | null;
   /** Maior 1RM estimado antes deste treino (o recorde a bater); null = primeira vez (sem PR). */
   best1RmKg: number | null;
   /** Cardio: melhores marcas (ritmo e distância) antes deste treino; null = primeira vez (sem PR). */
@@ -315,7 +317,8 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
           muscleGroup: se.exercises?.muscle_group ?? "",
           equipment: se.exercises?.equipment ?? "outro",
           restSeconds: ctx?.restSeconds ?? DEFAULT_REST_SECONDS,
-          note: se.notes ?? ctx?.routineNote ?? null,
+          note: se.notes,
+          previousNote: ctx?.routineNote ?? null,
           best1RmKg: ctx?.best1RmKg ?? null,
           cardioBest: ctx?.cardioBest ?? null,
           sets: se.set_logs.map((l) => {
