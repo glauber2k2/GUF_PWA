@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.9 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-10-29
+**Versão**: v0.10 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-11-04
+
+> **v0.10**: no perfil de outra pessoa, a lista de treinos (feed, paginado) e o treino aberto passam a mostrar todo o histórico que o titular deixa ver (titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto), não só o mês atual (decisão de produto, migration `20261104120000_member_history_full`). O gráfico de evolução continua no mês atual. Aumenta a exposição de dados já registrados ao mesmo público: Termos 1.4 descrevem a regra e pedem novo aceite (`requires_reaccept = true`); mitigação continua sendo ocultar o histórico ou fechar o perfil (Configurações › Privacidade).
 
 > **v0.9**: observações do treino e dos exercícios passam a fazer parte do treino (decisão de produto, migration `20261029150000_workout_notes_visible`): mesmo público do histórico (titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto; de outra pessoa, só o mês atual) e escondidas junto quando o titular oculta o histórico. Texto livre escrito pelo titular, que pode conter dado de saúde (dor, lesão): por isso as observações já escritas, feitas sob a promessa de serem privadas, só aparecem para outras pessoas depois que o titular aceita os Termos 1.3 (`workout_notes_shared`; `requires_reaccept = true`, Termos 1.3 e Política 1.4 com "O que mudou"), e os Termos pedem para não escrever dados de saúde nem de outras pessoas nelas. Continuam fora do GUF AI e do painel. Risco R007 revisto (residual pode subir se observações trouxerem dado de saúde ⚖).
 

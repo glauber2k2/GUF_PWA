@@ -41,7 +41,8 @@ export function buildWorkoutExercise(
     muscleGroup: library.muscleGroup,
     equipment: library.equipment,
     restSeconds: context?.restSeconds ?? DEFAULT_REST_SECONDS,
-    note: context?.routineNote ?? null,
+    note: null,
+    previousNote: context?.routineNote ?? null,
     best1RmKg: context?.best1RmKg ?? null,
     cardioBest: context?.cardioBest ?? null,
     sets: Array.from({ length: total }, (_, i) => {
@@ -90,6 +91,7 @@ export function workoutSnapshot(base: ActiveWorkout, state: WorkoutViewState, cl
       equipment: e.equipment,
       restSeconds: e.restSeconds,
       note: e.note,
+      previousNote: e.previousNote,
       best1RmKg: e.best1RmKg,
       cardioBest: e.cardioBest,
       sets: e.sets,

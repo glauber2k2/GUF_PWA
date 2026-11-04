@@ -213,7 +213,7 @@ const TERMS: LegalDocumentContent = {
         ),
         ul(
           "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
-          "No perfil de outra pessoa, o histórico de treinos mostra só os treinos do mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
+          "No perfil de outra pessoa, o histórico de treinos mostra todos os treinos que ela deixa ver; o gráfico de evolução mostra só o mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
           "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e de cardio e volume), pelas mesmas regras para todos, publicadas no app.",
           "No seu perfil, quem compete com você vê também os pontos de cada treino; quem só visita não vê pontos.",
@@ -297,6 +297,9 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.4": [
+      "Quem pode ver seus treinos passa a ver todo o histórico de treinos no seu perfil, não só os do mês atual. O gráfico de evolução continua mostrando só o mês atual. Para esconder, você pode ocultar o histórico ou fechar o perfil em Configurações › Privacidade.",
+    ],
     "1.3": [
       "Observações do treino e dos exercícios passam a fazer parte do treino: quem pode ver seus treinos vê também as observações, inclusive as que você já escreveu. Ocultar o histórico esconde as observações junto.",
       "Nova seção “Suas escolhas e responsabilidades”: o que você escreve e decide mostrar, o que acontece fora do app, dados declarados, decisões de treino, segurança da conta e fraude na competição.",

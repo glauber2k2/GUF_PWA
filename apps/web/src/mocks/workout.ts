@@ -159,13 +159,14 @@ function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioS
     equipment: ex.equipment,
     restSeconds,
     note: null,
+    previousNote: null,
     best1RmKg: null,
     cardioBest: MOCK_CARDIO_BEST,
     sets: sets.map(seedCardioSet),
   };
 }
 
-function seedExercise(name: string, restSeconds: number, note: string | null, sets: SeedSet[]): WorkoutExercise {
+function seedExercise(name: string, restSeconds: number, previousNote: string | null, sets: SeedSet[]): WorkoutExercise {
   const ex = byName(name);
   return {
     id: nextId("se"),
@@ -174,7 +175,8 @@ function seedExercise(name: string, restSeconds: number, note: string | null, se
     muscleGroup: ex.muscleGroup,
     equipment: ex.equipment,
     restSeconds,
-    note,
+    note: null,
+    previousNote,
     best1RmKg: BEST_1RM_KG[name] ?? null,
     cardioBest: null,
     sets: sets.map(seedSet),
