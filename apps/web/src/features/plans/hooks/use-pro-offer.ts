@@ -12,9 +12,10 @@ import {
   type PlanPrice,
 } from "@guf/core";
 import { useAppShell } from "@/features/app-shell";
-import { usePlanCatalog, useStartSubscription, useSubscriptionDocuments } from "@/features/plans/api/use-plans";
+import { usePlanCatalog, useSubscriptionDocuments } from "@/features/plans/api/use-plans";
 import { useMyBilling, usePlanPrices } from "@/features/plans/api/use-billing";
-import { WEB_BILLING_PROVIDER } from "@/features/plans/constants/payment";
+import { usePaymentChannel } from "@/features/plans/hooks/use-payment-channel";
+import { useSubscribeFlow } from "@/features/plans/hooks/use-subscribe-flow";
 import { usePlanGateContext } from "@/features/plans/providers/plan-gate-provider";
 
 const DOCUMENTS_ERROR = "Não foi possível carregar os termos. Verifique a internet e tente de novo.";
@@ -29,17 +30,19 @@ function useOfferInterval(prices: readonly PlanPrice[], planCode: string | undef
 
 /**
  * Oferta do plano acima do atual (tela de planos e tela do Pro): plano, preços à venda (mensal e
- * anual), o que ele melhora, os termos a aceitar e a assinatura. Os dois lugares assinam pelo mesmo
+ * anual) no gateway do canal (Google Play no app da Play, Stripe no navegador),
+ * o que ele melhora, os termos a aceitar e a assinatura. Os dois lugares assinam pelo mesmo
  * caminho e com os mesmos avisos.
  */
 export function useProOffer() {
   const { showToast } = useAppShell();
   const { entitlements } = usePlanGateContext();
   const catalog = usePlanCatalog();
-  const prices = usePlanPrices(WEB_BILLING_PROVIDER);
+  const channel = usePaymentChannel();
+  const prices = usePlanPrices(channel.provider);
   const documents = useSubscriptionDocuments();
   const billing = useMyBilling();
-  const subscribe = useStartSubscription();
+  const subscribe = useSubscribeFlow(channel);
 
   const plans = catalog.data ?? [];
   const priceList = prices.data ?? [];
@@ -54,19 +57,14 @@ export function useProOffer() {
 
   const startSubscription = (acceptedDocumentIds: string[]) => {
     if (!upgrade || !interval) return;
-    subscribe.mutate(
-      { planCode: upgrade.code, interval, acceptedDocumentIds, platform: "web" },
-      {
-        onError: (error) => {
-          if (error.code === "subscription_documents_outdated") void documents.refetch();
-          const isUnavailable = error.code === "billing_unavailable";
-          showToast(isUnavailable ? "Assinatura em breve" : "Não foi possível assinar", {
-            tone: isUnavailable ? "info" : "error",
-            message: error.message,
-          });
-        },
-      },
-    );
+    subscribe.start({ planCode: upgrade.code, interval, acceptedDocumentIds }, (error) => {
+      if (error.code === "subscription_documents_outdated") void documents.refetch();
+      const isUnavailable = error.code === "billing_unavailable";
+      showToast(isUnavailable ? "Assinatura em breve" : "Não foi possível assinar", {
+        tone: isUnavailable ? "info" : "error",
+        message: error.message,
+      });
+    });
   };
 
   return {
@@ -92,6 +90,8 @@ export function useProOffer() {
     retryDocuments: () => void documents.refetch(),
     isReadyToSubscribe: documents.isSuccess && billing.isSuccess,
     isSubscribing: subscribe.isPending,
+    /** Canal desta sessão (app da Play ou navegador): gateway, plataforma e a linha de confiança. */
+    channel,
     startSubscription,
   };
 }

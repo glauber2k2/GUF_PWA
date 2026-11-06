@@ -5,8 +5,11 @@
 //   cancel     → { mode, refund } (7 dias = devolução + fim agora; depois = até o fim do período)
 //   reactivate → { ok } (desfaz o cancelamento agendado)
 //   portal     → { url } do portal do gateway (trocar cartão, faturas)
+//   store-prepare → { productId } (aceites gravados antes; compra pela loja no app Android)
+//   store-confirm → { status: active | pending } (confere a compra no Google, liga, confirma e espelha)
 // Secrets: STRIPE_SECRET_KEY (chave restrita), APP_URL, ALLOWED_ORIGINS; opcional BILLING_PROVIDER,
-// STRIPE_PORTAL_CONFIGURATION. Deploy: npx supabase functions deploy billing --use-api
+// STRIPE_PORTAL_CONFIGURATION; Google Play: GOOGLE_PLAY_PACKAGE_NAME, GOOGLE_PLAY_SERVICE_ACCOUNT.
+// Deploy: npx supabase functions deploy billing --use-api
 // =====================================================================
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createSupabaseBillingStore } from "../_shared/billing/store.ts";
@@ -15,8 +18,16 @@ import { BillingActionError, toBillingActionError } from "./action-error.ts";
 import { checkout } from "./checkout.ts";
 import type { BillingAction } from "./context.ts";
 import { cancel, portal, reactivate } from "./manage.ts";
+import { storeConfirm, storePrepare } from "./store-purchase.ts";
 
-const BILLING_ACTIONS: Record<string, BillingAction> = { checkout, cancel, reactivate, portal };
+const BILLING_ACTIONS: Record<string, BillingAction> = {
+  checkout,
+  cancel,
+  reactivate,
+  portal,
+  "store-prepare": storePrepare,
+  "store-confirm": storeConfirm,
+};
 
 const MAX_BODY_BYTES = 4_096;
 

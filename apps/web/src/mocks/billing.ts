@@ -122,4 +122,15 @@ export const mockBillingApi = {
     // No app real é o portal do gateway; aqui só recarrega a tela de planos no mesmo cenário.
     return { data: { url: `/planos/?estado=${scenario},pro` }, error: null };
   },
+  async prepareStorePurchase(client, { interval }) {
+    ignoreClient(client);
+    await wait();
+    return { data: { productId: interval === "year" ? "pro_anual" : "pro_mensal" }, error: null };
+  },
+  async confirmStorePurchase(client) {
+    ignoreClient(client);
+    await wait(900);
+    scenario = "assinante-7dias";
+    return { data: { status: "active" }, error: null };
+  },
 } satisfies BillingApi;

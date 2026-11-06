@@ -22,13 +22,14 @@ export function SubscriptionManageList({ subscription, lastPayment, canManage }:
   const paymentDescription = lastPayment
     ? `Último: ${formatDayMonthYear(new Date(lastPayment.paidAt))} · ${formatMoney(lastPayment.amountCents, lastPayment.currency)}`
     : "Cartão, faturas e recibos";
+  const paymentTitle = actions.isManagedInStore ? "Gerenciar no Google Play" : view === "past_due" ? "Atualizar pagamento" : "Pagamento e recibos";
 
   return (
     <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-surface">
-      {isLive && subscription.canManagePayment && (
+      {isLive && (subscription.canManagePayment || actions.isManagedInStore) && (
         <ManageRow
           icon={CreditCard}
-          title={view === "past_due" ? "Atualizar pagamento" : "Pagamento e recibos"}
+          title={paymentTitle}
           description={paymentDescription}
           loading={actions.isOpeningPortal}
           disabled={!canManage}
@@ -39,7 +40,7 @@ export function SubscriptionManageList({ subscription, lastPayment, canManage }:
         <ManageRow
           icon={Undo2}
           title="Reativar assinatura"
-          description="A renovação volta a acontecer normalmente"
+          description={actions.isManagedInStore ? "Pela sua assinatura no Google Play" : "A renovação volta a acontecer normalmente"}
           loading={actions.isReactivating}
           disabled={!canManage}
           onClick={actions.reactivateNow}

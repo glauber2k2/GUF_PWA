@@ -74,20 +74,58 @@ Não criar o arquivo com valores inventados: sem as impressões digitais reais, 
 - **Teste fechado:** conta pessoal nova na Play precisa de um teste fechado com testadores por um período antes de
   publicar em produção. Conferir a regra vigente na Play Console ao criar a conta.
 
-## 5. Pagamento do Pro dentro do app da Play (ATENÇÃO)
+## 5. Pagamento do Pro: Google Play dentro do app, Stripe no site
 
-A Google Play tem regras próprias para vender **conteúdo digital e assinaturas** dentro de apps distribuídos por ela
-(em geral, exige o faturamento da própria Google Play, com exceções por país e programas de faturamento alternativo).
-O Pro hoje é vendido pelo **Stripe**, na web. **Antes de publicar o TWA com a venda aberta**, confirmar na
-[Central de políticas da Play](https://support.google.com/googleplay/android-developer/answer/9858738) a regra vigente
-para o Brasil e escolher um caminho:
+Decisão de 2026-11-07: **dentro do app da Play (TWA) a assinatura é comprada pelo Google Play Billing**
+(regra da Play para conteúdo digital); **no navegador, pelo Stripe**. O código já faz isso
+(branch `feat/google-play-billing`); falta a configuração abaixo.
 
-1. **Não vender dentro do app da Play** (o TWA esconde a compra; quem assina faz pela web); ou
-2. Aderir a um programa de faturamento alternativo/escolha do usuário, se disponível para o Brasil; ou
-3. Usar o **Google Play Billing** no app (no TWA, pela Digital Goods API; no nativo, pela biblioteca de faturamento).
+**Como o app decide:** o TWA abre o site com o referrer `android-app://<pacote>`; o app guarda o canal na
+sessão (`detectPaymentChannel`) e pede os preços e a compra ao gateway do canal (`PAYMENT_CHANNELS` em
+`packages/core/src/payment-channel.ts`). No app da Play, o Stripe nunca aparece.
 
-Isso tem risco de remoção do app da loja e precisa de validação (inclusive jurídica) antes da venda; não está
-implementado. O app ainda não diferencia "aberto pela Play" de "aberto no navegador".
+**Fluxo da compra:** `store-prepare` (Edge Function `billing`: aceites dos documentos ANTES de pagar e o produto
+da periodicidade) → janela de compra do Google Play (Digital Goods API + Payment Request) → `store-confirm`
+(o servidor lê a compra na Google Play Developer API, liga o token à pessoa em `billing_purchase_links`, confirma
+a compra — *acknowledge* — e espelha a assinatura e o pagamento). Renovações, falhas e devoluções chegam pelos
+avisos em tempo real (RTDN) no `billing-webhook?provider=google`. Se o app fechar antes da confirmação, a tela do
+plano confirma as compras da loja ao abrir (`useReconcileStorePurchases`); sem confirmação em 3 dias o Google
+devolve o dinheiro sozinho.
+
+**Configurar (uma vez):**
+
+1. **Produtos na Play Console** (Monetizar › Produtos › Assinaturas), com estes ids EXATOS (são os de `plan_prices`,
+   migration `20261107130000_billing_google_play`):
+   - `pro_mensal`: plano básico mensal, renovação automática, **R$ 14,80** (preço promocional; depois R$ 19,80).
+   - `pro_anual`: plano básico anual, renovação automática, **R$ 118,00** (depois R$ 148,00).
+   Os valores na Play precisam ser os mesmos de `plan_prices` (a tela do guf mostra os do banco). Mudou o preço
+   na Play = desativar a linha antiga e inserir a nova em `plan_prices` (como no Stripe, § 11.7 do plano do Stripe).
+2. **Conta de serviço:** Google Cloud do projeto ligado à Play Console › IAM › Contas de serviço › criar › gerar
+   chave JSON. Na Play Console › Usuários e permissões › convidar o e-mail da conta com "Ver dados financeiros" e
+   "Gerenciar pedidos e assinaturas". Ativar a **Google Play Android Developer API** no Google Cloud.
+3. **Avisos em tempo real (RTDN):** Google Cloud › Pub/Sub › criar o tópico (ex.: `play-billing`) e dar a
+   `google-play-developer-notifications@system.gserviceaccount.com` a permissão de publicar nele. Criar uma
+   assinatura **push** para `https://<ref>.supabase.co/functions/v1/billing-webhook?provider=google&token=<SEGREDO>`.
+   Na Play Console › Monetizar › Configuração de monetização, informar o tópico e enviar a notificação de teste.
+4. **Secrets do Supabase:**
+   ```
+   npx supabase secrets set GOOGLE_PLAY_PACKAGE_NAME="br.com.gufapp.treino"
+   npx supabase secrets set GOOGLE_PLAY_SERVICE_ACCOUNT="$(cat conta-de-servico.json)"
+   npx supabase secrets set GOOGLE_PLAY_RTDN_TOKEN="<o mesmo SEGREDO da URL do push, 32+ caracteres aleatórios>"
+   ```
+   Guardar o JSON e o segredo no gerenciador de senhas; nunca no git.
+5. **Variável do site** (Cloudflare › Build variables): `NEXT_PUBLIC_PLAY_PACKAGE_NAME = br.com.gufapp.treino`
+   (o botão "Gerenciar no Google Play" abre direto a assinatura do guf).
+6. **Bubblewrap:** ligar o Play Billing no `twa-manifest.json` (`"features": { "playBilling": { "enabled": true } }`;
+   conferir o nome do campo na documentação vigente do Bubblewrap) e gerar o AAB de novo.
+7. **Testar** com contas de teste de licença (Play Console › Configuração › Teste de licença) pelo teste interno:
+   assinar, ver o Pro, cancelar em até 7 dias (devolução + fim) e deixar vencer.
+
+**Diferenças em relação ao Stripe (descritas nos Termos da Assinatura 1.4):** cancelar continua no guf (regra dos 7
+dias: o guf pede ao Google a devolução do pedido inteiro, com revogação); forma de pagamento, recibos e reativação
+ficam na página de assinaturas da Play (o app abre); cupons do Stripe não valem na Play; o Google não informa o
+valor devolvido (a devolução é sempre do pedido inteiro) nem a hora exata do pedido (vale a hora em que o guf
+registrou).
 
 ## 6. Trocar o TWA pelo app nativo (React Native / Expo) no mesmo anúncio
 
@@ -106,9 +144,10 @@ implementado. O app ainda não diferencia "aberto pela Play" de "aberto no naveg
    - **Notificações:** a inscrição Web Push do Chrome não serve para o nativo; o nativo se inscreve de novo
      (FCM/Expo Notifications) e precisa de uma nova forma de envio na Edge Function `push-alerts` (revisar o RIPD social).
    - **Preferências do aparelho** (tema, som do descanso, tela ligada): voltam ao padrão.
-7. **Reaproveitar o código:** `packages/core`, `schemas`, `api` e `types` já são independentes de React DOM e
+7. **Assinaturas do Google Play continuam:** mesmo pacote e mesmos produtos (`pro_mensal`, `pro_anual`), então quem assinou no TWA segue assinante no nativo. O nativo compra pela Play Billing Library (ex.: `react-native-iap`, a avaliar) e chama as MESMAS ações do servidor (`store-prepare` e `store-confirm`, `confirmStorePurchase` em `packages/api`); só a compra na loja muda (`useStoreSubscription` recebe a função de compra por parâmetro).
+8. **Reaproveitar o código:** `packages/core`, `schemas`, `api` e `types` já são independentes de React DOM e
    foram feitos para isso (`docs/architecture.md`). As telas são refeitas em React Native.
-8. **Antes de enviar:** testar a atualização instalando o TWA de produção num celular e, por cima, o AAB do nativo
+9. **Antes de enviar:** testar a atualização instalando o TWA de produção num celular e, por cima, o AAB do nativo
    pelo teste interno da Play (não por APK solto, que tem outra assinatura).
 
 ## 7. Checklist do primeiro envio
@@ -119,5 +158,6 @@ implementado. O app ainda não diferencia "aberto pela Play" de "aberto no naveg
 - [ ] `assetlinks.json` publicado com as duas impressões digitais e conferido.
 - [ ] Página pública de exclusão de conta.
 - [ ] Segurança dos dados preenchida a partir do `.lgpd/data-map.md`.
-- [ ] Decisão sobre a venda do Pro dentro do app da Play (seção 5).
+- [x] Venda do Pro dentro do app da Play: Google Play Billing (seção 5).
+- [ ] Produtos `pro_mensal` e `pro_anual`, conta de serviço, RTDN e secrets (seção 5).
 - [ ] Domínio no Supabase Auth (Redirect URLs) e no `ALLOWED_ORIGINS` (já necessários para o site).

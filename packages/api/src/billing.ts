@@ -12,6 +12,7 @@ import type {
   RefundStatus,
   SubscriptionStatus,
 } from "@guf/core";
+import type { Platform } from "./auth";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiError, type ApiErrorCode, type ApiResult } from "./result";
 
@@ -34,7 +35,27 @@ export interface BillingApi {
   reactivateSubscription: (client: GufClient, input: { subscriptionId: string }) => Result<null>;
   /** Endereço do portal do gateway (trocar cartão, ver faturas). */
   openBillingPortal: (client: GufClient, input: null) => Result<{ url: string }>;
+  /** Loja de apps: grava os aceites e devolve o produto a comprar (antes de abrir a compra na loja). */
+  prepareStorePurchase: (client: GufClient, input: PrepareStorePurchaseInput) => Result<{ productId: string }>;
+  /** Loja de apps: confere a compra no servidor e libera o Pro (`pending` = pagamento em análise na loja). */
+  confirmStorePurchase: (client: GufClient, input: ConfirmStorePurchaseInput) => Result<{ status: StorePurchaseStatus }>;
 }
+
+export interface PrepareStorePurchaseInput {
+  provider: BillingProviderId;
+  planCode: string;
+  interval: BillingInterval;
+  acceptedDocumentIds: string[];
+  platform: Platform;
+}
+
+export interface ConfirmStorePurchaseInput {
+  provider: BillingProviderId;
+  purchaseToken: string;
+  productId: string;
+}
+
+export type StorePurchaseStatus = "active" | "pending";
 
 /* =====================================================================
  * Implementação (Supabase)
@@ -49,6 +70,8 @@ const BILLING_ERROR_CODES: Record<string, ApiErrorCode> = {
   subscription_not_found: "subscription_not_found",
   subscription_already_active: "subscription_already_active",
   subscription_documents_outdated: "subscription_documents_outdated",
+  store_purchase_invalid: "store_purchase_invalid",
+  subscription_managed_in_store: "subscription_managed_in_store",
   account_suspended: "account_suspended",
   not_authenticated: "not_authenticated",
 };
@@ -195,10 +218,18 @@ export const openBillingPortal: BillingApi["openBillingPortal"] = async (client)
   return { data: { url: data.url }, error: null };
 };
 
+export const prepareStorePurchase: BillingApi["prepareStorePurchase"] = (client, input) =>
+  invokeBilling<{ productId: string }>(client, { action: "store-prepare", ...input });
+
+export const confirmStorePurchase: BillingApi["confirmStorePurchase"] = (client, input) =>
+  invokeBilling<{ status: StorePurchaseStatus }>(client, { action: "store-confirm", ...input });
+
 export const billingApi = {
   getPlanPrices,
   getMyBilling,
   cancelSubscription,
   reactivateSubscription,
   openBillingPortal,
+  prepareStorePurchase,
+  confirmStorePurchase,
 } satisfies BillingApi;

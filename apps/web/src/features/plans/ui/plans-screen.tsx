@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { isPlanFeature, subscriptionViewOf, type BillingPayment, type PlanPrice } from "@guf/core";
+import { isPlanFeature, SUBSCRIPTION_MANAGEMENT, subscriptionViewOf, type BillingPayment, type PlanPrice } from "@guf/core";
 import { Banner, GufLoader, Skeleton } from "@/shared/components/ds";
 import { DetailHeader } from "@/shared/components/detail-header";
 import { DetailScreen } from "@/shared/components/detail-screen";
@@ -23,6 +23,7 @@ import { buildPaidPlanCard } from "@/features/plans/helpers/paid-plan-card";
 import { useCheckoutConfirmation, type CheckoutConfirmation } from "@/features/plans/hooks/use-checkout-confirmation";
 import { usePlanGate } from "@/features/plans/hooks/use-plan-gate";
 import { useProOffer } from "@/features/plans/hooks/use-pro-offer";
+import { useReconcileStorePurchases } from "@/features/plans/hooks/use-reconcile-store-purchases";
 
 /** Valor cobrado de quem assina: o do último pagamento (o preço à venda pode ter mudado depois). */
 function chargedPrice(price: PlanPrice | null, lastPayment: BillingPayment | null): PlanPrice | null {
@@ -43,6 +44,7 @@ export function PlansScreen() {
     [showToast],
   );
   const confirmation = useCheckoutConfirmation(onConfirmed);
+  useReconcileStorePurchases(offer.channel);
 
   const requested = searchParams.get("recurso");
   const highlight = requested && isPlanFeature(requested) ? requested : null;
@@ -96,7 +98,7 @@ export function PlansScreen() {
           <PlanSection id="plan-subscription" title="Assinatura">
             <SubscriptionManageList subscription={subscription} lastPayment={payments[0] ?? null} canManage={online} />
             <p className="m-0 px-1 text-xs leading-[17px] text-pretty text-fg-muted">
-              Pagamento pelo Stripe. Cancelando em até 7 dias do primeiro pagamento, o valor volta inteiro; depois, o {subscription.planName} continua até o
+              {SUBSCRIPTION_MANAGEMENT[subscription.provider].paymentNote} Cancelando em até 7 dias do primeiro pagamento, o valor volta inteiro; depois, o {subscription.planName} continua até o
               fim do período já pago.
             </p>
           </PlanSection>

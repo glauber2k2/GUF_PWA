@@ -94,7 +94,7 @@ async function deleteScheduled(req: Request): Promise<Response> {
   const service = serviceClient();
   const { data: isDue, error: dueError } = await service.rpc("is_account_deletion_due", { p_user_id: userId });
   if (dueError) return jsonResponse({ error: "Falha ao conferir a exclusão" }, 500);
-  if (!isDue) return jsonResponse({ ok: false, reason: "not_due" });
+  if (!isDue) return jsonResponse({ ok: false, reason: "not_due" }, 200);
 
   // Falhou: o job do banco chama de novo na próxima rodada (a mesma chave evita devolver duas vezes).
   if (!(await cancelSubscriptions(service, userId))) return jsonResponse({ error: "Gateway sem resposta" }, 502);
@@ -103,7 +103,7 @@ async function deleteScheduled(req: Request): Promise<Response> {
     console.error("Exclusão agendada: falha ao excluir", { code: error.code });
     return jsonResponse({ error: "Falha ao excluir" }, 500);
   }
-  return jsonResponse({ ok: true });
+  return jsonResponse({ ok: true }, 200);
 }
 
 Deno.serve(async (req) => {
