@@ -1,0 +1,13 @@
+{
+  // Painel de administração: site estático (só o `next build` do apps/admin), em domínio separado do app.
+  // Deploy a partir da raiz do repositório: `npx wrangler deploy -c apps/admin/wrangler.jsonc`.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "guf-admin",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page",
+    // O Next exporta com trailingSlash: true (rota/index.html).
+    "html_handling": "auto-trailing-slash"
+  }
+}
