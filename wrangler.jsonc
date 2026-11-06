@@ -1,0 +1,12 @@
+{
+  // Site estático: só os arquivos do `next build` + `serwist build`, sem código de servidor.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "guf-pwa",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./apps/web/out",
+    "not_found_handling": "404-page",
+    // O Next exporta com trailingSlash: true (rota/index.html).
+    "html_handling": "auto-trailing-slash"
+  }
+}
