@@ -464,6 +464,27 @@ export type Database = {
           },
         ]
       }
+      billing_purchase_links: {
+        Row: {
+          created_at: string
+          provider: string
+          purchase_ref: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          provider: string
+          purchase_ref: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          provider?: string
+          purchase_ref?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       billing_refunds: {
         Row: {
           amount_cents: number
@@ -1640,6 +1661,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      account_has_live_subscription: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       account_has_storage_files: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -2009,6 +2034,10 @@ export type Database = {
         Args: { p_customer_ref: string; p_provider: string; p_user_id: string }
         Returns: string
       }
+      billing_link_purchase: {
+        Args: { p_provider: string; p_purchase_ref: string; p_user_id: string }
+        Returns: string
+      }
       billing_live_subscriptions: {
         Args: { p_user_id: string }
         Returns: {
@@ -2024,6 +2053,14 @@ export type Database = {
           p_status: string
         }
         Returns: undefined
+      }
+      billing_owner_of: {
+        Args: {
+          p_customer_ref: string
+          p_provider: string
+          p_subscription_ref: string
+        }
+        Returns: string
       }
       billing_record_dispute: {
         Args: { p_payment_ref: string; p_provider: string }
@@ -2236,6 +2273,10 @@ export type Database = {
       effective_plan: { Args: never; Returns: string }
       ensure_social_profile: { Args: { p_user_id: string }; Returns: undefined }
       execute_scheduled_account_deletions: { Args: never; Returns: undefined }
+      execute_scheduled_deletion: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       exercise_name_key: { Args: { p_name: string }; Returns: string }
       export_my_data: { Args: never; Returns: Json }
       feature_limit: { Args: { p_feature: string }; Returns: number }
@@ -2574,6 +2615,7 @@ export type Database = {
         }
         Returns: string
       }
+      is_account_deletion_due: { Args: { p_user_id: string }; Returns: boolean }
       is_blocked_between: {
         Args: { p_a: string; p_b: string }
         Returns: boolean
@@ -2738,6 +2780,7 @@ export type Database = {
         Returns: string
       }
       plan_of: { Args: { p_user_id: string }; Returns: string }
+      post_account_closure: { Args: { p_user_id: string }; Returns: undefined }
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
       purge_expired_ai_plan_imports: { Args: never; Returns: number }
