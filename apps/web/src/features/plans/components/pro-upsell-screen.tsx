@@ -100,7 +100,7 @@ function ProUpsellContent({ feature, entitlements, onSeePlans, onClose }: ProUps
                   className="flex animate-guf-rise flex-col items-center gap-2.5 rounded-xl border-[1.5px] border-accent-text bg-accent/10 px-5 pt-6 pb-5 text-center [animation-delay:240ms]"
                 >
                   <OfferIntervalPicker offer={offer} className="w-full" />
-                  <PriceTag price={price} size="hero" />
+                  <PriceTag price={price} size="hero" savings={offer.annualSavings} />
                   <span className="text-[13px] leading-[18px] text-fg-secondary">Renova automaticamente até você cancelar</span>
                 </section>
               )

@@ -21,7 +21,7 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
   {
     question: "Como funciona o plano anual?",
     answer:
-      "O valor do ano inteiro é cobrado de uma vez, na assinatura e a cada renovação. O valor por mês que aparece na oferta é só para comparar com o mensal. Desistindo em até 7 dias, o valor anual volta inteiro; depois disso, o Pro continua até o fim do ano pago.",
+      "O valor do ano inteiro é cobrado de uma vez, na assinatura e a cada renovação. O valor por mês que aparece na oferta é só para comparar com o mensal. O preço fica garantido pelos 12 meses pagos; se ele mudar na renovação, avisamos no app e por e-mail antes da cobrança. Desistindo em até 7 dias, o valor anual volta inteiro; depois disso, o Pro continua até o fim do ano pago.",
   },
   {
     question: "O preço atual é promocional?",

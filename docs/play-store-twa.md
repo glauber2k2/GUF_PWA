@@ -97,7 +97,7 @@ devolve o dinheiro sozinho.
 1. **Produtos na Play Console** (Monetizar › Produtos › Assinaturas), com estes ids EXATOS (são os de `plan_prices`,
    migration `20261107130000_billing_google_play`):
    - `pro_mensal`: plano básico mensal, renovação automática, **R$ 14,80** (preço promocional; depois R$ 19,80).
-   - `pro_anual`: plano básico anual, renovação automática, **R$ 118,00** (depois R$ 148,00).
+   - `pro_anual`: plano básico anual, renovação automática, **R$ 148,00** (anual de fundador; mesmo valor do Stripe, sem preço "depois" no `plan_prices`).
    Os valores na Play precisam ser os mesmos de `plan_prices` (a tela do guf mostra os do banco). Mudou o preço
    na Play = desativar a linha antiga e inserir a nova em `plan_prices` (como no Stripe, § 11.7 do plano do Stripe).
 2. **Conta de serviço:** Google Cloud do projeto ligado à Play Console › IAM › Contas de serviço › criar › gerar

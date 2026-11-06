@@ -20,11 +20,10 @@ export const BILLING_MOCK_SCENARIOS: readonly BillingMockScenario[] = [
 
 const LATENCY_MS = 350;
 const DAY_MS = 86_400_000;
-/** Preços promocionais de exemplo (iguais aos do lançamento) e os normais que valem depois. */
+/** Preços de exemplo iguais aos do lançamento: mensal em promoção (e o normal que vale depois) e anual de fundador. */
 const PRICE_CENTS = 1480;
 const REGULAR_PRICE_CENTS = 1980;
-const ANNUAL_PRICE_CENTS = 11800;
-const ANNUAL_REGULAR_PRICE_CENTS = 14800;
+const ANNUAL_PRICE_CENTS = 14800;
 const wait = (ms = LATENCY_MS) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let scenario: BillingMockScenario = "none";
@@ -92,7 +91,7 @@ export const mockBillingApi = {
     return {
       data: [
         { planCode: "pro", interval: "month", amountCents: PRICE_CENTS, regularAmountCents: REGULAR_PRICE_CENTS, currency: "brl" },
-        { planCode: "pro", interval: "year", amountCents: ANNUAL_PRICE_CENTS, regularAmountCents: ANNUAL_REGULAR_PRICE_CENTS, currency: "brl" },
+        { planCode: "pro", interval: "year", amountCents: ANNUAL_PRICE_CENTS, regularAmountCents: null, currency: "brl" },
       ],
       error: null,
     };

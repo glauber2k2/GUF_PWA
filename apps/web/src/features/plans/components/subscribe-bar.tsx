@@ -22,7 +22,7 @@ export interface SubscribeBarProps {
   canSubscribe: boolean;
   subscribing: boolean;
   onSubscribe: (acceptedDocumentIds: string[]) => void;
-  /** Mostra "Pro anual · R$ 118,00 por ano" e o valor por mês acima do botão (tela do Pro, onde o preço não fica sempre à vista). */
+  /** Mostra "Pro anual · R$ 148,00 por ano" e o valor por mês acima do botão (tela do Pro, onde o preço não fica sempre à vista). */
   showSummary?: boolean;
 }
 
