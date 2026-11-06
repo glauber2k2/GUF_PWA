@@ -2,7 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { billingApi, type ApiError, type BillingApi } from "@guf/api";
+import {
+  billingApi,
+  type ApiError,
+  type BillingApi,
+  type ConfirmStorePurchaseInput,
+  type PrepareStorePurchaseInput,
+  type StorePurchaseStatus,
+} from "@guf/api";
 import type { BillingProviderId, CancellationOutcome } from "@guf/core";
 import { useAuth } from "@/features/auth";
 import { PLANS_KEY } from "@/shared/libs/query-keys";
@@ -95,5 +102,47 @@ export function useOpenBillingPortal() {
       return data.url;
     },
     onSuccess: (url) => window.location.assign(url),
+  });
+}
+
+/** Compra feita na loja (Google Play): o token vai ao servidor e `finish` fecha a janela da loja. */
+export interface StorePurchaseResult {
+  purchaseToken: string;
+  finish: (isConfirmed: boolean) => Promise<void>;
+}
+
+/**
+ * Assinar pela loja de apps: aceites e produto no servidor → compra na loja → conferência no
+ * servidor. A compra na loja entra por parâmetro (Google Play hoje; outra loja amanhã).
+ */
+export function useStoreSubscription(purchaseInStore: (productId: string) => Promise<StorePurchaseResult>) {
+  const { api } = useBillingSource();
+  const invalidate = useInvalidatePlans();
+  return useMutation<StorePurchaseStatus, unknown, PrepareStorePurchaseInput>({
+    mutationFn: async (input) => {
+      const prepared = await api.prepareStorePurchase(getSupabaseClient(), input);
+      if (prepared.error) throw prepared.error;
+      const { productId } = prepared.data;
+      const purchase = await purchaseInStore(productId);
+      const confirmed = await api.confirmStorePurchase(getSupabaseClient(), { provider: input.provider, purchaseToken: purchase.purchaseToken, productId });
+      await purchase.finish(!confirmed.error);
+      if (confirmed.error) throw confirmed.error;
+      return confirmed.data.status;
+    },
+    onSettled: invalidate,
+  });
+}
+
+/** Confirma no servidor uma compra já feita na loja (ex.: o app fechou antes da confirmação). */
+export function useConfirmStorePurchase() {
+  const { api } = useBillingSource();
+  const invalidate = useInvalidatePlans();
+  return useMutation<StorePurchaseStatus, ApiError, ConfirmStorePurchaseInput>({
+    mutationFn: async (input) => {
+      const { data, error } = await api.confirmStorePurchase(getSupabaseClient(), input);
+      if (error) throw error;
+      return data.status;
+    },
+    onSuccess: invalidate,
   });
 }

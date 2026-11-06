@@ -1,9 +1,10 @@
 // Contrato do gateway de pagamento. Nada fora de `providers/<gateway>/` conhece o Stripe (ou outro):
 // os serviços e as Edge Functions falam só com estes tipos normalizados.
-// Gateway novo = um adaptador que implementa BillingProvider + uma entrada em BILLING_PROVIDERS (registry.ts).
+// Gateway novo = um adaptador que implementa BillingProvider e a forma de vender (HostedCheckoutProvider
+// para página de pagamento, StorePurchaseProvider para loja de apps) + uma entrada em BILLING_PROVIDERS.
 
 /** Gateways que o banco aceita (`provider` nas tabelas de cobrança). */
-export type ProviderId = "stripe";
+export type ProviderId = "stripe" | "google";
 
 /** Situação da assinatura no guf (check de `subscriptions.status`). */
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
@@ -125,12 +126,46 @@ export interface PortalGateway {
 
 export interface WebhookGateway {
   /** Confere a assinatura do evento; lança `InvalidWebhookError` se não for do gateway. */
-  parseEvent(rawBody: string, headers: Headers): Promise<BillingEvent>;
+  parseEvent(rawBody: string, headers: Headers, requestUrl: URL): Promise<BillingEvent>;
 }
 
-export interface BillingProvider extends CheckoutGateway, SubscriptionGateway, PaymentGateway, PortalGateway, WebhookGateway {
+/** Compra na loja como o gateway a vê (conferida no servidor antes de valer). */
+export interface StorePurchase {
+  /** Produto comprado (o `price_ref` em plan_prices). */
+  productRef: string;
+  isAcknowledged: boolean;
+  subscription: ProviderSubscription;
+}
+
+/** Compra feita na loja de apps (Google Play): o app compra, o servidor confere e confirma. */
+export interface StorePurchaseGateway {
+  /** Lê a compra na loja; compra inexistente → ProviderRequestError. */
+  getStorePurchase(purchaseRef: string): Promise<StorePurchase>;
+  /** Confirma a compra na loja (sem isso, o Google devolve o dinheiro em 3 dias). Já confirmada = sucesso. */
+  acknowledgePurchase(input: { purchaseRef: string; productRef: string }): Promise<void>;
+}
+
+/** O que todo gateway faz: espelhar a assinatura, pagamentos, devoluções e avisos (webhook). */
+export interface BillingProvider extends SubscriptionGateway, PaymentGateway, WebhookGateway {
   readonly id: ProviderId;
 }
+
+/** Gateway com página de pagamento própria e portal (Stripe, na web). */
+export interface HostedCheckoutProvider extends BillingProvider, CheckoutGateway, PortalGateway {}
+
+/** Gateway de loja de apps (Google Play, no app Android). */
+export interface StorePurchaseProvider extends BillingProvider, StorePurchaseGateway {}
+
+export function isHostedCheckoutProvider(provider: BillingProvider): provider is HostedCheckoutProvider {
+  return "createCheckout" in provider && "createPortalSession" in provider;
+}
+
+export function isStorePurchaseProvider(provider: BillingProvider): provider is StorePurchaseProvider {
+  return "acknowledgePurchase" in provider;
+}
+
+/** O gateway não faz essa operação (ex.: reativar assinatura do Google Play pelo servidor). */
+export class UnsupportedOperationError extends Error {}
 
 /** Assinatura do webhook ausente, velha ou que não confere. */
 export class InvalidWebhookError extends Error {}

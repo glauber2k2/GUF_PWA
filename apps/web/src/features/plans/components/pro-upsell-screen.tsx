@@ -23,11 +23,14 @@ import { cn } from "@/shared/helpers/class-names";
 const HIGHLIGHT_STAGGER_MS = 80;
 const HIGHLIGHT_FIRST_DELAY_MS = 460;
 
-const TRUST_LINES: ReadonlyArray<{ icon: LucideIcon; text: string }> = [
-  { icon: ShieldCheck, text: "Cancele quando quiser, aqui no app, sem multa" },
-  { icon: Undo2, text: "Desistiu em até 7 dias? Devolvemos o valor inteiro" },
-  { icon: Lock, text: "Pagamento seguro na página do Stripe" },
-];
+/** Garantias da oferta; a do pagamento vem do canal (Stripe na web, Google Play no app da Play). */
+function trustLines(paymentLine: string): ReadonlyArray<{ icon: LucideIcon; text: string }> {
+  return [
+    { icon: ShieldCheck, text: "Cancele quando quiser, aqui no app, sem multa" },
+    { icon: Undo2, text: "Desistiu em até 7 dias? Devolvemos o valor inteiro" },
+    { icon: Lock, text: paymentLine },
+  ];
+}
 
 export interface ProUpsellScreenProps {
   /** Funcionalidade que a pessoa tentou usar; null = fechada. */
@@ -135,7 +138,7 @@ function ProUpsellContent({ feature, entitlements, onSeePlans, onClose }: ProUps
             {offer.plans.length > 1 && <PlanComparison plans={offer.plans} highlight={feature} className="animate-guf-rise [animation-delay:1000ms]" />}
 
             <ul className="m-0 flex list-none flex-col gap-2.5 px-1 pt-1">
-              {TRUST_LINES.map((line) => (
+              {trustLines(offer.channel.trustLine).map((line) => (
                 <li key={line.text} className="flex items-center gap-2.5 text-[13px] text-fg-secondary">
                   <Icon icon={line.icon} size={18} className="flex-none text-accent-text" />
                   {line.text}

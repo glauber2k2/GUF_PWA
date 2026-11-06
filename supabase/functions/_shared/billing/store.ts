@@ -66,6 +66,8 @@ export interface BillingStore {
   checkoutContext(userId: string, planCode: string, provider: ProviderId, interval: BillingInterval): Promise<CheckoutContext>;
   linkCustomer(userId: string, provider: ProviderId, customerRef: string): Promise<string>;
   customerOf(userId: string, provider: ProviderId): Promise<string | null>;
+  /** Liga a compra feita na loja à pessoa (compra de outra conta → BillingStoreError GB005). */
+  linkPurchase(userId: string, provider: ProviderId, purchaseRef: string): Promise<void>;
   syncSubscription(provider: ProviderId, subscription: ProviderSubscription & { status: SubscriptionStatus }): Promise<SyncOutcome>;
   recordPayment(provider: ProviderId, payment: ProviderPayment & { paidAt: string }): Promise<void>;
   beginCancellation(userId: string, subscriptionId: string, origin: "withdrawal" | "account_deletion"): Promise<CancellationPlan>;
@@ -107,6 +109,10 @@ export function createSupabaseBillingStore(admin: SupabaseClient): BillingStore 
 
     linkCustomer: (userId, provider, customerRef) =>
       rpc<string>("billing_link_customer", { p_user_id: userId, p_provider: provider, p_customer_ref: customerRef }),
+
+    async linkPurchase(userId, provider, purchaseRef) {
+      await rpc("billing_link_purchase", { p_user_id: userId, p_provider: provider, p_purchase_ref: purchaseRef });
+    },
 
     async customerOf(userId, provider) {
       const { data, error } = await admin

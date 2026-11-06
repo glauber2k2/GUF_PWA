@@ -1,13 +1,13 @@
 // Contratar (docs/stripe-payments-plan.md § 2.1): aceite ANTES de pagar, preço conferido no gateway,
 // página de pagamento hospedada. O Pro só nasce pelo webhook.
-import { activeProviderId, billingProviderFor } from "../_shared/billing/registry.ts";
+import { activeProviderId, hostedCheckoutProviderFor } from "../_shared/billing/registry.ts";
 import { BillingActionError } from "./action-error.ts";
 import type { BillingAction } from "./context.ts";
 import { acceptSubscriptionDocuments, parseSubscribeRequest } from "./subscribe-request.ts";
 
 export const checkout: BillingAction = async (context) => {
   const request = parseSubscribeRequest(context.body);
-  const provider = billingProviderFor(activeProviderId());
+  const provider = hostedCheckoutProviderFor(activeProviderId());
   const offer = await context.store.checkoutContext(context.userId, request.planCode, provider.id, request.interval);
 
   // O preço mostrado no app vem do banco: se o gateway cobrar diferente, nada é vendido.

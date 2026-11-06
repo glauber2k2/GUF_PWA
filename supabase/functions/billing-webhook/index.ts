@@ -4,7 +4,9 @@
 // da assinatura do evento, conferida pelo adaptador. Cada objeto é relido na API do gateway antes de
 // gravar (eventos fora de ordem ou repetidos não voltam o estado); idempotente por id do evento.
 // URL: https://<ref>.supabase.co/functions/v1/billing-webhook?provider=stripe
-// Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET.
+//      Google Play (push do Pub/Sub): ...?provider=google&token=<GOOGLE_PLAY_RTDN_TOKEN>
+// Secrets: STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET; Google Play: GOOGLE_PLAY_PACKAGE_NAME,
+// GOOGLE_PLAY_SERVICE_ACCOUNT, GOOGLE_PLAY_RTDN_TOKEN.
 // Deploy: npx supabase functions deploy billing-webhook --no-verify-jwt --use-api
 // Logs: só tipo e id do evento (nunca o corpo, e-mail ou valores).
 // =====================================================================
@@ -32,7 +34,7 @@ Deno.serve(async (req) => {
   let event;
   try {
     provider = billingProviderFor(providerId);
-    event = await provider.parseEvent(rawBody, req.headers);
+    event = await provider.parseEvent(rawBody, req.headers, new URL(req.url));
   } catch (error) {
     if (error instanceof InvalidWebhookError) return plain("Assinatura inválida", 400);
     if (error instanceof BillingConfigError) {

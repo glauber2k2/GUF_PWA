@@ -9,6 +9,7 @@
 | [Vercel](./vercel.md) | Operador | Baixo/Médio | EUA (rede global) | Hobby | Não aceito/arquivado | Nenhuma | Aprovado com ressalvas — só para testes; trocar antes de monetizar |
 | [Serviços de push](./push-services.md) (Google FCM, Apple APNs, Mozilla) | Infraestrutura do navegador/sistema escolhida pelo titular; recebe só mensagem cifrada e metadados ⚖ | Baixo | EUA | — | Não se aplica ⚖ | Avaliar com o jurídico (G8) | Aprovado com ressalvas — informado na Política 0.4-dev |
 | [Stripe](./stripe.md) (planejado) | Operador; controlador independente para fraude e obrigações próprias ⚖ | **Alto** | EUA e Irlanda | — | Não aceito | DPA do Stripe (cláusulas-padrão próprias) | **Não contratado** — plano em `docs/stripe-payments-plan.md`; DPA e MFA antes da 1ª cobrança (G33) |
+| [Google Play](./google-play.md) (planejado) | Controlador independente na venda (a Play é a vendedora de registro); operador nas consultas pela API ⚖ | **Alto** | EUA | — | Contrato de distribuição da Play | Avaliar (G8) | **Não contratado** — compra do Pro no app Android; configuração em `docs/play-store-twa.md` § 5 |
 | [Google (login)](./google.md) | **Controlador independente** (não é operador) | — | EUA | — | Não se aplica | Não se aplica (dados enviados pelo titular por escolha dele) | Aprovado — informar na política |
 
 **Totais**: 2 operadores (1 crítico, 1 baixo/médio) + 1 terceiro controlador · **0** com DPA e base de transferência adequados.

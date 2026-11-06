@@ -3,7 +3,7 @@ import {
   BillingConfigError,
   ProviderRequestError,
   type BillingEventPayload,
-  type BillingProvider,
+  type HostedCheckoutProvider,
   type ProviderRefundStatus,
   type SubscriptionStatus,
 } from "../../provider.ts";
@@ -136,7 +136,7 @@ function requireEnv(name: string): string {
 }
 
 /** Monta o adaptador com os secrets da Edge Function. */
-export function createStripeProvider(): BillingProvider {
+export function createStripeProvider(): HostedCheckoutProvider {
   const stripe: StripeClient = createStripeClient(requireEnv("STRIPE_SECRET_KEY"));
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? null;
   const portalConfiguration = Deno.env.get("STRIPE_PORTAL_CONFIGURATION") ?? undefined;

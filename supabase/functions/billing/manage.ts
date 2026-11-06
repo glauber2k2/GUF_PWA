@@ -1,6 +1,6 @@
 // Gerenciar a assinatura: cancelar (com a regra dos 7 dias), reativar e abrir o portal do gateway.
 import { cancelSubscription, reactivateSubscription } from "../_shared/billing/cancellation.ts";
-import { activeProviderId, billingProviderFor } from "../_shared/billing/registry.ts";
+import { activeProviderId, billingProviderFor, hostedCheckoutProviderFor } from "../_shared/billing/registry.ts";
 import type { OwnedSubscription } from "../_shared/billing/store.ts";
 import { BillingActionError } from "./action-error.ts";
 import type { BillingAction, BillingActionContext } from "./context.ts";
@@ -30,7 +30,7 @@ export const reactivate: BillingAction = async (context) => {
 };
 
 export const portal: BillingAction = async ({ store, userId, appUrl }) => {
-  const provider = billingProviderFor(activeProviderId());
+  const provider = hostedCheckoutProviderFor(activeProviderId());
   const customerRef = await store.customerOf(userId, provider.id);
   if (!customerRef) throw new BillingActionError("subscription_not_found", 404);
   return provider.createPortalSession({ customerRef, returnUrl: `${appUrl}/planos/` });

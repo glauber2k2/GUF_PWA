@@ -1,5 +1,5 @@
 // Erros das ações de cobrança → resposta { code } que o app traduz (packages/api/src/billing.ts).
-import { BillingConfigError, ProviderRequestError } from "../_shared/billing/provider.ts";
+import { BillingConfigError, ProviderRequestError, UnsupportedOperationError } from "../_shared/billing/provider.ts";
 import { BillingStoreError } from "../_shared/billing/store.ts";
 
 export type BillingErrorCode =
@@ -8,6 +8,8 @@ export type BillingErrorCode =
   | "subscription_not_found"
   | "subscription_already_active"
   | "subscription_documents_outdated"
+  | "store_purchase_invalid"
+  | "subscription_managed_in_store"
   | "account_suspended"
   | "invalid_request"
   | "not_authenticated";
@@ -22,6 +24,7 @@ const STORE_ERROR_CODES: Record<string, BillingActionError> = {
   GB000: new BillingActionError("billing_unavailable", 503),
   GB001: new BillingActionError("subscription_not_found", 404),
   GB004: new BillingActionError("subscription_already_active", 409),
+  GB005: new BillingActionError("store_purchase_invalid", 409),
   GU001: new BillingActionError("account_suspended", 403),
 };
 
@@ -29,6 +32,7 @@ const STORE_ERROR_CODES: Record<string, BillingActionError> = {
 export function toBillingActionError(error: unknown): BillingActionError {
   if (error instanceof BillingActionError) return error;
   if (error instanceof BillingStoreError && error.code && STORE_ERROR_CODES[error.code]) return STORE_ERROR_CODES[error.code];
+  if (error instanceof UnsupportedOperationError) return new BillingActionError("subscription_managed_in_store", 409);
   if (error instanceof BillingConfigError) {
     console.error("Cobrança: configuração ausente", { message: error.message });
     return new BillingActionError("billing_unavailable", 503);

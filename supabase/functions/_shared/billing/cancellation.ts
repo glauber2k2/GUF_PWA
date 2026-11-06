@@ -53,6 +53,8 @@ async function endWithRefunds(deps: BillingDeps, plan: CancellationPlan, origin:
 
   const statuses: Awaited<ReturnType<typeof requestRefund>>[] = [];
   for (const refund of plan.refunds) statuses.push(await requestRefund(deps.provider, deps.store, refund, origin));
+  // Em loja de apps (Google Play), o acesso só termina com a devolução: relê o estado depois dela.
+  await syncSubscription(deps, plan.subscriptionRef);
   return REFUND_OUTCOME_PRIORITY.find((outcome) => statuses.includes(outcome)) ?? "refunded";
 }
 

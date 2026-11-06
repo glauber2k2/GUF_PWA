@@ -47,3 +47,4 @@ export * from "./share-cardio";
 export * from "./workout-feed";
 export * from "./billing";
 export * from "./plan-pricing";
+export * from "./payment-channel";

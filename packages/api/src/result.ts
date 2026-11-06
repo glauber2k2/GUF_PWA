@@ -28,6 +28,9 @@ export type ApiErrorCode =
   | "billing_provider_error"
   | "subscription_not_found"
   | "subscription_already_active"
+  | "store_purchase_invalid"
+  | "subscription_managed_in_store"
+  | "store_billing_unavailable"
   | "subscription_documents_outdated"
   | "health_consent_required"
   | "measurement_date_invalid"
@@ -101,6 +104,9 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   billing_provider_error: "O sistema de pagamento não respondeu. Nada foi cobrado: tente de novo em alguns minutos.",
   subscription_not_found: "Não encontramos essa assinatura ativa. Atualize a tela e confira a situação do seu plano.",
   subscription_already_active: "Você já tem uma assinatura ativa. Gerencie em Configurações › Plano.",
+  store_purchase_invalid: "Não foi possível confirmar a compra no Google Play. Se houve cobrança, ela é devolvida pelo Google em até 3 dias; tente assinar de novo.",
+  subscription_managed_in_store: "Esta assinatura foi feita pelo Google Play. Para reativar, abra Gerenciar no Google Play.",
+  store_billing_unavailable: "A compra pelo Google Play não está disponível neste aparelho. Atualize o app pela Play Store e tente de novo.",
   subscription_documents_outdated: "Os termos foram atualizados. Recarregue a tela, leia e aceite de novo para assinar.",
   health_consent_required: "Para registrar medidas, autorize o uso dos dados de saúde em Perfil › Medidas corporais.",
   measurement_date_invalid: "Escolha hoje ou um dia que já passou para a medição.",

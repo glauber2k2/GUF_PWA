@@ -1,6 +1,7 @@
 // Conferência da assinatura do webhook do Stripe (cabeçalho Stripe-Signature, HMAC-SHA256) com Web Crypto.
 // Referência: https://docs.stripe.com/webhooks#verify-manually
 import { InvalidWebhookError } from "../../provider.ts";
+import { timingSafeEqual } from "../../timing-safe.ts";
 
 /** Evento mais velho que isso é recusado (evita reenvio de um evento capturado). */
 const SIGNATURE_TOLERANCE_SECONDS = 300;
@@ -18,14 +19,6 @@ function parseSignatureHeader(header: string): { timestamp: number; signatures: 
 
 function toHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-/** Comparação em tempo constante (não vaza quantos caracteres conferem). */
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
 }
 
 /** Lança `InvalidWebhookError` se o corpo não foi assinado pelo Stripe com este segredo há pouco tempo. */

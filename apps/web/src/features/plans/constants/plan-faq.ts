@@ -16,7 +16,7 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
   {
     question: "Como é feito o pagamento?",
     answer:
-      "Na página segura do Stripe. A assinatura renova automaticamente até você cancelar, e o cartão e os recibos ficam em Assinatura › Pagamento e recibos.",
+      "No site, na página segura do Stripe; no app Android baixado na Play Store, pelo Google Play, com a forma de pagamento da sua conta Google. A assinatura renova automaticamente até você cancelar. Cartão e recibos ficam em Assinatura › Pagamento e recibos (no Google Play, em Gerenciar no Google Play).",
   },
   {
     question: "Como funciona o plano anual?",
@@ -31,7 +31,7 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
   {
     question: "Tenho um cupom de desconto. Onde uso?",
     answer:
-      "Na página de pagamento do Stripe, no campo do código promocional. Antes de confirmar, ela mostra o valor com desconto, por quantas cobranças ele vale e quanto será cobrado nas renovações.",
+      "Na página de pagamento do Stripe (assinatura pelo site), no campo do código promocional. Antes de confirmar, ela mostra o valor com desconto, por quantas cobranças ele vale e quanto será cobrado nas renovações. Cupons do Stripe não valem na compra pelo Google Play.",
   },
   {
     question: "O que acontece com meus dados se eu voltar ao Free?",

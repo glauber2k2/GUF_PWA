@@ -383,8 +383,8 @@ const PRIVACY: LegalDocumentContent = {
             ["Avisos no celular", "Endereço do aparelho no serviço de notificações e chaves de criptografia", "Seu aparelho, se você ligar os avisos"],
             [
               "Plano e assinatura",
-              "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, o código do seu cadastro no Stripe, a situação e as datas da assinatura e o valor, a data e a situação de cada pagamento e devolução",
-              "O app e, se você assinar, o Stripe",
+              "Plano atual, de onde ele vem e até quando vale; se você assinar o Pro, o código do seu cadastro no Stripe ou o código da compra no Google Play, a periodicidade (mensal ou anual), a situação e as datas da assinatura e o valor, a data e a situação de cada pagamento e devolução",
+              "O app e, se você assinar, o Stripe ou o Google Play",
             ],
             ["Medidas corporais", "Circunferências do corpo, em centímetros", "Você, opcional e com consentimento"],
             ["Conversas com o GUF AI", "Suas perguntas, as respostas e se você marcou a resposta como útil", "Você, se usar o GUF AI"],
@@ -515,6 +515,7 @@ const PRIVACY: LegalDocumentContent = {
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
           "Google (API do Gemini), se você usar o GUF AI: recebe a pergunta e os dados de treino sem identificação (veja a seção GUF AI).",
           "Stripe, se você assinar o Pro: processa o pagamento, a renovação e as devoluções. Recebe do guf só o e-mail da sua conta (para o recibo) e um código interno da conta; os dados do cartão e o que mais a página de pagamento pedir você informa direto ao Stripe. O guf não vê nem guarda o número do cartão. Para prevenir fraudes e cumprir as próprias obrigações legais, o Stripe também trata esses dados por conta própria, conforme a política de privacidade dele.",
+          "Google Play, se você assinar o Pro pelo app Android baixado na Play Store: processa o pagamento, a renovação e as devoluções pela sua conta Google. Para a compra, o guf não envia dados seus ao Google; recebe dele o código da compra, o produto (mensal ou anual), a situação e as datas da assinatura e o valor de cada pagamento. A forma de pagamento você informa direto ao Google, que também trata esses dados por conta própria, conforme a política de privacidade dele.",
           "Serviço de notificações do seu navegador ou celular (Google, Apple ou Mozilla), se você ligar as notificações. O texto do aviso vai criptografado: só o seu aparelho consegue ler.",
           "Outras pessoas do guf, só o que o seu perfil mostrar a elas (veja a seção Perfil, seguidores e competição).",
           "Autoridades públicas, quando houver ordem judicial ou obrigação legal.",
@@ -526,7 +527,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações), o Stripe (só se você assinar o Pro; também em outros países onde ele mantém operações) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações), o Stripe (só se você assinar o Pro; também em outros países onde ele mantém operações), o Google Play (só se você assinar pelo app Android) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
         ),
       ],
     },
@@ -548,8 +549,10 @@ const PRIVACY: LegalDocumentContent = {
               "Pagamentos e devoluções do Pro",
               "5 anos a contar do pagamento, pela lei fiscal. Se você excluir a conta antes, eles ficam sem ligação com você até o fim desse prazo",
             ],
-            ["Avisos técnicos recebidos do Stripe (só o código e o tipo do aviso)", "90 dias"],
+            ["Avisos técnicos recebidos do Stripe ou do Google Play (só o código e o tipo do aviso)", "90 dias"],
+            ["Vínculo entre a compra no Google Play e a sua conta", "Enquanto a conta existir"],
             ["Dados de pagamento no Stripe", "Pelo prazo de retenção do Stripe"],
+            ["Dados de pagamento no Google Play", "Pelo prazo de retenção do Google"],
             ["Conversas com o GUF AI", "Até 180 dias depois da última mensagem, ou até excluir a conta"],
             ["Horário das conversões de ficha", "2 dias"],
             ["Registro dos comunicados que você viu", "Até 12 meses depois de o comunicado terminar"],
@@ -623,6 +626,10 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.6": [
+      "Assinatura pelo app Android: o Google Play processa o pagamento; o guf recebe dele o código da compra, o produto, a situação da assinatura e os pagamentos, e não envia dados seus ao Google para a compra.",
+      "Prazos: vínculo entre a compra e a conta enquanto ela existir; avisos técnicos do Google Play por 90 dias.",
+    ],
     "1.5": [
       "Assinatura do Pro pelo Stripe: o que o guf envia (só o e-mail e um código interno da conta), o que você informa direto ao Stripe e o que o guf guarda (situação da assinatura, pagamentos e devoluções; nunca o número do cartão).",
       "Prazos: pagamentos e devoluções por 5 anos, pela lei fiscal (sem ligação com você se excluir a conta antes); avisos técnicos do Stripe por 90 dias.",
@@ -838,6 +845,21 @@ const SUBSCRIPTION: LegalDocumentContent = {
       ],
     },
     {
+      id: "google-play",
+      title: "Assinatura pelo app Android (Google Play)",
+      blocks: [
+        p(
+          "No app do guf baixado na Play Store, o Pro é assinado pelo Google Play, com a forma de pagamento da sua conta Google; no site, pelo Stripe. O preço, a periodicidade e a renovação seguem o que a tela do guf e a janela de pagamento do Google Play mostram antes de você confirmar. O recibo é enviado pelo Google.",
+        ),
+        p(
+          "Cancelar continua sendo no guf, em Configurações › Plano, com as mesmas regras: em até 7 dias do primeiro pagamento, o guf pede ao Google a devolução do valor inteiro e o Pro termina; depois disso, a renovação para e o Pro continua até o fim do período já pago. Trocar a forma de pagamento, ver os recibos e reativar uma assinatura cancelada são feitos na página de assinaturas do Google Play, que o app abre para você.",
+        ),
+        p(
+          "Se a renovação não for paga, o Pro continua pelo prazo que o Google Play der para atualizar o pagamento; sem pagamento, a assinatura é encerrada e a conta volta ao Free. Uma devolução feita pelo próprio Google encerra o Pro daquele período. Cupons do Stripe não valem no Google Play.",
+        ),
+      ],
+    },
+    {
       id: "falha",
       title: "Se a cobrança falhar",
       blocks: [
@@ -914,6 +936,10 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.4": [
+      "Assinatura pelo app Android: o Pro é comprado pelo Google Play; cancelar continua no guf, com a regra dos 7 dias.",
+      "Forma de pagamento, recibos e reativação da assinatura do Google Play ficam na página de assinaturas da Play.",
+    ],
     "1.3": [
       "Plano anual: o valor do ano é cobrado de uma vez; o valor por mês aparece só como comparação.",
       "Preço promocional por tempo limitado: a tela mostra o preço normal que vale depois. Aumento para quem já assina é avisado antes e vale só na renovação seguinte.",

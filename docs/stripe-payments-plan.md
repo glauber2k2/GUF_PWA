@@ -435,3 +435,10 @@ values ('pro', 'stripe', 'price_XXXXXXXX', 'year', 11800, 14800, 'brl');
 
 - **Fim da promoção (subir o preço):** criar no Stripe os preços novos (R$ 19,80/mês e R$ 148,00/ano), desativar as linhas promocionais (`update plan_prices set is_active = false where ...`) e inserir as novas com `regular_amount_cents = null`. Quem já assina continua no preço antigo do Stripe; aumentar o valor de quem já assina exige aviso antes e só vale na renovação seguinte (Termos da Assinatura 1.3, seção "Mensal ou anual").
 - **Textos:** Termos da Assinatura 1.3 (migration `20261107120100_legal_docs_subscription_annual`, aplicar depois da 1.1 e da 1.2, com a abertura da venda) e as perguntas "Como funciona o plano anual?" e "O preço atual é promocional?" em `/planos`.
+
+### 11.8 Google Play no app Android (2026-11-07, branch `feat/google-play-billing`)
+
+Dentro do app da Play (TWA) o Pro é vendido pelo Google Play Billing; no navegador, pelo Stripe. A mesma
+camada de gateways serve aos dois (capacidades em `_shared/billing/provider.ts`: `HostedCheckoutProvider` = Stripe,
+`StorePurchaseProvider` = Google Play) e o mesmo espelho no banco (assinatura, direitos, pagamentos, 7 dias).
+Arquitetura, fluxo e configuração (produtos, conta de serviço, RTDN, secrets) em `docs/play-store-twa.md` § 5.
