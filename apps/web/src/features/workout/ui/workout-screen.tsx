@@ -273,6 +273,7 @@ function WorkoutView({ workout, source, persist, offline, dev, exercisePathFor }
     sink,
     showToast,
     loadContext,
+    repRangeAlerts: true,
     onSetCompleted: startRestAfter,
     initialEdit:
       dev.has("editando") && workout.exercises[0] ? { exerciseId: workout.exercises[0].id, setIndex: 0, field: "weightKg" } : null,

@@ -1,9 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { ArrowLeftRight, NotepadText, Plus, Trash2 } from "lucide-react";
+import { ArrowLeftRight, NotepadText, Plus, Trash2, TrendingDown, TrendingUp } from "lucide-react";
 import type { ActiveWorkout, ExerciseContext, LibraryExercise, WorkoutExercise, WorkoutSet } from "@guf/api";
-import { buildExerciseRecord, EMPTY_SET_VALUES, formatRecordValue, markExerciseRecordSets, MAX_SET_DURATION_SECONDS, setMetricFor, SET_METRICS, type WeightUnit } from "@guf/core";
+import {
+  buildExerciseRecord,
+  EMPTY_SET_VALUES,
+  formatRecordValue,
+  markExerciseRecordSets,
+  MAX_SET_DURATION_SECONDS,
+  measuresReps,
+  repRangeAlert,
+  repRangeStatus,
+  setMetricFor,
+  SET_METRICS,
+  type WeightUnit,
+} from "@guf/core";
 import type { ToastOptions } from "@/features/app-shell";
 import { buildWorkoutExercise } from "@/features/workout/helpers/workout-builders";
 import {
@@ -59,6 +71,8 @@ export interface WorkoutEditingOptions {
   loadContext: (exerciseIds: string[]) => Promise<Record<string, ExerciseContext>>;
   /** Séries novas já entram concluídas (treino concluído: só as concluídas ficam). */
   newSetsCompleted?: boolean;
+  /** Avisa ao concluir uma série fora da faixa de repetições da rotina (só no treino em andamento). */
+  repRangeAlerts?: boolean;
   /** Série acabou de ser concluída, com os exercícios já atualizados (o treino em andamento começa o descanso). */
   onSetCompleted?: (exercises: ExerciseView[], exerciseIndex: number, setIndex: number) => void;
   /** Só desenvolvimento: abre já editando uma série. */
@@ -90,6 +104,7 @@ export function useWorkoutEditing({
   showToast,
   loadContext,
   newSetsCompleted = false,
+  repRangeAlerts = false,
   onSetCompleted,
   initialEdit = null,
 }: WorkoutEditingOptions) {
@@ -131,6 +146,16 @@ export function useWorkoutEditing({
     showToast("Recorde pessoal", { tone: "pr", message: `${ex.name} – ${formatRecordValue(built.record, unit)}`, haptic });
   };
 
+  /** Aviso quando a série concluída ficou abaixo ou acima da faixa de repetições (aquecimento não conta). */
+  const announceRepRange = (ex: ExerciseView, set: WorkoutSet) => {
+    if (!repRangeAlerts || set.setType === "warmup" || !measuresReps(ex.muscleGroup) || !ex.repRange) return;
+    const status = repRangeStatus(set.reps, ex.repRange);
+    const alert = status && repRangeAlert(status, ex.repRange);
+    if (!alert) return;
+    const isBelow = status === "below";
+    showToast(alert.title, { tone: isBelow ? "warning" : "info", icon: isBelow ? TrendingDown : TrendingUp, message: alert.message, haptic: false });
+  };
+
   const toggleSet = (exerciseIndex: number, setIndex: number) => {
     const ex = state.exercises[exerciseIndex];
     const set = ex?.sets[setIndex];
@@ -153,6 +178,7 @@ export function useWorkoutEditing({
     );
     // A conclusão da série já vibrou com o padrão de recorde.
     if (isRecord) announceRecord(ex, nextSets, setIndex, false);
+    announceRepRange(ex, set);
   };
 
   const cycleType = (ex: ExerciseView, setIndex: number) => {

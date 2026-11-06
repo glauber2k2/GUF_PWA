@@ -15,11 +15,12 @@ import {
   toKeypadValue,
   type WeightUnit,
 } from "@guf/core";
-import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN, TARGET_REPS_MAX_LENGTH } from "@guf/schemas";
+import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN } from "@guf/schemas";
 import type { RoutineExerciseDraft } from "@guf/api";
 import { Icon, IconButton, SegmentedControl, Stepper, Tag, TextField } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import type { DraftAction } from "@/features/routine/helpers/routine-draft";
+import { RepRangeFields } from "@/features/routine/components/rep-range-fields";
 
 const REST_OPTIONS = ROUTINE_REST_OPTIONS.map((s) => ({ value: String(s), label: formatClock(s) }));
 
@@ -158,14 +159,7 @@ export function RoutineExerciseCard({
             decreaseLabel="Menos uma série"
             increaseLabel="Mais uma série"
           />
-          <TextField
-            label="Repetições alvo"
-            value={exercise.targetReps}
-            maxLength={TARGET_REPS_MAX_LENGTH}
-            disabled={disabled}
-            hint="Opcional. Ex.: 10, 8–12 ou falha"
-            onChange={(e) => update({ targetReps: e.target.value })}
-          />
+          <RepRangeFields value={exercise.targetReps} disabled={disabled} onChange={(targetReps) => update({ targetReps })} />
           {showTargetWeight && (
             <TargetWeightField valueKg={exercise.targetWeightKg} unit={unit} disabled={disabled} onChange={(kg) => update({ targetWeightKg: kg })} />
           )}

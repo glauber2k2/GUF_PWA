@@ -149,12 +149,21 @@ export type ChartPeriod = "4s" | "3m" | "6m" | "1a";
 /** Semanas de cada período do gráfico. */
 export const CHART_PERIOD_WEEKS: Record<ChartPeriod, number> = { "4s": 4, "3m": 13, "6m": 26, "1a": 52 };
 
-export const CHART_PERIOD_LABELS: Record<ChartPeriod, { short: string; long: string }> = {
-  "4s": { short: "4 sem", long: "últimas 4 semanas" },
-  "3m": { short: "3 meses", long: "últimos 3 meses" },
-  "6m": { short: "6 meses", long: "últimos 6 meses" },
-  "1a": { short: "1 ano", long: "último ano" },
+export const CHART_PERIOD_LABELS: Record<ChartPeriod, { short: string; long: string; previous: string }> = {
+  "4s": { short: "4 sem", long: "últimas 4 semanas", previous: "nas 4 semanas anteriores" },
+  "3m": { short: "3 meses", long: "últimos 3 meses", previous: "nos 3 meses anteriores" },
+  "6m": { short: "6 meses", long: "últimos 6 meses", previous: "nos 6 meses anteriores" },
+  "1a": { short: "1 ano", long: "último ano", previous: "no ano anterior" },
 };
+
+/**
+ * Como mostrar a comparação com o período anterior quando não há variação (`delta` null).
+ * @returns "hidden" se o histórico começou dentro do período atual (não há o que comparar e a
+ *   falta de dados não é um problema); "empty" se havia treinos antes, mas nenhum no período anterior
+ */
+export function missingComparisonKind(firstTrainedOn: string | null, currentFrom: string): "hidden" | "empty" {
+  return firstTrainedOn === null || firstTrainedOn >= currentFrom ? "hidden" : "empty";
+}
 
 export function isChartPeriod(value: string | null | undefined): value is ChartPeriod {
   return value !== null && value !== undefined && value in CHART_PERIOD_WEEKS;

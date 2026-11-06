@@ -184,8 +184,8 @@ export function PreferencesSection({ profile, canEdit, platform }: { profile: Pr
           />
         </div>
         <span className="text-[13px] leading-[18px] text-pretty text-fg-muted min-[360px]:pl-12">
-          Com todas as séries concluídas, o treino é finalizado sozinho após 30 minutos sem atividade, com o horário da última série. Funciona
-          mesmo com o app fechado.
+          30 minutos depois da última série concluída, o treino é finalizado sozinho, com o horário dela; séries não marcadas ficam de fora. Sem
+          nenhuma série concluída, ele é descartado depois de 3 horas. Funciona mesmo com o app fechado.
         </span>
       </RowGroup>
 

@@ -19,14 +19,23 @@ function closedToast({ status, autoFinished, droppedChanges }: ServerClosedWorko
   const lost = droppedChanges > 0 ? " As alterações feitas depois disso não foram salvas." : "";
   const tone = droppedChanges > 0 ? "warning" : "info";
   if (status === "missing") {
-    return { title: "Treino encerrado", options: { tone, message: `Este treino não está mais disponível.${lost}` } };
+    return {
+      title: "Treino encerrado",
+      options: {
+        tone,
+        message: `Ele foi descartado em outro aparelho ou automaticamente, por ficar horas sem nenhuma série concluída.${lost}`,
+      },
+    };
   }
   if (autoFinished) {
     return {
       title: "Treino encerrado automaticamente",
       options: {
         tone,
-        message: droppedChanges > 0 ? `Ele terminou 30 min após a última série.${lost}` : "Ele terminou 30 min após a última série e já está no seu histórico.",
+        message:
+          droppedChanges > 0
+            ? `Ele terminou 30 min após a última série concluída.${lost}`
+            : "Ele terminou 30 min após a última série concluída e já está no seu histórico. Séries não marcadas ficaram de fora.",
       },
     };
   }

@@ -148,6 +148,8 @@ const seedCardioSet = ([prev, distanceKm, durationSeconds, isCompleted]: SeedCar
 
 /** Marcas anteriores do cardio na demonstração: 6:00 /km e 5 km (correr mais rápido ou mais longe vira recorde). */
 const MOCK_CARDIO_BEST = { secondsPerKm: 360, distanceKm: 5 };
+/** Faixa de repetições de exemplo (avisos de série abaixo/acima da faixa na demonstração). */
+const MOCK_REP_RANGE = { min: 8, max: 12 };
 
 function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioSet[]): WorkoutExercise {
   const ex = byName(name);
@@ -158,6 +160,7 @@ function seedCardioExercise(name: string, restSeconds: number, sets: SeedCardioS
     muscleGroup: ex.muscleGroup,
     equipment: ex.equipment,
     restSeconds,
+    repRange: null,
     note: null,
     previousNote: null,
     best1RmKg: null,
@@ -175,6 +178,7 @@ function seedExercise(name: string, restSeconds: number, previousNote: string | 
     muscleGroup: ex.muscleGroup,
     equipment: ex.equipment,
     restSeconds,
+    repRange: MOCK_REP_RANGE,
     note: null,
     previousNote,
     best1RmKg: BEST_1RM_KG[name] ?? null,
@@ -287,6 +291,7 @@ export const getExerciseContext: WorkoutApi["getExerciseContext"] = async (clien
       best1RmKg: ex ? (BEST_1RM_KG[ex.name] ?? null) : null,
       cardioBest: ex?.muscleGroup === "cardio" ? MOCK_CARDIO_BEST : null,
       restSeconds: DEFAULT_REST_SECONDS,
+      repRange: null,
       routineNote: null,
     };
   }

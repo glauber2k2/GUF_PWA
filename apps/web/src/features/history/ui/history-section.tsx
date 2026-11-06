@@ -176,6 +176,7 @@ function HistoryContent({
           unit={weightUnit}
           period={period}
           onPeriodChange={changePeriod}
+          firstTrainedOn={firstTrainedOn}
           fewData={fewData}
         />
       </div>

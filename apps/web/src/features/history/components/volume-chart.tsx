@@ -10,12 +10,14 @@ import {
   formatDayMonth,
   formatNumber,
   fromLocalISODate,
+  missingComparisonKind,
   periodAverage,
   periodComparison,
   plural,
   toDisplayWeight,
   trendLine,
   weeklyAverageVolume,
+  weeksRange,
   type ChartPeriod,
   type TrainingDayLike,
   type WeightUnit,
@@ -44,15 +46,20 @@ export interface VolumeChartProps {
   unit: WeightUnit;
   period: ChartPeriod;
   onPeriodChange: (period: ChartPeriod) => void;
+  /** Data do primeiro treino (sem comparação quando o histórico começou dentro do período). */
+  firstTrainedOn: string | null;
   /** Menos de 2 semanas com treino em todo o histórico. */
   fewData: boolean;
 }
 
 /** "Volume médio por dia treinado": barras por semana + linha de tendência, com comparação ao período anterior. */
-export function VolumeChart({ days, today, unit, period, onPeriodChange, fewData }: VolumeChartProps) {
+export function VolumeChart({ days, today, unit, period, onPeriodChange, firstTrainedOn, fewData }: VolumeChartProps) {
   const weeks = CHART_PERIOD_WEEKS[period];
   const data = useMemo(() => buildSeries(days, today, weeks, unit), [days, today, weeks, unit]);
   const hasData = days.length > 0;
+  // Sem comparação: some se não houve treino neste período ou se o histórico começou nele; senão, diz que o anterior ficou sem treino.
+  const comparisonHidden =
+    data.delta === null && (data.average === null || missingComparisonKind(firstTrainedOn, weeksRange(today, weeks).from) === "hidden");
 
   return (
     <section aria-label="Volume médio por dia treinado" className="flex flex-col gap-3.5 rounded-lg border border-border bg-surface px-4 pt-5 pb-4 shadow-e1">
@@ -66,7 +73,7 @@ export function VolumeChart({ days, today, unit, period, onPeriodChange, fewData
 
       {hasData ? (
         <>
-          <ChartHeader average={data.average} delta={fewData ? undefined : data.delta} unit={unit} />
+          <ChartHeader average={data.average} delta={fewData || comparisonHidden ? undefined : data.delta} period={period} unit={unit} />
           {fewData && (
             <Banner tone="info" icon={ChartColumn}>
               Treine mais algumas semanas para ver sua evolução.
@@ -147,25 +154,35 @@ function chartSummary(series: ChartSeries, period: ChartPeriod, unit: WeightUnit
  * Partes visuais
  * --------------------------------------------------------------------- */
 
-function ChartHeader({ average, delta, unit }: { average: number | null; delta: number | null | undefined; unit: WeightUnit }) {
+function ChartHeader({
+  average,
+  delta,
+  period,
+  unit,
+}: {
+  average: number | null;
+  delta: number | null | undefined;
+  period: ChartPeriod;
+  unit: WeightUnit;
+}) {
   return (
     <div className="flex flex-col gap-0.5 px-1">
       <div className="flex items-baseline gap-1.5">
         <span className="font-display text-num-lg font-semibold tabular-nums">{average === null ? "—" : formatNumber(average, 0)}</span>
         <span className="text-sm text-fg-muted">{unit} · média do período</span>
       </div>
-      {delta !== undefined && <DeltaLabel delta={delta} />}
+      {delta !== undefined && <DeltaLabel delta={delta} period={period} />}
     </div>
   );
 }
 
 /** Variação: alta em volt; queda e "igual" em cor neutra (queda não é erro). */
-function DeltaLabel({ delta }: { delta: number | null }) {
+function DeltaLabel({ delta, period }: { delta: number | null; period: ChartPeriod }) {
   const up = delta !== null && delta > 0;
   const icon = delta === null || delta === 0 ? Minus : up ? TrendingUp : TrendingDown;
   const text =
     delta === null
-      ? "Sem dados do período anterior"
+      ? `Sem treinos ${CHART_PERIOD_LABELS[period].previous} para comparar`
       : delta === 0
         ? "Igual ao período anterior"
         : `${up ? "+" : "−"}${Math.abs(delta)}% vs. período anterior`;

@@ -21,6 +21,7 @@ function toEditableExercise(exercise: SummaryExercise, record: WorkoutSummaryRec
     muscleGroup: exercise.muscleGroup,
     equipment: "outro",
     restSeconds: DEFAULT_REST_SECONDS,
+    repRange: null,
     note: exercise.note,
     previousNote: null,
     best1RmKg: record?.metric === "load" ? record.previous1RmKg : null,

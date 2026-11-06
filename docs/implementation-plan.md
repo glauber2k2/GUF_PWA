@@ -15,6 +15,8 @@ Este documento tem como finalidade registrar o que foi entregue, as próximas et
 
 ### Entregue
 
+**2026-11-06 (branch `feat/faixa-reps-cupons`):** faixa de repetições na rotina com aviso no treino, finalização automática que funciona com séries em aberto (e descarte do treino vazio), tempo médio da rotina no card de hoje, texto da comparação do gráfico de volume, cupons de desconto no checkout do Stripe (Termos da Assinatura 1.2, não aplicados) e o guia da Play Store em `docs/play-store-twa.md` (TWA agora, React Native no mesmo anúncio depois). Hospedagem de produção na Cloudflare (`treino.gufapp.com.br`).
+
 Tudo abaixo está na `main` (número do PR entre parênteses).
 
 | Etapa | Branch | PR |

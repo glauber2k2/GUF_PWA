@@ -811,6 +811,18 @@ const SUBSCRIPTION: LegalDocumentContent = {
       ],
     },
     {
+      id: "cupom",
+      title: "Cupons de desconto",
+      blocks: [
+        p(
+          "Se você tiver um cupom de desconto, digite o código na página de pagamento do Stripe. Antes de você confirmar, essa página mostra o valor com desconto, por quantas cobranças o desconto vale e quanto será cobrado nas renovações depois dele.",
+        ),
+        p(
+          "O cupom vale só para a assinatura em que foi usado, não é trocado por dinheiro e não muda cobranças já feitas. Na desistência em até 7 dias, é devolvido o valor que você efetivamente pagou.",
+        ),
+      ],
+    },
+    {
       id: "falha",
       title: "Se a cobrança falhar",
       blocks: [
@@ -887,6 +899,10 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.2": [
+      "Cupons de desconto: o código é digitado na página de pagamento do Stripe, que mostra o valor com desconto, por quantas cobranças ele vale e o valor das renovações antes de você confirmar.",
+      "Na desistência em até 7 dias, é devolvido o valor efetivamente pago (com o desconto, se houver).",
+    ],
     "1.1": [
       "O Pro passa a ser vendido: o preço aparece na tela antes de você confirmar e o pagamento é feito pelo Stripe, com renovação automática.",
       "Desistir em até 7 dias do primeiro pagamento é feito no próprio app, em Configurações › Plano: o valor volta inteiro e o Pro termina na hora.",

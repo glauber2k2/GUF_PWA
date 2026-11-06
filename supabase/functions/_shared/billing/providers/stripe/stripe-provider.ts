@@ -180,7 +180,9 @@ export function createStripeProvider(): BillingProvider {
         success_url: successUrl,
         cancel_url: cancelUrl,
         locale: "pt-BR",
-        allow_promotion_codes: false,
+        // Cupons: criados no painel do Stripe (Cupons › Códigos promocionais); a página mostra o
+        // desconto e as renovações antes de confirmar (Termos da Assinatura 1.2, seção "cupom").
+        allow_promotion_codes: true,
         expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_EXPIRES_SECONDS,
         metadata: { user_id: userId },
         subscription_data: { metadata: { user_id: userId } },
