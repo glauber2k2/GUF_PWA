@@ -1002,6 +1002,7 @@ export type Database = {
           plan_code: string
           price_ref: string
           provider: string
+          regular_amount_cents: number | null
         }
         Insert: {
           amount_cents: number
@@ -1013,6 +1014,7 @@ export type Database = {
           plan_code: string
           price_ref: string
           provider: string
+          regular_amount_cents?: number | null
         }
         Update: {
           amount_cents?: number
@@ -1024,6 +1026,7 @@ export type Database = {
           plan_code?: string
           price_ref?: string
           provider?: string
+          regular_amount_cents?: number | null
         }
         Relationships: [
           {
@@ -1470,6 +1473,7 @@ export type Database = {
       }
       subscriptions: {
         Row: {
+          billing_interval: string | null
           cancel_at_period_end: boolean
           canceled_at: string | null
           created_at: string
@@ -1484,6 +1488,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           created_at?: string
@@ -1498,6 +1503,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          billing_interval?: string | null
           cancel_at_period_end?: boolean
           canceled_at?: string | null
           created_at?: string
@@ -1983,7 +1989,12 @@ export type Database = {
         Returns: Json
       }
       billing_checkout_context: {
-        Args: { p_plan_code: string; p_provider: string; p_user_id: string }
+        Args: {
+          p_interval?: string
+          p_plan_code: string
+          p_provider: string
+          p_user_id: string
+        }
         Returns: Json
       }
       billing_event_begin: {

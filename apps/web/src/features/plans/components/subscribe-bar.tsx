@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { Crown } from "lucide-react";
-import { formatIntervalSuffix, formatMoney, formatPlanPeriodName, legalDocumentArticle, legalDocumentLabel, type CatalogPlan, type PlanPrice } from "@guf/core";
+import { buildPriceDisplay, formatChargeSummary, formatPlanPeriodName, legalDocumentArticle, legalDocumentLabel, type CatalogPlan, type PlanPrice } from "@guf/core";
 import type { LegalDocument } from "@guf/api";
 import { Banner, Button, Checkbox } from "@/shared/components/ds";
 import { BOTTOM_BAR_PROPS } from "@/shared/hooks/use-bottom-clearance";
@@ -22,7 +22,7 @@ export interface SubscribeBarProps {
   canSubscribe: boolean;
   subscribing: boolean;
   onSubscribe: (acceptedDocumentIds: string[]) => void;
-  /** Mostra "Pro mensal · R$ 14,80/mês" acima do botão (tela do Pro, onde o preço não fica sempre à vista). */
+  /** Mostra "Pro anual · R$ 118,00 por ano" e o valor por mês acima do botão (tela do Pro, onde o preço não fica sempre à vista). */
   showSummary?: boolean;
 }
 
@@ -43,8 +43,8 @@ export function SubscribeBar({
 }: SubscribeBarProps) {
   const [accepted, setAccepted] = useState(false);
   const needsAcceptance = documents.length > 0;
-  const amount = price ? formatMoney(price.amountCents, price.currency) : null;
-  const suffix = price ? formatIntervalSuffix(price.interval) : "";
+  const display = price ? buildPriceDisplay(price) : null;
+
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -60,12 +60,12 @@ export function SubscribeBar({
       className="fixed inset-x-0 bottom-0 z-10 animate-guf-rise border-t border-border bg-background/90 backdrop-blur-[12px] [animation-delay:400ms]"
     >
       <div className="mx-auto flex max-w-[430px] flex-col gap-2.5 px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
-        {showSummary && price && amount && (
+        {showSummary && price && display && (
           <p className="m-0 flex items-baseline justify-between gap-2">
-            <span className="text-[13px] text-fg-secondary">{formatPlanPeriodName(plan.name, price.interval)}</span>
-            <strong className="font-display text-[22px] font-bold tabular-nums">
-              {amount}
-              <span className="font-sans text-[13px] font-medium text-fg-secondary">{suffix}</span>
+            <span className="min-w-0 truncate text-[13px] text-fg-secondary">{formatChargeSummary(plan.name, price)}</span>
+            <strong className="flex-none font-display text-[22px] font-bold tabular-nums">
+              {display.amount}
+              <span className="font-sans text-[13px] font-medium text-fg-secondary">{display.suffix}</span>
             </strong>
           </p>
         )}
@@ -97,10 +97,12 @@ export function SubscribeBar({
           loading={subscribing}
           disabled={!price || !canSubscribe || documentsError !== null || (needsAcceptance && !accepted)}
         >
-          {amount ? `Assinar ${plan.name} por ${amount}${suffix}` : "Assinatura em breve"}
+          {price && display ? `Assinar ${formatPlanPeriodName(plan.name, price.interval)} por ${display.amount}${display.suffix}` : "Assinatura em breve"}
         </Button>
         <span className="text-center text-xs leading-4 text-fg-muted">
-          {price ? "Renova automaticamente · cancele quando quiser, aqui no app" : `Avisaremos quando o ${plan.name} puder ser assinado.`}
+          {display
+            ? `${display.billedText} · renova automaticamente · cancele quando quiser, aqui no app`
+            : `Avisaremos quando o ${plan.name} puder ser assinado.`}
         </span>
       </div>
     </form>

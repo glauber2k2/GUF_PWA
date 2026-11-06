@@ -420,3 +420,18 @@ Testada em 30/10/2026 no banco remoto dentro de uma transação desfeita (32 ver
 - **Nada muda no banco nem no app:** o plano continua vindo do preço (`plan_prices`); o valor gravado em `billing_payments` é o **pago** (`invoice.amount_paid`), então a devolução dos 7 dias devolve o que foi pago, e "Valor" em `/planos` mostra o último pagamento. Cupom de 100% gera fatura de R$ 0: o Pro é liberado e a devolução é zero.
 - **Textos:** Termos da Assinatura 1.2 (seção "Cupons de desconto") e a pergunta "Tenho um cupom de desconto. Onde uso?" em `/planos` (`constants/plan-faq.ts`).
 - **Não feito:** campo de cupom dentro do app (o código vai só na página do Stripe) e cupons por pessoa criados pelo painel do guf.
+
+### 11.7 Plano anual e preço promocional (2026-11-07, branch `feat/plano-anual-promocao`)
+
+- **Preços (decisão do controlador):** lançamento com preço promocional por tempo limitado — mensal **R$ 14,80** (depois **R$ 19,80**) e anual **R$ 118,00**, mostrado como **R$ 11,80/mês** (depois **R$ 148,00** = R$ 14,80/mês). Nenhum valor fica no código: tudo vem de `plan_prices` (`amount_cents` = preço à venda, `regular_amount_cents` = preço normal depois da promoção, null = sem promoção). Migration `20261107120000_plan_prices_annual_promo`.
+- **Tela:** seletor Mensal/Anual (`BillingIntervalPicker`, anual primeiro e selecionado, com a economia "−20%" calculada por `annualSavingsPercent`), `PriceTag` (valor POR MÊS em destaque; "R$ 118,00 cobrados uma vez por ano"; selo "Promoção por tempo limitado" + "Depois, R$ 14,80/mês (R$ 148,00 por ano).") e a barra de assinar ("Assinar Pro anual por R$ 11,80/mês" com o total cobrado logo abaixo). Regras e textos em `packages/core/src/plan-pricing.ts`.
+- **Checkout:** o app envia `interval` ("month" | "year"); `billing_checkout_context(..., p_interval)` escolhe o preço ativo daquela periodicidade; a Edge Function confere no Stripe que o preço é anual e do mesmo valor (senão `billing_unavailable`). A assinatura guarda `subscriptions.billing_interval`, devolvido por `my_billing` com o gateway (`provider`).
+- **Criar o anual no Stripe (modo de teste antes do real):** Catálogo de produtos › produto do Pro › **Adicionar preço** › recorrente, **anual**, R$ 118,00, BRL. Copiar o id (`price_…`) e cadastrar (SQL do controlador):
+
+```sql
+insert into public.plan_prices (plan_code, provider, price_ref, billing_interval, amount_cents, regular_amount_cents, currency)
+values ('pro', 'stripe', 'price_XXXXXXXX', 'year', 11800, 14800, 'brl');
+```
+
+- **Fim da promoção (subir o preço):** criar no Stripe os preços novos (R$ 19,80/mês e R$ 148,00/ano), desativar as linhas promocionais (`update plan_prices set is_active = false where ...`) e inserir as novas com `regular_amount_cents = null`. Quem já assina continua no preço antigo do Stripe; aumentar o valor de quem já assina exige aviso antes e só vale na renovação seguinte (Termos da Assinatura 1.3, seção "Mensal ou anual").
+- **Textos:** Termos da Assinatura 1.3 (migration `20261107120100_legal_docs_subscription_annual`, aplicar depois da 1.1 e da 1.2, com a abertura da venda) e as perguntas "Como funciona o plano anual?" e "O preço atual é promocional?" em `/planos`.

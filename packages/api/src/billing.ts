@@ -1,6 +1,7 @@
 import { FunctionsFetchError, FunctionsHttpError } from "@supabase/supabase-js";
 import type {
   BillingInterval,
+  BillingProviderId,
   BillingPayment,
   BillingRefund,
   BillingSubscription,
@@ -23,8 +24,8 @@ import { apiError, toApiError, type ApiError, type ApiErrorCode, type ApiResult 
 type Result<T> = Promise<ApiResult<T>>;
 
 export interface BillingApi {
-  /** Preços à venda (mostrados antes de assinar). */
-  getPlanPrices: (client: GufClient, input: null) => Result<PlanPrice[]>;
+  /** Preços à venda no gateway do canal de pagamento (Stripe na web, Google Play no app Android). */
+  getPlanPrices: (client: GufClient, input: { provider: BillingProviderId }) => Result<PlanPrice[]>;
   /** Assinatura, prazo de desistência, pagamentos e devoluções do próprio usuário. */
   getMyBilling: (client: GufClient, input: null) => Result<MyBilling>;
   /** Cancela: dentro dos 7 dias devolve tudo e encerra agora; depois, vale até o fim do período. */
@@ -87,6 +88,8 @@ interface MyBillingJson {
     id: string;
     plan_code: string;
     plan_name: string;
+    provider: BillingProviderId;
+    billing_interval: BillingInterval | null;
     status: SubscriptionStatus;
     started_at: string | null;
     current_period_end: string | null;
@@ -107,6 +110,8 @@ function toSubscription(json: NonNullable<MyBillingJson["subscription"]>): Billi
     id: json.id,
     planCode: json.plan_code,
     planName: json.plan_name,
+    provider: json.provider,
+    interval: json.billing_interval ?? null,
     status: json.status,
     startedAt: json.started_at,
     currentPeriodEnd: json.current_period_end,
@@ -120,15 +125,20 @@ function toSubscription(json: NonNullable<MyBillingJson["subscription"]>): Billi
   };
 }
 
-export const getPlanPrices: BillingApi["getPlanPrices"] = async (client) => {
+export const getPlanPrices: BillingApi["getPlanPrices"] = async (client, { provider }) => {
   try {
-    const { data, error } = await client.from("plan_prices").select("plan_code, billing_interval, amount_cents, currency").order("amount_cents");
+    const { data, error } = await client
+      .from("plan_prices")
+      .select("plan_code, billing_interval, amount_cents, regular_amount_cents, currency")
+      .eq("provider", provider)
+      .order("amount_cents");
     if (error) return { data: null, error: toApiError(error) };
     return {
       data: data.map((row) => ({
         planCode: row.plan_code,
         interval: row.billing_interval as BillingInterval,
         amountCents: row.amount_cents,
+        regularAmountCents: row.regular_amount_cents ?? null,
         currency: row.currency,
       })),
       error: null,

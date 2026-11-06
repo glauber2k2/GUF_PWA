@@ -1,7 +1,7 @@
 // Acesso ao banco das funções de cobrança (service_role). Os serviços dependem da interface
 // BillingStore, nunca do cliente Supabase (nos testes, um store em memória).
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import type { ProviderId, ProviderPayment, ProviderRefundState, ProviderSubscription, SubscriptionStatus } from "./provider.ts";
+import type { BillingInterval, ProviderId, ProviderPayment, ProviderRefundState, ProviderSubscription, SubscriptionStatus } from "./provider.ts";
 
 /** Erro do banco com o código (GB001, GB004…) para a Edge Function traduzir. */
 export class BillingStoreError extends Error {
@@ -14,7 +14,7 @@ export interface CheckoutContext {
   priceRef: string;
   amountCents: number;
   currency: string;
-  interval: "month" | "year";
+  interval: BillingInterval;
   customerRef: string | null;
 }
 
@@ -63,7 +63,7 @@ export interface OwnedSubscription {
 export interface BillingStore {
   beginEvent(provider: ProviderId, eventId: string, type: string): Promise<boolean>;
   finishEvent(provider: ProviderId, eventId: string, errorCode: string | null): Promise<void>;
-  checkoutContext(userId: string, planCode: string, provider: ProviderId): Promise<CheckoutContext>;
+  checkoutContext(userId: string, planCode: string, provider: ProviderId, interval: BillingInterval): Promise<CheckoutContext>;
   linkCustomer(userId: string, provider: ProviderId, customerRef: string): Promise<string>;
   customerOf(userId: string, provider: ProviderId): Promise<string | null>;
   syncSubscription(provider: ProviderId, subscription: ProviderSubscription & { status: SubscriptionStatus }): Promise<SyncOutcome>;
@@ -94,13 +94,13 @@ export function createSupabaseBillingStore(admin: SupabaseClient): BillingStore 
       await rpc("billing_event_finish", { p_provider: provider, p_event_id: eventId, p_error_code: errorCode });
     },
 
-    async checkoutContext(userId, planCode, provider) {
-      const json = await rpc<Json>("billing_checkout_context", { p_user_id: userId, p_plan_code: planCode, p_provider: provider });
+    async checkoutContext(userId, planCode, provider, interval) {
+      const json = await rpc<Json>("billing_checkout_context", { p_user_id: userId, p_plan_code: planCode, p_provider: provider, p_interval: interval });
       return {
         priceRef: json.price_ref as string,
         amountCents: json.amount_cents as number,
         currency: json.currency as string,
-        interval: json.billing_interval as "month" | "year",
+        interval: json.billing_interval as BillingInterval,
         customerRef: (json.customer_ref as string | null) ?? null,
       };
     },

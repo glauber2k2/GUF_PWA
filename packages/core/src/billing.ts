@@ -6,6 +6,8 @@ import { formatDayMonthYear } from "./dates";
 
 export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled" | "expired";
 export type BillingInterval = "month" | "year";
+/** Gateway da assinatura (`provider` nas tabelas de cobrança): Stripe na web, Google Play no app Android. */
+export type BillingProviderId = "stripe" | "google";
 export type PaymentStatus = "paid" | "partially_refunded" | "refunded" | "disputed";
 export type RefundStatus = "processing" | "refunded" | "failed";
 
@@ -13,6 +15,10 @@ export interface BillingSubscription {
   id: string;
   planCode: string;
   planName: string;
+  /** Onde a assinatura foi feita (decide onde ela é gerenciada). */
+  provider: BillingProviderId;
+  /** Mensal ou anual (null = assinatura antiga, sem a informação). */
+  interval: BillingInterval | null;
   status: SubscriptionStatus;
   startedAt: string | null;
   currentPeriodEnd: string | null;
@@ -58,6 +64,8 @@ export interface PlanPrice {
   interval: BillingInterval;
   amountCents: number;
   currency: string;
+  /** Preço normal depois da promoção (null = o preço atual não é promocional). */
+  regularAmountCents: number | null;
 }
 
 /** O que o cancelamento fez (resposta da Edge Function `billing`). */
