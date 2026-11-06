@@ -22,7 +22,7 @@ import {
   nextTrainingDayLabel,
   plural,
   routineLetter,
-  routineDurationLabel,
+  routineAverageLabel,
   routineMeta,
   routineMuscleGroups,
   startedAgoLabel,
@@ -197,10 +197,10 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
   const meta = [
     plural(routine.exercises.length, "exercício", "exercícios"),
     routine.exercises.length > 0 ? plural(plannedSetCount(routine.exercises), "série", "séries") : null,
-    routineDurationLabel(routine.averageDurationSeconds),
   ]
     .filter(Boolean)
     .join(" · ");
+  const averageLabel = routineAverageLabel(routine.averageDurationSeconds);
   const muscleGroups = routineMuscleGroups(routine.exercises.map((e) => e.muscleGroup).filter(Boolean));
   const preview = routine.exercises.slice(0, PREVIEW_COUNT);
   const remaining = routine.exercises.length - preview.length;
@@ -213,6 +213,12 @@ export function TodayCard({ state, actions }: { state: TodayCardState; actions: 
       </div>
       <h2 className="mt-2 mb-0 text-[22px] leading-7 font-semibold tracking-[-0.015em] text-pretty">{routine.name}</h2>
       <span className="mt-1 text-sm leading-5 text-fg-secondary">{meta}</span>
+      {averageLabel && (
+        <span className="mt-1 flex items-center gap-1 text-xs leading-4 text-fg-muted tabular-nums">
+          <Icon icon={Timer} size={12} />
+          {averageLabel}
+        </span>
+      )}
       {muscleGroups.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {muscleGroups.map((g) => (

@@ -410,3 +410,13 @@ Testada em 30/10/2026 no banco remoto dentro de uma transação desfeita (32 ver
 - Exportação (`export_my_data` → `guf-export/8` com pagamentos e devoluções).
 - Reenvio automático de devoluções sem resposta (`retry_pending_refunds`); hoje a pessoa toca em "Concluir devolução" e a exclusão da conta não prossegue sem resposta do Stripe.
 - Fases 4 e 5 (suporte e painel) e a seção 8 (conta, DPA, MFA, hospedagem).
+- ⏸ Termos da Assinatura 1.2 (cupons): migration `20261106120100_legal_docs_subscription_coupons`, aplicar depois da 1.1 e junto com a abertura da venda.
+- ⚠ App na Google Play (TWA, `docs/play-store-twa.md` § 5): vender assinatura digital pelo Stripe dentro de um app da Play pode violar a política de pagamentos da Google. Decidir antes de publicar o app da Play com a venda aberta.
+
+### 11.6 Cupons de desconto (2026-11-06)
+
+- **Ligado no checkout:** `allow_promotion_codes: true` em `supabase/functions/_shared/billing/providers/stripe/stripe-provider.ts`. A página do Stripe mostra o campo "Adicionar código promocional".
+- **Criar um cupom:** painel do Stripe › Catálogo de produtos › **Cupons** › Criar cupom (percentual ou valor fixo; **duração**: uma vez, por N meses ou para sempre) › dentro do cupom, **Criar código promocional** (o texto que a pessoa digita, ex.: `GUF20`), com limites opcionais (só primeira compra, número máximo de usos, data de validade). Fazer no modo de teste antes do modo real.
+- **Nada muda no banco nem no app:** o plano continua vindo do preço (`plan_prices`); o valor gravado em `billing_payments` é o **pago** (`invoice.amount_paid`), então a devolução dos 7 dias devolve o que foi pago, e "Valor" em `/planos` mostra o último pagamento. Cupom de 100% gera fatura de R$ 0: o Pro é liberado e a devolução é zero.
+- **Textos:** Termos da Assinatura 1.2 (seção "Cupons de desconto") e a pergunta "Tenho um cupom de desconto. Onde uso?" em `/planos` (`constants/plan-faq.ts`).
+- **Não feito:** campo de cupom dentro do app (o código vai só na página do Stripe) e cupons por pessoa criados pelo painel do guf.

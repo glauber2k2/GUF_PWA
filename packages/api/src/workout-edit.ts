@@ -112,6 +112,7 @@ export const getEditableWorkout: WorkoutEditApi["getEditableWorkout"] = async (c
           muscleGroup: se.exercises?.muscle_group ?? "",
           equipment: se.exercises?.equipment ?? "outro",
           restSeconds: routineRes.data?.find((r) => r.exercise_id === se.exercise_id)?.rest_seconds ?? DEFAULT_REST_SECONDS,
+          repRange: null,
           note: se.notes,
           previousNote: null,
           best1RmKg: previousBest1Rm(history, s.id, s.performed_on, earlierRes.data)?.oneRmKg ?? null,

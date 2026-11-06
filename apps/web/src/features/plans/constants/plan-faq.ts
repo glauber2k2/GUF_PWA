@@ -19,6 +19,11 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
       "Na página segura do Stripe. A assinatura renova automaticamente até você cancelar, e o cartão e os recibos ficam em Assinatura › Pagamento e recibos.",
   },
   {
+    question: "Tenho um cupom de desconto. Onde uso?",
+    answer:
+      "Na página de pagamento do Stripe, no campo do código promocional. Antes de confirmar, ela mostra o valor com desconto, por quantas cobranças ele vale e quanto será cobrado nas renovações.",
+  },
+  {
     question: "O que acontece com meus dados se eu voltar ao Free?",
     answer:
       "Nada se perde. Treinos, recordes e evolução continuam completos em qualquer plano; os gráficos voltam ao período do Free e você mantém os projetos e rotinas que já tem.",

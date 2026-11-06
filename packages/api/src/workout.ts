@@ -1,4 +1,14 @@
-import { pickSetValues, type ActivePeriod, type CardioBest, type RecordValue, type SetType, type SetValues, type WeightUnit } from "@guf/core";
+import {
+  parseRepRange,
+  pickSetValues,
+  type ActivePeriod,
+  type CardioBest,
+  type RecordValue,
+  type RepRange,
+  type SetType,
+  type SetValues,
+  type WeightUnit,
+} from "@guf/core";
 import type { Database } from "@guf/types";
 import { fetchCardioBests } from "./cardio-history";
 import type { GufClient } from "./client";
@@ -55,6 +65,8 @@ export interface WorkoutExercise {
   equipment: string;
   /** Descanso planejado na rotina (padrão 90s). */
   restSeconds: number;
+  /** Faixa de repetições da rotina (avisa ao concluir série fora dela); null = sem faixa ou treino livre. */
+  repRange: RepRange | null;
   /** Observação do exercício neste treino (começa vazia: a de antes não passa para o treino novo). */
   note: string | null;
   /** Observação salva na rotina (a do último treino com ela): só aparece como sugestão no campo. */
@@ -103,6 +115,7 @@ export interface ExerciseContext {
   best1RmKg: number | null;
   cardioBest: CardioBest | null;
   restSeconds: number;
+  repRange: RepRange | null;
   routineNote: string | null;
 }
 
@@ -244,8 +257,11 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
     const [lastRes, routineRes, bests, cardioBests] = await Promise.all([
       client.rpc("get_last_performance", { p_exercise_ids: ids }),
       routineId
-        ? client.from("routine_exercises").select("exercise_id, rest_seconds, notes").eq("routine_id", routineId)
-        : Promise.resolve({ data: [] as { exercise_id: string; rest_seconds: number | null; notes: string | null }[], error: null }),
+        ? client.from("routine_exercises").select("exercise_id, rest_seconds, target_reps, notes").eq("routine_id", routineId)
+        : Promise.resolve({
+            data: [] as { exercise_id: string; rest_seconds: number | null; target_reps: string | null; notes: string | null }[],
+            error: null,
+          }),
       Promise.all(ids.map((id) => fetchBest1RmKg(client, id))),
       fetchCardioBests(client, ids),
     ]);
@@ -263,6 +279,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
         best1RmKg: bests[i] ?? null,
         cardioBest: cardioBests.data.get(id) ?? null,
         restSeconds: planned?.rest_seconds ?? DEFAULT_REST_SECONDS,
+        repRange: parseRepRange(planned?.target_reps),
         routineNote: planned?.notes ?? null,
       };
     });
@@ -317,6 +334,7 @@ export const getWorkout: GetWorkout = async (client, { sessionId }) => {
           muscleGroup: se.exercises?.muscle_group ?? "",
           equipment: se.exercises?.equipment ?? "outro",
           restSeconds: ctx?.restSeconds ?? DEFAULT_REST_SECONDS,
+          repRange: ctx?.repRange ?? null,
           note: se.notes,
           previousNote: ctx?.routineNote ?? null,
           best1RmKg: ctx?.best1RmKg ?? null,

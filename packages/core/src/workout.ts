@@ -61,6 +61,11 @@ export function routineDurationLabel(averageSeconds: number | null): string | nu
   return averageSeconds === null ? null : `~${Math.max(1, Math.round(averageSeconds / 60))} min`;
 }
 
+/** "Média de 52 min nos últimos treinos" (tempo médio da rotina; null = nunca treinada). */
+export function routineAverageLabel(averageSeconds: number | null): string | null {
+  return averageSeconds === null ? null : `Média de ${Math.max(1, Math.round(averageSeconds / 60))} min nos últimos treinos`;
+}
+
 /** Total de séries planejadas (séries não definidas contam como o padrão de 3). */
 export function plannedSetCount(exercises: ReadonlyArray<{ targetSets: number | null }>): number {
   return exercises.reduce((total, e) => total + (e.targetSets ?? DEFAULT_SETS), 0);
