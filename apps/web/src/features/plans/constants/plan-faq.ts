@@ -19,6 +19,16 @@ export const PLAN_FAQ: readonly PlanFaqItem[] = [
       "Na página segura do Stripe. A assinatura renova automaticamente até você cancelar, e o cartão e os recibos ficam em Assinatura › Pagamento e recibos.",
   },
   {
+    question: "Como funciona o plano anual?",
+    answer:
+      "O valor do ano inteiro é cobrado de uma vez, na assinatura e a cada renovação. O valor por mês que aparece na oferta é só para comparar com o mensal. Desistindo em até 7 dias, o valor anual volta inteiro; depois disso, o Pro continua até o fim do ano pago.",
+  },
+  {
+    question: "O preço atual é promocional?",
+    answer:
+      "Quando a oferta mostra “Promoção por tempo limitado”, sim: logo abaixo aparece o preço normal que valerá depois. Se você já assina e o preço subir, avisamos antes, e o novo valor só vale a partir da renovação seguinte.",
+  },
+  {
     question: "Tenho um cupom de desconto. Onde uso?",
     answer:
       "Na página de pagamento do Stripe, no campo do código promocional. Antes de confirmar, ela mostra o valor com desconto, por quantas cobranças ele vale e quanto será cobrado nas renovações.",

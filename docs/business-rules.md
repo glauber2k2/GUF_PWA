@@ -273,6 +273,7 @@ Arquitetura completa em `docs/plans-and-access.md`.
 | Telas que abrem com período (gráfico do histórico, evolução) escolhem o maior padrão que cabe no plano ("4 sem" e "1 mês" no Free). Link antigo com período ou mês fora do plano volta ao que cabe. | Web |
 | Mudar de plano nunca apaga dados; o histórico antigo continua guardado e na exportação. | Banco + Termos 0.4-dev |
 | Assinar: os Termos da Assinatura (e qualquer documento pendente) são aceitos juntos, numa única caixa desmarcada, na tela de planos. Enquanto o pagamento não existe, "Assinar" avisa que a assinatura chega em breve e nada é gravado. | Web (`/planos`) + Banco (`accept_documents`, source `subscribe`) |
+| **Mensal ou anual e promoção:** o Pro é vendido por mês ou por ano (as duas opções quando houver preço ativo de cada uma). A oferta abre no anual e destaca o valor por mês (anual ÷ 12), sempre com o total cobrado ao lado ("R$ 118,00 cobrados uma vez por ano"). Preço com `regular_amount_cents` é promocional: selo "Promoção por tempo limitado" e o preço normal que vale depois. A economia do anual é calculada pelos preços à venda (ex.: 11,80 contra 14,80 = 20%). No anual, desistir em 7 dias devolve o ano inteiro; depois, o Pro segue até o fim do ano pago. | Banco (`plan_prices`, `billing_checkout_context`) + Core (`plan-pricing.ts`) + Web (`PriceTag`, `BillingIntervalPicker`) |
 | Versão de documento publicada com `requires_reaccept = false` (sem mudança material) não pede novo aceite. | Banco (`pending_documents_of`) |
 
 ## 8.6 Medidas corporais

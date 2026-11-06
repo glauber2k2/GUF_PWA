@@ -4,8 +4,6 @@ import { useEffect } from "react";
 import { ChevronRight, Crown, Lock, ShieldCheck, Undo2, X, type LucideIcon } from "lucide-react";
 import {
   formatFeatureUpgrade,
-  formatIntervalSuffix,
-  formatMoney,
   PLAN_FEATURE_LABELS,
   planUpsellCopy,
   type Entitlements,
@@ -14,7 +12,9 @@ import {
 import { Button, Icon, IconButton, ScreenPortal, Skeleton } from "@/shared/components/ds";
 import { useOnlineStatus } from "@/shared/hooks/use-online-status";
 import { PLAN_FEATURE_ICONS } from "@/features/plans/constants/feature-icons";
+import { OfferIntervalPicker } from "@/features/plans/components/billing-interval-picker";
 import { PlanComparison } from "@/features/plans/components/plan-comparison";
+import { PriceTag } from "@/features/plans/components/price-tag";
 import { SUBSCRIBE_BAR_CLEARANCE, SubscribeBar } from "@/features/plans/components/subscribe-bar";
 import { useProOffer } from "@/features/plans/hooks/use-pro-offer";
 import { cn } from "@/shared/helpers/class-names";
@@ -96,12 +96,8 @@ function ProUpsellContent({ feature, entitlements, onSeePlans, onClose }: ProUps
                   aria-label="Preço"
                   className="flex animate-guf-rise flex-col items-center gap-2.5 rounded-xl border-[1.5px] border-accent-text bg-accent/10 px-5 pt-6 pb-5 text-center [animation-delay:240ms]"
                 >
-                  <p className="m-0 flex items-baseline justify-center gap-1.5 text-accent-text">
-                    <span className="font-display text-[56px] leading-[56px] font-bold tracking-[-0.01em] tabular-nums">
-                      {formatMoney(price.amountCents, price.currency)}
-                    </span>
-                    <span className="text-[15px] font-semibold text-fg-secondary">{formatIntervalSuffix(price.interval)}</span>
-                  </p>
+                  <OfferIntervalPicker offer={offer} className="w-full" />
+                  <PriceTag price={price} size="hero" />
                   <span className="text-[13px] leading-[18px] text-fg-secondary">Renova automaticamente até você cancelar</span>
                 </section>
               )

@@ -1,5 +1,6 @@
 import {
   PLAN_FEATURES,
+  type BillingInterval,
   type CatalogPlan,
   type Entitlements,
   type FeatureAccess,
@@ -22,6 +23,8 @@ type Result<T> = Promise<ApiResult<T>>;
 
 export interface StartSubscriptionInput {
   planCode: string;
+  /** Mensal ou anual. */
+  interval: BillingInterval;
   /** Ids exibidos na tela de assinatura (pending_subscription_documents), aceitos juntos. */
   acceptedDocumentIds: string[];
   platform: Platform;
@@ -127,8 +130,8 @@ export const getSubscriptionDocuments: PlansApi["getSubscriptionDocuments"] = as
   }
 };
 
-export const startSubscription: PlansApi["startSubscription"] = async (client, { planCode, acceptedDocumentIds, platform }) => {
-  const { data, error } = await invokeBilling<{ url: string }>(client, { action: "checkout", planCode, acceptedDocumentIds, platform });
+export const startSubscription: PlansApi["startSubscription"] = async (client, { planCode, interval, acceptedDocumentIds, platform }) => {
+  const { data, error } = await invokeBilling<{ url: string }>(client, { action: "checkout", planCode, interval, acceptedDocumentIds, platform });
   if (error) return { data: null, error };
   if (!isSafeRedirectUrl(data.url)) return { data: null, error: apiError("billing_provider_error") };
   return { data: { checkoutUrl: data.url }, error: null };

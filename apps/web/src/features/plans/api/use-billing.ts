@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { billingApi, type ApiError, type BillingApi } from "@guf/api";
-import type { CancellationOutcome } from "@guf/core";
+import type { BillingProviderId, CancellationOutcome } from "@guf/core";
 import { useAuth } from "@/features/auth";
 import { PLANS_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
@@ -23,14 +23,14 @@ function useBillingSource(): { api: BillingApi; mock: boolean } {
   return { api: billingApi, mock: false };
 }
 
-/** Preços à venda. */
-export function usePlanPrices() {
+/** Preços à venda no gateway informado (Stripe na web; Google Play no app da Play). */
+export function usePlanPrices(provider: BillingProviderId) {
   const { api, mock } = useBillingSource();
   return useQuery({
-    queryKey: [PLANS_KEY, "prices", mock],
+    queryKey: [PLANS_KEY, "prices", provider, mock],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await api.getPlanPrices(getSupabaseClient(), null);
+      const { data, error } = await api.getPlanPrices(getSupabaseClient(), { provider });
       if (error) throw error;
       return data;
     },

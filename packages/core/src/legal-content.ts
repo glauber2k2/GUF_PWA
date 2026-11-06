@@ -781,7 +781,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
   icon: "file-text",
   summary: [
     { icon: "target", text: "O Pro tira os limites do plano Free enquanto a assinatura estiver ativa." },
-    { icon: "bell", text: "O preço e a periodicidade aparecem na tela antes de você confirmar. O pagamento é feito na página segura do Stripe." },
+    { icon: "bell", text: "Mensal ou anual: o preço, a periodicidade e, se houver, o preço depois da promoção aparecem na tela antes de você confirmar." },
     { icon: "toggle-left", text: "Cancelou em até 7 dias do primeiro pagamento? O valor volta inteiro e o Pro termina na hora." },
     { icon: "circle-x", text: "Depois disso, cancele quando quiser, no app: o Pro continua até o fim do período já pago, sem nova cobrança." },
     { icon: "folder-lock", text: "Quando o Pro termina, você volta ao Free sem perder nenhum dado." },
@@ -808,6 +808,21 @@ const SUBSCRIPTION: LegalDocumentContent = {
           "O Pro é liberado quando o Stripe confirma o pagamento, o que costuma levar alguns segundos. A assinatura se renova automaticamente ao fim de cada período, na mesma forma de pagamento, até você cancelar. O recibo de cada cobrança é enviado pelo Stripe ao e-mail da sua conta e fica em Configurações › Plano › Pagamento e recibos.",
         ),
         p("Mudanças de preço são avisadas no app e por e-mail antes de valer e só valem a partir da renovação seguinte."),
+      ],
+    },
+    {
+      id: "periodicidade",
+      title: "Mensal ou anual",
+      blocks: [
+        p(
+          "O Pro pode ser assinado por mês ou por ano, quando as duas opções estiverem à venda. No anual, o valor do ano inteiro é cobrado de uma vez, na assinatura e a cada renovação anual. A tela mostra também quanto o anual equivale por mês, só como comparação: a cobrança é a do valor anual informado ao lado.",
+        ),
+        p(
+          "Quando o preço à venda for promocional, a tela informa que é uma promoção por tempo limitado e qual preço normal valerá depois dela. Para quem já assina, um aumento segue a regra de mudança de preço: aviso no app e por e-mail antes de valer, só a partir da renovação seguinte.",
+        ),
+        p(
+          "A desistência em até 7 dias devolve o valor inteiro pago, inclusive no anual. Depois desse prazo, o cancelamento do anual mantém o Pro até o fim do ano já pago, sem devolução proporcional dos meses restantes.",
+        ),
       ],
     },
     {
@@ -899,6 +914,11 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.3": [
+      "Plano anual: o valor do ano é cobrado de uma vez; o valor por mês aparece só como comparação.",
+      "Preço promocional por tempo limitado: a tela mostra o preço normal que vale depois. Aumento para quem já assina é avisado antes e vale só na renovação seguinte.",
+      "No anual, cancelar depois dos 7 dias mantém o Pro até o fim do ano pago, sem devolução proporcional.",
+    ],
     "1.2": [
       "Cupons de desconto: o código é digitado na página de pagamento do Stripe, que mostra o valor com desconto, por quantas cobranças ele vale e o valor das renovações antes de você confirmar.",
       "Na desistência em até 7 dias, é devolvido o valor efetivamente pago (com o desconto, se houver).",

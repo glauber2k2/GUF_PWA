@@ -20,7 +20,11 @@ export const BILLING_MOCK_SCENARIOS: readonly BillingMockScenario[] = [
 
 const LATENCY_MS = 350;
 const DAY_MS = 86_400_000;
-const PRICE_CENTS = 1990;
+/** Preços promocionais de exemplo (iguais aos do lançamento) e os normais que valem depois. */
+const PRICE_CENTS = 1480;
+const REGULAR_PRICE_CENTS = 1980;
+const ANNUAL_PRICE_CENTS = 11800;
+const ANNUAL_REGULAR_PRICE_CENTS = 14800;
 const wait = (ms = LATENCY_MS) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let scenario: BillingMockScenario = "none";
@@ -43,6 +47,8 @@ function buildSubscription(): BillingSubscription | null {
     id: "00000000-0000-4000-8000-0000000000b1",
     planCode: "pro",
     planName: "Pro",
+    provider: "stripe",
+    interval: "month",
     status: scenario === "atraso" ? "past_due" : scenario === "reembolsando" || scenario === "reembolsada" ? "canceled" : "active",
     startedAt: daysFromNow(-startedDaysAgo),
     currentPeriodEnd: daysFromNow(30 - (startedDaysAgo % 30)),
@@ -83,7 +89,13 @@ export const mockBillingApi = {
   async getPlanPrices(client) {
     ignoreClient(client);
     await wait();
-    return { data: [{ planCode: "pro", interval: "month", amountCents: PRICE_CENTS, currency: "brl" }], error: null };
+    return {
+      data: [
+        { planCode: "pro", interval: "month", amountCents: PRICE_CENTS, regularAmountCents: REGULAR_PRICE_CENTS, currency: "brl" },
+        { planCode: "pro", interval: "year", amountCents: ANNUAL_PRICE_CENTS, regularAmountCents: ANNUAL_REGULAR_PRICE_CENTS, currency: "brl" },
+      ],
+      error: null,
+    };
   },
   async getMyBilling(client) {
     ignoreClient(client);
