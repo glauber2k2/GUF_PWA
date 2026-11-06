@@ -8,7 +8,7 @@ Este documento tem como finalidade explicar como o código do guf é organizado,
 | --- | --- |
 | Data de Criação | 18/10/2026 |
 
-Regras detalhadas e caminhos de cada funcionalidade: [`CLAUDE.md`](../CLAUDE.md). Padrões de engenharia: `.claude/skills/code-standards`.
+Regras gerais: [`CLAUDE.md`](../CLAUDE.md). Caminhos e regras de cada funcionalidade: [`features/`](./features/). Padrões de engenharia: `.claude/skills/code-standards`.
 
 ## 1. Bases que não mudam
 
