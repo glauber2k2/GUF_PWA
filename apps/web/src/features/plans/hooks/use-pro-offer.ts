@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import {
-  annualSavingsPercent,
+  annualSavings,
   availableIntervals,
   defaultInterval,
   findPlanPrice,
@@ -77,7 +77,8 @@ export function useProOffer() {
     intervals,
     interval,
     setInterval,
-    annualSavingsPercent: upgrade ? annualSavingsPercent(priceList, upgrade.code) : null,
+    /** Economia do anual sobre o mensal (null = sem os dois preços ou sem economia). */
+    annualSavings: upgrade ? annualSavings(priceList, upgrade.code) : null,
     /** Preço à venda do plano atual na periodicidade da assinatura (null no gratuito ou sem preço). */
     currentPrice,
     /** O que o plano acima dá a mais que o atual, na ordem do catálogo. */

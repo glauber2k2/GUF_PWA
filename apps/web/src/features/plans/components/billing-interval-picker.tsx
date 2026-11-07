@@ -1,4 +1,4 @@
-import { BILLING_INTERVAL_OPTION_LABELS, type BillingInterval } from "@guf/core";
+import { BILLING_INTERVAL_OPTION_LABELS, formatSavingsBadge, type AnnualSavings, type BillingInterval } from "@guf/core";
 import { SegmentedControl } from "@/shared/components/ds";
 import type { ProOffer } from "@/features/plans/hooks/use-pro-offer";
 
@@ -8,23 +8,23 @@ export interface BillingIntervalPickerProps {
   value: BillingInterval;
   onChange: (interval: BillingInterval) => void;
   /** Economia do anual sobre 12 meses do mensal (null = não mostra). */
-  annualSavingsPercent: number | null;
+  annualSavings: AnnualSavings | null;
   className?: string;
 }
 
-function optionLabel(interval: BillingInterval, savingsPercent: number | null): string {
+function optionLabel(interval: BillingInterval, savings: AnnualSavings | null): string {
   const label = BILLING_INTERVAL_OPTION_LABELS[interval];
-  return interval === "year" && savingsPercent ? `${label} · −${savingsPercent}%` : label;
+  return interval === "year" && savings ? `${label} · ${formatSavingsBadge(savings)}` : label;
 }
 
 /** Mensal ou anual. Some quando só uma periodicidade está à venda. */
-export function BillingIntervalPicker({ intervals, value, onChange, annualSavingsPercent, className }: BillingIntervalPickerProps) {
+export function BillingIntervalPicker({ intervals, value, onChange, annualSavings, className }: BillingIntervalPickerProps) {
   if (intervals.length < 2) return null;
   return (
     <SegmentedControl
       label="Periodicidade da assinatura"
       className={className}
-      options={intervals.map((interval) => ({ value: interval, label: optionLabel(interval, annualSavingsPercent) }))}
+      options={intervals.map((interval) => ({ value: interval, label: optionLabel(interval, annualSavings) }))}
       value={value}
       onChange={(next) => onChange(next as BillingInterval)}
     />
@@ -36,7 +36,7 @@ export function OfferIntervalPicker({
   offer,
   className,
 }: {
-  offer: Pick<ProOffer, "intervals" | "interval" | "setInterval" | "annualSavingsPercent">;
+  offer: Pick<ProOffer, "intervals" | "interval" | "setInterval" | "annualSavings">;
   className?: string;
 }) {
   if (!offer.interval) return null;
@@ -45,7 +45,7 @@ export function OfferIntervalPicker({
       intervals={offer.intervals}
       value={offer.interval}
       onChange={offer.setInterval}
-      annualSavingsPercent={offer.annualSavingsPercent}
+      annualSavings={offer.annualSavings}
       className={className}
     />
   );

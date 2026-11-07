@@ -1,5 +1,5 @@
-import { Sparkles } from "lucide-react";
-import { buildPriceDisplay, type PlanPrice } from "@guf/core";
+import { PiggyBank, Sparkles } from "lucide-react";
+import { buildPriceDisplay, formatAnnualSavings, type AnnualSavings, type PlanPrice } from "@guf/core";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/helpers/class-names";
 
@@ -14,6 +14,8 @@ export interface PriceTagProps {
   price: PlanPrice;
   /** hero = tela do Pro (centralizado); card = cartão da oferta (alinhado à esquerda). */
   size?: PriceTagSize;
+  /** Economia do anual sobre o mensal: aparece só quando o preço mostrado é o anual. */
+  savings?: AnnualSavings | null;
   className?: string;
 }
 
@@ -22,7 +24,7 @@ export interface PriceTagProps {
  * de fato e, se houver, o selo da promoção com o preço que vale depois. Todos os números vêm de
  * `plan_prices` por `buildPriceDisplay` (packages/core/src/plan-pricing.ts).
  */
-export function PriceTag({ price, size = "card", className }: PriceTagProps) {
+export function PriceTag({ price, size = "card", savings = null, className }: PriceTagProps) {
   const display = buildPriceDisplay(price);
   const isCentered = size === "hero";
   return (
@@ -39,6 +41,13 @@ export function PriceTag({ price, size = "card", className }: PriceTagProps) {
       </p>
       <span className="text-[13px] leading-[18px] font-medium text-fg-secondary tabular-nums">{display.billedText}</span>
       {display.promotion && <span className="text-xs leading-4 text-fg-muted tabular-nums">{display.promotion.regularText}</span>}
+      {display.renewalNote && <span className="text-xs leading-4 text-fg-muted">{display.renewalNote}</span>}
+      {savings && price.interval === "year" && (
+        <span className="flex items-center gap-1.5 text-[13px] leading-[18px] font-semibold text-accent-text tabular-nums">
+          <PiggyBank aria-hidden="true" className="size-4 flex-none" />
+          {formatAnnualSavings(savings)}
+        </span>
+      )}
     </div>
   );
 }
