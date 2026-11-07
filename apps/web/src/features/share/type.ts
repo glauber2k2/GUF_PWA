@@ -9,7 +9,7 @@ export interface StoryModelProps<T = StoryData> {
 export type StoryTheme = "dark" | "light";
 
 /** Assinatura no rodapé das imagens (endereço público do app). */
-export const STORY_DOMAIN = "www.gufapp.com.br";
+export const STORY_DOMAIN = "gufapp.com.br";
 export const STORY_SIGNATURE_LEAD = "Registrado com";
 export const STORY_SIGNATURE = `${STORY_SIGNATURE_LEAD} ${STORY_DOMAIN}`;
 
