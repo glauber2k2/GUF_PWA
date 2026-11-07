@@ -519,8 +519,10 @@ const PRIVACY: LegalDocumentContent = {
           "Seus dados não são vendidos. São compartilhados só com prestadores necessários para o app funcionar, que agem em nome da controladora e sob contrato:",
         ),
         ul(
-          "Supabase: banco de dados, login e envio dos e-mails de acesso. Os dados ficam guardados em São Paulo (Brasil).",
-          "Vercel: hospedagem do site do app. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela.",
+          "Supabase: banco de dados e login. Os dados ficam guardados em São Paulo (Brasil).",
+          "Resend: envio dos e-mails de acesso (confirmação de cadastro e recuperação de senha). Recebe o seu e-mail e o texto da mensagem.",
+          "Cloudflare: hospedagem do site do app e do endereço gufapp.com.br. Recebe só dados de acesso, como IP e navegador; nenhum dado de treino passa por ela. Também encaminha as mensagens enviadas para suporte@gufapp.com.br.",
+          "Google (Gmail): caixa de e-mail que recebe as mensagens enviadas para suporte@gufapp.com.br, inclusive os pedidos sobre os seus dados.",
           "Google, se você escolher entrar com Google. O guf recebe nome, e-mail e foto.",
           "Google (API do Gemini), se você usar o GUF AI: recebe a pergunta e os dados de treino sem identificação (veja a seção GUF AI).",
           "Stripe, se você assinar o Pro: processa o pagamento, a renovação e as devoluções. Recebe do guf só o e-mail da sua conta (para o recibo) e um código interno da conta; os dados do cartão e o que mais a página de pagamento pedir você informa direto ao Stripe. O guf não vê nem guarda o número do cartão. Para prevenir fraudes e cumprir as próprias obrigações legais, o Stripe também trata esses dados por conta própria, conforme a política de privacidade dele.",
@@ -536,7 +538,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Transferência internacional",
       blocks: [
         p(
-          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Vercel, o Google (se você entrar com Google ou usar o GUF AI), o serviço de notificações do seu aparelho (só se você ligar as notificações), o Stripe (só se você assinar o Pro; também em outros países onde ele mantém operações), o Google Play (só se você assinar pelo app Android) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
+          "O banco de dados fica no Brasil. Alguns prestadores ficam nos Estados Unidos: a Cloudflare (que atende pela rede dela em vários países), o Resend, o Google (se você entrar com Google, usar o GUF AI ou escrever para o suporte), o serviço de notificações do seu aparelho (só se você ligar as notificações), o Stripe (só se você assinar o Pro; também em outros países onde ele mantém operações), o Google Play (só se você assinar pelo app Android) e empresas contratadas pelo Supabase. Essas transferências acontecem porque são necessárias para prestar o serviço que você contratou (art. 33, IX, combinado com o art. 7º, V, da LGPD), e esses prestadores têm compromissos públicos de proteção de dados.",
         ),
       ],
     },
@@ -567,7 +569,9 @@ const PRIVACY: LegalDocumentContent = {
             ["Registro dos comunicados que você viu", "Até 12 meses depois de o comunicado terminar"],
             ["Suspensões e exclusões agendadas", "Enquanto a conta existir"],
             ["Registro do que a equipe viu ou alterou na sua conta", "5 anos, sem o conteúdo dos seus dados (só a ação, a data, quem fez e o motivo)"],
-            ["Registros técnicos de acesso (IP, data e hora)", "Ficam nos provedores (Supabase e Vercel) pelo prazo curto de cada um; o guf não guarda um arquivo próprio desses registros"],
+            ["Registros técnicos de acesso (IP, data e hora)", "Ficam nos provedores (Supabase e Cloudflare) pelo prazo curto de cada um; o guf não guarda um arquivo próprio desses registros"],
+            ["Registro dos e-mails de acesso enviados", "Pelo prazo de retenção do Resend"],
+            ["Mensagens enviadas para o suporte", "Ficam na caixa de e-mail do suporte (Gmail), sem exclusão automática; você pode pedir a exclusão das suas mensagens pelo mesmo e-mail"],
             ["Depois de excluir a conta", "Apagados na hora. Cópias de segurança automáticas do provedor do banco, se houver, são substituídas no ciclo dele e não são usadas para recuperar contas excluídas"],
             [
               "Prova dos seus aceites, depois de excluir a conta",
@@ -635,6 +639,11 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.9": [
+      "Hospedagem: o site do app passa a ser hospedado pela Cloudflare, no lugar da Vercel. A Cloudflare também encaminha as mensagens enviadas para suporte@gufapp.com.br.",
+      "Os e-mails de acesso (confirmação de cadastro e recuperação de senha) são enviados pelo Resend.",
+      "As mensagens para o suporte, inclusive pedidos sobre seus dados, ficam numa caixa do Gmail (Google).",
+    ],
     // A 1.7 nunca valeu sozinha (publicada junto com esta): o /aceite mostra só a versão atual, então repete a mudança dela.
     "1.8": [
       "Perfil: Quem vê o seu projeto ativo pode copiar uma rotina ou o projeto inteiro para a própria conta (sem cargas nem observações). A cópia é independente do seu projeto.",

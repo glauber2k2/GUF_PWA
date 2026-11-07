@@ -18,3 +18,9 @@ O Google trata os dados da conta Google como **controlador próprio**, sob os te
 
 ## Avaliação — Google
 - Veredito: **APROVADO** — terceiro controlador; nenhum eliminatório se aplica
+
+## Gmail: caixa do suporte (desde 2026-11-07, Política 1.9)
+- As mensagens enviadas para `contato@` e `suporte@gufapp.com.br` (inclusive pedidos de titular) chegam pelo Email Routing da Cloudflare a uma conta **Gmail** (conta mãe do guf, conta Google comum, sem Google Workspace).
+- Papel: o Google trata essas mensagens como provedor do e-mail, pelos termos de consumidor do Gmail; **não há DPA** (o DPA do Google só existe no Workspace) ⚖. Se o volume de pedidos crescer ou entrar dado sensível com frequência, avaliar migrar a caixa para o Google Workspace (com DPA).
+- Retenção: sem exclusão automática; a Política 1.9 informa isso e que o titular pode pedir a exclusão das próprias mensagens.
+- Segurança: 2FA forte na conta mãe (ver plano de transferência das contas, Fase 1).

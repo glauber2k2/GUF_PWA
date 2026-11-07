@@ -2,7 +2,7 @@
 
 - Razão social / registro: Supabase, Inc. (EUA) — **confirmar no DPA**
 - País(es) de tratamento: **Brasil** — projeto `GUF DEV` (ref `yscoujsisrytytqsxkya`) na região **`sa-east-1` (São Paulo)** desde 2026-10-16. Antes: projeto `GUF` (ref `hpghcddtezunlvoybivb`) em `us-west-2` (EUA), a ser pausado e excluído após a validação. A empresa é americana e a infraestrutura roda sobre a AWS (sub-operador); suporte e sub-operadores podem tratar dados fora do Brasil
-- Finalidade: banco de dados, autenticação, e-mails de confirmação/recuperação (SMTP padrão), Edge Function `delete-account`, job pg_cron, logs
+- Finalidade: banco de dados, autenticação, e-mails de confirmação/recuperação (enviados pelo Resend como SMTP próprio; ver `resend.md`), Edge Function `delete-account`, job pg_cron, logs
 - Dados compartilhados: **todos** — conta, perfil, treinos, consentimentos, registros de acesso e, quando o módulo existir, **medidas corporais** | Sensíveis (Art. 11)? **Sim** (A010)
 - Tier: **Crítico**
 - Plano: **Free** (desenvolvimento)

@@ -1,5 +1,7 @@
 # Operador: Vercel
 
+> **Encerrada em 2026-11-07:** a hospedagem passou para a Cloudflare (`cloudflare.md`) e os projetos da Vercel foram apagados. Saiu da Política na versão 1.9. Ficha mantida como histórico.
+
 - Razão social / registro: Vercel Inc. (EUA) — **confirmar no DPA**
 - País(es) de tratamento: EUA e rede global de borda
 - Finalidade: hospedar o site estático (PWA) de testes
