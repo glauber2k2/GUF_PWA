@@ -9,7 +9,7 @@ import { createSupabaseBillingStore } from "../_shared/billing/store.ts";
 import { removeAccountFiles } from "../_shared/account-files.ts";
 
 // Sites autorizados a chamar a função (secret ALLOWED_ORIGINS, separados por vírgula):
-//   npx supabase secrets set ALLOWED_ORIGINS="https://<app>.vercel.app,http://localhost:3000"
+//   npx supabase secrets set ALLOWED_ORIGINS="https://treino.gufapp.com.br,http://localhost:3000"
 // Sem o secret, aceita qualquer origem (comportamento anterior), para não quebrar o app.
 // O CORS é uma camada extra: quem protege a exclusão é a validação do token abaixo.
 const allowedOrigins = (Deno.env.get("ALLOWED_ORIGINS") ?? "")
