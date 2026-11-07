@@ -125,7 +125,7 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   nothing_changed: "Nada mudou: o valor novo é igual ao atual.",
   staff_already_member: "Essa pessoa já faz parte da equipe.",
   account_is_staff: "Essa conta é sua ou de alguém da equipe. Tire o acesso dela em Equipe antes de suspender ou excluir.",
-  account_has_files: "Essa conta tem foto guardada no aplicativo. Peça para a pessoa excluir a conta pelo app (Configurações › Privacidade).",
+  account_has_files: "Não foi possível apagar a foto dessa conta, então ela não foi excluída. Tente de novo em alguns minutos.",
   account_has_subscription:
     "Essa conta tem assinatura ativa e ela não pôde ser cancelada agora. Tente de novo em alguns minutos; nada foi excluído.",
   date_in_past: "Escolha uma data e um horário no futuro.",

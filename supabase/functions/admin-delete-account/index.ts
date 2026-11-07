@@ -1,13 +1,14 @@
 // =====================================================================
-// GUF APP · Edge Function · Excluir conta pelo painel (cancela a assinatura antes)
-// O banco recusa excluir conta com assinatura viva (GA023, delete_account_now); esta função cancela
-// no gateway com a mesma regra da exclusão pelo app (7 dias: devolve tudo; depois: encerra) e exclui.
+// GUF APP · Edge Function · Excluir conta pelo painel (apaga a foto e cancela a assinatura antes)
+// O banco recusa excluir conta com foto no Storage (GA015) ou assinatura viva (GA023, delete_account_now):
+// o SQL não apaga arquivos do Storage nem fala com o gateway. Esta função apaga a foto, cancela no
+// gateway com a mesma regra da exclusão pelo app (7 dias: devolve tudo; depois: encerra) e exclui.
 //   Painel (excluir agora): supabase.functions.invoke('admin-delete-account', { body: { userId, reason, note } })
 //     → admin_delete_user com o token do colaborador (equipe, segundo fator, papel Admin, motivo,
-//       auditoria). Só depois de o banco aceitar a pessoa (GA023 vem depois dessas conferências)
-//       a assinatura é cancelada e a exclusão tentada de novo.
+//       auditoria). Só depois de o banco aceitar a pessoa (GA015 e GA023 vêm depois dessas
+//       conferências) a foto é apagada ou a assinatura cancelada, e a exclusão tentada de novo.
 //   Banco (exclusão agendada vencida, job execute-scheduled-account-deletions via pg_net):
-//     cabeçalho x-guf-secret + { scheduled: true, userId } → confere a exclusão vencida, cancela e exclui.
+//     cabeçalho x-guf-secret + { scheduled: true, userId } → confere a exclusão vencida, apaga a foto, cancela e exclui.
 // Secrets: ACCOUNT_CLOSURE_SECRET (o mesmo `account_closure_secret` do Vault), ALLOWED_ORIGINS, STRIPE_*.
 // Deploy: npx supabase functions deploy admin-delete-account --no-verify-jwt --use-api
 //   (sem verificação do gateway: a chamada do banco não tem JWT; o painel é conferido pelo banco)
@@ -15,10 +16,14 @@
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { cancelSubscriptionsForAccountDeletion } from "../_shared/billing/cancellation.ts";
 import { createSupabaseBillingStore } from "../_shared/billing/store.ts";
+import { removeAccountFiles } from "../_shared/account-files.ts";
 import { corsHeadersFor, isOriginBlocked, jsonResponse, sameSecret } from "../_shared/http.ts";
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const HAS_FILES_CODE = "GA015";
 const SUBSCRIPTION_LIVE_CODE = "GA023";
+/** Foto e assinatura: no máximo uma nova tentativa para cada recusa que esta função resolve. */
+const MAX_ATTEMPTS = 3;
 
 /** Códigos do banco que viram resposta própria (o painel mostra a mensagem do ApiError). */
 const DATABASE_ERRORS: Record<string, { status: number; code: string }> = {
@@ -60,7 +65,7 @@ async function cancelSubscriptions(service: SupabaseClient, userId: string): Pro
   }
 }
 
-/** Excluir agora (painel): o banco confere tudo com o token do colaborador; assinatura viva → cancela e repete. */
+/** Excluir agora (painel): o banco confere tudo com o token do colaborador; foto → apaga, assinatura viva → cancela; e repete. */
 async function deleteByStaff(req: Request, cors: Record<string, string>): Promise<Response> {
   const authorization = req.headers.get("Authorization");
   if (!authorization) return jsonResponse({ code: "not_authenticated" }, 401, cors);
@@ -74,8 +79,14 @@ async function deleteByStaff(req: Request, cors: Record<string, string>): Promis
   const deleteAccount = () => caller.rpc("admin_delete_user", { p_user_id: body.userId, p_reason: body.reason, p_note: body.note });
 
   let { error } = await deleteAccount();
-  if (error?.code === SUBSCRIPTION_LIVE_CODE) {
-    if (!(await cancelSubscriptions(serviceClient(), body.userId))) return jsonResponse({ code: "billing_provider_error" }, 502, cors);
+  for (let attempt = 1; error && attempt < MAX_ATTEMPTS; attempt++) {
+    if (error.code === HAS_FILES_CODE) {
+      if (!(await removeAccountFiles(serviceClient(), body.userId))) return jsonResponse({ code: "account_has_files" }, 500, cors);
+    } else if (error.code === SUBSCRIPTION_LIVE_CODE) {
+      if (!(await cancelSubscriptions(serviceClient(), body.userId))) return jsonResponse({ code: "billing_provider_error" }, 502, cors);
+    } else {
+      break;
+    }
     ({ error } = await deleteAccount());
   }
   if (!error) return jsonResponse({ ok: true }, 200, cors);
@@ -83,7 +94,7 @@ async function deleteByStaff(req: Request, cors: Record<string, string>): Promis
   return mapped ? jsonResponse({ code: mapped.code }, mapped.status, cors) : jsonResponse({ code: "unknown" }, 500, cors);
 }
 
-/** Exclusão agendada vencida (chamada pelo banco): confere, cancela a assinatura e exclui. */
+/** Exclusão agendada vencida (chamada pelo banco): confere, apaga a foto, cancela a assinatura e exclui. */
 async function deleteScheduled(req: Request): Promise<Response> {
   const secret = Deno.env.get("ACCOUNT_CLOSURE_SECRET");
   if (!secret || !sameSecret(req.headers.get("x-guf-secret"), secret)) return jsonResponse({ error: "Não autorizado" }, 401);
@@ -97,6 +108,7 @@ async function deleteScheduled(req: Request): Promise<Response> {
   if (!isDue) return jsonResponse({ ok: false, reason: "not_due" }, 200);
 
   // Falhou: o job do banco chama de novo na próxima rodada (a mesma chave evita devolver duas vezes).
+  if (!(await removeAccountFiles(service, userId))) return jsonResponse({ error: "Falha ao apagar a foto" }, 500);
   if (!(await cancelSubscriptions(service, userId))) return jsonResponse({ error: "Gateway sem resposta" }, 502);
   const { error } = await service.rpc("execute_scheduled_deletion", { p_user_id: userId });
   if (error) {
