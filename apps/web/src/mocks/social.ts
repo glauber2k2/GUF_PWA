@@ -469,6 +469,21 @@ export const mockSocialApi = {
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
     return { data: mockActiveProject(), error: null };
   },
+  async copyMemberRoutine(client, { targetProjectId }) {
+    ignoreClient(client);
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    return { data: { routineId: "mock-copied-routine", projectId: targetProjectId ?? "mock-copied-project" }, error: null };
+  },
+  async copyMemberProject(client, { userId }) {
+    ignoreClient(client);
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    if (userId === MOCK_ME) return { data: null, error: apiError("copy_own") };
+    return { data: { projectId: "mock-copied-project" }, error: null };
+  },
 } satisfies SocialApi;
 
 /** Projeto ativo de exemplo (o mesmo para todas as pessoas do mock); gerado sob demanda. */

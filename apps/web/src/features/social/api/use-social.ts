@@ -7,11 +7,13 @@ import {
   type ApiError,
   type ConnectionKind,
   type FollowStatus,
+  type CopiedRoutine,
+  type CopyMemberRoutineInput,
   type MemberWorkoutDetail,
   type SocialApi,
   type SocialSettings,
 } from "@guf/api";
-import { invalidateSocialData, SOCIAL_KEY } from "@/shared/libs/query-keys";
+import { invalidatePlanningData, invalidateSocialData, SOCIAL_KEY } from "@/shared/libs/query-keys";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 import { mockSocialApi, setSocialMockScenario } from "@/mocks/social";
 import { useAuth } from "@/features/auth";
@@ -86,6 +88,26 @@ export function useMemberActiveProject(userId: string | null, enabled: boolean) 
     queryKey: [SOCIAL_KEY, "active-project", user?.id, userId, dev.scenario],
     enabled: (Boolean(user) || dev.scenario !== null) && enabled,
     queryFn: async () => unwrap(await api.getMemberActiveProject(getSupabaseClient(), { userId })),
+  });
+}
+
+/** Copia uma rotina do projeto ativo de outra pessoa; Projetos e Início recarregam. Só online. */
+export function useCopyMemberRoutine() {
+  const queryClient = useQueryClient();
+  const { api } = useSocialSource();
+  return useMutation<CopiedRoutine, ApiError, CopyMemberRoutineInput>({
+    mutationFn: async (input) => unwrap(await api.copyMemberRoutine(getSupabaseClient(), input)),
+    onSuccess: () => invalidatePlanningData(queryClient),
+  });
+}
+
+/** Copia o projeto ativo de outra pessoa inteiro (activate = vira o seu ativo). Só online. */
+export function useCopyMemberProject() {
+  const queryClient = useQueryClient();
+  const { api } = useSocialSource();
+  return useMutation<{ projectId: string }, ApiError, { userId: string; activate: boolean }>({
+    mutationFn: async (input) => unwrap(await api.copyMemberProject(getSupabaseClient(), input)),
+    onSuccess: () => invalidatePlanningData(queryClient),
   });
 }
 
