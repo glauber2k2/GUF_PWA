@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Copy, Eye, EyeOff } from "lucide-react";
 import { activeProjectVisibilityNote, formatPlannedSets, nextRoutineId, routineLetter, routineScheduleMeta } from "@guf/core";
 import type { MemberActiveProject, RoutineSummary } from "@guf/api";
-import { BottomSheet, Icon } from "@/shared/components/ds";
+import { BottomSheet, Button, Icon } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { PRIVACY_SETTINGS_PATH } from "@/features/profile";
 
@@ -19,13 +19,23 @@ export interface ActiveProjectSheetProps {
   historyHidden: boolean;
   open: boolean;
   onClose: () => void;
+  /** Perfil de outra pessoa: copiar uma rotina ou o projeto inteiro. */
+  copyActions?: ActiveProjectCopyActions;
+}
+
+export interface ActiveProjectCopyActions {
+  /** Sem internet, os botões ficam desligados (editar projetos é só online). */
+  canCopy: boolean;
+  onCopyRoutine: (routine: RoutineSummary) => void;
+  onCopyProject: () => void;
 }
 
 /**
  * Painel do projeto ativo (2c): descrição e as rotinas lado a lado, com dias, tempo médio e
  * exercícios (séries × repetições). A próxima rotina, pela regra da Início, fica em destaque.
+ * De outra pessoa: "Copiar rotina" em cada card e "Copiar projeto inteiro".
  */
-export function ActiveProjectSheet({ project, handle, isSelf, historyHidden, open, onClose }: ActiveProjectSheetProps) {
+export function ActiveProjectSheet({ project, handle, isSelf, historyHidden, open, onClose, copyActions }: ActiveProjectSheetProps) {
   const nextId = nextRoutineId(project.routines, project.lastRoutineId, new Date(), false);
   return (
     <BottomSheet placement="screen" open={open} onClose={onClose} title={project.name} subtitle={`@${handle}`}>
@@ -39,9 +49,19 @@ export function ActiveProjectSheet({ project, handle, isSelf, historyHidden, ope
             className="-mx-4 my-0 flex min-w-0 snap-x snap-mandatory scroll-px-4 list-none gap-2.5 overflow-x-auto px-4 pt-0.5 pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           >
             {project.routines.map((routine, index) => (
-              <ProjectRoutineCard key={routine.id} routine={routine} isNext={routine.id === nextId} index={index} />
+              <ProjectRoutineCard key={routine.id} routine={routine} isNext={routine.id === nextId} index={index} copyActions={copyActions} />
             ))}
           </ul>
+        )}
+        {copyActions && project.routines.length > 0 && (
+          <>
+            <Button variant="primary" size="lg" fullWidth icon={Copy} disabled={!copyActions.canCopy} onClick={copyActions.onCopyProject}>
+              Copiar projeto inteiro
+            </Button>
+            {!copyActions.canCopy && (
+              <p className="m-0 text-center text-[13px] leading-[18px] text-fg-muted">Sem conexão – para copiar, conecte-se à internet.</p>
+            )}
+          </>
         )}
         {isSelf && <VisibilityNote historyHidden={historyHidden} />}
       </div>
@@ -49,7 +69,17 @@ export function ActiveProjectSheet({ project, handle, isSelf, historyHidden, ope
   );
 }
 
-function ProjectRoutineCard({ routine, isNext, index }: { routine: RoutineSummary; isNext: boolean; index: number }) {
+function ProjectRoutineCard({
+  routine,
+  isNext,
+  index,
+  copyActions,
+}: {
+  routine: RoutineSummary;
+  isNext: boolean;
+  index: number;
+  copyActions?: ActiveProjectCopyActions;
+}) {
   return (
     <li
       className="flex w-[272px] flex-none animate-guf-rise-fast snap-start flex-col overflow-hidden rounded-lg border border-border bg-surface"
@@ -85,6 +115,13 @@ function ProjectRoutineCard({ routine, isNext, index }: { routine: RoutineSummar
           </li>
         ))}
       </ul>
+      {copyActions && (
+        <div className="mt-auto px-3.5 pt-2.5 pb-3.5">
+          <Button variant="secondary" fullWidth icon={Copy} disabled={!copyActions.canCopy} onClick={() => copyActions.onCopyRoutine(routine)}>
+            Copiar rotina
+          </Button>
+        </div>
+      )}
     </li>
   );
 }

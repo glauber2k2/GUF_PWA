@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Dumbbell, LockKeyhole, LockKeyholeOpen, ShieldCheck } from "lucide-react";
 import { passwordProgressCaption } from "@guf/core";
-import { updatePassword } from "@guf/api";
+import { signOut, updatePassword } from "@guf/api";
 import { Banner, Button, Skeleton } from "@/shared/components/ds";
 import { NewPasswordFields } from "@/shared/components/password/new-password-fields";
 import { PasswordIntro, PasswordTip } from "@/shared/components/password/password-intro";
@@ -37,6 +37,13 @@ export function ResetPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isDone, setDone] = useState(false);
   const goHome = () => router.replace("/");
+
+  // Um link com a sessão de outra pessoa faria a vítima entrar na conta dela sem perceber: o cartão
+  // mostra de quem é a conta, e "Sair" descarta a sessão do link.
+  const leaveAccount = async () => {
+    await signOut(getSupabaseClient());
+    router.replace("/login");
+  };
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -109,6 +116,16 @@ export function ResetPasswordForm() {
         {isReady && (
           <>
             {user && <RecoveryAccountCard user={user} />}
+            <p className="m-0 -mt-3 flex items-center justify-center gap-1.5 text-sm text-fg-secondary">
+              <span>Não é a sua conta?</span>
+              <button
+                type="button"
+                onClick={() => void leaveAccount()}
+                className="min-h-11 cursor-pointer border-0 bg-transparent px-1 font-semibold text-accent-text hover:underline"
+              >
+                Sair
+              </button>
+            </p>
             <div className="flex flex-col gap-[18px]">
               <NewPasswordFields form={form} />
             </div>

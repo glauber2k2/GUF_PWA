@@ -49,3 +49,4 @@ export * from "./workout-feed";
 export * from "./billing";
 export * from "./plan-pricing";
 export * from "./payment-channel";
+export * from "./internal-path";

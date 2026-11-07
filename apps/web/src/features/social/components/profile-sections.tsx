@@ -69,37 +69,31 @@ export function LockedProfile({ profile }: { profile: MemberProfile }) {
   );
 }
 
-/** Sequência de semanas com as 8 últimas (a atual sem treino fica "em andamento"). */
-export function ProfileStreak({ profile }: { profile: MemberProfile }) {
+/** Texto da sequência para leitor de tela e dica (o número sozinho não diz o que é). */
+function streakDescription(streak: number, best: number): string {
+  const weeks = streak === 1 ? "1 semana seguida" : `${streak} semanas seguidas`;
+  return `Sequência: ${weeks} treinando. Recorde: ${best}`;
+}
+
+/** Sequência ao lado do @ (Claude Design "Perfil - Projeto Ativo" · 2c): chama + número, sem cartão. */
+export function ProfileStreakBadge({ profile }: { profile: MemberProfile }) {
   const streak = profile.currentStreak ?? 0;
-  const weeks = profile.recentWeeks ?? [];
+  const description = streakDescription(streak, profile.bestStreak ?? 0);
   return (
-    <section aria-label="Sequência" className="flex items-center gap-4 rounded-lg border border-border bg-surface px-5 py-4 shadow-e1">
-      <span className="grid size-14 flex-none place-items-center rounded-[14px] bg-accent/14 text-accent-text">
-        <StreakFlame size={30} animate={streak > 0 ? "flicker" : "none"} label={`Sequência de ${streak} semanas`} />
+    <span
+      role="img"
+      aria-label={description}
+      title={description}
+      className={cn(
+        "inline-flex h-6 flex-none items-center gap-[3px] rounded-pill pr-2 pl-1.5",
+        streak > 0 ? "bg-accent/14 text-accent-text" : "bg-surface-3 text-fg-muted",
+      )}
+    >
+      <StreakFlame size={16} animate={streak > 0 ? "flicker" : "none"} />
+      <span aria-hidden="true" className="font-display text-[15px] leading-4 font-bold tabular-nums">
+        {streak}
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="flex items-baseline gap-1.5">
-            <span className="font-display text-[34px] leading-[34px] font-bold tabular-nums">{streak}</span>
-            <span className="text-sm font-semibold whitespace-nowrap">{streak === 1 ? "semana seguida" : "semanas seguidas"}</span>
-          </span>
-          <span className="text-xs whitespace-nowrap text-fg-muted">Recorde {profile.bestStreak ?? 0}</span>
-        </div>
-        <div aria-label="Últimas 8 semanas" className="grid grid-cols-8 gap-1">
-          {weeks.map((done, i) => {
-            const isCurrent = i === weeks.length - 1;
-            return (
-              <span
-                key={i}
-                title={isCurrent ? (done ? "Esta semana, garantida" : "Esta semana, em andamento") : done ? "Semana com treino" : "Semana sem treino"}
-                className={cn("h-1.5 rounded-pill", done ? "bg-accent" : isCurrent ? "bg-accent/30" : "bg-surface-3")}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </section>
+    </span>
   );
 }
 

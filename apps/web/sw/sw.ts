@@ -63,7 +63,9 @@ self.addEventListener("push", (event) => {
 // Tocar no aviso: volta para o app aberto (na tela do aviso) ou abre um novo.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = new URL((event.notification.data as { url?: string } | null)?.url ?? "/", self.location.origin).href;
+  const target = new URL((event.notification.data as { url?: string } | null)?.url ?? "/", self.location.origin);
+  // Só telas do próprio app: um endereço de outro site no aviso abre a Início.
+  const url = target.origin === self.location.origin ? target.href : new URL("/", self.location.origin).href;
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
       const open = windows[0];

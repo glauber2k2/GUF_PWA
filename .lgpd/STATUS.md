@@ -4,7 +4,7 @@
 **Cenário**: C — Híbrido (Pipeline B até L4, depois Pipeline A a partir de F3 para features novas)
 **Início**: 2026-10-16
 **Última atualização**: 2026-10-30
-**Encarregado**: não designado — dispensa da Res. CD/ANPD nº 2/2022, art. 11 (agente de pequeno porte de baixo risco); canal `devglaubermonteiro@gmail.com` (`encarregado.md`)
+**Encarregado**: não designado — dispensa da Res. CD/ANPD nº 2/2022, art. 11 (agente de pequeno porte de baixo risco); canal `suporte@gufapp.com.br` (`encarregado.md`)
 **Controlador**: Glauber Monteiro, pessoa física, agente de pequeno porte — identificado nos documentos 1.0 (G1, G22)
 
 ## Pipeline atual
@@ -106,7 +106,7 @@ Ver `.lgpd/gaps.md`.
 ## F5 — DSAR ✓ (2026-10-17)
 - Migration `20261017141954_export_my_data_complete.sql` (branch `feat/lgpd-dsar`): `export_my_data()` agora inclui conta (e-mail, datas, provedores, dados do cadastro), contas vinculadas, períodos ativos e consentimentos com documento/versão/hash; formato `guf-export/2`; sem senha, tokens nem sessões
 - Testada com usuário fictício (transação desfeita): sem login recusado (28000), só dados do próprio usuário, 2 identidades, 1 período ativo, nada de senha/token
-- Canal: `PRIVACY_CONTACT_EMAIL` = devglaubermonteiro@gmail.com (provisório do beta) em Perfil › Privacidade › "Outros pedidos sobre seus dados" (mailto com assunto), rodapé do leitor e `/documentos`
+- Canal: `PRIVACY_CONTACT_EMAIL` = suporte@gufapp.com.br (provisório do beta) em Perfil › Privacidade › "Outros pedidos sobre seus dados" (mailto com assunto), rodapé do leitor e `/documentos`
 - Fluxo, verificação de identidade, modelos de resposta e controle de prazo (15 dias, lembretes no 10º e 13º dia) em `.lgpd/dsar/workflow.md`; controle com dados pessoais fica FORA do repositório
 - Pendente: e-mail dedicado e Encarregado antes do lançamento; texto dos documentos com o e-mail na publicação da política v1
 

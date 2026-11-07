@@ -20,7 +20,7 @@ export const CONTROLLER_DESCRIPTION = `${CONTROLLER_NAME}, pessoa física, desen
  * porte sem encarregado mantém um canal). Também é o e-mail de suporte. Mudar o e-mail muda o hash
  * dos documentos: nova versão.
  */
-export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
+export const PRIVACY_CONTACT_EMAIL = "suporte@gufapp.com.br";
 /** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
 export const DSAR_RESPONSE_DAYS = 15;
 
@@ -188,7 +188,7 @@ const TERMS: LegalDocumentContent = {
       blocks: [
         p("O guf entrega as ferramentas; o que você registra, escreve e mostra é escolha sua. Ao usar o app, você concorda que:"),
         ul(
-          "Você decide quem vê seus treinos (perfil privado ou aberto, aprovar seguidores, esconder o histórico e o projeto ativo). Antes de abrir o perfil ou aprovar alguém, lembre que essas pessoas verão seus treinos, com as observações, e o seu projeto ativo.",
+          "Você decide quem vê seus treinos (perfil privado ou aberto, aprovar seguidores, esconder o histórico e o projeto ativo). Antes de abrir o perfil ou aprovar alguém, lembre que essas pessoas verão seus treinos, com as observações, e o seu projeto ativo, que elas podem copiar.",
           "Depois que alguém vê algo no app, o guf não controla o que essa pessoa faz fora dele (por exemplo, uma captura de tela). Mostre só o que você aceita que seja visto.",
           "Imagens que você compartilha (stories e stickers) saem do app por sua escolha e passam a seguir as regras de onde forem publicadas.",
           "As informações que você declara, como idade, nome, cargas e medidas, devem ser verdadeiras. Declarar idade falsa viola estes termos.",
@@ -209,7 +209,7 @@ const TERMS: LegalDocumentContent = {
           "Em Editar perfil você pode, se quiser, escrever uma bio, que aparece junto com o nome e a foto para qualquer pessoa com conta no guf, e marcar seus objetivos e sua experiência, que aparecem só para quem pode ver seus treinos. Não escreva na bio dados de saúde nem dados de outras pessoas.",
         ),
         p(
-          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência, histórico de treinos (com as observações que você escreve neles) e projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações). Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
+          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência, histórico de treinos (com as observações que você escreve neles) e projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações). Quem vê o seu projeto ativo pode copiar uma rotina ou o projeto inteiro para a própria conta, com dias, exercícios, séries, repetições e descanso, sem cargas nem observações. A cópia passa a ser dessa pessoa: mudar ou apagar o seu projeto não muda a cópia. Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
         ),
         ul(
           "Em Configurações › Privacidade, a opção “Visibilidade de treino” mostra ou esconde, juntos e a qualquer momento, o histórico de treinos e o projeto ativo; evolução, sequência e competição continuam visíveis.",
@@ -297,6 +297,12 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    // A 1.5 nunca valeu sozinha (publicada junto com esta): o /aceite mostra só a versão atual, então repete a mudança dela.
+    "1.6": [
+      "Quem vê o seu projeto ativo pode copiar uma rotina ou o projeto inteiro para a própria conta (sem cargas nem observações). A cópia é independente do seu projeto.",
+      "Novo e-mail de contato e para pedidos sobre seus dados: suporte@gufapp.com.br.",
+      "Seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) passa a aparecer no seu perfil para quem já pode ver seus treinos. A opção “Visibilidade de treino”, em Configurações › Privacidade, mostra ou esconde os dois juntos.",
+    ],
     "1.5": [
       "Seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) passa a aparecer no seu perfil para quem já pode ver seus treinos. A opção “Visibilidade de treino”, em Configurações › Privacidade, mostra ou esconde os dois juntos.",
     ],
@@ -451,7 +457,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Perfil, seguidores e competição",
       blocks: [
         p(
-          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos, com as observações que você escreve no treino e nos exercícios, e o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode esconder o histórico e o projeto ativo (opção “Visibilidade de treino”), remover seguidores e bloquear pessoas a qualquer momento.",
+          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos, com as observações que você escreve no treino e nos exercícios, e o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Quem vê o seu projeto ativo pode copiar uma rotina ou o projeto inteiro para a própria conta, com dias, exercícios, séries, repetições e descanso, sem cargas nem observações. A cópia passa a ser dessa pessoa: mudar ou apagar o seu projeto não muda a cópia. Você pode esconder o histórico e o projeto ativo (opção “Visibilidade de treino”), remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos, a partir dos treinos: constância, recordes de carga e de cardio e volume comparado à sua própria média. As regras ficam publicadas em Competição › Como funciona."),
         p(
@@ -629,6 +635,12 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    // A 1.7 nunca valeu sozinha (publicada junto com esta): o /aceite mostra só a versão atual, então repete a mudança dela.
+    "1.8": [
+      "Perfil: Quem vê o seu projeto ativo pode copiar uma rotina ou o projeto inteiro para a própria conta (sem cargas nem observações). A cópia é independente do seu projeto.",
+      "Novo e-mail de contato e para pedidos sobre seus dados: suporte@gufapp.com.br.",
+      "Perfil: o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) aparece para quem já pode ver seus treinos. A opção “Visibilidade de treino” esconde o histórico e o projeto ativo juntos.",
+    ],
     "1.7": [
       "Perfil: o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) aparece para quem já pode ver seus treinos. A opção “Visibilidade de treino” esconde o histórico e o projeto ativo juntos.",
     ],
@@ -942,6 +954,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.5": ["Novo e-mail para cancelamento, devolução e problemas com a cobrança: suporte@gufapp.com.br."],
     "1.4": [
       "Assinatura pelo app Android: o Pro é comprado pelo Google Play; cancelar continua no guf, com a regra dos 7 dias.",
       "Forma de pagamento, recibos e reativação da assinatura do Google Play ficam na página de assinaturas da Play.",

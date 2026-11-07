@@ -19,6 +19,8 @@ const staffDomain = (Deno.env.get("STAFF_EMAIL_DOMAIN") ?? "").trim().toLowerCas
 
 const ROLES = new Set(["viewer", "support", "admin"]);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Conta criada por este convite (e não uma que já existia): criada há menos de 1 minuto. */
+const NEW_ACCOUNT_WINDOW_MS = 60_000;
 
 function corsHeadersFor(origin: string | null): Record<string, string> {
   const allow = allowedOrigins.length === 0 ? "*" : origin && allowedOrigins.includes(origin) ? origin : null;
@@ -91,6 +93,16 @@ Deno.serve(async (req) => {
       { error: exists ? "Esse e-mail já tem conta no guf. Use um e-mail só da equipe." : "Não foi possível enviar o convite. Tente de novo." },
       exists ? 400 : 500,
     );
+  }
+
+  // O Supabase reenvia o convite a uma conta que ainda não confirmou o e-mail e devolve a conta que já
+  // existia: ela nunca vira conta da equipe por aqui nem é apagada se o registro falhar.
+  const isNewAccount = Date.now() - Date.parse(invited.user.created_at) < NEW_ACCOUNT_WINDOW_MS;
+  if (!isNewAccount) {
+    const { data: member } = await service.from("staff_members").select("user_id").eq("user_id", invited.user.id).maybeSingle();
+    return member
+      ? json({ error: "Essa pessoa já faz parte da equipe." }, 409)
+      : json({ error: "Esse e-mail já tem conta no guf. Use um e-mail só da equipe." }, 400);
   }
 
   const { error: registerError } = await service.rpc("register_staff_member", {

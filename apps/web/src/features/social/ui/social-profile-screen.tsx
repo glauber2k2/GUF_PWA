@@ -15,7 +15,7 @@ import {
   useWorkoutFeed,
   useSocialSource,
 } from "@/features/social/api/use-social";
-import { LockedProfile, ProfileCounts, ProfileEvolution, ProfileHistory, ProfileStreak } from "@/features/social/components/profile-sections";
+import { LockedProfile, ProfileCounts, ProfileEvolution, ProfileHistory, ProfileStreakBadge } from "@/features/social/components/profile-sections";
 import { EVOLUTION_WEEKS } from "@/features/social/constants/profile-evolution";
 import { useProfileEvolutionPeriod } from "@/features/social/hooks/use-profile-evolution-period";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
@@ -43,7 +43,7 @@ function ProfileSkeleton() {
 
 /**
  * Perfil social (protótipo "Perfil Social"): o seu (aba Perfil; null) ou o de outra pessoa (/pessoa).
- * Cartão para qualquer conta; números, sequência e evolução só com o perfil desbloqueado;
+ * Cartão para qualquer conta; números, sequência (ao lado do @) e evolução só com o perfil desbloqueado;
  * histórico e projeto ativo só com a "Visibilidade de treino" ligada.
  */
 export function SocialProfileScreen({ userId }: { userId: string | null }) {
@@ -71,6 +71,8 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
         {!isSelf && <IconButton icon={ChevronLeft} label="Voltar" variant="ghost" onClick={goBack} />}
         <span className="flex min-w-0 flex-1 items-center gap-1.5 pl-2 text-base leading-[22px] font-semibold">
           <span className="truncate">{data ? `@${data.handle}` : ""}</span>
+          {/* Sequência só com o perfil desbloqueado (a mesma regra dos números e da evolução). */}
+          {data?.unlocked && <ProfileStreakBadge profile={data} />}
           {/* Só o seu plano: o de outra pessoa não é compartilhado (revisar o RIPD social antes de mostrar). */}
           {isSelf && entitlements && <PlanBadge user={entitlements} className="flex-none" />}
           {data?.visibility === "private" && <Icon icon={Lock} size={14} label="Perfil privado" className="flex-none text-fg-muted" />}
@@ -128,7 +130,6 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
           ) : (
             <>
               <ActiveProjectSection userId={userId} profile={data} />
-              <ProfileStreak profile={data} />
               <ProfileEvolution weeks={evolution.data} loading={evolution.isPending} periods={evolutionPeriod.periods} period={evolutionPeriod.period} onPeriod={evolutionPeriod.changePeriod} unit={unit} />
               <ProfileHistory
                 profile={data}

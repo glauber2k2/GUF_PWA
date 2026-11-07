@@ -18,7 +18,7 @@ import { buildLanguageModel, THINKING_RESERVE_TOKENS } from "./model.ts";
 import { buildPlanImportTool } from "./plan-import.ts";
 import { redactPersonalData } from "./privacy.ts";
 import { logProviderError, MAX_RETRIES, TIMEOUT, toProviderErrorMessage } from "./provider-errors.ts";
-import { checkDailyQuota } from "./quota.ts";
+import { consumeDailyQuota } from "./quota.ts";
 import { guardEmptyReply } from "./reply-guard.ts";
 
 // Mantido igual a packages/core/src/ai.ts (a Edge Function não importa os pacotes do monorepo).
@@ -111,8 +111,8 @@ export async function handleChat(body: unknown, { db, userId, cors, signal }: Ha
   const request = parseChatRequest(body);
   if (!request) return textResponse(`Mensagem inválida. Escreva até ${AI_MESSAGE_MAX_CHARS} caracteres.`, 400, cors);
 
-  // Vale também para "gerar de novo" (cada nova resposta custa uma chamada ao provedor).
-  const quota = await checkDailyQuota(db, userId);
+  // Conta e registra antes de chamar o provedor: "gerar de novo" e "tentar de novo" também custam uma chamada.
+  const quota = await consumeDailyQuota(db, request.trigger === "regenerate-message" ? "regenerate" : "chat");
   if (!quota.allowed) return textResponse(quota.message, quota.status, cors);
 
   if (!(await recordTurn(db, userId, request))) return textResponse("Não foi possível salvar a conversa. Tente de novo.", 500, cors);

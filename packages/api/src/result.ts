@@ -24,6 +24,7 @@ export type ApiErrorCode =
   | "plan_import_invalid"
   | "plan_import_empty"
   | "plan_limit"
+  | "copy_own"
   | "billing_unavailable"
   | "billing_provider_error"
   | "subscription_not_found"
@@ -100,6 +101,7 @@ export const API_ERROR_MESSAGES: Record<ApiErrorCode, string> = {
   plan_import_invalid: "Não foi possível ler essa ficha. Confira o texto (até 6.000 caracteres) e tente de novo.",
   plan_import_empty: "Não encontramos exercícios nesse texto. Cole a ficha com o nome dos exercícios, séries e repetições.",
   plan_limit: "Isso não está incluído no seu plano. Veja os planos para continuar.",
+  copy_own: "Essa rotina já é sua: ela está nos seus Projetos.",
   billing_unavailable: "As assinaturas ainda não estão disponíveis. Avisaremos quando o Pro puder ser assinado.",
   billing_provider_error: "O sistema de pagamento não respondeu. Nada foi cobrado: tente de novo em alguns minutos.",
   subscription_not_found: "Não encontramos essa assinatura ativa. Atualize a tela e confira a situação do seu plano.",
@@ -195,6 +197,7 @@ const SOCIAL_ERROR_CODES: Record<string, ApiErrorCode> = {
   GS006: "history_hidden",
   GS008: "handle_invalid",
   GS009: "session_not_found", // get_member_workout: inexistente OU sem permissão (mesma resposta de propósito)
+  GS010: "copy_own", // copy_member_routine / copy_member_project: a rotina ou o projeto já é seu
 };
 
 /** Converte erros do PostgREST/rede no ApiError do app. */

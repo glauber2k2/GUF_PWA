@@ -81,7 +81,7 @@ function person(userId: string, handle: string, name: string, extra: Partial<Moc
 }
 
 function seed(scenario: SocialMockScenario): MockState {
-  const me = person(MOCK_ME, "glauber.treina", "Glauber Souza", {
+  const me = person(MOCK_ME, "bruno.treina", "Bruno Souza", {
     workouts: 186,
     streak: 12,
     bestStreak: 18,
@@ -468,6 +468,21 @@ export const mockSocialApi = {
     if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
     if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
     return { data: mockActiveProject(), error: null };
+  },
+  async copyMemberRoutine(client, { targetProjectId }) {
+    ignoreClient(client);
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    return { data: { routineId: "mock-copied-routine", projectId: targetProjectId ?? "mock-copied-project" }, error: null };
+  },
+  async copyMemberProject(client, { userId }) {
+    ignoreClient(client);
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    if (userId === MOCK_ME) return { data: null, error: apiError("copy_own") };
+    return { data: { projectId: "mock-copied-project" }, error: null };
   },
 } satisfies SocialApi;
 

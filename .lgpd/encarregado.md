@@ -6,7 +6,7 @@
 - **Controlador**: Glauber Monteiro, pessoa física, desenvolvedor independente (sem empresa, sem advogado e sem contador nesta fase).
 - **Enquadramento**: agente de tratamento de pequeno porte (ATPP) — pessoa natural com fins econômicos (Res. CD/ANPD nº 2/2022).
 - **Dispensa**: o art. 11 da Res. 2/2022 dispensa a designação formal de encarregado para ATPP de **baixo risco**, desde que exista **canal de comunicação** com o titular.
-- **Canal**: `devglaubermonteiro@gmail.com` (constante `PRIVACY_CONTACT_EMAIL`), publicado na Política 1.0 (seção "Quem somos"), no rodapé do leitor, em `/documentos` e em Configurações › Privacidade › "Outros pedidos sobre seus dados". Prazo de resposta prometido: 15 dias (`DSAR_RESPONSE_DAYS`; a Res. 2/2022, art. 14, permitiria o dobro).
+- **Canal**: `suporte@gufapp.com.br` (constante `PRIVACY_CONTACT_EMAIL`; desde 2026-11-06, Termos 1.6, Política 1.8 e Assinatura 1.5 — antes, o e-mail pessoal do controlador; o nome do controlador continua nos documentos por exigência do art. 9º da LGPD e do Decreto 7.962/2013), publicado na Política 1.0 (seção "Quem somos"), no rodapé do leitor, em `/documentos` e em Configurações › Privacidade › "Outros pedidos sobre seus dados". Prazo de resposta prometido: 15 dias (`DSAR_RESPONSE_DAYS`; a Res. 2/2022, art. 14, permitiria o dobro).
 
 ## Condição da dispensa: baixo risco (Res. 2/2022, art. 4º)
 Alto risco exige um critério **geral** (larga escala **ou** afetar significativamente direitos) **e** um **específico** (dados sensíveis, tecnologias emergentes, decisões automatizadas…). Hoje:

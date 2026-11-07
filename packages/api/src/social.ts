@@ -138,6 +138,17 @@ export interface MemberActiveProject {
 
 type Result<T = null> = Promise<ApiResult<T>>;
 
+export interface CopyMemberRoutineInput {
+  routineId: string;
+  /** Projeto seu que recebe a rotina; null = cria um projeto novo com o nome da rotina. */
+  targetProjectId: string | null;
+}
+
+export interface CopiedRoutine {
+  routineId: string;
+  projectId: string;
+}
+
 export interface SocialApi {
   getMySocial: (client: GufClient) => Result<MySocial>;
   updateHandle: (client: GufClient, handle: string) => Result;
@@ -163,6 +174,13 @@ export interface SocialApi {
   getMemberWorkout: (client: GufClient, input: { sessionId: string }) => Result<MemberWorkoutDetail>;
   /** Projeto ativo do perfil (userId nulo = o seu); null sem projeto ativo. Erros: person_not_found, history_hidden. */
   getMemberActiveProject: (client: GufClient, input: { userId: string | null }) => Result<MemberActiveProject | null>;
+  /**
+   * Copia uma rotina do projeto ativo de outra pessoa (séries, repetições e descanso; sem cargas nem
+   * observações). Erros: person_not_found, history_hidden, copy_own, project_not_found, routine_not_found, plan_limit.
+   */
+  copyMemberRoutine: (client: GufClient, input: CopyMemberRoutineInput) => Result<CopiedRoutine>;
+  /** Copia o projeto ativo de outra pessoa inteiro (com os dias); activate = vira o seu ativo. Devolve o id do projeto. */
+  copyMemberProject: (client: GufClient, input: { userId: string; activate: boolean }) => Result<{ projectId: string }>;
 }
 
 /* =====================================================================
@@ -525,6 +543,31 @@ export const getMemberActiveProject: SocialApi["getMemberActiveProject"] = async
   }
 };
 
+export const copyMemberRoutine: SocialApi["copyMemberRoutine"] = async (client, { routineId, targetProjectId }) => {
+  try {
+    const { data, error } = await client.rpc("copy_member_routine", {
+      p_routine_id: routineId,
+      ...(targetProjectId ? { p_target_project_id: targetProjectId } : {}),
+    });
+    if (error) return { data: null, error: toApiError(error) };
+    // jsonb montado pela função ({ routine_id, project_id }); o tipo gerado só diz Json.
+    const row = data as unknown as { routine_id: string; project_id: string };
+    return { data: { routineId: row.routine_id, projectId: row.project_id }, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
+export const copyMemberProject: SocialApi["copyMemberProject"] = async (client, { userId, activate }) => {
+  try {
+    const { data, error } = await client.rpc("copy_member_project", { p_user_id: userId, p_activate: activate });
+    if (error) return { data: null, error: toApiError(error) };
+    return { data: { projectId: data }, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const socialApi = {
   getMySocial,
   updateHandle,
@@ -543,4 +586,6 @@ export const socialApi = {
   listWorkoutFeed,
   getMemberWorkout,
   getMemberActiveProject,
+  copyMemberRoutine,
+  copyMemberProject,
 } satisfies SocialApi;

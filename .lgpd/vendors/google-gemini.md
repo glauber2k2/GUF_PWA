@@ -5,7 +5,7 @@
 - Finalidade: gerar as respostas do GUF AI (A021)
 - Dados enviados: pergunta anonimizada e os dados de treino necessários à resposta (ver `.lgpd/RIPD/ripd-guf-ai.md`). Nunca nome, e-mail, medidas, observações ou dados de outra pessoa
 - Tier: operador (Art. 39) enquanto houver contrato; hoje usa a **API gratuita** (Google AI Studio)
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Última revisão: 2026-10-21 | Próxima revisão: antes do lançamento público
 
 ## Atenção (plano gratuito)

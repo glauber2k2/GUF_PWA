@@ -1,7 +1,7 @@
 # Operadores e terceiros — Guf App
 
 **Data**: 2026-10-16 · **Fase do produto**: beta em desenvolvimento, sem empresa constituída
-**Owner interno**: Glauber (desenvolvedor; controlador provisório como pessoa natural — ver G22)
+**Owner interno**: o controlador (desenvolvedor; controlador provisório como pessoa natural — ver G22)
 
 | Fornecedor | Papel na LGPD | Tier | País | Plano | DPA | Base Art. 33 | Veredito |
 |---|---|---|---|---|---|---|---|

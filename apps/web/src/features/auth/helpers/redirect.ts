@@ -1,12 +1,13 @@
+import { toInternalPath } from "@guf/core";
+
 /**
- * Valida o destino do ?next= para evitar redirecionamento aberto:
- * só caminhos internos ("/algo"), nunca "//site", "/\site" ou URLs absolutas.
+ * Valida o destino do ?next= para evitar redirecionamento aberto: só caminhos internos
+ * (`toInternalPath`), e nunca de volta para o login ou o cadastro.
  */
 export function safeNextPath(next: string | null | undefined): string | null {
-  if (!next || !next.startsWith("/")) return null;
-  if (next.startsWith("//") || next.startsWith("/\\")) return null;
-  if (next.startsWith("/login") || next.startsWith("/cadastro")) return null;
-  return next;
+  const path = toInternalPath(next);
+  if (!path || path.startsWith("/login") || path.startsWith("/cadastro")) return null;
+  return path;
 }
 
 /** Monta /login?next=<rota atual> (rota interna já validada). */

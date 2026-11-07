@@ -2282,6 +2282,14 @@ export type Database = {
           rival_name: string
         }[]
       }
+      copy_member_project: {
+        Args: { p_activate?: boolean; p_user_id: string }
+        Returns: string
+      }
+      copy_member_routine: {
+        Args: { p_routine_id: string; p_target_project_id?: string }
+        Returns: Json
+      }
       current_legal_document: {
         Args: { p_doc_type: string }
         Returns: {

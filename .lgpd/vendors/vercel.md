@@ -6,7 +6,7 @@
 - Dados compartilhados: IP, user-agent, URL acessada e data/hora (logs de acesso da hospedagem). **Nenhum dado do banco passa pela Vercel**: o app fala direto com o Supabase pelo navegador | Sensíveis (Art. 11)? Não
 - Tier: **Baixo/Médio** (só dados de acesso, sem conteúdo do usuário)
 - Plano: **Hobby**
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Última revisão: 2026-10-16 | Próxima revisão: 2027-10-16 ou na troca para a hospedagem de produção
 
 ## 1. Contrato e base legal
