@@ -71,9 +71,9 @@ Este documento tem como finalidade [objetivo em uma frase].
 ```
 
 No guf, os documentos de projeto ficam em `docs/` (`implementation-plan.md`, `business-rules.md`, `lgpd.md`) e o
-resumo vivo no `CLAUDE.md`. Não há rotas HTTP próprias: o **contrato de API** é o de cada função de
+resumo vivo no `CLAUDE.md` (regras gerais) e em `docs/features/` (um documento por funcionalidade). Não há rotas HTTP próprias: o **contrato de API** é o de cada função de
 `packages/api` (`(client, input) => Promise<{ data, error }>`, TSDoc na função + tipo do contrato `XxxApi`) e o de
-cada RPC do Supabase (tabela de RPCs do `CLAUDE.md`). Mudou função, RPC ou erro? Atualize os dois e o mock.
+cada RPC do Supabase (tabela de RPCs em `docs/reference/supabase.md`; códigos de erro em `docs/reference/api-errors.md`). Mudou função, RPC ou erro? Atualize os dois e o mock.
 
 ## Checklist
 

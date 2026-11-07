@@ -1221,6 +1221,8 @@ export type Database = {
           rest_seconds: number | null
           routine_id: string
           target_reps: string | null
+          target_reps_max: number | null
+          target_reps_min: number | null
           target_sets: number | null
           target_weight_kg: number | null
           user_id: string
@@ -1233,6 +1235,8 @@ export type Database = {
           rest_seconds?: number | null
           routine_id: string
           target_reps?: string | null
+          target_reps_max?: number | null
+          target_reps_min?: number | null
           target_sets?: number | null
           target_weight_kg?: number | null
           user_id: string
@@ -1245,6 +1249,8 @@ export type Database = {
           rest_seconds?: number | null
           routine_id?: string
           target_reps?: string | null
+          target_reps_max?: number | null
+          target_reps_min?: number | null
           target_sets?: number | null
           target_weight_kg?: number | null
           user_id?: string
@@ -2489,6 +2495,7 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_member_active_project: { Args: { p_user_id?: string }; Returns: Json }
       get_member_evolution: {
         Args: { p_user_id?: string; p_weeks?: number }
         Returns: {
@@ -2705,6 +2712,10 @@ export type Database = {
         Args: { p_body: string; p_title: string; p_user_id: string }
         Returns: undefined
       }
+      parse_rep_target: {
+        Args: { p_text: string }
+        Returns: Record<string, unknown>
+      }
       pause_workout: {
         Args: { p_at?: string; p_session_id: string }
         Returns: undefined
@@ -2799,6 +2810,11 @@ export type Database = {
         Returns: undefined
       }
       remove_follower: { Args: { p_user_id: string }; Returns: undefined }
+      rep_target_from_item: {
+        Args: { p_item: Json }
+        Returns: Record<string, unknown>
+      }
+      rep_target_in_item: { Args: { p_item: Json }; Returns: boolean }
       request_follow: { Args: { p_user_id: string }; Returns: string }
       require_staff: {
         Args: { p_min_role: string }

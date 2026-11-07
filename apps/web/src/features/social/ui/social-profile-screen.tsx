@@ -20,6 +20,7 @@ import { EVOLUTION_WEEKS } from "@/features/social/constants/profile-evolution";
 import { useProfileEvolutionPeriod } from "@/features/social/hooks/use-profile-evolution-period";
 import { SelfActions, VisitorActions, VisitorOptionsSheet } from "@/features/social/components/profile-actions";
 import { ProfileAbout } from "@/features/social/components/profile-about";
+import { ActiveProjectSection } from "@/features/social/components/active-project/active-project-section";
 import { FollowRequestsBar } from "@/features/social/components/follow-requests-bar";
 import { editProfilePath, memberWorkoutPath } from "@/features/social/helpers/paths";
 import { PlanBadge, usePlanGate } from "@/features/plans";
@@ -43,7 +44,7 @@ function ProfileSkeleton() {
 /**
  * Perfil social (protótipo "Perfil Social"): o seu (aba Perfil; null) ou o de outra pessoa (/pessoa).
  * Cartão para qualquer conta; números, sequência e evolução só com o perfil desbloqueado;
- * histórico só se a pessoa não ocultou.
+ * histórico e projeto ativo só com a "Visibilidade de treino" ligada.
  */
 export function SocialProfileScreen({ userId }: { userId: string | null }) {
   const router = useRouter();
@@ -126,6 +127,7 @@ export function SocialProfileScreen({ userId }: { userId: string | null }) {
             <LockedProfile profile={data} />
           ) : (
             <>
+              <ActiveProjectSection userId={userId} profile={data} />
               <ProfileStreak profile={data} />
               <ProfileEvolution weeks={evolution.data} loading={evolution.isPending} periods={evolutionPeriod.periods} period={evolutionPeriod.period} onPeriod={evolutionPeriod.changePeriod} unit={unit} />
               <ProfileHistory

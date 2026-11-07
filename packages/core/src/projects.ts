@@ -1,6 +1,8 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { plural } from "./format";
+import { DEFAULT_REP_TARGET } from "./rep-range";
+import { weekdaysLabel } from "./schedule";
 import { estimateRoutineMinutes, routineDurationLabel } from "./workout";
 
 /** Regras da aba Projetos (puras, sem React). */
@@ -32,6 +34,15 @@ export function routineMeta(
   return [plural(exercises.length, "exercício", "exercícios"), routineDurationLabel(averageSeconds)]
     .filter(Boolean)
     .join(" · ");
+}
+
+/** "Seg e Qui · 6 exercícios · ~52 min" (sem dias marcados, só o resto). */
+export function routineScheduleMeta(
+  weekdays: readonly number[],
+  exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>,
+  averageSeconds: number | null,
+): string {
+  return [weekdays.length > 0 ? weekdaysLabel(weekdays) : null, routineMeta(exercises, averageSeconds)].filter(Boolean).join(" · ");
 }
 
 /* ---------------------------------------------------------------------
@@ -130,7 +141,7 @@ export function nextPosition(positions: readonly number[]): number {
 export const ROUTINE_REST_OPTIONS = [45, 60, 90, 120, 180] as const;
 
 /** Exercício recém-adicionado à rotina: 3 séries de 10, descanso padrão de 90 s. */
-export const NEW_PLANNED_EXERCISE = { targetSets: 3, targetReps: "10", targetWeightKg: null, restSeconds: 90, notes: "" } as const;
+export const NEW_PLANNED_EXERCISE = { targetSets: 3, targetReps: DEFAULT_REP_TARGET, targetWeightKg: null, restSeconds: 90, notes: "" } as const;
 
 /** "6 exercícios · 19 séries · ~55 min"; vazia → "Nenhum exercício". */
 export function routineDraftSummary(exercises: ReadonlyArray<{ targetSets: number; restSeconds: number }>): string {

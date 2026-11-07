@@ -1,5 +1,4 @@
 import {
-  parseRepRange,
   pickSetValues,
   type ActivePeriod,
   type CardioBest,
@@ -7,6 +6,8 @@ import {
   type RepRange,
   type SetType,
   type SetValues,
+  toRepRange,
+  toRepTarget,
   type WeightUnit,
 } from "@guf/core";
 import type { Database } from "@guf/types";
@@ -257,9 +258,9 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
     const [lastRes, routineRes, bests, cardioBests] = await Promise.all([
       client.rpc("get_last_performance", { p_exercise_ids: ids }),
       routineId
-        ? client.from("routine_exercises").select("exercise_id, rest_seconds, target_reps, notes").eq("routine_id", routineId)
+        ? client.from("routine_exercises").select("exercise_id, rest_seconds, target_reps_min, target_reps_max, notes").eq("routine_id", routineId)
         : Promise.resolve({
-            data: [] as { exercise_id: string; rest_seconds: number | null; target_reps: string | null; notes: string | null }[],
+            data: [] as { exercise_id: string; rest_seconds: number | null; target_reps_min: number | null; target_reps_max: number | null; notes: string | null }[],
             error: null,
           }),
       Promise.all(ids.map((id) => fetchBest1RmKg(client, id))),
@@ -279,7 +280,7 @@ export const getExerciseContext: GetExerciseContext = async (client, { exerciseI
         best1RmKg: bests[i] ?? null,
         cardioBest: cardioBests.data.get(id) ?? null,
         restSeconds: planned?.rest_seconds ?? DEFAULT_REST_SECONDS,
-        repRange: parseRepRange(planned?.target_reps),
+        repRange: toRepRange(toRepTarget(planned?.target_reps_min, planned?.target_reps_max)),
         routineNote: planned?.notes ?? null,
       };
     });

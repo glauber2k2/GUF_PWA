@@ -25,7 +25,7 @@ export function toPlannedExercise(library: LibraryExercise): RoutineExerciseDraf
     equipment: library.equipment,
     ...NEW_PLANNED_EXERCISE,
     targetSets: setMetricFor(library.muscleGroup).defaultSetCount,
-    targetReps: measuresReps(library.muscleGroup) ? NEW_PLANNED_EXERCISE.targetReps : "",
+    targetReps: measuresReps(library.muscleGroup) ? NEW_PLANNED_EXERCISE.targetReps : null,
   };
 }
 

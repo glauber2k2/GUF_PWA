@@ -3,6 +3,8 @@
  * Ex.: 82,5 · 12.480 · 80 × 10 · 1:30 · −2,5
  */
 
+import { formatRepTarget, type RepTarget } from "./rep-range";
+
 const LOCALE = "pt-BR";
 
 /** Sinal de menos tipográfico (U+2212), usado em números negativos na interface. */
@@ -33,22 +35,12 @@ export function formatClock(totalSeconds: number): string {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-/**
- * Repetições alvo da rotina (routine_exercises.target_reps é texto livre: "10", "8-12", "falha").
- * Intervalos usam travessão: "8–12".
- */
-export function formatTargetReps(targetReps: string | null | undefined): string | null {
-  const reps = targetReps?.trim();
-  if (!reps) return null;
-  return reps.replace(/\s*-\s*/g, "–");
-}
-
-/** Séries × repetições planejadas: "3 × 8–12", "3 × falha", "3 séries", "8–12 reps" ou null. */
-export function formatPlannedSets(targetSets: number | null | undefined, targetReps: string | null | undefined): string | null {
-  const reps = formatTargetReps(targetReps);
+/** Séries × repetições planejadas: "3 × 8–12", "3 × 10", "3 séries", "8–12 reps" ou null. */
+export function formatPlannedSets(targetSets: number | null | undefined, targetReps: RepTarget | null | undefined): string | null {
+  const reps = targetReps ? formatRepTarget(targetReps) : null;
   if (targetSets && reps) return `${targetSets} ${TIMES_SIGN} ${reps}`;
   if (targetSets) return `${targetSets} ${targetSets === 1 ? "série" : "séries"}`;
-  if (reps) return /^\d/.test(reps) ? `${reps} reps` : reps;
+  if (reps) return `${reps} reps`;
   return null;
 }
 

@@ -74,7 +74,8 @@ function toImportParams(draft: PlanImportDraft) {
     exercises: routine.exercises.map((exercise) => {
       const planned = {
         target_sets: exercise.targetSets,
-        target_reps: exercise.targetReps.trim(),
+        target_reps_min: exercise.targetReps?.min ?? null,
+        target_reps_max: exercise.targetReps?.max ?? null,
         rest_seconds: exercise.restSeconds,
         notes: exercise.notes.trim(),
       };
