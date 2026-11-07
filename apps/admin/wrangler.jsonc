@@ -2,7 +2,7 @@
   // Painel de administração: site estático (só o `next build` do apps/admin), em domínio separado do app.
   // Deploy a partir da raiz do repositório: `npx wrangler deploy -c apps/admin/wrangler.jsonc`.
   "$schema": "../../node_modules/wrangler/config-schema.json",
-  "name": "guf-admin",
+  "name": "admin-guf",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./out",

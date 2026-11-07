@@ -1,7 +1,7 @@
 {
   // Site estático: só os arquivos do `next build` + `serwist build`, sem código de servidor.
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "guf-pwa",
+  "name": "treino-guf",
   "compatibility_date": "2026-11-01",
   "assets": {
     "directory": "./apps/web/out",
