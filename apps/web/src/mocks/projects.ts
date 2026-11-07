@@ -30,7 +30,7 @@ const SAMPLE_EXERCISES = [
   { name: "Panturrilha em pé", muscleGroup: "panturrilha" },
 ];
 const planned = (count: number) =>
-  Array.from({ length: count }, (_, i) => ({ ...SAMPLE_EXERCISES[i % SAMPLE_EXERCISES.length]!, targetSets: 3, targetReps: "8-12", restSeconds: 90 }));
+  Array.from({ length: count }, (_, i) => ({ ...SAMPLE_EXERCISES[i % SAMPLE_EXERCISES.length]!, targetSets: 3, targetReps: { min: 8, max: 12 }, restSeconds: 90 }));
 const routine = (
   id: string,
   name: string,

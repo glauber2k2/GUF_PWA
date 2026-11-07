@@ -13,6 +13,12 @@ import { toUnit, type WeightUnit } from "./units.ts";
 export type { WeightUnit } from "./units.ts";
 
 const ISO_WEEKDAYS = ["", "segunda", "terça", "quarta", "quinta", "sexta", "sábado", "domingo"];
+
+/** Repetições alvo da rotina como o modelo lê: "10" (fixas), "8-12" (faixa) ou null (não definidas). */
+function formatRepTargetText(min: number | null, max: number | null): string | null {
+  if (min === null) return null;
+  return max === null ? String(min) : `${min}-${max}`;
+}
 const DEFAULT_WORKOUTS = 8;
 const MAX_WORKOUTS = 20;
 const MAX_EXERCISE_MATCHES = 5;
@@ -281,12 +287,12 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
       inputSchema: z.object({}),
       execute: async () => {
         const { data } = await db.from("routines")
-          .select("name, weekdays, position, auto_progress, projects(name, is_active), routine_exercises(position, target_sets, target_reps, rest_seconds, target_weight_kg, exercises(name))")
+          .select("name, weekdays, position, auto_progress, projects(name, is_active), routine_exercises(position, target_sets, target_reps_min, target_reps_max, rest_seconds, target_weight_kg, exercises(name))")
           .eq("user_id", userId).is("archived_at", null);
         type RoutineRow = {
           name: string; weekdays: number[]; position: number; auto_progress: boolean;
           projects: { name: string; is_active: boolean } | null;
-          routine_exercises: { position: number; target_sets: number | null; target_reps: string | null; rest_seconds: number | null; target_weight_kg: number | null; exercises: { name: string } | null }[];
+          routine_exercises: { position: number; target_sets: number | null; target_reps_min: number | null; target_reps_max: number | null; rest_seconds: number | null; target_weight_kg: number | null; exercises: { name: string } | null }[];
         };
         const rows = ((data ?? []) as unknown as RoutineRow[])
           .sort((a, b) => Number(b.projects?.is_active ?? false) - Number(a.projects?.is_active ?? false) || a.position - b.position);
@@ -301,7 +307,7 @@ export function buildDataTools({ db, userId, unit, today }: ToolsContext) {
             exercicios: [...r.routine_exercises].sort((a, b) => a.position - b.position).map((e) => ({
               exercicio: e.exercises?.name ?? "Exercício",
               series: e.target_sets,
-              repeticoes: e.target_reps,
+              repeticoes: formatRepTargetText(e.target_reps_min, e.target_reps_max),
               descanso_s: e.rest_seconds,
               carga_planejada: r.auto_progress ? null : toUnit(e.target_weight_kg, unit),
             })),

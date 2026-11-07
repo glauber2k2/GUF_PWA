@@ -7,7 +7,7 @@ import {
   PLAN_IMPORT_MAX_ROUTINES,
 } from "@guf/core";
 import { PROJECT_NAME_MAX_LENGTH, ROUTINE_NAME_MAX_LENGTH } from "./projects";
-import { EXERCISE_NOTE_MAX_LENGTH, ROUTINE_SETS_MAX, ROUTINE_SETS_MIN, TARGET_REPS_MAX_LENGTH } from "./routines";
+import { EXERCISE_NOTE_MAX_LENGTH, optionalRepTargetSchema, ROUTINE_SETS_MAX, ROUTINE_SETS_MIN } from "./routines";
 
 /** Limite de exercises.name no banco. */
 const EXERCISE_NAME_MAX_LENGTH = 100;
@@ -54,8 +54,8 @@ const planImportExerciseSchema = z.object({
   sourceName: z.string().max(EXERCISE_NAME_MAX_LENGTH * 2),
   match: planImportMatchSchema,
   targetSets: z.number().int().min(ROUTINE_SETS_MIN).max(ROUTINE_SETS_MAX),
-  // Opcional, como na rotina: ficha sem repetições chega em branco e a pessoa preenche se quiser.
-  targetReps: z.string().trim().max(TARGET_REPS_MAX_LENGTH, `Use até ${TARGET_REPS_MAX_LENGTH} caracteres nas repetições.`),
+  // Opcional, como na rotina. O GUF AI manda o texto da ficha ("8-12"); o schema converte em números.
+  targetReps: optionalRepTargetSchema,
   restSeconds: z.number().int().min(0).max(REST_SECONDS_MAX),
   notes: z.string().trim().max(EXERCISE_NOTE_MAX_LENGTH),
 });

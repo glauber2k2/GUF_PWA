@@ -1,4 +1,4 @@
-import { plannedSetValues, sessionTotals, setMetricFor, type ActivePeriod, type SetType } from "@guf/core";
+import { plannedSetValues, sessionTotals, setMetricFor, toRepTarget, type ActivePeriod, type RepTarget, type SetType } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import {
@@ -27,8 +27,8 @@ export interface PlannedExercise {
   /** Código de exercises.muscle_group (ex.: "biceps"); rótulo via muscleGroupLabel (@guf/core). */
   muscleGroup: string;
   targetSets: number | null;
-  /** Texto livre da rotina: "10", "8-12", "falha". */
-  targetReps: string | null;
+  /** Repetições fixas ou faixa; null = a rotina não define. */
+  targetReps: RepTarget | null;
   restSeconds: number | null;
 }
 
@@ -158,7 +158,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
       const routinesRes = await client
         .from("routines")
         .select(
-          "id, name, position, weekdays, average_duration_seconds, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group))",
+          "id, name, position, weekdays, average_duration_seconds, routine_exercises(position, target_sets, target_reps_min, target_reps_max, rest_seconds, exercises(name, muscle_group))",
         )
         .eq("project_id", projectRes.data.id)
         .is("archived_at", null)
@@ -178,7 +178,7 @@ export const getHomeSummary: GetHomeSummary = async (client, { weekStart, weekEn
             name: re.exercises?.name ?? "Exercício",
             muscleGroup: re.exercises?.muscle_group ?? "",
             targetSets: re.target_sets,
-            targetReps: re.target_reps,
+            targetReps: toRepTarget(re.target_reps_min, re.target_reps_max),
             restSeconds: re.rest_seconds,
           })),
           averageDurationSeconds: r.average_duration_seconds ?? null,
@@ -250,7 +250,8 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
       exercise_id: string;
       position: number;
       target_sets: number | null;
-      target_reps: string | null;
+      target_reps_min: number | null;
+      target_reps_max: number | null;
       target_weight_kg: number | null;
       exercises: { muscle_group: string } | null;
     }[] = [];
@@ -258,7 +259,7 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
     if (routineId) {
       const routineRes = await client
         .from("routines")
-        .select("name, auto_progress, routine_exercises(exercise_id, position, target_sets, target_reps, target_weight_kg, exercises(muscle_group))")
+        .select("name, auto_progress, routine_exercises(exercise_id, position, target_sets, target_reps_min, target_reps_max, target_weight_kg, exercises(muscle_group))")
         .eq("id", routineId)
         .maybeSingle();
       if (routineRes.error || !routineRes.data) return { data: null, error: toApiError(routineRes.error) };
@@ -292,7 +293,7 @@ export const startWorkout: StartWorkout = async (client, { routineId, performedO
           const prev = previous.find((l) => l.set_number === i + 1) ?? lastPrev;
           const values = plannedSetValues(autoProgress, prev && { weightKg: prev.weight_kg, reps: prev.reps }, {
             weightKg: p.target_weight_kg === null ? null : Number(p.target_weight_kg),
-            targetReps: p.target_reps,
+            targetReps: toRepTarget(p.target_reps_min, p.target_reps_max),
           });
           return {
             id: crypto.randomUUID(),

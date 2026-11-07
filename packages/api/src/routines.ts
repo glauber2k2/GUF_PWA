@@ -1,4 +1,4 @@
-import { setMetricFor } from "@guf/core";
+import { setMetricFor, toRepTarget, type RepTarget } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 
@@ -16,8 +16,8 @@ export interface RoutineExerciseDraft {
   /** Código de exercises.equipment; rótulo via equipmentLabel (@guf/core). */
   equipment: string;
   targetSets: number;
-  /** Texto livre: "10", "8-12", "falha". */
-  targetReps: string;
+  /** Repetições fixas ou faixa; null = a rotina não define (ex.: cardio). */
+  targetReps: RepTarget | null;
   /** Carga planejada em kg (opcional); usada quando a rotina não atualiza carga automaticamente. */
   targetWeightKg: number | null;
   restSeconds: number;
@@ -59,7 +59,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
     const { data, error } = await client
       .from("routines")
       .select(
-        "id, project_id, name, weekdays, auto_progress, archived_at, routine_exercises(id, exercise_id, position, target_sets, target_reps, target_weight_kg, rest_seconds, notes, exercises(name, muscle_group, equipment))",
+        "id, project_id, name, weekdays, auto_progress, archived_at, routine_exercises(id, exercise_id, position, target_sets, target_reps_min, target_reps_max, target_weight_kg, rest_seconds, notes, exercises(name, muscle_group, equipment))",
       )
       .eq("id", routineId)
       .order("position", { referencedTable: "routine_exercises", ascending: true })
@@ -80,7 +80,7 @@ export const getRoutine: RoutinesApi["getRoutine"] = async (client, { routineId 
           muscleGroup: re.exercises?.muscle_group ?? "",
           equipment: re.exercises?.equipment ?? "outro",
           targetSets: re.target_sets ?? setMetricFor(re.exercises?.muscle_group ?? "").defaultSetCount,
-          targetReps: re.target_reps ?? "",
+          targetReps: toRepTarget(re.target_reps_min, re.target_reps_max),
           targetWeightKg: re.target_weight_kg === null ? null : Number(re.target_weight_kg),
           restSeconds: re.rest_seconds ?? DEFAULT_REST_SECONDS,
           notes: re.notes ?? "",
@@ -106,7 +106,8 @@ export const saveRoutine: RoutinesApi["saveRoutine"] = async (client, draft) => 
         id: e.id,
         exercise_id: e.exerciseId,
         target_sets: e.targetSets,
-        target_reps: e.targetReps.trim(),
+        target_reps_min: e.targetReps?.min ?? null,
+        target_reps_max: e.targetReps?.max ?? null,
         target_weight_kg: e.targetWeightKg,
         rest_seconds: e.restSeconds,
         notes: e.notes.trim(),

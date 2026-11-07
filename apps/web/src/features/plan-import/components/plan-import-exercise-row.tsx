@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { ArrowLeftRight, ChevronDown, Trash2 } from "lucide-react";
 import type { PlanImportExercise, PlanImportMatch } from "@guf/api";
-import { formatClock, formatPlannedSets, muscleGroupLabel, normalizeSearch } from "@guf/core";
-import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN, TARGET_REPS_MAX_LENGTH } from "@guf/schemas";
-import { Icon, IconButton, Stepper, TextField } from "@/shared/components/ds";
+import { formatClock, formatPlannedSets, measuresReps, muscleGroupLabel, normalizeSearch } from "@guf/core";
+import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN } from "@guf/schemas";
+import { Icon, IconButton, Stepper } from "@/shared/components/ds";
+import { RepTargetEditor } from "@/shared/components/rep-target-editor";
 import { Badge } from "@/shared/components/ui/badge";
 import { cn } from "@/shared/helpers/class-names";
 import type { PlanImportExercisePatch } from "@/features/plan-import/helpers/plan-import-draft";
@@ -72,14 +73,9 @@ export function PlanImportExerciseRow({ exercise, disabled, onChange, onReplace,
             decreaseLabel="Menos uma série"
             increaseLabel="Mais uma série"
           />
-          <TextField
-            label="Repetições alvo"
-            value={exercise.targetReps}
-            maxLength={TARGET_REPS_MAX_LENGTH}
-            disabled={disabled}
-            hint="Opcional. Ex.: 10, 8–12 ou falha"
-            onChange={(event) => onChange({ targetReps: event.target.value })}
-          />
+          {measuresReps(exercise.match.muscleGroup) && (
+            <RepTargetEditor value={exercise.targetReps} onChange={(targetReps) => onChange({ targetReps })} />
+          )}
         </div>
       )}
     </li>

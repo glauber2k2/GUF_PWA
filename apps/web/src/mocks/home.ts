@@ -7,7 +7,7 @@
  * - Sequência: ativa (padrão) · recorde · risco · zerada
  */
 import type { FinishedSession, GufClient, HomeApi, HomeSummary, PlannedExercise, RoutineSummary } from "@guf/api";
-import { fromLocalISODate, isoWeekday, WEEKDAYS } from "@guf/core";
+import { fromLocalISODate, isoWeekday, WEEKDAYS, parseRepTarget } from "@guf/core";
 
 export type TodayScenario = "planejado" | "descanso" | "vazio" | "novo" | "concluido" | "andamento";
 export type StreakScenario = "ativa" | "recorde" | "risco" | "zerada";
@@ -37,7 +37,7 @@ const ex = (name: string, muscleGroup: string, targetSets: number, targetReps: s
   name,
   muscleGroup,
   targetSets,
-  targetReps,
+  targetReps: parseRepTarget(targetReps),
   restSeconds,
 });
 

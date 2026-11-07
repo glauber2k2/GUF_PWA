@@ -1,4 +1,5 @@
 import { differenceInMinutes } from "date-fns";
+import type { RepTarget } from "./rep-range";
 import { totalVolume, type SetType } from "./training";
 
 /** Códigos de exercises.muscle_group → rótulo em pt-BR. */
@@ -104,12 +105,6 @@ export function startedAgoLabel(startedAt: string, now: Date = new Date()): stri
   return `começou há ${hours} h${rest ? ` ${rest} min` : ""}`;
 }
 
-/** Menor número das repetições alvo da rotina ("8-12" → 8, "10" → 10, "falha" → null). */
-export function targetRepsMin(targetReps: string | null | undefined): number | null {
-  const match = targetReps?.match(/\d+/);
-  return match ? Number(match[0]) : null;
-}
-
 /**
  * Carga e repetições de uma série planejada ao iniciar o treino pela rotina.
  * @param autoProgress opção da rotina: true = repete o último desempenho (sem histórico, as
@@ -120,9 +115,10 @@ export function targetRepsMin(targetReps: string | null | undefined): number | n
 export function plannedSetValues(
   autoProgress: boolean,
   previous: { weightKg: number | null; reps: number | null } | undefined,
-  planned: { weightKg: number | null; targetReps: string | null },
+  planned: { weightKg: number | null; targetReps: RepTarget | null },
 ): { weightKg: number | null; reps: number | null } {
-  if (autoProgress && previous) return { weightKg: previous.weightKg, reps: previous.reps ?? targetRepsMin(planned.targetReps) };
-  if (autoProgress) return { weightKg: null, reps: targetRepsMin(planned.targetReps) };
-  return { weightKg: planned.weightKg, reps: targetRepsMin(planned.targetReps) };
+  const plannedReps = planned.targetReps?.min ?? null;
+  if (autoProgress && previous) return { weightKg: previous.weightKg, reps: previous.reps ?? plannedReps };
+  if (autoProgress) return { weightKg: null, reps: plannedReps };
+  return { weightKg: planned.weightKg, reps: plannedReps };
 }
