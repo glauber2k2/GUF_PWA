@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff, Info, Lock, type LucideIcon } from "lucide-react";
+import { Eye, Info, Lock, type LucideIcon } from "lucide-react";
 import { socialPrivacySummary } from "@guf/core";
 import type { MySocial } from "@guf/api";
 import { Icon, Switch } from "@/shared/components/ds";
@@ -23,9 +23,10 @@ function PrivacyRow({ icon, title, description, children }: { icon: LucideIcon; 
 }
 
 /**
- * Perfil privado e ocultar histórico (regras aceitas no cadastro, nos Termos e na Política).
+ * Perfil privado e visibilidade de treino (regras aceitas no cadastro, nos Termos e na Política).
  * Abrir aceita os pedidos pendentes; fechar mantém quem já segue (só quem chegar depois precisa
- * de aprovação); ocultar o histórico vale na hora.
+ * de aprovação). "Visibilidade de treino" mostra ou esconde, juntos e na hora, o histórico de
+ * treinos e o projeto ativo (social_profiles.history_hidden).
  */
 export function SocialPrivacySettings({ social, disabled = false }: { social: MySocial; disabled?: boolean }) {
   const update = useUpdateSocialSettings();
@@ -61,13 +62,17 @@ export function SocialPrivacySettings({ social, disabled = false }: { social: My
         />
       </PrivacyRow>
       <div className="h-px bg-border" />
-      <PrivacyRow icon={EyeOff} title="Ocultar histórico de treinos" description="Ninguém vê seus treinos, nem seguidores. Vale com o perfil aberto ou privado.">
+      <PrivacyRow
+        icon={Eye}
+        title="Visibilidade de treino"
+        description="Histórico de treinos e projeto ativo aparecem para quem vê seu perfil. Desligada, só você vê os dois."
+      >
         <Switch
-          label="Ocultar histórico de treinos"
+          label="Visibilidade de treino"
           hideLabel
-          checked={social.historyHidden}
+          checked={!social.historyHidden}
           disabled={disabled || update.isPending}
-          onChange={(hidden) => save(social.visibility, hidden)}
+          onChange={(isVisible) => save(social.visibility, !isVisible)}
         />
       </PrivacyRow>
       <div className="mt-2 flex items-start gap-2.5 rounded-md bg-surface-3 px-3.5 py-3 text-[13px] leading-[18px] text-fg-secondary">

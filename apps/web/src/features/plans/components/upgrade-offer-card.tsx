@@ -1,6 +1,6 @@
 import { Check, Crown } from "lucide-react";
 import type { ReactNode } from "react";
-import { formatFeatureAccess, PLAN_FEATURE_LABELS, type CatalogPlan, type PlanFeature, type PlanPrice } from "@guf/core";
+import { formatFeatureAccess, PLAN_FEATURE_LABELS, type AnnualSavings, type CatalogPlan, type PlanFeature, type PlanPrice } from "@guf/core";
 import { Icon } from "@/shared/components/ds";
 import { PriceTag } from "@/features/plans/components/price-tag";
 
@@ -11,12 +11,14 @@ export interface UpgradeOfferCardProps {
   plan: CatalogPlan;
   price: PlanPrice | null;
   highlights: readonly PlanFeature[];
+  /** Economia do anual sobre o mensal (mostrada com o preço anual). */
+  savings?: AnnualSavings | null;
   /** Seletor mensal/anual (acima do preço; a oferta guarda a escolha). */
   picker?: ReactNode;
 }
 
 /** Oferta do plano acima: nome, periodicidade, preço à venda (por mês, com a promoção) e o que ele libera a mais. */
-export function UpgradeOfferCard({ plan, price, highlights, picker }: UpgradeOfferCardProps) {
+export function UpgradeOfferCard({ plan, price, highlights, savings = null, picker }: UpgradeOfferCardProps) {
   return (
     <section
       aria-label={plan.name}
@@ -33,7 +35,7 @@ export function UpgradeOfferCard({ plan, price, highlights, picker }: UpgradeOff
       </div>
       {picker}
       {price ? (
-        <PriceTag price={price} />
+        <PriceTag price={price} savings={savings} />
       ) : (
         <p className="m-0 text-sm leading-5 text-fg-secondary">A assinatura ainda não está disponível. Avisaremos quando o {plan.name} puder ser assinado.</p>
       )}

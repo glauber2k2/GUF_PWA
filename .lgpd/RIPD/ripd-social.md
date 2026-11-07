@@ -5,7 +5,9 @@
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
 **Equipe**: desenvolvedor (Glauber) + assistente técnico
-**Versão**: v0.10 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-11-04
+**Versão**: v0.11 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-11-08
+
+> **v0.11**: o perfil passa a mostrar o **projeto ativo** do titular (Claude Design "Perfil - Projeto Ativo" · 2c; função `get_member_active_project`, migration `20261108130000_member_active_project`): nome e descrição do projeto e as rotinas com dias da semana, tempo médio, exercícios, séries e repetições. Fica de fora de propósito: cargas planejadas, observações dos exercícios da rotina e ids. Mesmo público do histórico (`can_view_member_history`: titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto) e a mesma opção: "Ocultar histórico de treinos" virou **"Visibilidade de treino"** (`social_profiles.history_hidden`, sem coluna nova), que mostra ou esconde histórico e projeto ativo juntos. É planejamento, não registro de treino, mas da mesma natureza do que o histórico já mostra (exercícios e séries). Termos 1.5 (novo aceite, `requires_reaccept = true`) e Política 1.7 descrevem a regra (migration `20261108130100`, aplicar depois do app no ar). Copiar rotina ou projeto de outra pessoa (também no protótipo) **não** foi implementado. R001 revisto.
 
 > **v0.10**: no perfil de outra pessoa, a lista de treinos (feed, paginado) e o treino aberto passam a mostrar todo o histórico que o titular deixa ver (titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto), não só o mês atual (decisão de produto, migration `20261104120000_member_history_full`). O gráfico de evolução continua no mês atual. Aumenta a exposição de dados já registrados ao mesmo público: Termos 1.4 descrevem a regra e pedem novo aceite (`requires_reaccept = true`); mitigação continua sendo ocultar o histórico ou fechar o perfil (Configurações › Privacidade).
 
@@ -145,7 +147,7 @@ flowchart LR
 
 | ID | Risco | P | I | Nível | Mitigação | Status | Residual |
 |---|---|---|---|---|---|---|---|
-| R001 | Seguidor vê mais do que o titular quis | 2 | 4 | 8 | Privado por padrão; histórico ocultável (esconde a lista e o detalhe de cada treino); campos mínimos (sem observações, RPE, projeto ou rotina); leitura só por funções que conferem `can_view_member`/`can_view_member_history` | mitigado | 3 |
+| R001 | Seguidor vê mais do que o titular quis | 2 | 4 | 8 | Privado por padrão; histórico ocultável (esconde a lista e o detalhe de cada treino); campos mínimos (sem RPE; projeto ativo só com nome, descrição, dias, exercícios, séries e repetições, sem cargas nem observações da rotina; histórico e projeto ativo escondidos juntos pela "Visibilidade de treino"); leitura só por funções que conferem `can_view_member`/`can_view_member_history` | mitigado | 3 |
 | R002 | Erro de política expõe treinos a qualquer usuário | 2 | 5 | 10 | Nenhuma política nova em tabelas de treino; funções `SECURITY DEFINER` com conferência explícita; testes de permissão antes do lançamento | mitigado (testes pendentes) | 4 |
 | R003 | Contato indesejado / assédio | 3 | 3 | 9 | Sem chat; bloqueio e remoção; busca restrita; limite de pedidos | mitigado | 4 |
 | R004 | Adolescente usando o módulo (acesso provável) | 2 | 4 | 8 | 18+ por autodeclaração; procedimento de conta de menor (`eca-digital.md`) | parcial ⚖ | 6 |

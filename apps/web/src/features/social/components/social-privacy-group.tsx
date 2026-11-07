@@ -6,7 +6,7 @@ import { Icon, Skeleton } from "@/shared/components/ds";
 import { useCanUseSocial, useMySocial } from "@/features/social/api/use-social";
 import { SocialPrivacySettings } from "@/features/social/components/social-privacy-settings";
 
-/** Configurações › Privacidade: perfil privado, histórico oculto e pessoas bloqueadas. */
+/** Configurações › Privacidade: perfil privado, visibilidade de treino (histórico e projeto ativo) e pessoas bloqueadas. */
 export function SocialPrivacyGroup() {
   const social = useMySocial();
   const canUse = useCanUseSocial();

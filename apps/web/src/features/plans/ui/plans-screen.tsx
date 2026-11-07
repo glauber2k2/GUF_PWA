@@ -83,7 +83,7 @@ export function PlansScreen() {
           <>
             <FreePlanCard plan={currentPlan} limitedFeatures={offer.highlights} />
             {upgrade && (
-              <UpgradeOfferCard plan={upgrade} price={offer.upgradePrice} highlights={offer.highlights} picker={<OfferIntervalPicker offer={offer} />} />
+              <UpgradeOfferCard plan={upgrade} price={offer.upgradePrice} highlights={offer.highlights} savings={offer.annualSavings} picker={<OfferIntervalPicker offer={offer} />} />
             )}
             <PlanSection id="plan-compare" title={upgrade ? `${currentPlan.name} e ${upgrade.name} lado a lado` : "O que cada plano inclui"} className="animate-guf-rise [animation-delay:220ms]">
               <PlanComparison plans={offer.plans} highlight={highlight} />
