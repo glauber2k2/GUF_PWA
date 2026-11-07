@@ -15,6 +15,8 @@ Este documento tem como finalidade registrar o que foi entregue, as próximas et
 
 ### Entregue
 
+**2026-11-08 (branch `feat/avisos-recorrentes`):** comunicados recorrentes no painel (diário, semanal, mensal, anual, a cada N; tempo no app por vez; fim nunca, na data ou após N vezes; prévia das próximas vezes). Migration `20261108140000` aplicada.
+
 **2026-11-08 (branch `feat/rotina-faixa-ou-fixa`):** escolha entre repetições fixas e faixa em cada exercício da rotina (Claude Design `Editor de Rotina` · 1a), também na revisão da ficha importada; repetições gravadas em duas colunas numéricas (`target_reps_min`/`target_reps_max`, migration `20261108120000`, aplicada), com a coluna de texto descontinuada. Pendente: migration que remove `routine_exercises.target_reps` quando nenhum app instalado a ler.
 
 **2026-11-06 (branch `feat/faixa-reps-cupons`):** faixa de repetições na rotina com aviso no treino, finalização automática que funciona com séries em aberto (e descarte do treino vazio), tempo médio da rotina no card de hoje, texto da comparação do gráfico de volume, cupons de desconto no checkout do Stripe (Termos da Assinatura 1.2, não aplicados) e o guia da Play Store em `docs/play-store-twa.md` (TWA agora, React Native no mesmo anúncio depois). Hospedagem de produção na Cloudflare (`treino.gufapp.com.br`).

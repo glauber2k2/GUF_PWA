@@ -241,6 +241,8 @@ export interface AppAnnouncement {
   ctaPath: string | null;
   priority: number;
   publishedAt: string | null;
+  /** Começo da vez que está valendo (recorrente: muda a cada vez; senão, o início). */
+  occurrenceStartsAt: string | null;
 }
 
 /** Quantos avisos que não interrompem (toast e faixa) aparecem numa abertura. */

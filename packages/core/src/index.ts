@@ -40,6 +40,7 @@ export * from "./plans";
 export * from "./plan-import";
 export * from "./body-measurements";
 export * from "./announcements";
+export * from "./announcement-recurrence";
 export * from "./staff";
 export * from "./account-suspension";
 export * from "./exercise-catalog";

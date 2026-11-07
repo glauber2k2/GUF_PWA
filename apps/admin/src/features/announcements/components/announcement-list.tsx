@@ -57,7 +57,7 @@ export function AnnouncementList({ items, device, planNames, onOpen }: Announcem
               </span>
               <strong className="text-base leading-[22px]">{item.title || "Sem título"}</strong>
               <span className="text-[13px] text-fg-secondary">
-                {audienceLabel(item, planNames)} · {formatPeriod(item.startsAt, item.endsAt)}
+                {audienceLabel(item, planNames)} · {formatPeriod(item.startsAt, item.endsAt, item.recurrence)}
               </span>
               <span className="grid grid-cols-3 gap-2 border-t border-border pt-2.5">
                 {[
@@ -121,7 +121,7 @@ export function AnnouncementList({ items, device, planNames, onOpen }: Announcem
                 <FormatLabel item={item} />
               </td>
               {isDesktop && <td className="max-w-[260px] px-4 py-3 text-fg-secondary">{audienceLabel(item, planNames)}</td>}
-              <td className="px-4 py-3 whitespace-nowrap text-fg-secondary">{formatPeriod(item.startsAt, item.endsAt)}</td>
+              <td className="px-4 py-3 whitespace-nowrap text-fg-secondary">{formatPeriod(item.startsAt, item.endsAt, item.recurrence)}</td>
               <td className={cn("px-4 py-3 text-right", NUMBER)}>{statValue(item, item.reachEstimate)}</td>
               {isDesktop && <td className={cn("px-4 py-3 text-right", NUMBER)}>{statValue(item, item.seenCount)}</td>}
               {isDesktop && <td className={cn("px-4 py-3 text-right", NUMBER)}>{statValue(item, item.ctaCount)}</td>}

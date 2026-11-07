@@ -335,6 +335,7 @@ export const mockAnnouncementsAdminApi = {
       state: "draft" as const,
       startsAt: draft.startsAt,
       endsAt: draft.endsAt,
+      recurrence: draft.recurrence,
       reachEstimate: null,
       seenCount: 0,
       dismissedCount: 0,

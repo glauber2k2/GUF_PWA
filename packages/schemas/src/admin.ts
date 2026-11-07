@@ -8,6 +8,9 @@ import {
   REASON_NOTE_LIMITS,
   STAFF_ROLES,
   isPurposeAllowed,
+  isRecurrenceValid,
+  RECURRENCE_EVERY_MAX,
+  RECURRENCE_EVERY_MIN,
   type ChangeReason,
   type StaffRole,
 } from "@guf/core";
@@ -32,6 +35,15 @@ export const audienceSchema = z
 
 const destinationPaths = ANNOUNCEMENT_DESTINATIONS.map((d) => d.path) as [string, ...string[]];
 
+/** Repetição do comunicado (mesmos limites dos checks do banco). */
+export const announcementRecurrenceSchema = z
+  .object({
+    unit: z.enum(["day", "week", "month", "year"]),
+    every: z.number().int().min(RECURRENCE_EVERY_MIN).max(RECURRENCE_EVERY_MAX, `Use no máximo ${RECURRENCE_EVERY_MAX}.`),
+    windowHours: z.number().int().min(1),
+  })
+  .refine(isRecurrenceValid, { message: "Cada vez precisa terminar antes da próxima começar. Diminua o tempo no app.", path: ["windowHours"] });
+
 /** Rascunho do comunicado (o editor salva aos poucos; publicar exige o resto, conferido no banco). */
 export const announcementDraftSchema = z
   .object({
@@ -47,6 +59,7 @@ export const announcementDraftSchema = z
     frequency: z.enum(["once", "until_dismissed"]),
     startsAt: z.iso.datetime({ offset: true }).nullable(),
     endsAt: z.iso.datetime({ offset: true }).nullable(),
+    recurrence: announcementRecurrenceSchema.nullable(),
   })
   .refine((d) => isPurposeAllowed(d.audience, d.purpose), {
     message: "Com a regra de consentimento de saúde, use a finalidade Serviço ou Legal.",
@@ -59,12 +72,15 @@ export const announcementDraftSchema = z
 
 export type AnnouncementDraftInput = z.input<typeof announcementDraftSchema>;
 
-/** Pronto para publicar: título, texto e fim no futuro. */
-export const announcementPublishSchema = z.object({
-  title: z.string().trim().min(1, "Escreva o título."),
-  body: z.string().trim().min(1, "Escreva o texto."),
-  endsAt: z.string({ error: "Escolha quando o comunicado termina." }).min(1, "Escolha quando o comunicado termina."),
-});
+/** Pronto para publicar: título, texto e fim (recorrente pode não ter fim: repete até alguém encerrar). */
+export const announcementPublishSchema = z
+  .object({
+    title: z.string().trim().min(1, "Escreva o título."),
+    body: z.string().trim().min(1, "Escreva o texto."),
+    endsAt: z.string().nullable(),
+    isRecurring: z.boolean(),
+  })
+  .refine((d) => d.isRecurring || Boolean(d.endsAt), { message: "Escolha quando o comunicado termina.", path: ["endsAt"] });
 
 const reasonKeys = Object.keys(CHANGE_REASONS) as [ChangeReason, ...ChangeReason[]];
 

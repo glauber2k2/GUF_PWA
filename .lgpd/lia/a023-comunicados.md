@@ -25,7 +25,7 @@
 | Impacto potencial sobre direitos | Leve (aviso dentro do app, sem e-mail ou push) |
 | Categoria do dado | Comum |
 | Vulnerabilidade do titular | Público 18+ por autodeclaração; ECA Digital veda perfilamento publicitário de menores — sem segmentação comportamental (Arts. 22 e 26) |
-| Frequência | No máximo 1 aviso que interrompe por abertura; "Mostrar uma vez" como padrão para produto |
+| Frequência | No máximo 1 aviso que interrompe por abertura; "Mostrar uma vez" como padrão para produto. Desde 2026-11-08 um comunicado pode se repetir (diário a anual): cada vez conta como um aviso novo, com a mesma opção de não receber os de produto; recomendação da equipe: produto no máximo semanal |
 | Salvaguardas | Fora do treino e das telas imersivas; "Agora não" sempre visível; auditoria de publicação |
 
 ## 4. Salvaguardas obrigatórias antes do primeiro envio

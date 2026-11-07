@@ -38,6 +38,7 @@ export const getMyAnnouncements: AnnouncementsApi["getMyAnnouncements"] = async 
           ctaPath: row.cta_path,
           priority: row.priority,
           publishedAt: row.published_at,
+          occurrenceStartsAt: row.occurrence_starts_at,
         }),
       );
     return { data: items, error: null };

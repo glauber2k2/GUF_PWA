@@ -12,7 +12,7 @@ const LATENCY_MS = 250;
 const wait = () => new Promise((resolve) => setTimeout(resolve, LATENCY_MS));
 
 function sample(format: AppAnnouncement["format"]): AppAnnouncement {
-  const base = { priority: 50, publishedAt: "2026-10-22T12:00:00Z" };
+  const base = { priority: 50, publishedAt: "2026-10-22T12:00:00Z", occurrenceStartsAt: "2026-10-22T12:00:00Z" };
   switch (format) {
     case "fullscreen":
       return { ...base, id: "mock-full", format, tone: "news", title: "Exporte seu treino em stories", body: "Compartilhe o resumo do treino no Instagram, com sua carga e seus recordes.", ctaLabel: "Experimentar", ctaPath: "/perfil" };

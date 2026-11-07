@@ -12,6 +12,7 @@ import {
   formatCount,
   isPurposeAllowed,
   priorityFromValue,
+  recurrenceSummary,
   type AnnouncementPurpose,
 } from "@guf/core";
 import { Banner, Button } from "@guf/ui";
@@ -33,7 +34,10 @@ interface ReviewStepProps {
 
 /** 8f · d) Revisar: resumo com "Editar" por passo e a finalidade (base legal do comunicado). */
 export function ReviewStep({ draft, reach, targetCount, planNames, issue, onPurpose, onGoTo }: ReviewStepProps) {
-  const when = `${draft.startsAt ? formatDayTime(draft.startsAt) : "Ao publicar"} – ${draft.endsAt ? formatDayTime(draft.endsAt) : "sem fim"} (Brasília)`;
+  const period = `${draft.startsAt ? formatDayTime(draft.startsAt) : "Ao publicar"} – ${draft.endsAt ? formatDayTime(draft.endsAt) : "sem fim"} (Brasília)`;
+  const when = draft.recurrence
+    ? `${recurrenceSummary(draft.startsAt ? new Date(draft.startsAt) : new Date(), draft.recurrence)} · ${period}`
+    : period;
   const rows: Array<{ label: string; value: string; step: EditorStep }> = [
     { label: "Formato e tom", value: `${ANNOUNCEMENT_FORMATS[draft.format].label} · ${ANNOUNCEMENT_TONES[draft.tone].label}`, step: 1 },
     {
