@@ -4,7 +4,7 @@
 // velocidade máxima nem ritmo de cada km) e sem os modelos que pedem o que o app não registra (calorias,
 // inclinação, esforço, ritmo por km, tiros por distância, primeiro 5K, km da semana).
 import type { ReactNode } from "react";
-import { ChevronsRight, Flame, Timer, Trophy } from "lucide-react";
+import { ChevronsRight, Flame, Timer } from "lucide-react";
 import type { StoryCardio, StoryData } from "@guf/core";
 import { GufRat } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -318,33 +318,4 @@ export function StoryK18({ d }: StoryModelProps) {
       </div>
     </Card>
   ));
-}
-
-/** K19 · Recorde de cardio (ritmo, velocidade ou distância). */
-export function StoryK19({ d }: StoryModelProps) {
-  return withCardio(d, (cardio) => {
-    const record = cardio.record;
-    if (!record) return null;
-    return (
-      <Card className="gap-[24px] border-[3px] border-story-pr shadow-story-pr-glow">
-        <Header
-          aside={
-            <span className="flex items-center gap-[12px] rounded-full bg-pr px-[24px] py-[10px] text-[32px] font-bold text-accent-foreground">
-              <Trophy size={36} aria-hidden="true" />
-              RECORDE PESSOAL
-            </span>
-          }
-        />
-        <Eyebrow className="text-pr-text">{record.title.toUpperCase()}</Eyebrow>
-        <span className="flex items-baseline gap-[20px]">
-          <span className="inline-block -skew-x-10 font-display text-[300px] leading-[250px] font-bold tracking-[-.03em]">{record.value}</span>
-          <span className="font-display text-[90px] font-bold text-pr-text">{record.unit.toUpperCase()}</span>
-        </span>
-        <span className="text-[44px] leading-[52px] font-bold">
-          {record.kind === "distance" ? "Nunca fui tão longe." : "Nunca fui tão rápido."} <span className="text-pr-text">{record.delta}</span> em relação à
-          marca anterior.
-        </span>
-      </Card>
-    );
-  });
 }

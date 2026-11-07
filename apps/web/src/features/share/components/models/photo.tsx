@@ -40,30 +40,6 @@ export function Story16({ d }: StoryModelProps) {
   );
 }
 
-export function Story17({ d }: StoryModelProps) {
-  return (
-    <>
-      <div className="absolute left-[64px] top-[220px] w-[400px] p-[40px] rounded-[40px] bg-surface border border-border flex flex-col gap-[28px]">
-        <Logo className="h-[88px]" />
-        <span className="text-[28px] leading-[36px] font-semibold">{d.focus}</span>
-        <div className="flex flex-col gap-[4px] pt-[24px] border-t border-border">
-          <span className="font-display font-semibold text-[72px] leading-[72px] text-accent-text">{d.volume}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">{d.unit.toUpperCase()} DE VOLUME</span>
-        </div>
-        <div className="flex flex-col gap-[4px] pt-[24px] border-t border-border">
-          <span className="font-display font-semibold text-[72px] leading-[72px]">{d.duration}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">TEMPO</span>
-        </div>
-        <div className="flex flex-col gap-[4px] pt-[24px] border-t border-border">
-          <span className="font-display font-semibold text-[72px] leading-[72px]">{d.sets}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">SÉRIES</span>
-        </div>
-        <span className="pt-[24px] border-t border-border text-[22px] leading-[30px] text-fg">{STORY_SIGNATURE}</span>
-      </div>
-    </>
-  );
-}
-
 export function Story18({ d }: StoryModelProps) {
   return (
     <>

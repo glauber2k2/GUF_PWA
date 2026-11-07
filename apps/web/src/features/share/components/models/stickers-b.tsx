@@ -1,4 +1,4 @@
-// Stickers S12–S22, sem o S21 (igual ao modelo Comparação de peso) (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
+// Stickers S12–S22, sem o S18, o S20 e o S21 (este igual ao modelo Comparação de peso) (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
 // altura automática. O StoryArt envolve com folga, tema e fundo transparente; os dados vêm de StoryData.
 import { formatNumber, plural } from "@guf/core";
 import { GufRat, MuscleIcon, type MuscleIconKey } from "@/shared/components/ds";
@@ -261,27 +261,6 @@ export function StoryS17({ d }: StoryModelProps) {
   );
 }
 
-/** S18 · Descanso médio com o Guf Rat. */
-export function StoryS18({ d }: StoryModelProps) {
-  if (!d.restAverage) return null;
-  return (
-    <StickerCard className="w-[720px] gap-[12px] px-[44px] py-[40px]">
-      <StickerLogo />
-      <div className="flex items-center gap-[24px]">
-        <div className="flex-none">
-          <GufRat occasion="rest" size={220} animated={false} label={null} />
-        </div>
-        <div className="flex flex-col gap-[4px]">
-          <span className="text-[30px] font-bold tracking-[.08em] text-info">DESCANSO MÉDIO</span>
-          <span className="font-display text-[150px] leading-[136px] font-bold">{d.restAverage}</span>
-          <span className="text-[34px] text-fg">entre as séries do treino</span>
-        </div>
-      </div>
-      <StickerSignature />
-    </StickerCard>
-  );
-}
-
 /** S19 · Marco de treinos registrados com o Guf Rat. */
 export function StoryS19({ d }: StoryModelProps) {
   const { total, since } = d.milestone;
@@ -295,40 +274,6 @@ export function StoryS19({ d }: StoryModelProps) {
       <span className="text-[34px] font-bold tracking-[.08em]">{total === 1 ? "TREINO REGISTRADO" : "TREINOS REGISTRADOS"}</span>
       {since && <span className="text-[32px] text-fg">desde {since}</span>}
       <StickerSignature className="mt-[16px]" />
-      <StickerTagline />
-    </StickerCard>
-  );
-}
-
-function StackedNumber({ label, value, unit, accent }: { label: string; value: string | number; unit?: string; accent?: boolean }) {
-  return (
-    <div className="flex flex-col items-center gap-[2px]">
-      <span className="text-[32px] font-semibold text-fg">{label}</span>
-      <div className="flex items-baseline gap-[8px]">
-        <span className={accent ? "font-display text-[92px] leading-[88px] font-bold text-accent-text" : "font-display text-[92px] leading-[88px] font-bold"}>
-          {value}
-        </span>
-        {unit && <span className="font-display text-[40px] font-semibold text-fg">{unit}</span>}
-      </div>
-    </div>
-  );
-}
-
-/** S20 · Números empilhados + bonecos. */
-export function StoryS20({ d }: StoryModelProps) {
-  return (
-    <StickerCard className="w-[600px] items-center gap-[22px] px-[40px] pt-[48px] pb-[40px] text-center">
-      <StackedNumber label="Peso levantado" value={d.volume} unit={d.unit} accent />
-      <StackedNumber label="Duração" value={d.duration} />
-      <StackedNumber label="Séries" value={d.sets} />
-      <div className="mt-[8px] flex gap-[28px]">
-        <MuscleFigure view="front" height={300} levels={d.muscles} />
-        <MuscleFigure view="back" height={300} levels={d.muscles} />
-      </div>
-      <div className="mt-[8px]">
-        <StickerLogo />
-      </div>
-      <StickerSignature />
       <StickerTagline />
     </StickerCard>
   );
