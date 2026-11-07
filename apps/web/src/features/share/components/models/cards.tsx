@@ -1,4 +1,4 @@
-// Stories e feed · Cartões de resumo (Claude Design · ShareCard). Quatro modelos em dois formatos:
+// Stories e feed · Cartões de resumo (Claude Design · ShareCard). Três modelos em dois formatos:
 // stories 1080 × 1920 (área útil 96 / 220 / 96 / 260) e feed 1080 × 1350 (margem 72). Dados de StoryData.
 import { formatNumber, type StoryData } from "@guf/core";
 import { Trophy } from "lucide-react";
@@ -6,7 +6,7 @@ import { GufRat, Logo } from "@/shared/components/ds";
 import { MuscleFigure } from "@/shared/components/ds";
 import type { StoryModelProps } from "@/features/share/type";
 
-type CardModel = 1 | 2 | 3 | 4;
+type CardModel = 1 | 2 | 4;
 type CardFormat = "story" | "feed";
 
 interface StatPart {
@@ -22,13 +22,11 @@ interface Stat {
 
 /** Até 6 exercícios na lista; o resto vira "+N exercícios". */
 const MAX_ROWS = 6;
-/** Até 3 recordes cabem nos cartões. */
-const MAX_RECORDS = 3;
 const LEVEL_OPACITY = { 1: "opacity-36", 2: "opacity-64", 3: "" } as const;
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? `${n} ${one}` : `${n} ${many}`);
 
-/** Textos e números derivados que os quatro modelos compartilham. */
+/** Textos e números derivados que os três modelos compartilham. */
 function cardValues(d: StoryData) {
   const volumeZero = d.volume === "0";
   const reps = formatNumber(d.reps, 0);
@@ -37,18 +35,13 @@ function cardValues(d: StoryData) {
   const volumeLabel = volumeZero ? "REPETIÇÕES" : "VOLUME";
   const exercisesLabel = d.exerciseCount === 1 ? "EXERCÍCIO" : "EXERCÍCIOS";
   const extra = d.exercises.length - MAX_ROWS;
-  const extraRecords = d.records.length - MAX_RECORDS;
   return {
     title: d.title || "Treino livre",
     volumeZero,
     rows: d.exercises.slice(0, MAX_ROWS),
     moreLabel: extra > 0 ? `+${plural(extra, "exercício", "exercícios")}` : null,
-    records: d.records.slice(0, MAX_RECORDS),
-    recordsMore: extraRecords > 0 ? `+${plural(extraRecords, "recorde", "recordes")}` : null,
     hasRecord: d.records.length > 0,
     recordBadge: plural(d.records.length, "recorde", "recordes"),
-    recordOverline: d.records.length === 1 ? "RECORDE PESSOAL" : "RECORDES PESSOAIS",
-    recordTitle: d.records.length === 1 ? "1 recorde quebrado" : `${d.records.length} recordes quebrados`,
     heroLabel: volumeZero ? "REPETIÇÕES TOTAIS" : "VOLUME TOTAL",
     heroValue: volumeZero ? reps : d.volume,
     heroUnit: volumeZero ? "reps" : d.unit,
@@ -356,103 +349,6 @@ function SummaryVolume({ d, v, feed }: { d: StoryData; v: CardValues; feed: bool
 }
 
 /* ---------------------------------------------------------------------
- * Modelo 3 · Recordes (só com recorde)
- * --------------------------------------------------------------------- */
-
-function SummaryRecords({ d, v, feed }: { d: StoryData; v: CardValues; feed: boolean }) {
-  if (!v.hasRecord) return null;
-  return (
-    <div className="flex h-full flex-col">
-      <DateHeader d={d} feed={feed} />
-      {feed ? (
-        <div className="mt-[32px] flex items-center gap-[40px]">
-          <div className="relative flex h-[280px] w-[280px] flex-none items-center justify-center">
-            <div className="absolute left-[-80px] top-[-80px] h-[440px] w-[440px] rounded-full bg-radial from-story-pr/24 to-transparent to-62%"></div>
-            <div className="relative">
-              <GufRat occasion="personalRecord" size={260} animated={false} label={null} />
-            </div>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-[12px]">
-            <div className="flex items-center gap-[10px] text-[30px] font-semibold tracking-[.08em] text-pr-text">
-              <Trophy size={34} aria-hidden="true" />
-              <span>{v.recordOverline}</span>
-            </div>
-            <div className="text-[56px] font-bold leading-[64px] tracking-[-.02em]">{v.recordTitle}</div>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="relative mt-[32px] flex h-[360px] items-center justify-center">
-            <div className="absolute left-1/2 top-1/2 ml-[-300px] mt-[-300px] h-[600px] w-[600px] rounded-full bg-radial from-story-pr/24 to-transparent to-62%"></div>
-            <div className="relative">
-              <GufRat occasion="personalRecord" size={340} animated={false} label={null} />
-            </div>
-          </div>
-          <div className="mt-[24px] flex items-center justify-center gap-[12px] text-[34px] font-semibold tracking-[.08em] text-pr-text">
-            <Trophy size={36} aria-hidden="true" />
-            <span>{v.recordOverline}</span>
-          </div>
-          <div className="mt-[16px] text-center text-[64px] font-bold leading-[72px] tracking-[-.02em]">{v.recordTitle}</div>
-        </>
-      )}
-
-      <div className={`flex flex-col ${feed ? "mt-[40px] gap-[16px]" : "mt-[48px] gap-[24px]"}`}>
-        {v.records.map((r) => {
-          const previous = r.previousLoad ? `vs. ${r.previousLoad} ${d.unit}` : null;
-          const delta = (
-            <div className="flex flex-col items-end gap-[8px]">
-              <span
-                className={`flex items-center rounded-full bg-pr font-display font-bold text-pr-foreground ${
-                  feed ? "h-[48px] px-[18px] text-[38px]" : "h-[56px] px-[20px] text-[40px]"
-                }`}
-              >
-                {r.delta}
-              </span>
-              {previous && <span className={`${feed ? "text-[28px]" : "text-[32px]"} text-fg`}>{previous}</span>}
-            </div>
-          );
-          const load = (
-            <div className="flex items-baseline gap-[8px] text-pr-text">
-              <span className={`font-display font-bold ${feed ? "text-[88px] leading-[80px]" : "text-[112px] leading-[96px]"}`}>
-                {r.load}
-              </span>
-              <span className={`font-display font-semibold ${feed ? "text-[36px]" : "text-[44px]"}`}>{d.unit}</span>
-            </div>
-          );
-          return feed ? (
-            <div
-              key={r.exerciseName}
-              className="flex items-center justify-between gap-[24px] rounded-[24px] border-[2px] border-story-pr-text/36 bg-surface px-[32px] py-[24px]"
-            >
-              <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-                <span className="truncate text-[32px] font-semibold text-fg">{r.exerciseName}</span>
-                {load}
-              </div>
-              {delta}
-            </div>
-          ) : (
-            <div
-              key={r.exerciseName}
-              className="flex flex-col gap-[12px] rounded-[32px] border-[2px] border-story-pr-text/36 bg-surface px-[40px] py-[32px]"
-            >
-              <span className="truncate text-[34px] font-semibold text-fg">{r.exerciseName}</span>
-              <div className="flex items-end justify-between gap-[24px]">
-                {load}
-                {delta}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      {v.recordsMore && (
-        <div className={`text-center text-fg ${feed ? "mt-[16px] text-[30px]" : "mt-[24px] text-[34px]"}`}>{v.recordsMore}</div>
-      )}
-      <div className={`mt-auto truncate text-center text-fg ${feed ? "text-[30px]" : "text-[34px]"}`}>{v.title}</div>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------------
  * Modelo 4 · Treino finalizado (Guf Rat)
  * --------------------------------------------------------------------- */
 
@@ -506,7 +402,6 @@ function SummaryCard({ d, model, format, withRat = false }: { d: StoryData; mode
     >
       {model === 1 && <SummaryFigures d={d} v={v} feed={feed} withRat={withRat} />}
       {model === 2 && <SummaryVolume d={d} v={v} feed={feed} />}
-      {model === 3 && <SummaryRecords d={d} v={v} feed={feed} />}
       {model === 4 && <SummaryRat d={d} v={v} feed={feed} />}
     </div>
   );
@@ -514,13 +409,7 @@ function SummaryCard({ d, model, format, withRat = false }: { d: StoryData; mode
 
 export const StoryC01 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={1} format="story" />;
 export const StoryC02 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={2} format="story" />;
-export const StoryC03 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={3} format="story" />;
 export const StoryC04 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={4} format="story" />;
 export const StoryC05 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={1} format="story" withRat />;
-export const StoryC06 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={2} format="story" withRat />;
-export const StoryC07 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={3} format="story" withRat />;
-export const StoryC08 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={4} format="story" withRat />;
 export const StoryC09 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={1} format="feed" />;
 export const StoryC10 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={2} format="feed" />;
-export const StoryC11 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={3} format="feed" />;
-export const StoryC12 = ({ d }: StoryModelProps) => <SummaryCard d={d} model={4} format="feed" />;

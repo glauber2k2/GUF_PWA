@@ -1,6 +1,6 @@
-// Stories · Telas cheias F01–F10 (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
+// Stories · Telas cheias F01–F10, sem F04 e F08 (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
 import type { ReactNode } from "react";
-import { ArrowRight, Check, TrendingDown, TrendingUp, Trophy } from "lucide-react";
+import { ArrowRight, Check, TrendingDown, TrendingUp } from "lucide-react";
 import { plural, WEEKDAY_INITIALS } from "@guf/core";
 import { GufRat, Logo, MuscleIcon, StreakFlame, type MuscleIconKey } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
@@ -217,55 +217,6 @@ export function StoryF03({ d }: StoryModelProps) {
   );
 }
 
-/* F04 · Recorde pessoal */
-export function StoryF04({ d }: StoryModelProps) {
-  const r = d.records[0];
-  if (!r) return null;
-  return (
-    <Frame center>
-      <Header right={d.date} />
-      <div className="mt-[120px] w-[200px] h-[200px] rounded-[56px] bg-story-pr-tile shadow-story-pr-glow flex items-center justify-center text-pr-text">
-        <Trophy size={112} aria-hidden="true" />
-      </div>
-      <span className="mt-[64px] text-[36px] font-semibold tracking-[.08em] text-pr-text">RECORDE PESSOAL</span>
-      <span className="mt-[16px] text-center text-[80px] leading-[88px] font-bold tracking-[-.02em]">{r.exerciseName}</span>
-      <div className="mt-[16px] flex items-baseline gap-[16px]">
-        <span className="font-display font-bold text-[360px] leading-[320px] tracking-[-.02em]">{r.load}</span>
-        <span className="font-display font-semibold text-[110px] text-fg">{d.unit}</span>
-      </div>
-      <span className="mt-[24px] py-[14px] px-[32px] rounded-full bg-story-pr-pill text-[38px] font-semibold text-pr-text">
-        {r.previousDate ? `${r.delta} desde ${r.previousDate}` : r.delta}
-      </span>
-      <div className="mt-[48px] self-stretch flex items-end justify-between gap-[24px]">
-        <div
-          className={cn(
-            "flex-1 min-w-0 py-[36px] px-[40px] rounded-[40px] bg-surface border-[2px] border-border shadow-story-e2 grid gap-[24px]",
-            r.previousLoad ? "grid-cols-2" : "grid-cols-1",
-          )}
-        >
-          {/* O app não guarda as repetições da marca anterior: ANTES mostra só a carga. */}
-          {r.previousLoad && (
-            <div className="flex flex-col gap-[8px]">
-              <span className="text-[28px] font-semibold tracking-[.08em] text-fg">ANTES</span>
-              <span className="font-display font-semibold text-[60px] leading-[60px] text-fg">{r.previousLoad}</span>
-            </div>
-          )}
-          <div className="flex flex-col gap-[8px]">
-            <span className="text-[28px] font-semibold tracking-[.08em] text-pr-text">AGORA</span>
-            <span className="font-display font-bold text-[60px] leading-[60px]">
-              {r.reps ? `${r.load} × ${r.reps}` : r.load}
-            </span>
-          </div>
-        </div>
-        <div className="flex-none">
-          <GufRat occasion="personalRecord" size={300} animated={false} label={null} />
-        </div>
-      </div>
-      <Signature tagline className="mt-[40px]" />
-    </Frame>
-  );
-}
-
 /* F05 · Volume da semana */
 export function StoryF05({ d }: StoryModelProps) {
   const change = d.week.changePct?.replace(/^[+\-−]/, "");
@@ -466,39 +417,6 @@ export function StoryF07({ d }: StoryModelProps) {
         </div>
       </div>
       <Signature className="mt-[48px]" />
-    </Frame>
-  );
-}
-
-/* F08 · Projeto */
-export function StoryF08({ d }: StoryModelProps) {
-  const p = d.project;
-  if (!p) return null;
-  const stats = [
-    { value: String(p.workouts), label: word(p.workouts, "TREINO", "TREINOS") },
-    { value: p.volume, label: `${d.unit.toUpperCase()} DE VOLUME` },
-    { value: String(p.weeks), label: word(p.weeks, "SEMANA", "SEMANAS") },
-  ];
-  return (
-    <Frame center>
-      <Header right={d.date} />
-      <div className="mt-[40px]">
-        <GufRat occasion="projectDone" size={380} animated={false} label={null} />
-      </div>
-      <div className="mt-[48px] self-stretch py-[64px] px-[56px] rounded-[48px] bg-accent text-accent-foreground flex flex-col gap-[16px]">
-        <span className="text-[34px] font-bold tracking-[.08em]">PROJETO</span>
-        <span className="font-display font-bold text-[112px] leading-[104px] tracking-[-.01em]">{p.name}</span>
-        <span className="text-[34px] font-semibold">{plural(p.weeks, "semana", "semanas")} de projeto</span>
-        <div className="mt-[24px] pt-[32px] border-t-[2px] border-story-accent-foreground grid grid-cols-[auto_1fr_auto] gap-[40px]">
-          {stats.map((s) => (
-            <div key={s.label} className="flex flex-col gap-[4px]">
-              <span className="font-display font-bold text-[72px] leading-[72px]">{s.value}</span>
-              <span className="text-[30px] font-bold tracking-[.08em]">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-      <Signature tagline className="mt-[40px]" />
     </Frame>
   );
 }

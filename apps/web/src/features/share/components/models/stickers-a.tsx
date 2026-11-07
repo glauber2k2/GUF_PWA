@@ -1,9 +1,9 @@
-// Stickers S01–S11 (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
+// Stickers S03–S11, sem o S09 (Claude Design · StoryArt "Stickers"): só a forma do adesivo, largura fixa do design e
 // altura automática. O StoryArt envolve com folga, tema e fundo transparente; os dados vêm de StoryData.
 import type { ReactNode } from "react";
 import { Check, Timer, Trophy } from "lucide-react";
 import { plural, type StoryData, type FigureMuscle } from "@guf/core";
-import { GufRat, Logo, MuscleIcon, StreakFlame } from "@/shared/components/ds";
+import { GufRat, Logo, MuscleIcon } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { MuscleFigure } from "@/shared/components/ds";
 import { STORY_DOMAIN, STORY_SIGNATURE_LEAD, type StoryModelProps } from "@/features/share/type";
@@ -47,11 +47,6 @@ export function StickerTagline() {
   );
 }
 
-/** "12 semanas seguidas" · "1 semana seguida" (a sequência do app é em semanas). */
-export function streakLabel(weeks: number): string {
-  return weeks === 1 ? "semana seguida" : "semanas seguidas";
-}
-
 /** Grupos mais treinados (maior nível primeiro), para os ícones de músculo. */
 export function topMuscles(d: StoryData, count: number): FigureMuscle[] {
   return (Object.entries(d.muscles) as Array<[FigureMuscle, 1 | 2 | 3]>)
@@ -68,44 +63,6 @@ function schemeWithLoad(e: StoryData["exercises"][number]): string {
 /* ---------------------------------------------------------------------
  * Modelos
  * --------------------------------------------------------------------- */
-
-/** S01 · Streak em pílula. */
-export function StoryS01({ d }: StoryModelProps) {
-  return (
-    <div className="flex h-[300px] w-[780px] items-center gap-[32px] rounded-full border-[3px] border-border-strong bg-surface pr-[64px] pl-[40px] text-fg">
-      <div className="flex size-[216px] flex-none items-center justify-center rounded-full bg-accent/16 text-accent-text">
-        <StreakFlame size={132} />
-      </div>
-      <div className="flex min-w-0 flex-col gap-[10px]">
-        <StickerLogo />
-        <div className="flex items-baseline gap-[14px]">
-          <span className="font-display text-[104px] leading-[96px] font-bold">{d.streak.current}</span>
-          <span className="text-[34px] font-bold">{streakLabel(d.streak.current)}</span>
-        </div>
-        <StickerSignature className="text-[24px]" />
-      </div>
-    </div>
-  );
-}
-
-/** S02 · Streak em selo redondo. */
-export function StoryS02({ d }: StoryModelProps) {
-  return (
-    <div className="flex size-[580px] flex-col items-center justify-center gap-[4px] rounded-full border-[6px] border-story-accent bg-surface text-center text-fg">
-      <StickerLogo />
-      <div className="mt-[12px] flex items-center gap-[8px] text-accent-text">
-        <StreakFlame size={96} />
-        <span className="font-display text-[180px] leading-[150px] font-bold text-fg">{d.streak.current}</span>
-      </div>
-      <span className="text-[34px] font-bold tracking-[.08em]">{streakLabel(d.streak.current).toUpperCase()}</span>
-      <span className="mt-[18px] text-[28px] leading-[30px] font-semibold text-fg">
-        {STORY_SIGNATURE_LEAD}
-        <br />
-        <span className="text-accent-text">{STORY_DOMAIN}</span>
-      </span>
-    </div>
-  );
-}
 
 /** S03 · Semana de treinos (domingo a sábado). */
 export function StoryS03({ d }: StoryModelProps) {
@@ -266,34 +223,6 @@ export function StoryS08({ d }: StoryModelProps) {
       </div>
       <StickerSignature />
     </StickerCard>
-  );
-}
-
-/** "+5 kg desde 12 set" (sem "desde" quando não há data da marca anterior). */
-function recordDelta(r: StoryData["records"][number]): string {
-  return r.previousDate ? `${r.delta} desde ${r.previousDate}` : r.delta;
-}
-
-/** S09 · Recorde dourado (primeiro recorde do treino). */
-export function StoryS09({ d }: StoryModelProps) {
-  const r = d.records[0];
-  if (!r) return null;
-  return (
-    <div className="flex w-[620px] flex-col items-center gap-[8px] rounded-[48px] border-[4px] border-story-pr bg-surface px-[40px] pt-[44px] pb-[40px] text-center text-fg shadow-sticker-pr">
-      <StickerLogo />
-      <div className="mt-[28px] flex size-[128px] items-center justify-center rounded-[36px] bg-pr/18 text-pr-text shadow-sticker-trophy">
-        <Trophy size={72} aria-hidden="true" />
-      </div>
-      <span className="mt-[20px] text-[32px] font-bold tracking-[.08em] text-pr-text">RECORDE PESSOAL</span>
-      <span className="text-[40px] font-bold">{r.exerciseName}</span>
-      <div className="flex items-baseline gap-[10px]">
-        <span className="font-display text-[160px] leading-[144px] font-bold">{r.load}</span>
-        <span className="font-display text-[56px] font-semibold text-fg">{d.unit}</span>
-      </div>
-      <span className="text-[34px] font-semibold text-pr-text">{recordDelta(r)}</span>
-      <StickerSignature className="mt-[20px]" />
-      <StickerTagline />
-    </div>
   );
 }
 

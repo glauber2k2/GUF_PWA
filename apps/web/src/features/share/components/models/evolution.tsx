@@ -1,46 +1,11 @@
 // Stories · Evolução (Claude Design · StoryArt). Arte fixa 1080 × 1920; os dados vêm de StoryData.
-import { GufRat, Logo } from "@/shared/components/ds";
+import { Logo } from "@/shared/components/ds";
 import { MuscleFigure } from "@/shared/components/ds";
 import { cn } from "@/shared/helpers/class-names";
 import { STORY_SIGNATURE, type StoryModelProps } from "@/features/share/type";
 
 /** Intensidade das barras pela posição (como no design: 2 cheias, 2 médias, o resto leve). */
 const SHARE_OPACITY = ["", "", "opacity-64", "opacity-64", "opacity-36"] as const;
-
-export function Story25({ d }: StoryModelProps) {
-  return (
-    <>
-      <div className="absolute left-[96px] right-[96px] top-[220px] flex justify-between items-center h-[48px]">
-        <Logo className="h-[88px]" />
-        <span className="text-[28px] text-fg">{d.date}</span>
-      </div>
-      <div className="absolute left-[96px] right-[96px] top-[320px] text-[64px] leading-[72px] font-bold tracking-[-.02em]">
-        {d.focus} em dia
-      </div>
-      <div className="absolute right-[72px] top-[480px]">
-        <MuscleFigure view="front" height={760} levels={d.muscles} />
-      </div>
-      <div className="absolute left-[40px] top-[760px]">
-        <GufRat occasion="goalReached" size={500} animated={false} label={null} />
-      </div>
-      <div className="absolute left-[96px] right-[96px] bottom-[260px] py-[36px] px-[48px] rounded-[40px] bg-surface border border-border grid grid-cols-3 gap-[16px]">
-        <div className="flex flex-col gap-[6px]">
-          <span className="font-display font-semibold text-[60px] leading-[60px]">{d.duration}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">TEMPO</span>
-        </div>
-        <div className="flex flex-col gap-[6px]">
-          <span className="font-display font-semibold text-[60px] leading-[60px] text-accent-text">{d.volume}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">{d.unit.toUpperCase()}</span>
-        </div>
-        <div className="flex flex-col gap-[6px]">
-          <span className="font-display font-semibold text-[60px] leading-[60px]">{d.sets}</span>
-          <span className="text-[20px] font-semibold tracking-[.08em] text-fg">SÉRIES</span>
-        </div>
-      </div>
-      <span className="absolute left-0 right-0 bottom-[204px] text-center text-[22px] text-fg">{STORY_SIGNATURE}</span>
-    </>
-  );
-}
 
 export function Story26({ d }: StoryModelProps) {
   return (
