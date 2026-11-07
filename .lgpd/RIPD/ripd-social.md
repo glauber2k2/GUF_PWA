@@ -4,7 +4,7 @@
 **Slug**: ripd-social
 **Controlador**: não constituído — desenvolvedor como pessoa natural durante o beta (G22)
 **Encarregado**: pendente designação (G2)
-**Equipe**: desenvolvedor (Glauber) + assistente técnico
+**Equipe**: desenvolvedor (o controlador) + assistente técnico
 **Versão**: v0.11 (rascunho técnico, **sem revisão jurídica** ⚖) | **Data**: 2026-11-08
 
 > **v0.11**: o perfil passa a mostrar o **projeto ativo** do titular (Claude Design "Perfil - Projeto Ativo" · 2c; função `get_member_active_project`, migration `20261108130000_member_active_project`): nome e descrição do projeto e as rotinas com dias da semana, tempo médio, exercícios, séries e repetições. Fica de fora de propósito: cargas planejadas, observações dos exercícios da rotina e ids. Mesmo público do histórico (`can_view_member_history`: titular, seguidor aceito ou qualquer conta logada se o perfil estiver aberto) e a mesma opção: "Ocultar histórico de treinos" virou **"Visibilidade de treino"** (`social_profiles.history_hidden`, sem coluna nova), que mostra ou esconde histórico e projeto ativo juntos. É planejamento, não registro de treino, mas da mesma natureza do que o histórico já mostra (exercícios e séries). Termos 1.5 (novo aceite, `requires_reaccept = true`) e Política 1.7 descrevem a regra (migration `20261108130100`, aplicar depois do app no ar). Copiar rotina ou projeto de outra pessoa (também no protótipo) **não** foi implementado. R001 revisto.
@@ -213,7 +213,7 @@ flowchart LR
 
 **Aprovado por**:
 - Encarregado: pendente
-- Patrocinador do produto: Glauber — pendente de confirmação
+- Patrocinador do produto: o controlador — pendente de confirmação
 
 ## 13. Plano de revisão
 

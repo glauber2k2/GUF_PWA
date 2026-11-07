@@ -5,7 +5,7 @@
 - Finalidade: provedor de identidade (OAuth) quando o titular escolhe "Entrar com Google"
 - Dados: o Google **envia** ao guf nome, e-mail, foto e identificador da conta (escopo padrão). O guf não envia dados de treino ao Google
 - Tier: — (não é operador)
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Última revisão: 2026-10-16 | Próxima revisão: anual
 
 ## Papel na LGPD

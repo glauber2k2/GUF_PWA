@@ -515,5 +515,5 @@
 | Retenção | Ver `retention.md` (pagamentos, reembolsos e registro dos pedidos 5 anos sem identificação após a exclusão; textos do suporte 180 dias; eventos 90 dias) |
 | Segurança | Checkout e portal hospedados pelo Stripe; chave restrita em secrets; webhook assinado e idempotente; painel com papel Admin + aal2 + motivo + auditoria |
 | Alto risco? | Não (Res. 2/2022 art. 4º); o automático só concede a devolução da desistência; qualquer recusa é humana. Suporte é um pedido e uma resposta, não chat |
-| Owner | Glauber |
+| Owner | Controlador |
 | Plano | [`docs/stripe-payments-plan.md`](../docs/stripe-payments-plan.md) |

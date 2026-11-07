@@ -54,7 +54,7 @@ interface MockCompetitor {
 
 function competitors(): MockCompetitor[] {
   const all: MockCompetitor[] = [
-    { userId: "me", handle: "glauber.treina", name: "Glauber Souza", rate: 4.1, volume: 8800, recordChance: 0.22, streak: 7 },
+    { userId: "me", handle: "bruno.treina", name: "Bruno Souza", rate: 4.1, volume: 8800, recordChance: 0.22, streak: 7 },
     { userId: "lucas", handle: "lucas.prado", name: "Lucas Prado", rate: 5, volume: 9200, recordChance: 0.2, streak: 12 },
     { userId: "bia", handle: "bia.moreira", name: "Bia Moreira", rate: 4.6, volume: 8300, recordChance: 0.24, streak: 9 },
     { userId: "rafa", handle: "rafa.lima", name: "Rafa Lima", rate: 4, volume: 8400, recordChance: 0.2, streak: 4 },

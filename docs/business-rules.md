@@ -4,7 +4,7 @@
 
 Este documento tem como finalidade listar as regras de negócio em vigor e onde cada uma está implementada.
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 10/10/2026 |
 

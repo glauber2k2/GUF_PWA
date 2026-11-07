@@ -2,7 +2,7 @@
 
 **Versão**: v1 · **Data**: 2026-10-17 · **Modo**: preparatório (nenhum incidente em curso)
 **Normas**: LGPD Art. 48 · Resolução CD/ANPD nº 15/2024 (RCIS) · Resolução CD/ANPD nº 2/2022 (ATPP)
-**Responsável hoje**: Glauber (desenvolvedor e controlador provisório, pessoa natural — G22). Encarregado ainda não designado (G2): até lá, o controlador assume as funções deste runbook.
+**Responsável hoje**: o controlador (desenvolvedor e controlador provisório, pessoa natural — G22). Encarregado ainda não designado (G2): até lá, o controlador assume as funções deste runbook.
 
 > Procedimento técnico preparado com antecedência. **Não é parecer jurídico.** Em incidente real, acione um advogado de proteção de dados já na triagem (T+4h a T+24h).
 
@@ -127,7 +127,7 @@ Comunicar ANPD **e** titulares só se **A e B**:
 
 | Quem | Como | Quando |
 |---|---|---|
-| Controlador / responsável | Glauber — [E-MAIL DE CONTATO DO CONTROLADOR] | Sempre |
+| Controlador / responsável | Controlador — suporte@gufapp.com.br | Sempre |
 | Encarregado | A designar antes do lançamento (G2) | — |
 | Advogado de proteção de dados | [A DEFINIR] | Triagem S1/S2 |
 | Supabase (suporte) | Painel › Support (plano Free: suporte limitado) | Incidente no operador ou ajuda técnica |

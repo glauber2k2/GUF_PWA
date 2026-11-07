@@ -1,10 +1,10 @@
 # LGPD e consumidor — riscos que sobram, lançamento e venda do Pro
 
-| Feito por | Glauber (com Claude Code) |
+| Feito por | Equipe guf (com Claude Code) |
 | --- | --- |
 | Data | 29/10/2026 (venda do Pro decidida em 30/10/2026) |
 | Fase | Antes do lançamento público; Pro ainda não à venda |
-| Controlador | Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022), sem encarregado (art. 11 da mesma resolução), canal `devglaubermonteiro@gmail.com` |
+| Controlador | Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022), sem encarregado (art. 11 da mesma resolução), canal `suporte@gufapp.com.br` |
 
 > Documento técnico, **não é parecer jurídico**. Foi feito com o que existe hoje: sem advogado, sem contador e sem orçamento. Ele diz o que o sistema e os documentos já fazem, o que **ainda pode gerar multa ou processo** e o que reduz esse risco sem custo. O resumo geral da LGPD no projeto fica em [`lgpd.md`](lgpd.md) e a auditoria completa em [`.lgpd/`](../.lgpd/STATUS.md).
 

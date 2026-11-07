@@ -4,11 +4,11 @@
 
 Este documento tem como finalidade resumir para o time o que a LGPD exige do guf, o que já está implementado e o que falta.
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 17/10/2026 |
 
-**Atualizado em**: 2026-10-29 · **Fase**: beta gratuito · **Controlador**: Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022) · **Encarregado**: não designado (dispensa do art. 11 da Res. 2/2022; canal `devglaubermonteiro@gmail.com`; ver [`.lgpd/encarregado.md`](../.lgpd/encarregado.md))
+**Atualizado em**: 2026-10-29 · **Fase**: beta gratuito · **Controlador**: Glauber Monteiro, pessoa física, agente de tratamento de pequeno porte (Res. CD/ANPD nº 2/2022) · **Encarregado**: não designado (dispensa do art. 11 da Res. 2/2022; canal `suporte@gufapp.com.br`; ver [`.lgpd/encarregado.md`](../.lgpd/encarregado.md))
 
 Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evidências e os testes ficam em [`.lgpd/`](../.lgpd/STATUS.md) (auditoria completa) e as regras de implementação no [`CLAUDE.md`](../CLAUDE.md).
 
@@ -45,7 +45,7 @@ Este é o resumo para quem trabalha no projeto. Os detalhes de cada tema, as evi
 | Correção | Perfil e telas de treino/rotina editáveis | Perfil |
 | Revogação do consentimento | "Revogar consentimento" apaga todas as medidas na mesma operação | Perfil › Privacidade; `revoke_health_consent()` |
 | Eliminação | "Excluir minha conta": apaga tudo em cascata e a foto do Storage | Edge Function `delete-account` |
-| Demais pedidos | "Outros pedidos sobre seus dados" abre o e-mail do canal (devglaubermonteiro@gmail.com) com o assunto pronto; resposta em até 15 dias | Perfil › Privacidade; fluxo em `.lgpd/dsar/workflow.md` |
+| Demais pedidos | "Outros pedidos sobre seus dados" abre o e-mail do canal (suporte@gufapp.com.br) com o assunto pronto; resposta em até 15 dias | Perfil › Privacidade; fluxo em `.lgpd/dsar/workflow.md` |
 | Revisão de decisão automatizada | Finalização automática do treino: desligada por padrão, regra explicada, revisão por e-mail | Perfil; política |
 
 ### 1.4 Segurança

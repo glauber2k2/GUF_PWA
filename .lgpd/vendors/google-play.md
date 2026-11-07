@@ -9,7 +9,7 @@
 - Sensíveis (Art. 11)? Não
 - Papel: **controlador independente** na relação de pagamento com o comprador (a Play é a vendedora de registro); **operador** nas consultas que o guf faz pela API ⚖
 - Tier: **Alto** (dinheiro), sem dados do app
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Situação: **não contratado** (falta a conta de desenvolvedor e os produtos). Configuração em [`docs/play-store-twa.md`](../../docs/play-store-twa.md) § 5
 - Última revisão: 2026-11-07 | Próxima: ao abrir a conta de desenvolvedor
 

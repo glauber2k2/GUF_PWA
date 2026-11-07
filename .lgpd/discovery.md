@@ -59,4 +59,4 @@
 
 ## 10. Porte
 - Provável Agente de Tratamento de Pequeno Porte (Res. CD/ANPD nº 2/2022) — **confirmar** natureza jurídica e faturamento.
-- **Atualização 2026-10-16**: não há empresa constituída; o app está em beta, desenvolvido só por Glauber. Supabase Free em `us-west-2`, SMTP padrão, Vercel Hobby, nenhum DPA aceito.
+- **Atualização 2026-10-16**: não há empresa constituída; o app está em beta, desenvolvido só pelo controlador (pessoa física). Supabase Free em `us-west-2`, SMTP padrão, Vercel Hobby, nenhum DPA aceito.

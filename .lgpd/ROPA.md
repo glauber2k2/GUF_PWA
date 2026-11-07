@@ -14,8 +14,8 @@
 
 | Papel | Quem | Contato |
 |---|---|---|
-| **Controlador** | [NOME COMPLETO DO DESENVOLVEDOR], pessoa natural, responsável pelo beta do guf (sem empresa constituída — G22) | devglaubermonteiro@gmail.com |
-| **Encarregado** | Não designado — dispensa de agente de pequeno porte (Res. 2/2022, Art. 11) a confirmar ⚖; designação prevista para antes do lançamento | Canal de comunicação com o titular: devglaubermonteiro@gmail.com |
+| **Controlador** | [NOME COMPLETO DO DESENVOLVEDOR], pessoa natural, responsável pelo beta do guf (sem empresa constituída — G22) | suporte@gufapp.com.br |
+| **Encarregado** | Não designado — dispensa de agente de pequeno porte (Res. 2/2022, Art. 11) a confirmar ⚖; designação prevista para antes do lançamento | Canal de comunicação com o titular: suporte@gufapp.com.br |
 | **Operador** | Supabase, Inc. — banco de dados, autenticação, e-mails de autenticação, funções e jobs | Projeto `yscoujsisrytytqsxkya`, região São Paulo (`sa-east-1`) |
 | **Operador** | Vercel Inc. — hospedagem do site estático (testes) | EUA / rede global |
 | **Terceiro (controlador independente)** | Google LLC — login com Google, por escolha do titular | EUA |

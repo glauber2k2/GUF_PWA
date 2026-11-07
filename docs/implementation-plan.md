@@ -4,7 +4,7 @@
 
 Este documento tem como finalidade registrar o que foi entregue, as próximas etapas e as pendências para o lançamento.
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 10/10/2026 |
 

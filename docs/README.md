@@ -4,7 +4,7 @@
 
 Este documento tem como finalidade indexar a documentação do projeto e explicar como mantê-la.
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 10/10/2026 |
 

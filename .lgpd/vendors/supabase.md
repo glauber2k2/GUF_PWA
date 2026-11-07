@@ -6,7 +6,7 @@
 - Dados compartilhados: **todos** — conta, perfil, treinos, consentimentos, registros de acesso e, quando o módulo existir, **medidas corporais** | Sensíveis (Art. 11)? **Sim** (A010)
 - Tier: **Crítico**
 - Plano: **Free** (desenvolvimento)
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Última revisão: 2026-10-16 | Próxima revisão: 2027-01-16 (trimestral)
 
 ## 1. Contrato e base legal

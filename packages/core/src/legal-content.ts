@@ -20,7 +20,7 @@ export const CONTROLLER_DESCRIPTION = `${CONTROLLER_NAME}, pessoa física, desen
  * porte sem encarregado mantém um canal). Também é o e-mail de suporte. Mudar o e-mail muda o hash
  * dos documentos: nova versão.
  */
-export const PRIVACY_CONTACT_EMAIL = "devglaubermonteiro@gmail.com";
+export const PRIVACY_CONTACT_EMAIL = "suporte@gufapp.com.br";
 /** Prazo de resposta a pedidos do titular (LGPD, art. 19, II). */
 export const DSAR_RESPONSE_DAYS = 15;
 
@@ -297,6 +297,11 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    // A 1.5 nunca valeu sozinha (publicada junto com esta): o /aceite mostra só a versão atual, então repete a mudança dela.
+    "1.6": [
+      "Novo e-mail de contato e para pedidos sobre seus dados: suporte@gufapp.com.br.",
+      "Seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) passa a aparecer no seu perfil para quem já pode ver seus treinos. A opção “Visibilidade de treino”, em Configurações › Privacidade, mostra ou esconde os dois juntos.",
+    ],
     "1.5": [
       "Seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) passa a aparecer no seu perfil para quem já pode ver seus treinos. A opção “Visibilidade de treino”, em Configurações › Privacidade, mostra ou esconde os dois juntos.",
     ],
@@ -629,6 +634,11 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    // A 1.7 nunca valeu sozinha (publicada junto com esta): o /aceite mostra só a versão atual, então repete a mudança dela.
+    "1.8": [
+      "Novo e-mail de contato e para pedidos sobre seus dados: suporte@gufapp.com.br.",
+      "Perfil: o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) aparece para quem já pode ver seus treinos. A opção “Visibilidade de treino” esconde o histórico e o projeto ativo juntos.",
+    ],
     "1.7": [
       "Perfil: o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) aparece para quem já pode ver seus treinos. A opção “Visibilidade de treino” esconde o histórico e o projeto ativo juntos.",
     ],
@@ -942,6 +952,7 @@ const SUBSCRIPTION: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.5": ["Novo e-mail para cancelamento, devolução e problemas com a cobrança: suporte@gufapp.com.br."],
     "1.4": [
       "Assinatura pelo app Android: o Pro é comprado pelo Google Play; cancelar continua no guf, com a regra dos 7 dias.",
       "Forma de pagamento, recibos e reativação da assinatura do Google Play ficam na página de assinaturas da Play.",

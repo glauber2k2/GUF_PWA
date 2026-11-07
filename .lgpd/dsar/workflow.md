@@ -2,7 +2,7 @@
 
 **Versão**: v1 · **Data**: 2026-10-17 · **Etapa**: F5 (`lgpd-dsar`)
 **Resolve**: G10 (canal + prazo) e G12 (exportação completa)
-**Canal**: devglaubermonteiro@gmail.com (provisório do beta; `PRIVACY_CONTACT_EMAIL` em `packages/core/src/legal-content.ts`)
+**Canal**: suporte@gufapp.com.br (provisório do beta; `PRIVACY_CONTACT_EMAIL` em `packages/core/src/legal-content.ts`)
 **Prazo**: **15 dias corridos** para a resposta completa (LGPD art. 19, II). Mesmo podendo ser agente de pequeno porte, **o guf adota 15 dias** (não usa o prazo em dobro).
 
 > Procedimento técnico. **Não é parecer jurídico** ⚖.

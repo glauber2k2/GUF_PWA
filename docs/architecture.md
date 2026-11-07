@@ -4,7 +4,7 @@
 
 Este documento tem como finalidade explicar como o código do guf é organizado, em camadas e pastas, e por quê.
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 18/10/2026 |
 

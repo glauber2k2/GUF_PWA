@@ -4,7 +4,7 @@
 
 Este documento descreve os avisos no celular (o que avisa, como funciona, custo, situação e configuração).
 
-| Feito por | Glauber |
+| Feito por | Equipe guf |
 | --- | --- |
 | Data de Criação | 19/10/2026 |
 

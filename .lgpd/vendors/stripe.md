@@ -8,7 +8,7 @@
 - Sensíveis (Art. 11)? Não
 - Papel: **operador** no processamento do pagamento; **controlador independente** para prevenção a fraude e obrigações legais próprias (como o Stripe descreve na política dele) ⚖
 - Tier: **Alto** (dinheiro e identificação do comprador), mas sem dados do app
-- Owner interno: Glauber
+- Owner interno: o controlador
 - Situação: **não contratado**. Plano em [`docs/stripe-payments-plan.md`](../../docs/stripe-payments-plan.md)
 - Última revisão: 2026-10-30 | Próxima: ao abrir a conta
 

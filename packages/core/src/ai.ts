@@ -67,7 +67,7 @@ export function aiThinkingPhrases(toolName: string | null): string[] {
   return (toolName && TOOL_PHRASES[toolName]) || GENERAL_PHRASES;
 }
 
-/** "Oi, Glauber" (primeiro nome) ou "Oi" sem nome. */
+/** "Oi, Bruno" (primeiro nome) ou "Oi" sem nome. */
 export function aiGreeting(name: string | null): string {
   const first = name?.trim().split(/\s+/)[0];
   return first ? `Oi, ${first}` : "Oi";

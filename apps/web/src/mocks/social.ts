@@ -81,7 +81,7 @@ function person(userId: string, handle: string, name: string, extra: Partial<Moc
 }
 
 function seed(scenario: SocialMockScenario): MockState {
-  const me = person(MOCK_ME, "glauber.treina", "Glauber Souza", {
+  const me = person(MOCK_ME, "bruno.treina", "Bruno Souza", {
     workouts: 186,
     streak: 12,
     bestStreak: 18,

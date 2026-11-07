@@ -1,6 +1,6 @@
 # Pagamento do Pro pelo Stripe — plano de implementação
 
-| Feito por | Glauber (com Claude Code) |
+| Feito por | Equipe guf (com Claude Code) |
 | --- | --- |
 | Data | 30/10/2026 |
 | Situação | **Fases 1 a 3 implementadas** (branch `feat/assinatura-stripe`): contratar, renovar, cancelar com devolução em 7 dias, portal, reembolso e contestação pelo webhook, exclusão da conta cancelando no Stripe. **A venda fica desligada até existir um preço em `plan_prices`** (seção 11). Faltam o suporte (fase 4), o painel (fase 5), os textos e a exportação (fase 6) |

@@ -65,7 +65,7 @@ function nameWords(name: string): string[] {
 }
 
 /**
- * Sugestões de @ a partir do nome (cadastro em passos): "glauber.monteiro", "glaubermonteiro"…; sem nome,
+ * Sugestões de @ a partir do nome (cadastro em passos): "bruno.souza", "brunosouza"…; sem nome,
  * variações do @ em uso. Só formatos válidos; a disponibilidade é conferida quando a pessoa escolhe.
  * @param name nome digitado
  * @param takenHandle @ que já está em uso (fica de fora e serve de base sem nome)
