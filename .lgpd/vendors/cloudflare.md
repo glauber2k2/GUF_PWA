@@ -2,7 +2,7 @@
 
 - Razão social / registro: Cloudflare, Inc. (EUA) — **confirmar no DPA**
 - País(es) de tratamento: EUA e rede global de borda
-- Finalidade: (1) hospedar o site estático do app (`treino.gufapp.com.br`, Worker `guf-pwa`), do painel (`admin.gufapp.com.br`, Worker `guf-admin`) e a página `gufapp.com.br`; (2) DNS do domínio; (3) Email Routing: encaminhar as mensagens enviadas para `contato@` e `suporte@gufapp.com.br` (inclusive pedidos de titular) para a caixa do Gmail
+- Finalidade: (1) hospedar o site estático do app (`treino.gufapp.com.br`, Worker `treino-guf`), do painel (`admin.gufapp.com.br`, Worker `admin-guf`) e a página `gufapp.com.br`; (2) DNS do domínio; (3) Email Routing: encaminhar as mensagens enviadas para `contato@` e `suporte@gufapp.com.br` (inclusive pedidos de titular) para a caixa do Gmail
 - Dados compartilhados: IP, user-agent, URL acessada e data/hora (logs de acesso da hospedagem); no Email Routing, o remetente, o destinatário e o conteúdo das mensagens em trânsito. **Nenhum dado do banco passa pela Cloudflare**: o app fala direto com o Supabase pelo navegador | Sensíveis (Art. 11)? Não pela hospedagem; uma mensagem ao suporte pode conter o que o titular escrever
 - Tier: **Médio** (dados de acesso + mensagens ao suporte em trânsito)
 - Plano: Free (Workers com assets estáticos; uso comercial permitido)

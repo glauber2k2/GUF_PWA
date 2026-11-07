@@ -59,7 +59,7 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 | Edge Function `push-alerts` | Publicada em 2026-10-19 (`--no-verify-jwt`) |
 | Segredos do Vault (`project_url`, `push_alerts_secret`) | Criados em 2026-10-19 pela CLI (`supabase db query --linked`) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` | Feito em 2026-10-19 |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no build de produção | Cadastrada na Vercel em 2026-10-20; hoje nas variáveis de build do Worker `guf-pwa` na Cloudflare (conferida no site publicado em 2026-11-07) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no build de produção | Cadastrada na Vercel em 2026-10-20; hoje nas variáveis de build do Worker `treino-guf` na Cloudflare (conferida no site publicado em 2026-11-07) |
 | Teste com um aviso real (dois celulares, contas que se seguem) | **Feito em 2026-10-20**: inscrição no Chrome/Android e aviso de pedido para seguir recebido, depois que o `/sw.js` passou a ser publicado (`fix/service-worker-producao`) |
 
 **Conferido em 2026-10-19:** sem o segredo, a função responde 401; com o segredo e um usuário inexistente, responde `{"sent":0}`; `post_push_alert` chamado no banco chega à função pelo pg_net (status 200 em `net._http_response`). A leitura das chaves VAPID e o envio só acontecem quando há um aviso de verdade, por isso ainda falta o teste com celulares.
@@ -95,7 +95,7 @@ Histórico: até 2026-10-19 a falha na inscrição era engolida (o botão voltav
 ## Configuração (uma vez por ambiente)
 
 1. Chaves VAPID: `node supabase/scripts/generate-vapid-keys.mjs > vapid.json` (o JSON tem a chave privada: está no `.gitignore`). A linha `NEXT_PUBLIC_VAPID_PUBLIC_KEY=…` sai no terminal.
-2. App: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` e nas variáveis de build do Worker `guf-pwa` (Cloudflare › Settings › Builds).
+2. App: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` e nas variáveis de build do Worker `treino-guf` (Cloudflare › Settings › Builds).
 3. Secrets da função, por arquivo (o valor não aparece na linha de comando nem no histórico do terminal):
    ```
    # push-secrets.env (fora do repositório; apagar depois)
