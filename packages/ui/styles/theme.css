@@ -211,6 +211,8 @@
   /* GUF AI (ver base.css) */
   --animate-guf-ai-twinkle: guf-ai-twinkle 5s var(--ease-standard) 1.4s infinite;
   --animate-guf-ai-halo: guf-ai-halo 2.4s var(--ease-standard) 1s 3 both;
+  --animate-guf-field-shake: guf-field-shake 0.4s var(--ease-standard);
+  --animate-guf-success-halo: guf-success-halo 1.6s var(--ease-standard) 0.5s infinite;
   --animate-guf-ai-caret: guf-ai-caret 0.9s linear infinite;
   --animate-guf-ai-float: guf-ai-float 3.6s var(--ease-standard) infinite;
   --animate-guf-ai-hint: guf-ai-hint 0.3s var(--ease-enter) both;

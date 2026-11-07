@@ -1,4 +1,4 @@
-import { createGufClient, type GufClient } from "@guf/api";
+import { createGufClient, createPasswordRecoveryClient, type GufClient } from "@guf/api";
 import { reportAccountSuspension } from "@/store/global/account-suspension.store";
 
 let client: GufClient | null = null;
@@ -15,4 +15,15 @@ export function getSupabaseClient(): GufClient {
     onAccountSuspended: reportAccountSuspension,
   });
   return client;
+}
+
+let recoveryClient: GufClient | null = null;
+
+/** Cliente só para pedir o link de "Esqueci minha senha" (sem PKCE: o link abre em qualquer aparelho). */
+export function getPasswordRecoveryClient(): GufClient {
+  recoveryClient ??= createPasswordRecoveryClient({
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  });
+  return recoveryClient;
 }

@@ -22,6 +22,8 @@ export type AuthErrorCode =
   | "account_suspended"
   | "recovery_link_invalid"
   | "same_password"
+  | "current_password_invalid"
+  | "password_login_unavailable"
   | "documents_unavailable"
   | "documents_outdated"
   | "oauth_cancelled"
@@ -46,8 +48,10 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   email_already_registered: "Este e-mail já tem conta. Entre com ele ou use “Esqueci minha senha”.",
   weak_password: "Senha fraca. Use 8 ou mais caracteres, com número e símbolo.",
   rate_limited: "Muitas tentativas seguidas. Aguarde um minuto e tente de novo.",
-  recovery_link_invalid: "Este link para criar a senha venceu ou já foi usado. Peça um novo ao suporte do guf.",
+  recovery_link_invalid: "Este link para criar a senha venceu ou já foi usado. Peça um novo em “Esqueci minha senha”.",
   same_password: "A senha nova precisa ser diferente da anterior.",
+  current_password_invalid: "Senha atual incorreta. Confira e tente de novo.",
+  password_login_unavailable: "Sua conta entra pelo Google e não tem senha. Continue entrando com o Google.",
   account_suspended: `Sua conta está suspensa pela equipe do guf. Para saber o motivo ou contestar, escreva para ${PRIVACY_CONTACT_EMAIL}.`,
   documents_unavailable: "Não foi possível carregar os Termos de Uso e a Política de Privacidade. Tente de novo em instantes.",
   documents_outdated: "Os termos foram atualizados. Confira a nova versão e aceite de novo.",
@@ -122,6 +126,33 @@ export type SetRecoverySession = (client: GufClient, hash: string) => Promise<Au
 /** Grava a senha nova da sessão aberta pelo link. */
 export type UpdatePassword = (client: GufClient, password: string) => Promise<AuthResult<null>>;
 
+export interface RequestPasswordRecoveryInput {
+  email: string;
+  /** Página que cria a senha nova (/redefinir-senha); precisa estar nas Redirect URLs do Supabase. */
+  redirectTo: string;
+}
+
+/**
+ * Pede o e-mail com o link para criar uma senha nova. Use o cliente de
+ * `createPasswordRecoveryClient` (sem PKCE): o link abre em qualquer aparelho. A resposta é a
+ * mesma exista a conta ou não (não revela quem tem conta); só falha por limite ou rede.
+ */
+export type RequestPasswordRecovery = (client: GufClient, input: RequestPasswordRecoveryInput) => Promise<AuthResult<null>>;
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+  /** Encerrar as sessões dos outros aparelhos (esta continua). */
+  signOutOthers: boolean;
+}
+
+/**
+ * Troca a senha de quem está logado. Confere a senha atual pelo login do Supabase (com limite de
+ * tentativas): sem ela, quem pegasse o aparelho desbloqueado tomaria a conta.
+ * Erros: current_password_invalid, password_login_unavailable (conta só com Google), same_password.
+ */
+export type ChangePassword = (client: GufClient, input: ChangePasswordInput) => Promise<AuthResult<null>>;
+
 export interface AuthApi {
   signInWithEmail: SignInWithEmail;
   signUpWithEmail: SignUpWithEmail;
@@ -129,6 +160,8 @@ export interface AuthApi {
   signOut: SignOut;
   setRecoverySession: SetRecoverySession;
   updatePassword: UpdatePassword;
+  requestPasswordRecovery: RequestPasswordRecovery;
+  changePassword: ChangePassword;
 }
 
 /* =====================================================================
@@ -318,5 +351,48 @@ export const updatePassword: UpdatePassword = async (client, password) => {
   }
 };
 
+export const requestPasswordRecovery: RequestPasswordRecovery = async (client, { email, redirectTo }) => {
+  try {
+    const { error } = await client.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+    return error ? { data: null, error: toAuthError(error) } : { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toAuthError(e) };
+  }
+};
+
+/** A conta tem login por e-mail e senha (quem entra só com o Google não tem senha para trocar). */
+export function hasPasswordLogin(user: { app_metadata?: { providers?: unknown } } | null | undefined): boolean {
+  const providers = user?.app_metadata?.providers;
+  return Array.isArray(providers) && providers.includes("email");
+}
+
+export const changePassword: ChangePassword = async (client, { currentPassword, newPassword, signOutOthers }) => {
+  try {
+    const { data: session } = await client.auth.getSession();
+    const user = session.session?.user;
+    if (!user?.email || !hasPasswordLogin(user)) return { data: null, error: authError("password_login_unavailable") };
+    const check = await client.auth.signInWithPassword({ email: user.email, password: currentPassword });
+    if (check.error) {
+      const mapped = toAuthError(check.error);
+      return { data: null, error: mapped.code === "invalid_credentials" ? authError("current_password_invalid") : mapped };
+    }
+    const { error } = await client.auth.updateUser({ password: newPassword });
+    if (error) return { data: null, error: toAuthError(error) };
+    if (signOutOthers) await signOutOtherSessions(client);
+    return { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: toAuthError(e) };
+  }
+};
+
 /** Garante em tempo de compilação que a implementação segue o contrato. */
-export const authApi = { signInWithEmail, signUpWithEmail, signInWithGoogle, signOut, setRecoverySession, updatePassword } satisfies AuthApi;
+export const authApi = {
+  signInWithEmail,
+  signUpWithEmail,
+  signInWithGoogle,
+  signOut,
+  setRecoverySession,
+  updatePassword,
+  requestPasswordRecovery,
+  changePassword,
+} satisfies AuthApi;

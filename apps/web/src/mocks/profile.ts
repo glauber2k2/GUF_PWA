@@ -30,6 +30,7 @@ function seedProfile(): Profile {
     trainingGoals: ["hypertrophy", "strength"],
     experienceLevel: "intermediate",
     hasUploadedPhoto: false,
+    hasPasswordLogin: true,
   };
 }
 

@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { meetsPasswordRequirements, PASSWORD_MIN_LENGTH } from "@guf/core";
 
-/** Mínimo exigido no cadastro (mais rígido que o mínimo do Supabase, que é 6). */
-export const PASSWORD_MIN_LENGTH = 8;
+/** Mínimo exigido no cadastro (mais rígido que o mínimo do Supabase, que é 6); a regra mora no core. */
+export { PASSWORD_MIN_LENGTH };
 
 /** Até 100 caracteres: o gatilho de cadastro grava `name` em profiles com left(..., 100). */
 export const NAME_MAX_LENGTH = 100;
@@ -58,11 +59,29 @@ export const signUpSchema = z.object({
   acceptsTerms: z.boolean().refine((v) => v, "Aceite os Termos de Uso e a Política de Privacidade para continuar."),
 });
 
+/** Senha nova ao redefinir ou alterar: todos os requisitos (PASSWORD_REQUIREMENTS no core). */
+export const strongPasswordSchema = passwordSchema.refine(meetsPasswordRequirements, {
+  message: "Use maiúscula e minúscula, um número e um símbolo na senha.",
+});
+
+const CONFIRM_MESSAGE = "As senhas não coincidem. Confira letra por letra.";
+
 /** Redefinir a senha pelo link do e-mail: digitada duas vezes. */
 export const newPasswordSchema = z
-  .object({ password: passwordSchema, confirm: z.string() })
-  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: "As senhas não conferem. Digite a mesma senha nos dois campos." });
+  .object({ password: strongPasswordSchema, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: CONFIRM_MESSAGE });
+
+/** Alterar a senha logado: a atual, a nova (diferente da atual) e a confirmação. */
+export const changePasswordSchema = z
+  .object({ current: z.string().min(1, "Informe a senha atual."), password: strongPasswordSchema, confirm: z.string() })
+  .refine((v) => v.password === v.confirm, { path: ["confirm"], message: CONFIRM_MESSAGE })
+  .refine((v) => v.password !== v.current, { path: ["password"], message: "A nova senha precisa ser diferente da atual." });
+
+/** Pedir o link para criar uma senha nova. */
+export const passwordRecoveryRequestSchema = z.object({ email: emailSchema });
 
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type PasswordRecoveryRequestInput = z.infer<typeof passwordRecoveryRequestSchema>;

@@ -5,3 +5,4 @@ export const DOCUMENTS_SETTINGS_PATH = "/configuracoes/documentos";
 
 /** Âncora antiga da seção de privacidade (links de documentos legais, apps instalados): vira a subpágina. */
 export const LEGACY_PRIVACY_ANCHOR = "#pf-privacy";
+export const PASSWORD_SETTINGS_PATH = "/configuracoes/senha";

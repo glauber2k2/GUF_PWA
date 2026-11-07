@@ -26,7 +26,7 @@ interface SettingsScreenProps {
 
 /**
  * Configurações (protótipo "Configurações"; abre pelo menu do Perfil): dados da conta, plano, instalar o
- * app, preferências, as subpáginas Privacidade e Documentos, sobre e sair.
+ * app, preferências, as subpáginas Alterar senha, Privacidade e Documentos, sobre e sair.
  * Alterações só com internet; instalar, tema e sair funcionam sem conexão.
  */
 export function SettingsScreen({ plan, editProfileHref }: SettingsScreenProps) {
@@ -77,7 +77,7 @@ export function SettingsScreen({ plan, editProfileHref }: SettingsScreenProps) {
             {plan}
             <InstallCard platform={platform} />
             <PreferencesSection profile={profile.data} canEdit={canEdit} platform={platform} />
-            <SettingsNavSection />
+            <SettingsNavSection hasPasswordLogin={profile.data.hasPasswordLogin} />
             <AboutSection />
             <ProfileSignOut forcePending={dev.forcePending} />
           </>

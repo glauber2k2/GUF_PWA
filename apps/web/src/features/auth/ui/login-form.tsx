@@ -12,6 +12,7 @@ import { getSupabaseClient } from "@/shared/libs/supabase";
 import { useAuth } from "@/features/auth/providers/auth-provider";
 import { AuthFooter, AuthLink, AuthScreen } from "@/features/auth/components/auth-screen";
 import { useGoogleSignIn } from "@/features/auth/hooks/use-google-sign-in";
+import { PASSWORD_RECOVERY_PATH } from "@/features/auth/helpers/paths";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -105,7 +106,7 @@ export function LoginForm() {
             {...register("password")}
           />
           <div className="flex justify-end">
-            <AuthLink href="/recuperar-senha" prefetch={false} className="flex min-h-11 items-center text-sm font-medium">
+            <AuthLink href={PASSWORD_RECOVERY_PATH} prefetch={false} className="flex min-h-11 items-center text-sm font-medium">
               Esqueci minha senha
             </AuthLink>
           </div>
