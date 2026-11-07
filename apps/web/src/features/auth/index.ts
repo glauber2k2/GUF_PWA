@@ -6,3 +6,5 @@ export { ConsentForm } from "./ui/consent-form";
 export { LoginForm } from "./ui/login-form";
 export { SignUpForm } from "./ui/signup-form";
 export { ResetPasswordForm } from "./ui/reset-password-form";
+export { PasswordRecoveryScreen } from "./ui/password-recovery-screen";
+export { PASSWORD_RECOVERY_PATH, PASSWORD_RESET_PATH } from "./helpers/paths";

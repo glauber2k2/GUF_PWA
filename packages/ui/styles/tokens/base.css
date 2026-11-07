@@ -639,6 +639,19 @@
   0% { transform: scale(1); opacity: 0.45; }
   100% { transform: scale(1.55); opacity: 0; }
 }
+/* Senha: campo recusado treme (sem atraso; o key do campo repete a animação a cada recusa). */
+@keyframes guf-field-shake {
+  0%, 100% { transform: none; }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}
+/* Senha salva: halo que sai do anel e some. */
+@keyframes guf-success-halo {
+  0% { transform: scale(0.8); opacity: 0.55; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
 @keyframes guf-ai-caret {
   0%, 45% { opacity: 1; }
   55%, 100% { opacity: 0; }

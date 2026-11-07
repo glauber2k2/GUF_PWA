@@ -13,6 +13,7 @@ import {
   type WeightUnit,
 } from "@guf/core";
 import type { Json } from "@guf/types";
+import { hasPasswordLogin } from "./auth";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiError, type ApiResult } from "./result";
 import { currentUserId, fetchTrainingTotals, resolveAvatarUrl } from "./shared";
@@ -43,6 +44,8 @@ export interface Profile {
   experienceLevel: ExperienceLevel | null;
   /** A foto mostrada foi enviada pelo usuário (e pode ser removida). */
   hasUploadedPhoto: boolean;
+  /** Entra com e-mail e senha (só assim existe "Alterar senha"). */
+  hasPasswordLogin: boolean;
 }
 
 export interface ProfileUpdate {
@@ -126,6 +129,7 @@ export const getProfile: ProfileApi["getProfile"] = async (client) => {
         trainingGoals: toTrainingGoals(profileRes.data?.training_goals),
         experienceLevel: toExperienceLevel(profileRes.data?.experience_level),
         hasUploadedPhoto: isUploadedAvatar(profileRes.data?.avatar_url),
+        hasPasswordLogin: hasPasswordLogin(session.data.session?.user),
       },
       error: null,
     };

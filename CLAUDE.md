@@ -119,6 +119,7 @@ Cada funcionalidade tem um documento próprio com caminhos, fluxos, regras de te
 - **Projetos, rotinas e a folha "Iniciar treino"** (só online, sem fila; Favoritos protegido; `save_routine` numa transação) → [docs/features/projects-and-routines.md](docs/features/projects-and-routines.md)
 - **Cadastro em passos** (`/bem-vindo`: nome, @, foto, amigos) → [docs/features/profile-setup.md](docs/features/profile-setup.md)
 - **PWA** (Serwist depois do `next build`, pré-cache, atualização; nunca cachear respostas do Supabase no service worker) → [docs/features/pwa.md](docs/features/pwa.md)
+- **Recuperar e alterar senha** (`/recuperar-senha`, `/redefinir-senha`, `/configuracoes/senha`; requisitos da senha nova no core; link sem PKCE) → [docs/features/password.md](docs/features/password.md)
 - **Configurações** (subpáginas, exportar dados, excluir conta, preferências do aparelho, tema, foto do usuário) → [docs/features/settings.md](docs/features/settings.md)
 - **Histórico** na Início (sequência sempre do `get_streak()`, calendário, gráfico, folha do dia) → [docs/features/history.md](docs/features/history.md)
 - **Resumo do treino e Evolução por exercício** (`/treino/resumo`, `/exercicio`; excluir treino) → [docs/features/summary-and-evolution.md](docs/features/summary-and-evolution.md)
