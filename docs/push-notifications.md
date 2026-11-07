@@ -59,7 +59,7 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 | Edge Function `push-alerts` | Publicada em 2026-10-19 (`--no-verify-jwt`) |
 | Segredos do Vault (`project_url`, `push_alerts_secret`) | Criados em 2026-10-19 pela CLI (`supabase db query --linked`) |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` | Feito em 2026-10-19 |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` na Vercel | Cadastrada e publicada (2026-10-20) |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no build de produção | Cadastrada na Vercel em 2026-10-20; hoje nas variáveis de build do Worker `guf-pwa` na Cloudflare (conferida no site publicado em 2026-11-07) |
 | Teste com um aviso real (dois celulares, contas que se seguem) | **Feito em 2026-10-20**: inscrição no Chrome/Android e aviso de pedido para seguir recebido, depois que o `/sw.js` passou a ser publicado (`fix/service-worker-producao`) |
 
 **Conferido em 2026-10-19:** sem o segredo, a função responde 401; com o segredo e um usuário inexistente, responde `{"sent":0}`; `post_push_alert` chamado no banco chega à função pelo pg_net (status 200 em `net._http_response`). A leitura das chaves VAPID e o envio só acontecem quando há um aviso de verdade, por isso ainda falta o teste com celulares.
@@ -68,7 +68,7 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 
 | Item | Onde fica | Quem usa |
 |---|---|---|
-| Chave pública VAPID | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (`.env.local` e Vercel); pode ficar visível | App, ao inscrever o aparelho |
+| Chave pública VAPID | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (`.env.local` e variáveis de build da Cloudflare); pode ficar visível | App, ao inscrever o aparelho |
 | Par de chaves VAPID (com a privada) | Secret `VAPID_KEYS` da função; cópia em `vapid.json` na raiz (fora do git) | Edge Function, ao assinar o envio |
 | `VAPID_SUBJECT` | Secret da função (`mailto:` do `PRIVACY_CONTACT_EMAIL`) | Serviços de push, para contato em caso de problema |
 | Segredo entre banco e função | Secret `PUSH_ALERTS_SECRET` e Vault `push_alerts_secret` (o mesmo valor) | Gatilhos (envia) e função (confere) |
@@ -83,9 +83,9 @@ Uma chamada da Edge Function por evento que tem destinatário com notificações
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
-| "O serviço que recebe as notificações não está ativo neste aparelho" | O site não tem service worker registrado. Até 2026-10-20 a Vercel não publicava `/sw.js` (preset Next.js) | Corrigido pelo `vercel.json` (site estático em `out/`). Conferir `https://<domínio>/sw.js` = 200; depois, fechar e abrir o app |
+| "O serviço que recebe as notificações não está ativo neste aparelho" | O site não tem service worker registrado. Até 2026-10-20 a Vercel não publicava `/sw.js` (preset Next.js) | Corrigido em 2026-10-20 (site estático em `out/`; hoje o Worker publica `apps/web/out` inteiro). Conferir `https://<domínio>/sw.js` = 200; depois, fechar e abrir o app |
 | "O app ainda está terminando de instalar ou atualizar" | Service worker não ficou ativo em 10 s (app recém-instalado ou atualizando) | Fechar e abrir o app e tentar de novo |
-| "As notificações estão com a configuração errada no servidor" (ou código `InvalidAccessError`) | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` do build não é uma chave P-256 válida (65 bytes em base64url) | Conferir o valor na Vercel (só a chave, sem o nome da variável) e publicar de novo. Aspas, espaços e o prefixo `NEXT_PUBLIC_VAPID_PUBLIC_KEY=` já são removidos pelo app (`normalizeVapidKey`) |
+| "As notificações estão com a configuração errada no servidor" (ou código `InvalidAccessError`) | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` do build não é uma chave P-256 válida (65 bytes em base64url) | Conferir o valor nas variáveis de build da Cloudflare (só a chave, sem o nome da variável) e publicar de novo. Aspas, espaços e o prefixo `NEXT_PUBLIC_VAPID_PUBLIC_KEY=` já são removidos pelo app (`normalizeVapidKey`) |
 | "O serviço de notificações do navegador recusou a inscrição" (código `AbortError` ou outro) | O serviço de push do navegador recusou: Brave com "Usar os serviços do Google para mensagens push" desligado, Chrome sem Google Play Services, sem internet no momento | No Brave, ligar a opção nas configurações de privacidade; nos outros, confirmar a internet e tentar de novo |
 | Opção aparece como indisponível | Build sem `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, navegador sem Web Push ou iPhone fora da Tela de Início | Cadastrar a chave e publicar; no iPhone, instalar o app |
 | Ligado, mas nenhum aviso chega | Segredos do Vault ou da função diferentes, ou função fora do ar | `select status_code, content from net._http_response order by created desc limit 20;` e logs da função |
@@ -95,7 +95,7 @@ Histórico: até 2026-10-19 a falha na inscrição era engolida (o botão voltav
 ## Configuração (uma vez por ambiente)
 
 1. Chaves VAPID: `node supabase/scripts/generate-vapid-keys.mjs > vapid.json` (o JSON tem a chave privada: está no `.gitignore`). A linha `NEXT_PUBLIC_VAPID_PUBLIC_KEY=…` sai no terminal.
-2. App: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` e nas variáveis da Vercel.
+2. App: `NEXT_PUBLIC_VAPID_PUBLIC_KEY` no `apps/web/.env.local` e nas variáveis de build do Worker `guf-pwa` (Cloudflare › Settings › Builds).
 3. Secrets da função, por arquivo (o valor não aparece na linha de comando nem no histórico do terminal):
    ```
    # push-secrets.env (fora do repositório; apagar depois)

@@ -74,7 +74,7 @@ Tudo abaixo está na `main` (número do PR entre parênteses).
 | Documentos legais do banco são provisórios (Termos, idade e saúde `0.1-dev`; Política `0.2-dev`, todos com hash real do rascunho) | `legal_documents` | **Bloqueia o lançamento** |
 | Pendências da auditoria LGPD: controlador e Encarregado definidos, política final, DPAs/transferência internacional, runbook de incidente, canal do titular (G1–G4, G7, G8, G10, G22, G23) | `.lgpd/gaps.md` | **Bloqueia abrir para pessoas de fora** |
 | Prazo de 5 anos da prova de consentimento após exclusão sem validação jurídica | `consent_proofs` | Médio (validar antes do lançamento) |
-| Migração do banco: confirmar variáveis da Vercel, testar o deploy, pausar e excluir o projeto antigo (`us-west-2`) | Painéis Vercel/Supabase | Médio |
+| Migração do banco: pausar e excluir o projeto antigo (`us-west-2`), se ainda existir | Painel do Supabase | Médio |
 | Leitor de documentos (histórico do navegador, voltar do Android) ainda não testado em aparelho real | `features/legal/providers/legal-reader-provider.tsx` | Baixo |
 | `ConfirmDialog` não fecha com Esc nem prende o foco dentro da caixa (o `BottomSheet` já fecha com Esc) | `shared/components/ds/overlays.tsx` | Baixo no celular; pendência de acessibilidade (teclado) |
 | Fechar o `BottomSheet` arrastando para baixo ainda não foi testado em aparelho real | `shared/hooks/use-sheet-drag.ts` | Baixo |
@@ -248,7 +248,7 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 
 - **Testes automatizados:** test runner para `packages/core` e `packages/api` (ex.: Vitest — **biblioteca nova, pedir aprovação**), convertendo os testes avulsos já feitos (relógio, unidades, 1RM, Histórico).
 - **Monitoramento de erros** (ex.: Sentry — pedir aprovação), com filtro que impede dados de medidas e dados pessoais.
-- **Hospedagem de produção:** Cloudflare Pages ou plano pago da Vercel; domínio próprio; Redirect URLs do Supabase para o domínio.
+- **Hospedagem de produção:** feita — Cloudflare Workers (`treino.gufapp.com.br` e `admin.gufapp.com.br`, 2026-11-06); a Vercel saiu em 2026-11-07. Pendente: tirar a Vercel da Política de Privacidade (nova versão).
 - **E-mail transacional próprio** (SMTP) para confirmação de cadastro e recuperação de senha.
 - **Documentos legais definitivos** no banco (versões, URLs e hash reais) — substituir os provisórios do `seed.sql`. **Validação jurídica obrigatória.**
 - **Revisão de acessibilidade** (WCAG AA) e de desempenho em celulares de entrada.
@@ -371,4 +371,4 @@ Troca do projeto ativo pela RPC `activate_project` (migration `20261010190244_ac
 | Dados de saúde (medidas) | Jurídico/LGPD | Consentimento específico, revogação que apaga os dados, nada em logs/analytics |
 | Sem testes automatizados | Técnico | Etapa 6; até lá, testar regras do core a cada etapa |
 | Trocar projeto ativo em duas gravações | Técnico | Resolvido: RPC `activate_project` (atômica) |
-| Limites do plano gratuito (Supabase/Vercel) | Financeiro | Revisar uso antes de abrir para usuários; produção em Cloudflare Pages ou Vercel pago |
+| Limites do plano gratuito (Supabase/Cloudflare) | Financeiro | Revisar uso antes de abrir para usuários |
