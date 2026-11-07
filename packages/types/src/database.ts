@@ -188,6 +188,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       announcement_receipts: {
         Row: {
           announcement_id: string
@@ -1980,6 +2001,10 @@ export type Database = {
         Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }
         Returns: undefined
       }
+      assert_can_copy_from: {
+        Args: { p_owner: string; p_uid: string }
+        Returns: undefined
+      }
       assert_staff_change_allowed: {
         Args: { p_losing_admin: boolean; p_user_id: string }
         Returns: {
@@ -2282,6 +2307,11 @@ export type Database = {
           rival_name: string
         }[]
       }
+      consume_ai_quota: { Args: { p_kind: string }; Returns: Json }
+      copy_exercise_for: {
+        Args: { p_exercise_id: string; p_user_id: string }
+        Returns: string
+      }
       copy_member_project: {
         Args: { p_activate?: boolean; p_user_id: string }
         Returns: string
@@ -2289,6 +2319,14 @@ export type Database = {
       copy_member_routine: {
         Args: { p_routine_id: string; p_target_project_id?: string }
         Returns: Json
+      }
+      copy_routine_exercises: {
+        Args: {
+          p_from_routine: string
+          p_to_routine: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       current_legal_document: {
         Args: { p_doc_type: string }
@@ -2831,6 +2869,7 @@ export type Database = {
       post_push_alert: { Args: { p_body: Json }; Returns: undefined }
       purge_expired_ai_conversations: { Args: never; Returns: number }
       purge_expired_ai_plan_imports: { Args: never; Returns: number }
+      purge_expired_ai_usage: { Args: never; Returns: number }
       purge_expired_announcements: { Args: never; Returns: undefined }
       purge_expired_audit_log: { Args: never; Returns: number }
       purge_expired_billing: { Args: never; Returns: undefined }
