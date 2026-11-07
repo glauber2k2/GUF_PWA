@@ -1,3 +1,4 @@
+import { toRepTarget } from "@guf/core";
 import type { GufClient } from "./client";
 import { apiError, toApiError, type ApiResult } from "./result";
 import type { PlannedExercise } from "./home";
@@ -92,7 +93,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
       client
         .from("projects")
         .select(
-          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, average_duration_seconds, routine_exercises(position, target_sets, target_reps, rest_seconds, exercises(name, muscle_group)))",
+          "id, name, description, is_active, is_favorites, archived_at, created_at, routines(id, name, position, weekdays, archived_at, average_duration_seconds, routine_exercises(position, target_sets, target_reps_min, target_reps_max, rest_seconds, exercises(name, muscle_group)))",
         )
         .order("created_at", { ascending: false })
         .order("position", { referencedTable: "routines", ascending: true })
@@ -124,7 +125,7 @@ export const getProjectsOverview: ProjectsApi["getProjectsOverview"] = async (cl
                 name: e.exercises?.name ?? "Exercício",
                 muscleGroup: e.exercises?.muscle_group ?? "",
                 targetSets: e.target_sets,
-                targetReps: e.target_reps,
+                targetReps: toRepTarget(e.target_reps_min, e.target_reps_max),
                 restSeconds: e.rest_seconds,
               })),
               averageDurationSeconds: r.average_duration_seconds ?? null,

@@ -14,7 +14,8 @@ Funções RPC:
 | `finish_workout(p_session_id)` | Finaliza treino: fecha o período aberto, grava `active_seconds`; retorna resumo (`duration_seconds` = tempo efetivo, `elapsed_seconds`, `pauses`) + `personal_records` |
 | `activate_project(p_project_id)` | Ativa o projeto e desativa o anterior na mesma transação (um ativo por usuário). Erro próprio `GP001` = projeto não encontrado ou arquivado (não usar os códigos de treino) |
 | `update_routine_from_workout(p_session_id)` | Depois de finalizar: os exercícios e séries do treino viram os da rotina dele (erros P0002, GP003, GP004) |
-| `save_routine(p_routine_id, p_project_id, p_name, p_weekdays, p_exercises, p_auto_progress)` | Cria (`p_routine_id` nulo) ou atualiza a rotina e seus exercícios planejados numa transação; mudar de projeto põe a rotina no fim da lista. Erros GP001, GP003, GP004 |
+| `save_routine(p_routine_id, p_project_id, p_name, p_weekdays, p_exercises, p_auto_progress)` | Cria (`p_routine_id` nulo) ou atualiza a rotina e seus exercícios planejados numa transação; mudar de projeto põe a rotina no fim da lista. Repetições em `target_reps_min`/`target_reps_max` de cada item (o texto `target_reps` do app antigo é convertido por `rep_target_from_item`; texto vazio mantém o salvo). Erros GP001, GP003, GP004 |
+| `parse_rep_target(p_text)` · `rep_target_from_item(p_item)` · `rep_target_in_item(p_item)` | Apoio das RPCs de rotina e de importação de ficha: texto antigo das repetições ("8-12") → mínimo e máximo |
 | `get_exercise_history(p_exercise_id, p_from)` / `get_exercise_records(p_exercise_id)` | Evolução e recordes |
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |

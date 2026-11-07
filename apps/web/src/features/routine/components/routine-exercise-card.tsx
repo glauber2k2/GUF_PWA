@@ -8,6 +8,7 @@ import {
   formatNumber,
   formatPlannedSets,
   fromDisplayWeight,
+  measuresReps,
   muscleGroupLabel,
   parseKeypadValue,
   ROUTINE_REST_OPTIONS,
@@ -18,9 +19,9 @@ import {
 import { ROUTINE_SETS_MAX, ROUTINE_SETS_MIN } from "@guf/schemas";
 import type { RoutineExerciseDraft } from "@guf/api";
 import { Icon, IconButton, SegmentedControl, Stepper, Tag, TextField } from "@/shared/components/ds";
+import { RepTargetEditor } from "@/shared/components/rep-target-editor";
 import { cn } from "@/shared/helpers/class-names";
 import type { DraftAction } from "@/features/routine/helpers/routine-draft";
-import { RepRangeFields } from "@/features/routine/components/rep-range-fields";
 
 const REST_OPTIONS = ROUTINE_REST_OPTIONS.map((s) => ({ value: String(s), label: formatClock(s) }));
 
@@ -159,7 +160,9 @@ export function RoutineExerciseCard({
             decreaseLabel="Menos uma série"
             increaseLabel="Mais uma série"
           />
-          <RepRangeFields value={exercise.targetReps} disabled={disabled} onChange={(targetReps) => update({ targetReps })} />
+          {measuresReps(exercise.muscleGroup) && (
+            <RepTargetEditor value={exercise.targetReps} onChange={(targetReps) => update({ targetReps })} />
+          )}
           {showTargetWeight && (
             <TargetWeightField valueKg={exercise.targetWeightKg} unit={unit} disabled={disabled} onChange={(kg) => update({ targetWeightKg: kg })} />
           )}

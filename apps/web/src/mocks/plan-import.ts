@@ -5,7 +5,7 @@
  * "erro" falha a conversão e "queda" falha a criação como queda de conexão.
  */
 import { apiError, type ApiResult, type GufClient, type LibraryExercise, type PlanImportApi, type PlanImportDraft } from "@guf/api";
-import { PLAN_IMPORT_DEFAULT_REST_SECONDS } from "@guf/core";
+import { PLAN_IMPORT_DEFAULT_REST_SECONDS, parseRepTarget } from "@guf/core";
 import { findMockRoutine, mockDropsOnSave, mockProjectsApi, saveMockRoutine } from "@/mocks/projects";
 import { mockWorkoutApi } from "@/mocks/workout";
 
@@ -49,7 +49,7 @@ function toSampleExercise([catalogName, sourceName, sets, reps]: SampleExercise,
       ? { kind: "catalog" as const, exerciseId: found.id, name: found.name, muscleGroup: found.muscleGroup }
       : { kind: "new" as const, name: "Crucifixo inclinado 45°", muscleGroup: "peito" as const, equipment: "halter" as const },
     targetSets: sets,
-    targetReps: reps,
+    targetReps: parseRepTarget(reps),
     restSeconds: PLAN_IMPORT_DEFAULT_REST_SECONDS,
     notes: "",
   };
@@ -85,7 +85,7 @@ export const mockPlanImportApi = {
     const project = destination.kind === "existing" ? { data: { id: destination.projectId }, error: null } : await createMockProject(client, draft, destination.activate);
     if (project.error) return { data: null, error: project.error };
     for (const routine of draft.routines) {
-      const planned = routine.exercises.map((e) => ({ name: e.match.name, muscleGroup: e.match.muscleGroup, targetSets: e.targetSets, targetReps: e.targetReps || null, restSeconds: e.restSeconds }));
+      const planned = routine.exercises.map((e) => ({ name: e.match.name, muscleGroup: e.match.muscleGroup, targetSets: e.targetSets, targetReps: e.targetReps, restSeconds: e.restSeconds }));
       // Rotina existente: os exercícios entram no fim e nome/dias dela continuam (como no banco).
       const into = routine.intoRoutineId ? findMockRoutine(routine.intoRoutineId) : null;
       if (routine.intoRoutineId && (!into || into.project.id !== project.data.id)) return { data: null, error: apiError("routine_not_found") };
