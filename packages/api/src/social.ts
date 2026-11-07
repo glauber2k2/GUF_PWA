@@ -2,6 +2,7 @@ import {
   durationSeconds,
   pauseStats,
   toExperienceLevel,
+  toRepTarget,
   toTrainingGoals,
   type ExperienceLevel,
   type SocialRelationship,
@@ -12,6 +13,7 @@ import {
 } from "@guf/core";
 import type { GufClient } from "./client";
 import type { WorkoutSummaryBase, WorkoutSummaryRecord } from "./evolution";
+import type { RoutineSummary } from "./home";
 import { apiError, toApiError, type ApiResult } from "./result";
 import { FREE_WORKOUT_NAME, resolveAvatarUrl, sessionDurationSeconds, toWeightUnit } from "./shared";
 import { buildSummaryExercise, buildSummaryRecord, buildSummaryTotals, type CompletedSetRow } from "./summary-builder";
@@ -122,6 +124,18 @@ export interface MemberWorkoutDetail extends WorkoutSummaryBase {
   owner: PersonCard;
 }
 
+/**
+ * Projeto ativo mostrado no perfil (Claude Design "Perfil - Projeto Ativo" · 2c): mesma visibilidade
+ * do histórico de treinos. Sem cargas nem observações; descanso não vem (o card não mostra).
+ */
+export interface MemberActiveProject {
+  name: string;
+  description: string | null;
+  /** Rotina do último treino concluído da pessoa (marca a próxima, como na Início). */
+  lastRoutineId: string | null;
+  routines: RoutineSummary[];
+}
+
 type Result<T = null> = Promise<ApiResult<T>>;
 
 export interface SocialApi {
@@ -147,6 +161,8 @@ export interface SocialApi {
   listWorkoutFeed: (client: GufClient, input: { userId: string | null; before?: string | null; limit?: number }) => Result<WorkoutFeedItem[]>;
   /** Detalhe de um treino do histórico (session_not_found = inexistente ou sem permissão; history_hidden). */
   getMemberWorkout: (client: GufClient, input: { sessionId: string }) => Result<MemberWorkoutDetail>;
+  /** Projeto ativo do perfil (userId nulo = o seu); null sem projeto ativo. Erros: person_not_found, history_hidden. */
+  getMemberActiveProject: (client: GufClient, input: { userId: string | null }) => Result<MemberActiveProject | null>;
 }
 
 /* =====================================================================
@@ -462,6 +478,53 @@ export const getMemberWorkout: SocialApi["getMemberWorkout"] = async (client, { 
   }
 };
 
+interface ActiveProjectRow {
+  name: string;
+  description: string | null;
+  last_routine_id: string | null;
+  routines: {
+    id: string;
+    name: string;
+    position: number;
+    weekdays: number[];
+    average_duration_seconds: number | null;
+    exercises: { name: string; muscle_group: string; target_sets: number | null; target_reps_min: number | null; target_reps_max: number | null }[];
+  }[];
+}
+
+function toActiveProject(row: ActiveProjectRow): MemberActiveProject {
+  return {
+    name: row.name,
+    description: row.description,
+    lastRoutineId: row.last_routine_id,
+    routines: row.routines.map((r) => ({
+      id: r.id,
+      name: r.name,
+      position: r.position,
+      weekdays: r.weekdays,
+      averageDurationSeconds: r.average_duration_seconds,
+      exercises: r.exercises.map((e) => ({
+        name: e.name,
+        muscleGroup: e.muscle_group,
+        targetSets: e.target_sets,
+        targetReps: toRepTarget(e.target_reps_min, e.target_reps_max),
+        restSeconds: null,
+      })),
+    })),
+  };
+}
+
+export const getMemberActiveProject: SocialApi["getMemberActiveProject"] = async (client, { userId }) => {
+  try {
+    const { data, error } = await client.rpc("get_member_active_project", userId ? { p_user_id: userId } : {});
+    if (error) return { data: null, error: toApiError(error) };
+    // jsonb montado pela função (formato em ActiveProjectRow); o tipo gerado só diz Json.
+    return { data: data ? toActiveProject(data as unknown as ActiveProjectRow) : null, error: null };
+  } catch (e) {
+    return { data: null, error: toApiError(e) };
+  }
+};
+
 export const socialApi = {
   getMySocial,
   updateHandle,
@@ -479,4 +542,5 @@ export const socialApi = {
   getMemberEvolution,
   listWorkoutFeed,
   getMemberWorkout,
+  getMemberActiveProject,
 } satisfies SocialApi;

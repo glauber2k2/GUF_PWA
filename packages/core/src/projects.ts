@@ -2,6 +2,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { plural } from "./format";
 import { DEFAULT_REP_TARGET } from "./rep-range";
+import { weekdaysLabel } from "./schedule";
 import { estimateRoutineMinutes, routineDurationLabel } from "./workout";
 
 /** Regras da aba Projetos (puras, sem React). */
@@ -33,6 +34,15 @@ export function routineMeta(
   return [plural(exercises.length, "exercício", "exercícios"), routineDurationLabel(averageSeconds)]
     .filter(Boolean)
     .join(" · ");
+}
+
+/** "Seg e Qui · 6 exercícios · ~52 min" (sem dias marcados, só o resto). */
+export function routineScheduleMeta(
+  weekdays: readonly number[],
+  exercises: ReadonlyArray<{ targetSets: number | null; restSeconds: number | null }>,
+  averageSeconds: number | null,
+): string {
+  return [weekdays.length > 0 ? weekdaysLabel(weekdays) : null, routineMeta(exercises, averageSeconds)].filter(Boolean).join(" · ");
 }
 
 /* ---------------------------------------------------------------------

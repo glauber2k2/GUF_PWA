@@ -78,6 +78,17 @@ export function useMemberEvolution(userId: string | null, weeks: number, enabled
   });
 }
 
+/** Projeto ativo do perfil (mesma visibilidade do histórico); null = sem projeto ativo. */
+export function useMemberActiveProject(userId: string | null, enabled: boolean) {
+  const { user } = useAuth();
+  const { api, dev } = useSocialSource();
+  return useQuery({
+    queryKey: [SOCIAL_KEY, "active-project", user?.id, userId, dev.scenario],
+    enabled: (Boolean(user) || dev.scenario !== null) && enabled,
+    queryFn: async () => unwrap(await api.getMemberActiveProject(getSupabaseClient(), { userId })),
+  });
+}
+
 /** Feed de treinos do perfil (cards), 10 por página, pelo fim do último treino carregado. */
 export function useWorkoutFeed(userId: string | null, enabled: boolean) {
   const { user } = useAuth();

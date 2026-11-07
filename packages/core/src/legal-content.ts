@@ -188,7 +188,7 @@ const TERMS: LegalDocumentContent = {
       blocks: [
         p("O guf entrega as ferramentas; o que você registra, escreve e mostra é escolha sua. Ao usar o app, você concorda que:"),
         ul(
-          "Você decide quem vê seus treinos (perfil privado ou aberto, aprovar seguidores, ocultar o histórico). Antes de abrir o perfil ou aprovar alguém, lembre que essas pessoas verão seus treinos, com as observações.",
+          "Você decide quem vê seus treinos (perfil privado ou aberto, aprovar seguidores, esconder o histórico e o projeto ativo). Antes de abrir o perfil ou aprovar alguém, lembre que essas pessoas verão seus treinos, com as observações, e o seu projeto ativo.",
           "Depois que alguém vê algo no app, o guf não controla o que essa pessoa faz fora dele (por exemplo, uma captura de tela). Mostre só o que você aceita que seja visto.",
           "Imagens que você compartilha (stories e stickers) saem do app por sua escolha e passam a seguir as regras de onde forem publicadas.",
           "As informações que você declara, como idade, nome, cargas e medidas, devem ser verdadeiras. Declarar idade falsa viola estes termos.",
@@ -209,10 +209,10 @@ const TERMS: LegalDocumentContent = {
           "Em Editar perfil você pode, se quiser, escrever uma bio, que aparece junto com o nome e a foto para qualquer pessoa com conta no guf, e marcar seus objetivos e sua experiência, que aparecem só para quem pode ver seus treinos. Não escreva na bio dados de saúde nem dados de outras pessoas.",
         ),
         p(
-          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência e histórico de treinos (com as observações que você escreve neles). Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
+          "O perfil começa privado: só seguidores que você aprovar veem sua evolução, sequência, histórico de treinos (com as observações que você escreve neles) e projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações). Se você abrir o perfil, qualquer pessoa com conta no guf vê esses dados, e seguir não precisa mais de aprovação. Fechar de novo não remove quem já segue você: só quem chegar depois precisa de aprovação.",
         ),
         ul(
-          "Você pode ocultar o histórico de treinos a qualquer momento; evolução, sequência e competição continuam visíveis.",
+          "Em Configurações › Privacidade, a opção “Visibilidade de treino” mostra ou esconde, juntos e a qualquer momento, o histórico de treinos e o projeto ativo; evolução, sequência e competição continuam visíveis.",
           "No perfil de outra pessoa, o histórico de treinos mostra todos os treinos que ela deixa ver; o gráfico de evolução mostra só o mês atual, em qualquer plano. O mesmo vale para quem vê o seu perfil.",
           "Você pode remover qualquer seguidor ou bloquear uma pessoa. Bloquear desfaz os vínculos dos dois lados.",
           "Quem vocês se seguem mutuamente compete com você num ranking de pontos calculado a partir dos treinos (constância, recordes de carga e de cardio e volume), pelas mesmas regras para todos, publicadas no app.",
@@ -297,6 +297,9 @@ const TERMS: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.5": [
+      "Seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) passa a aparecer no seu perfil para quem já pode ver seus treinos. A opção “Visibilidade de treino”, em Configurações › Privacidade, mostra ou esconde os dois juntos.",
+    ],
     "1.4": [
       "Quem pode ver seus treinos passa a ver todo o histórico de treinos no seu perfil, não só os do mês atual. O gráfico de evolução continua mostrando só o mês atual. Para esconder, você pode ocultar o histórico ou fechar o perfil em Configurações › Privacidade.",
     ],
@@ -448,7 +451,7 @@ const PRIVACY: LegalDocumentContent = {
       title: "Perfil, seguidores e competição",
       blocks: [
         p(
-          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos, com as observações que você escreve no treino e nos exercícios, só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode ocultar o histórico, remover seguidores e bloquear pessoas a qualquer momento.",
+          "Toda conta tem um perfil privado com nome de usuário (@), nome e foto, que aparecem na busca e no link do perfil, junto com a bio, se você escrever uma. Objetivos e experiência, se você marcar, seguem a mesma regra dos treinos. Seus treinos, com as observações que você escreve no treino e nos exercícios, e o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) só aparecem para seguidores que você aprovar ou, se você abrir o perfil, para qualquer pessoa com conta no guf. Você pode esconder o histórico e o projeto ativo (opção “Visibilidade de treino”), remover seguidores e bloquear pessoas a qualquer momento.",
         ),
         p("A pontuação da competição é calculada pelas mesmas regras para todos, a partir dos treinos: constância, recordes de carga e de cardio e volume comparado à sua própria média. As regras ficam publicadas em Competição › Como funciona."),
         p(
@@ -626,6 +629,9 @@ const PRIVACY: LegalDocumentContent = {
     },
   ],
   changes: {
+    "1.7": [
+      "Perfil: o seu projeto ativo (nome, descrição e rotinas, com dias, exercícios, séries e repetições; sem cargas nem observações) aparece para quem já pode ver seus treinos. A opção “Visibilidade de treino” esconde o histórico e o projeto ativo juntos.",
+    ],
     "1.6": [
       "Assinatura pelo app Android: o Google Play processa o pagamento; o guf recebe dele o código da compra, o produto, a situação da assinatura e os pagamentos, e não envia dados seus ao Google para a compra.",
       "Prazos: vínculo entre a compra e a conta enquanto ela existir; avisos técnicos do Google Play por 90 dias.",

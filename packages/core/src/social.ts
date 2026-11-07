@@ -120,12 +120,19 @@ export function monthYearLabel(isoDate: string): string {
 export function socialPrivacySummary(visibility: SocialVisibility, historyHidden: boolean): string {
   if (visibility === "private") {
     return historyHidden
-      ? "Seguidores aprovados veem evolução e sequência. O histórico fica só com você."
-      : "Seguidores aprovados veem evolução, sequência e histórico.";
+      ? "Seguidores aprovados veem evolução e sequência. Histórico e projeto ativo ficam só com você."
+      : "Seguidores aprovados veem evolução, sequência, histórico e projeto ativo.";
   }
   return historyHidden
-    ? "Qualquer pessoa no guf vê evolução e sequência. O histórico fica só com você."
-    : "Qualquer pessoa no guf vê evolução, sequência e histórico.";
+    ? "Qualquer pessoa no guf vê evolução e sequência. Histórico e projeto ativo ficam só com você."
+    : "Qualquer pessoa no guf vê evolução, sequência, histórico e projeto ativo.";
+}
+
+/** Aviso no painel do seu projeto ativo: quem mais vê (a opção "Visibilidade de treino" vale para os dois). */
+export function activeProjectVisibilityNote(historyHidden: boolean): string {
+  return historyHidden
+    ? "Só você vê este projeto, como o seu histórico de treinos."
+    : "Quem vê seu histórico de treinos também vê este projeto.";
 }
 
 /** Quantos @ aparecem no subtítulo da barra de solicitações antes do "e mais N". */
