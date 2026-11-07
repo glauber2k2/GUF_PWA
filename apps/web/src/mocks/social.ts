@@ -7,6 +7,7 @@
  */
 import {
   addLocalDays,
+  parseRepTarget,
   startOfLocalWeek,
   toLocalISODate,
   type ExperienceLevel,
@@ -19,6 +20,7 @@ import {
   type Connection,
   type EvolutionWeek,
   type GufClient,
+  type MemberActiveProject,
   type MemberProfile,
   type MemberWorkout,
   type MemberWorkoutDetail,
@@ -457,4 +459,71 @@ export const mockSocialApi = {
     const data = await memberWorkout(client, sessionId, p);
     return data ? { data, error: null } : { data: null, error: apiError("session_not_found") };
   },
+  async getMemberActiveProject(client, { userId }) {
+    ignoreClient(client);
+    await wait();
+    const failed = failIfError();
+    if (failed) return failed;
+    const p = find(userId);
+    if (!p || !unlocked(p)) return { data: null, error: apiError("person_not_found") };
+    if (p.userId !== MOCK_ME && p.historyHidden) return { data: null, error: apiError("history_hidden") };
+    return { data: mockActiveProject(), error: null };
+  },
 } satisfies SocialApi;
+
+/** Projeto ativo de exemplo (o mesmo para todas as pessoas do mock); gerado sob demanda. */
+function mockActiveProject(): MemberActiveProject {
+  const exercise = (name: string, muscleGroup: string, targetSets: number, targetReps: string) => ({
+    name,
+    muscleGroup,
+    targetSets,
+    targetReps: parseRepTarget(targetReps),
+    restSeconds: null,
+  });
+  return {
+    name: "Hipertrofia 2026 – ABC",
+    description: "Três treinos alternados, quatro dias por semana.",
+    lastRoutineId: "mock-routine-a",
+    routines: [
+      {
+        id: "mock-routine-a",
+        name: "Treino A – Peito e Tríceps",
+        position: 1,
+        weekdays: [1, 4],
+        averageDurationSeconds: 55 * 60,
+        exercises: [
+          exercise("Supino reto", "peito", 4, "8-12"),
+          exercise("Crucifixo inclinado", "peito", 3, "12"),
+          exercise("Tríceps corda", "triceps", 3, "10-15"),
+          exercise("Mergulho no banco", "triceps", 3, "10"),
+        ],
+      },
+      {
+        id: "mock-routine-b",
+        name: "Treino B – Costas e Bíceps",
+        position: 2,
+        weekdays: [2, 5],
+        averageDurationSeconds: 50 * 60,
+        exercises: [
+          exercise("Puxada frontal", "costas", 4, "10"),
+          exercise("Remada baixa", "costas", 3, "10-12"),
+          exercise("Rosca direta", "biceps", 3, "10"),
+          exercise("Rosca alternada", "biceps", 3, "12"),
+        ],
+      },
+      {
+        id: "mock-routine-c",
+        name: "Treino C – Pernas e Ombros",
+        position: 3,
+        weekdays: [3],
+        averageDurationSeconds: null,
+        exercises: [
+          exercise("Agachamento livre", "quadriceps", 4, "8"),
+          exercise("Leg press", "quadriceps", 4, "10-12"),
+          exercise("Desenvolvimento militar", "ombros", 3, "8-10"),
+          exercise("Elevação lateral", "ombros", 3, "15"),
+        ],
+      },
+    ],
+  };
+}

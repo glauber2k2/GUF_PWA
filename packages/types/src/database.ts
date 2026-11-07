@@ -2495,6 +2495,7 @@ export type Database = {
           weight_kg: number
         }[]
       }
+      get_member_active_project: { Args: { p_user_id?: string }; Returns: Json }
       get_member_evolution: {
         Args: { p_user_id?: string; p_weeks?: number }
         Returns: {
