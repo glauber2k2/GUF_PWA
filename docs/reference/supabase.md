@@ -20,6 +20,7 @@ Funções RPC:
 | `get_training_days(p_from, p_to)` | Calendário |
 | `get_streak()` | `current_streak`, `best_streak`, `current_week_count`, `week_secured`, `streak_at_risk` |
 | `my_entitlements()` · `effective_plan()` · `has_feature(p_feature)` · `feature_limit(p_feature)` | Plano efetivo e o que ele libera (`enabled`, `limit`, `upgradable`); `is_premium()` mantida por compatibilidade |
+| `consume_ai_quota(p_kind)` | Edge Function `guf-ai` (token do usuário): confere e registra o uso do GUF AI no limite de 24 h do plano numa transação travada por pessoa (`chat` grava em `ai_usage`; a conversão de ficha conta `ai_plan_imports`); `ai_usage` sem acesso pelo app, eliminada em 2 dias (migration `20261105120000_ai_usage_quota`) |
 | `pending_subscription_documents()` | Documentos a aceitar na assinatura (Termos da Assinatura + pendências do cadastro) |
 | `grant_plan(...)` · `revoke_plan_grant(p_grant_id)` | Só service_role (suporte): direitos de plano sem pagamento, auditado |
 | `my_billing()` | Assinatura (com prazo de desistência e valor a devolver), pagamentos e devoluções do próprio usuário |
@@ -59,4 +60,4 @@ Edge Functions `billing` e `billing-webhook`: assinatura paga (ver Planos). Secr
 
 Edge Function: `delete-account` → `supabase.functions.invoke('delete-account', { method: 'POST' })` e depois `signOut()`.
 - CORS da `delete-account` por lista no secret `ALLOWED_ORIGINS` (`npx supabase secrets set ALLOWED_ORIGINS="https://<app>,http://localhost:3000"`); sem o secret, aceita qualquer origem. Publicar com `npx supabase functions deploy delete-account --use-api`.
-- Cabeçalhos de segurança da hospedagem (HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy) em `vercel.json` (raiz e `apps/web`, até confirmar o Root Directory da Vercel; na Cloudflare, recriar em `_headers`: `apps/web/public/_headers`, manter igual ao `vercel.json`). Checklist em `.lgpd/security-checklist.md`.
+- Cabeçalhos de segurança da hospedagem (HSTS, nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, Cross-Origin-Opener-Policy e a CSP ainda em `Content-Security-Policy-Report-Only`: conferir o console de produção e, sem bloqueios indevidos, trocar para `Content-Security-Policy`) em `vercel.json` (raiz e `apps/web`, até confirmar o Root Directory da Vercel; na Cloudflare, recriar em `_headers`: `apps/web/public/_headers`, manter igual ao `vercel.json`). Checklist em `.lgpd/security-checklist.md`.

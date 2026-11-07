@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import type { AppAnnouncement } from "@guf/core";
+import { toInternalPath, type AppAnnouncement } from "@guf/core";
 import { useMarkAnnouncement } from "@/features/announcements/api/use-announcements";
 
 /** Ações de um comunicado: visto, "Agora não" e botão (marca e abre a tela de destino). */
@@ -15,7 +15,9 @@ export function useAnnouncementActions() {
   const openCta = useCallback(
     (announcement: AppAnnouncement) => {
       mark(announcement.id, "cta");
-      if (announcement.ctaPath) router.push(announcement.ctaPath);
+      // O destino vem do banco: só caminho interno (nunca outro site).
+      const target = toInternalPath(announcement.ctaPath);
+      if (target) router.push(target);
     },
     [mark, router],
   );

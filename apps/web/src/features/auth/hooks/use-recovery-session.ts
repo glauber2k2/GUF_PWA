@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import { setRecoverySession } from "@guf/api";
 import { getSupabaseClient } from "@/shared/libs/supabase";
 
-export type RecoveryState = { status: "checking" } | { status: "ready" } | { status: "invalid"; message: string };
+export type RecoveryState =
+  | { status: "checking" }
+  | { status: "ready"; /** Conta do link (mostrada para a pessoa conferir que é a dela). */ email: string | null }
+  | { status: "invalid"; message: string };
 
 /**
  * Abre a sessão pelo link de "criar senha nova" (#access_token=…&type=recovery) uma vez ao carregar
@@ -17,8 +20,9 @@ export function useRecoverySession(): RecoveryState {
     const hash = window.location.hash;
     window.history.replaceState(null, "", window.location.pathname);
     let active = true;
-    void setRecoverySession(getSupabaseClient(), hash).then(({ error }) => {
-      if (active) setState(error ? { status: "invalid", message: error.message } : { status: "ready" });
+    void setRecoverySession(getSupabaseClient(), hash).then(({ data, error }) => {
+      if (!active) return;
+      setState(error ? { status: "invalid", message: error.message } : { status: "ready", email: data.email });
     });
     return () => {
       active = false;

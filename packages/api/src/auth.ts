@@ -120,8 +120,10 @@ export type SignOut = (client: GufClient) => Promise<AuthResult<null>>;
  * Abre a sessão pelo link de redefinição de senha (#access_token=…&refresh_token=…&type=recovery).
  * O link é implícito de propósito: pedido pela equipe, ele é aberto em outro aparelho, onde o PKCE
  * não teria o código guardado.
+ * @returns o e-mail da conta do link: a tela mostra de quem é a senha (um link com a sessão de
+ *   outra pessoa faria a vítima entrar na conta dela sem perceber).
  */
-export type SetRecoverySession = (client: GufClient, hash: string) => Promise<AuthResult<null>>;
+export type SetRecoverySession = (client: GufClient, hash: string) => Promise<AuthResult<{ email: string | null }>>;
 
 /** Grava a senha nova da sessão aberta pelo link. */
 export type UpdatePassword = (client: GufClient, password: string) => Promise<AuthResult<null>>;
@@ -320,8 +322,9 @@ export const setRecoverySession: SetRecoverySession = async (client, hash) => {
   if (params.get("error_code") === BANNED_CODE) return { data: null, error: authError("account_suspended") };
   if (!accessToken || !refreshToken || params.get("type") !== "recovery") return { data: null, error: authError("recovery_link_invalid") };
   try {
-    const { error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-    return error ? { data: null, error: authError("recovery_link_invalid") } : { data: null, error: null };
+    const { data, error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+    if (error) return { data: null, error: authError("recovery_link_invalid") };
+    return { data: { email: data.user?.email ?? null }, error: null };
   } catch (e) {
     return { data: null, error: toAuthError(e) };
   }
