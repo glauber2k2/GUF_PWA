@@ -6,6 +6,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { cancelSubscriptionsForAccountDeletion } from "../_shared/billing/cancellation.ts";
 import { createSupabaseBillingStore } from "../_shared/billing/store.ts";
+import { removeAccountFiles } from "../_shared/account-files.ts";
 
 // Sites autorizados a chamar a função (secret ALLOWED_ORIGINS, separados por vírgula):
 //   npx supabase secrets set ALLOWED_ORIGINS="https://<app>.vercel.app,http://localhost:3000"
@@ -70,17 +71,10 @@ Deno.serve(async (req) => {
     return json({ error: "Não foi possível cancelar sua assinatura agora. Tente excluir a conta de novo em alguns minutos." }, 502);
   }
 
-  // Foto enviada (bucket "avatars", pasta <user_id>/): o Storage não apaga em cascata com a conta.
-  // Bucket ainda inexistente (upload não implementado) = nada a apagar. Falha ao remover = não exclui
-  // a conta, para não deixar arquivos órfãos (o usuário tenta de novo).
-  const avatars = admin.storage.from("avatars");
-  const { data: files } = await avatars.list(user.id, { limit: 1000 });
-  if (files && files.length > 0) {
-    const { error: removeError } = await avatars.remove(files.map((file) => `${user.id}/${file.name}`));
-    if (removeError) {
-      console.error("Falha ao apagar a foto na exclusão da conta", { userId: user.id, message: removeError.message });
-      return json({ error: "Não foi possível excluir a conta. Tente novamente." }, 500);
-    }
+  // Foto enviada: o Storage não apaga em cascata com a conta. Falha ao remover = não exclui a conta,
+  // para não deixar arquivos órfãos (o usuário tenta de novo).
+  if (!(await removeAccountFiles(admin, user.id))) {
+    return json({ error: "Não foi possível excluir a conta. Tente novamente." }, 500);
   }
 
   const { error: deleteError } = await admin.auth.admin.deleteUser(user.id);

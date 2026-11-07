@@ -331,8 +331,8 @@ export const unbanUser: AdminUsersApi["unbanUser"] = async (client, { userId, re
 };
 
 /**
- * Exclui pela Edge Function admin-delete-account: o banco recusa conta com assinatura viva (GA023) e a
- * função cancela no gateway antes (mesma regra da exclusão pelo app). Permissão e auditoria no banco.
+ * Exclui pela Edge Function admin-delete-account: o banco recusa conta com foto (GA015) ou assinatura viva (GA023);
+ * a função apaga a foto e cancela no gateway antes (mesma regra da exclusão pelo app). Permissão e auditoria no banco.
  */
 export const deleteUser: AdminUsersApi["deleteUser"] = async (client, { userId, reason, note }) =>
   invokeAdminFunction(client, "admin-delete-account", { userId, reason, note: noteOrNull(note) });
