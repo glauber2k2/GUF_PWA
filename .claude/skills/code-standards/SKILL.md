@@ -83,4 +83,4 @@ Ao encerrar qualquer tarefa, mesmo pequena:
 - [ ] Conferir imports/exports, renomeações e arquivos movidos em todos os pontos de referência
 - [ ] Validar efeitos colaterais: estado compartilhado, migrações, variáveis de ambiente, configs
 - [ ] Rodar `pnpm lint`, `pnpm typecheck` e `pnpm build` (o build gera também o service worker)
-- [ ] Mudou caminho, regra ou fluxo? Atualizar `CLAUDE.md` e `docs/`
+- [ ] Mudou caminho, regra ou fluxo? Atualizar o documento da funcionalidade em `docs/features/` (ou `docs/reference/`) e `docs/`; o `CLAUDE.md` só para regra que vale para o projeto inteiro
