@@ -139,7 +139,7 @@ function Result({ announcement }: { announcement: AdminAnnouncement }) {
                 {ANNOUNCEMENT_FORMATS[draft.format].label}
               </span>
               <span>{describeAudience(draft.audience, { planNames, targetCount: announcement.targetIds.length })}</span>
-              <span>{formatPeriod(draft.startsAt, draft.endsAt)}</span>
+              <span>{formatPeriod(draft.startsAt, draft.endsAt, draft.recurrence)}</span>
             </div>
           </div>
           <div className="hidden gap-2.5 md:flex">{actions}</div>

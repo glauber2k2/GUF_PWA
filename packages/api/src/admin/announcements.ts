@@ -1,5 +1,6 @@
 import {
   AUDIENCE_ALL,
+  type AnnouncementRecurrence,
   type Audience,
   type AnnouncementFormat,
   type AnnouncementFrequency,
@@ -31,7 +32,10 @@ export interface AnnouncementDraft {
   priority: number;
   frequency: AnnouncementFrequency;
   startsAt: string | null;
+  /** Fim da campanha (recorrente sem fim: nulo). */
   endsAt: string | null;
+  /** Nulo = não repete. */
+  recurrence: AnnouncementRecurrence | null;
 }
 
 export interface AnnouncementStats {
@@ -51,6 +55,7 @@ export interface AdminAnnouncementSummary extends AnnouncementStats {
   state: AnnouncementState;
   startsAt: string | null;
   endsAt: string | null;
+  recurrence: AnnouncementRecurrence | null;
   targetsCount: number;
   updatedAt: string;
 }
@@ -89,6 +94,18 @@ function toAudience(value: unknown): Audience {
   return parsed.success ? parsed.data : AUDIENCE_ALL;
 }
 
+interface RecurrenceColumns {
+  repeat_unit: string | null;
+  repeat_every: number | null;
+  occurrence_hours: number | null;
+}
+
+/** Colunas da repetição → regra (as três andam juntas no banco). */
+function toRecurrence(row: RecurrenceColumns): AnnouncementRecurrence | null {
+  if (!row.repeat_unit || !row.repeat_every || !row.occurrence_hours) return null;
+  return { unit: row.repeat_unit as AnnouncementRecurrence["unit"], every: row.repeat_every, windowHours: row.occurrence_hours };
+}
+
 function toDraftRow(draft: AnnouncementDraft): Json {
   return {
     title: draft.title,
@@ -103,10 +120,13 @@ function toDraftRow(draft: AnnouncementDraft): Json {
     frequency: draft.frequency,
     starts_at: draft.startsAt,
     ends_at: draft.endsAt,
+    recurrence: draft.recurrence
+      ? { unit: draft.recurrence.unit, every: draft.recurrence.every, window_hours: draft.recurrence.windowHours }
+      : null,
   };
 }
 
-interface AnnouncementRow {
+interface AnnouncementRow extends RecurrenceColumns {
   id: string;
   title: string;
   body: string;
@@ -144,6 +164,7 @@ export const listAnnouncements: AnnouncementsAdminApi["listAnnouncements"] = asy
       state: r.state as AnnouncementState,
       startsAt: r.starts_at,
       endsAt: r.ends_at,
+      recurrence: toRecurrence(r),
       reachEstimate: r.reach_estimate,
       seenCount: r.seen_count,
       dismissedCount: r.dismissed_count,
@@ -183,6 +204,7 @@ export const getAnnouncement: AnnouncementsAdminApi["getAnnouncement"] = async (
         frequency: r.frequency,
         startsAt: r.starts_at,
         endsAt: r.ends_at,
+        recurrence: toRecurrence(r),
       },
     },
     error: null,

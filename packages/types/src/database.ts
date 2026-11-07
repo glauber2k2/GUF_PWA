@@ -258,11 +258,14 @@ export type Database = {
           frequency: string
           id: string
           is_account_notice: boolean
+          occurrence_hours: number | null
           priority: number
           published_at: string | null
           published_by: string | null
           purpose: string
           reach_estimate: number | null
+          repeat_every: number | null
+          repeat_unit: string | null
           starts_at: string | null
           status: string
           title: string
@@ -283,11 +286,14 @@ export type Database = {
           frequency?: string
           id?: string
           is_account_notice?: boolean
+          occurrence_hours?: number | null
           priority?: number
           published_at?: string | null
           published_by?: string | null
           purpose?: string
           reach_estimate?: number | null
+          repeat_every?: number | null
+          repeat_unit?: string | null
           starts_at?: string | null
           status?: string
           title?: string
@@ -308,11 +314,14 @@ export type Database = {
           frequency?: string
           id?: string
           is_account_notice?: boolean
+          occurrence_hours?: number | null
           priority?: number
           published_at?: string | null
           published_by?: string | null
           purpose?: string
           reach_estimate?: number | null
+          repeat_every?: number | null
+          repeat_unit?: string | null
           starts_at?: string | null
           status?: string
           title?: string
@@ -1754,8 +1763,11 @@ export type Database = {
           ends_at: string
           format: string
           id: string
+          occurrence_hours: number
           purpose: string
           reach_estimate: number
+          repeat_every: number
+          repeat_unit: string
           seen_count: number
           starts_at: string
           state: string
@@ -1923,6 +1935,21 @@ export type Database = {
       announcement_allowed_for: {
         Args: { p_purpose: string; p_user_id: string }
         Returns: boolean
+      }
+      announcement_occurrence_start: {
+        Args: {
+          p_ann: Database["public"]["Tables"]["announcements"]["Row"]
+          p_at: string
+        }
+        Returns: string
+      }
+      announcement_period_hours: {
+        Args: { p_every: number; p_unit: string }
+        Returns: number
+      }
+      announcement_repeat_step: {
+        Args: { p_every: number; p_unit: string }
+        Returns: string
       }
       announcement_state: {
         Args: { p_ann: Database["public"]["Tables"]["announcements"]["Row"] }
@@ -2699,6 +2726,7 @@ export type Database = {
           format: string
           frequency: string
           id: string
+          occurrence_starts_at: string
           priority: number
           published_at: string
           title: string

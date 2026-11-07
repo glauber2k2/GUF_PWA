@@ -101,6 +101,7 @@ function draft(partial: Partial<AnnouncementDraft>): AnnouncementDraft {
     frequency: "until_dismissed",
     startsAt: null,
     endsAt: null,
+    recurrence: null,
     ...partial,
   };
 }
@@ -121,6 +122,7 @@ function announcement(id: string, state: AdminAnnouncementSummary["state"], d: A
       state,
       startsAt: d.startsAt,
       endsAt: d.endsAt,
+      recurrence: d.recurrence,
       reachEstimate: state === "draft" ? null : reach,
       seenCount: seen,
       dismissedCount: dismissed,
@@ -154,6 +156,7 @@ function seed(): MockDb {
     announcement("a0000000-0000-4000-8000-000000000003", "scheduled", draft({ title: "Atualizamos os Termos de Uso", body: "A partir de 1 nov, valem as novas regras de uso do ranking. Leva 2 minutos para ler.", format: "fullscreen", tone: "info", purpose: "legal", ctaLabel: "Ler os termos", ctaPath: "/documentos", startsAt: day(10, 9), endsAt: day(39) }), [48230, 0, 0, 0]),
     announcement("a0000000-0000-4000-8000-000000000004", "draft", draft({ title: "Medidas: nova tela de registro", body: "Registre suas circunferências e veja a evolução por músculo.", format: "fullscreen", audience: { rules: [{ type: "health_consent" }] }, purpose: "service" }), [0, 0, 0, 0]),
     announcement("a0000000-0000-4000-8000-000000000005", "ended", draft({ title: "Ranking semanal chegou", body: "Siga amigos e dispute a pontuação da semana.", audience: { rules: [{ type: "visibility", value: "open" }] }, startsAt: day(-60), endsAt: day(-30) }), [21004, 17330, 9000, 6902]),
+    announcement("a0000000-0000-4000-8000-000000000006", "active", draft({ title: "Semana nova, treino novo", body: "Confira a rotina de hoje e mantenha a sequência viva.", format: "toast", tone: "info", ctaLabel: "Ver treino de hoje", ctaPath: "/", purpose: "product", startsAt: day(-14, 8), endsAt: null, recurrence: { unit: "week", every: 1, windowHours: 12 } }), [41200, 30110, 12400, 5320]),
   ];
 
   const staff: StaffRow[] = [

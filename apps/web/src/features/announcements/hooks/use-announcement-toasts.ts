@@ -7,7 +7,7 @@ import { useAnnouncementActions } from "@/features/announcements/hooks/use-annou
 
 /**
  * Comunicados em toast entram na pilha do AppShell (mesmo componente dos outros avisos), uma vez
- * por abertura. Sumiu sem tocar no botão = fechado.
+ * por abertura e por vez (recorrente volta na próxima vez). Sumiu sem tocar no botão = fechado.
  */
 export function useAnnouncementToasts(toasts: AppAnnouncement[], enabled: boolean) {
   const { showToast } = useAppShell();
@@ -17,8 +17,9 @@ export function useAnnouncementToasts(toasts: AppAnnouncement[], enabled: boolea
   useEffect(() => {
     if (!enabled) return;
     for (const announcement of toasts) {
-      if (shownIds.current.has(announcement.id)) continue;
-      shownIds.current.add(announcement.id);
+      const key = `${announcement.id}@${announcement.occurrenceStartsAt ?? ""}`;
+      if (shownIds.current.has(key)) continue;
+      shownIds.current.add(key);
       shown(announcement);
       showToast(announcement.title, {
         tone: announcement.tone === "success" || announcement.tone === "warning" ? announcement.tone : "info",

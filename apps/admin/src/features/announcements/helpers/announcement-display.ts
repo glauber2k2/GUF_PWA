@@ -1,6 +1,13 @@
 import { AppWindow, Maximize, MessageSquare, PanelTop, type LucideIcon } from "lucide-react";
 import type { AdminAnnouncementSummary } from "@guf/api/admin";
-import { describeAudience, formatCount, type AnnouncementFormat, type AudienceContext } from "@guf/core";
+import {
+  describeAudience,
+  formatCount,
+  recurrenceEveryLabel,
+  type AnnouncementFormat,
+  type AnnouncementRecurrence,
+  type AudienceContext,
+} from "@guf/core";
 import { PANEL_TIME_ZONE } from "@/shared/helpers/brasilia-time";
 import { withDevState } from "@/shared/helpers/dev-state-path";
 
@@ -13,6 +20,14 @@ export const FORMAT_ICONS: Record<AnnouncementFormat, LucideIcon> = {
 
 const DAY_FORMAT = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", timeZone: PANEL_TIME_ZONE });
 const DAY_TIME_FORMAT = new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: PANEL_TIME_ZONE });
+const OCCURRENCE_FORMAT = new Intl.DateTimeFormat("pt-BR", {
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: PANEL_TIME_ZONE,
+});
 
 function shortDay(iso: string): string {
   return DAY_FORMAT.format(new Date(iso)).replace(".", "").replace(" de ", " ");
@@ -23,11 +38,17 @@ export function formatDayTime(iso: string): string {
   return DAY_TIME_FORMAT.format(new Date(iso)).replace(".", "").replace(" de ", " ").replace(" às ", ", ");
 }
 
-/** "1 out – 31 out" · "Sem data". */
-export function formatPeriod(startsAt: string | null, endsAt: string | null): string {
-  if (!startsAt && !endsAt) return "Sem data";
-  if (!endsAt) return `desde ${shortDay(startsAt as string)}`;
-  return `${startsAt ? shortDay(startsAt) : "Ao publicar"} – ${shortDay(endsAt)}`;
+/** "qua, 12 nov, 09:00" (uma vez de um comunicado recorrente). */
+export function formatOccurrence(date: Date): string {
+  return OCCURRENCE_FORMAT.format(date).replaceAll(".", "").replace(" de ", " ").replace(" às ", ", ");
+}
+
+/** "1 out – 31 out" · "Toda semana · desde 4 nov" · "Sem data". */
+export function formatPeriod(startsAt: string | null, endsAt: string | null, recurrence: AnnouncementRecurrence | null = null): string {
+  const repeat = recurrence ? `${recurrenceEveryLabel(recurrence.unit, recurrence.every)} · ` : "";
+  if (!startsAt && !endsAt) return recurrence ? `${repeat}a partir da publicação` : "Sem data";
+  if (!endsAt) return `${repeat}desde ${startsAt ? shortDay(startsAt) : "a publicação"}`;
+  return `${repeat}${startsAt ? shortDay(startsAt) : "Ao publicar"} – ${shortDay(endsAt)}`;
 }
 
 /** Números da lista ("—" antes de publicar). */

@@ -22,6 +22,7 @@ const STEP_OF_FIELD: Record<string, EditorStep> = {
   purpose: 4,
   startsAt: 3,
   endsAt: 3,
+  recurrence: 3,
 };
 
 function firstIssue(draft: AnnouncementDraft, targetCount: number, forPublish: boolean): EditorIssue | null {
@@ -33,7 +34,7 @@ function firstIssue(draft: AnnouncementDraft, targetCount: number, forPublish: b
   if (draft.ctaLabel && !draft.ctaPath) return { step: 1, message: "Escolha a tela que o botão abre." };
   if (draft.audience.rules.some((r) => r.type === "ids") && targetCount === 0) return { step: 2, message: "Adicione pelo menos uma pessoa à lista." };
   if (!forPublish) return null;
-  const ready = announcementPublishSchema.safeParse({ title: draft.title, body: draft.body, endsAt: draft.endsAt ?? "" });
+  const ready = announcementPublishSchema.safeParse({ title: draft.title, body: draft.body, endsAt: draft.endsAt, isRecurring: draft.recurrence !== null });
   if (!ready.success) {
     const issue = ready.error.issues[0];
     return { step: STEP_OF_FIELD[String(issue?.path[0])] ?? 1, message: issue?.message ?? "Confira os campos." };

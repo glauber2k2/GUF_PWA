@@ -158,7 +158,7 @@ function Editor({ existing, presetTargetIds }: { existing: AdminAnnouncement | u
               onIdsText={(idsText) => editor.update({ idsText })}
             />
           )}
-          {editor.step === 3 && <ScheduleStep state={editor.state} onChange={editor.update} onDraft={editor.updateDraft} />}
+          {editor.step === 3 && <ScheduleStep state={editor.state} endsAt={editor.draft.endsAt} onChange={editor.update} onDraft={editor.updateDraft} />}
           {editor.step === 4 && (
             <ReviewStep
               draft={editor.draft}
